@@ -34,6 +34,9 @@ class HeroCanvasEngine {
     // Fast prioritized preloader
     this.preloadFrames();
 
+    // Force initial render frame
+    this.needsRedraw = true;
+
     // Start render loop
     this.render();
   }
@@ -55,22 +58,27 @@ class HeroCanvasEngine {
   }
 
   loadSingleFrame(folder, index) {
-    if (this.images[index - 1]) return; // Already loading
+    if (this.images[index - 1]) return; // Already loading or loaded
 
     const img = new Image();
+    this.images[index - 1] = img; // Assign immediately so duplicate fetches are prevented!
+
     const paddedNum = String(index).padStart(3, '0');
     img.src = `${folder}/ezgif-frame-${paddedNum}.jpg`;
 
     img.onload = () => {
-      this.images[index - 1] = img;
       this.imagesLoadedCount++;
-      if (Math.round(this.currentFrameIndex) === index - 1) {
-        this.needsRedraw = true;
-      }
+      // Unconditionally request redraw when any frame loads so canvas updates from fallbacks
+      this.needsRedraw = true;
+    };
+
+    img.onerror = () => {
+      this.images[index - 1] = null; // Reset on error so fallback finder works
     };
   }
 
   resize() {
+    if (!this.canvas) return;
     this.dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const displayWidth = window.innerWidth;
     const displayHeight = window.innerHeight;
@@ -82,22 +90,28 @@ class HeroCanvasEngine {
     this.canvas.style.height = `${displayHeight}px`;
 
     this.ctx.imageSmoothingEnabled = true;
-    this.ctx.imageSmoothingQuality = 'medium'; // Faster than 'high' with near-identical quality
+    this.ctx.imageSmoothingQuality = 'medium';
+    this.needsRedraw = true;
   }
 
   updateScrollProgress(progress) {
     const newProgress = Math.max(0, Math.min(1, progress));
-    if (Math.abs(newProgress - this.scrollProgress) > 0.0001) {
-      this.scrollProgress = newProgress;
-      this.targetFrameIndex = Math.min(
-        this.frameCount - 1,
-        Math.floor(this.scrollProgress * (this.frameCount - 1))
-      );
+    this.scrollProgress = newProgress;
+
+    const newTarget = Math.min(
+      this.frameCount - 1,
+      Math.floor(this.scrollProgress * (this.frameCount - 1))
+    );
+
+    if (newTarget !== this.targetFrameIndex || this.needsRedraw) {
+      this.targetFrameIndex = newTarget;
       this.needsRedraw = true;
     }
   }
 
   render() {
+    if (!this.canvas || !this.ctx) return;
+
     // Smooth frame lerp interpolation
     const delta = this.targetFrameIndex - this.currentFrameIndex;
     
@@ -117,7 +131,7 @@ class HeroCanvasEngine {
 
       // Fallback: If target frame isn't loaded yet, find closest available loaded frame
       if (!currentImg || !currentImg.complete) {
-        for (let offset = 1; offset < 20; offset++) {
+        for (let offset = 1; offset < 50; offset++) {
           if (this.images[frameToDrawIndex - offset]?.complete) {
             currentImg = this.images[frameToDrawIndex - offset];
             break;

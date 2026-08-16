@@ -4,8 +4,9 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Initialize Hero Canvas Engine
+  // 1. Initialize Hero Canvas Engine & Global Export
   const heroEngine = new window.HeroCanvasEngine();
+  window.heroEngine = heroEngine;
 
   // 2. Initialize Journey Timeline & Impact Counters
   if (window.JourneyTimeline) new window.JourneyTimeline();
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let isTicking = false;
 
-  window.addEventListener('scroll', () => {
+  function onScrollOrResize() {
     if (!isTicking) {
       window.requestAnimationFrame(() => {
         handleScroll();
@@ -29,19 +30,27 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       isTicking = true;
     }
-  }, { passive: true });
+  }
+
+  window.addEventListener('scroll', onScrollOrResize, { passive: true });
+  window.addEventListener('resize', onScrollOrResize, { passive: true });
 
   function handleScroll() {
-    const scrollY = window.scrollY;
+    const scrollY = window.scrollY || window.pageYOffset || 0;
 
     if (heroContainer) {
       const containerTop = heroContainer.offsetTop;
       const containerHeight = heroContainer.offsetHeight - window.innerHeight;
-      let progress = (scrollY - containerTop) / containerHeight;
-      progress = Math.max(0, Math.min(1, progress));
+
+      let progress = 0;
+      if (containerHeight > 0) {
+        progress = (scrollY - containerTop) / containerHeight;
+        progress = Math.max(0, Math.min(1, progress));
+      }
 
       // Pass progress to Canvas Engine
-      if (heroEngine) heroEngine.updateScrollProgress(progress);
+      const engine = window.heroEngine || heroEngine;
+      if (engine) engine.updateScrollProgress(progress);
 
       // Hero typography reveals
       updateHeroNarrativeCards(progress, narrativeCards);
@@ -106,6 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
       activeCardId = currentId;
     }
   }
+
+  // Initial calculation on page load and window load
+  handleScroll();
+  window.addEventListener('load', handleScroll);
 
   // 4. Smooth Anchor Link Scrolling
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {

@@ -1,8 +1,10 @@
-# OS generated files
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+
+# Server runtime cache
+cache/
+
+# System / OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+*.log

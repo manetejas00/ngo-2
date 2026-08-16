@@ -1,11 +1,22 @@
+/**
+ * Avinya Care Foundation - Production Node.js Backend Server
+ * 100% Node.js / ES Modules (Hostinger Compatible)
+ * Serves static assets, health news API (/api/news), persistent 1-hour cache, and cron refresh (/api/news/refresh).
+ */
+
 import { createServer } from 'node:http';
-import { readFile, stat } from 'node:fs/promises';
-import { join, extname } from 'node:path';
+import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
+import { join, extname, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import https from 'node:https';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = join(__filename, '..');
+const __dirname = dirname(__filename);
+
+const PORT = process.env.PORT || 3000;
+const CACHE_DIR = join(__dirname, 'cache');
+const CACHE_FILE = join(CACHE_DIR, 'news_cache.json');
+const CACHE_TTL_MS = 3600 * 1000; // 1 hour in milliseconds
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -21,12 +32,34 @@ const MIME_TYPES = {
   '.woff2': 'font/woff2'
 };
 
-// In-Memory 1-Hour Server Cache for Health & Cancer News
+// In-Memory News Cache initialized from persistent storage
 let newsCache = {
   timestamp: 0,
   articles: []
 };
-const CACHE_TTL_MS = 3600 * 1000; // 1 hour
+
+// Load persistent cache on startup
+async function initPersistentCache() {
+  try {
+    const raw = await readFile(CACHE_FILE, 'utf-8');
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.articles) && parsed.timestamp) {
+      newsCache = parsed;
+      console.log(`[Cache Loaded] Restored ${newsCache.articles.length} news articles from persistent storage.`);
+    }
+  } catch (err) {
+    console.log('[Cache Init] No existing persistent cache found. Will initialize on first fetch.');
+  }
+}
+
+async function savePersistentCache(data) {
+  try {
+    await mkdir(CACHE_DIR, { recursive: true });
+    await writeFile(CACHE_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('[Cache Save Warning] Could not write persistent cache file:', err.message);
+  }
+}
 
 // Cancer & Health Keywords Filter
 const CANCER_KEYWORDS = [
@@ -63,7 +96,7 @@ function deduplicateArticles(articles) {
   const seen = new Set();
   return articles.filter(article => {
     if (!article.title || !article.url) return false;
-    const cleanTitle = article.title.toLowerCase().trim().replace(/[^a-z0-0]/g, '');
+    const cleanTitle = article.title.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
     if (seen.has(cleanTitle) || seen.has(article.url)) return false;
     seen.add(cleanTitle);
     seen.add(article.url);
@@ -71,7 +104,7 @@ function deduplicateArticles(articles) {
   });
 }
 
-// Fallback Cancer News Data (Used if external APIs fail or are throttled)
+// Fallback Cancer News Data (Guarantees 12 verified health articles)
 const FALLBACK_CANCER_NEWS = [
   {
     id: "cancer-news-1",
@@ -99,7 +132,7 @@ const FALLBACK_CANCER_NEWS = [
     description: "Studies highlight how emotional counseling, respite care, and financial navigation for family caregivers directly improve patient resilience and recovery quality.",
     category: "Caregiver Support",
     source: "Journal of Clinical Oncology",
-    publishedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+    publishedAt: new Date(Date.now() - 3600000 * 10).toISOString(),
     url: "https://ascopubs.org/journal/jco",
     urlToImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
   },
@@ -109,7 +142,7 @@ const FALLBACK_CANCER_NEWS = [
     description: "Liquid biopsy technology shows high accuracy in detecting circulating tumor DNA across multiple cancer types, offering hope for earlier clinical diagnosis.",
     category: "Early Detection",
     source: "American Cancer Society",
-    publishedAt: new Date(Date.now() - 3600000 * 18).toISOString(),
+    publishedAt: new Date(Date.now() - 3600000 * 14).toISOString(),
     url: "https://www.cancer.org/research",
     urlToImage: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
   },
@@ -151,7 +184,7 @@ const FALLBACK_CANCER_NEWS = [
     source: "Journal of Clinical Genomics",
     publishedAt: new Date(Date.now() - 3600000 * 42).toISOString(),
     url: "https://www.genome.gov/about-genomics/fact-sheets/Sequencing-Human-Genome",
-    urlToImage": "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
+    urlToImage: "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
   },
   {
     id: "cancer-news-9",
@@ -197,7 +230,13 @@ const FALLBACK_CANCER_NEWS = [
 
 function fetchExternalNews() {
   return new Promise((resolve) => {
-    const req = https.get('https://saurav.tech/NewsAPI/top-headlines/category/health/us.json', { timeout: 4000 }, (res) => {
+    // Optionally use process.env.NEWS_API_KEY if configured
+    const apiKey = process.env.NEWS_API_KEY;
+    const targetUrl = apiKey
+      ? `https://newsapi.org/v2/top-headlines?category=health&country=us&apiKey=${apiKey}`
+      : 'https://saurav.tech/NewsAPI/top-headlines/category/health/us.json';
+
+    const req = https.get(targetUrl, { timeout: 4000 }, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
@@ -220,7 +259,7 @@ function fetchExternalNews() {
             return;
           }
         } catch (e) {
-          // Parse error
+          // Parse error fallback
         }
         resolve([]);
       });
@@ -234,9 +273,9 @@ function fetchExternalNews() {
   });
 }
 
-async function getNewsData() {
+async function refreshNewsCache(force = false) {
   const now = Date.now();
-  if (newsCache.articles.length > 0 && (now - newsCache.timestamp) < CACHE_TTL_MS) {
+  if (!force && newsCache.articles.length > 0 && (now - newsCache.timestamp) < CACHE_TTL_MS) {
     return {
       status: "ok",
       cached: true,
@@ -245,17 +284,17 @@ async function getNewsData() {
     };
   }
 
-  // Fetch fresh articles
+  // Fetch fresh external articles
   let liveArticles = await fetchExternalNews();
   
-  // Combine live articles with curated oncology research articles
+  // Merge with verified fallback dataset
   let combined = [...liveArticles, ...FALLBACK_CANCER_NEWS];
   let deduplicated = deduplicateArticles(combined);
 
   // Sort newest first
   deduplicated.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 
-  // Limit to top 12 items
+  // Top 12 health & oncology articles
   const finalArticles = deduplicated.slice(0, 12);
 
   newsCache = {
@@ -263,21 +302,28 @@ async function getNewsData() {
     articles: finalArticles
   };
 
+  // Save to persistent storage
+  await savePersistentCache(newsCache);
+
   return {
     status: "ok",
     cached: false,
+    refreshed: true,
     lastUpdated: now,
     articles: finalArticles
   };
 }
 
+// Initialize persistent cache from disk
+await initPersistentCache();
+
 const server = createServer(async (req, res) => {
   const urlPath = req.url.split('?')[0];
 
-  // API Endpoint: /api/news
+  // API Endpoint: /api/news (Serves cached or fresh news)
   if (urlPath === '/api/news') {
     try {
-      const data = await getNewsData();
+      const data = await refreshNewsCache(false);
       res.writeHead(200, {
         'Content-Type': 'application/json; charset=utf-8',
         'Cache-Control': 'public, max-age=3600, s-maxage=3600',
@@ -288,6 +334,29 @@ const server = createServer(async (req, res) => {
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ status: 'error', message: 'Failed to retrieve news' }));
+      return;
+    }
+  }
+
+  // Cron Refresh Endpoint: /api/news/refresh (Forces cache refresh for Hostinger scheduled jobs)
+  if (urlPath === '/api/news/refresh') {
+    try {
+      const data = await refreshNewsCache(true);
+      res.writeHead(200, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'Access-Control-Allow-Origin': '*'
+      });
+      res.end(JSON.stringify({
+        status: "ok",
+        refreshed: true,
+        count: data.articles.length,
+        lastUpdated: data.lastUpdated
+      }));
+      return;
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'error', message: 'Failed to refresh news cache' }));
       return;
     }
   }
@@ -318,8 +387,6 @@ const server = createServer(async (req, res) => {
   }
 });
 
-const PORT = 3000;
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`Avinya Care website running on http://127.0.0.1:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Avinya Care Node.js server running on http://0.0.0.0:${PORT}`);
 });
-
