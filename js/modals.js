@@ -1,5 +1,6 @@
 /**
  * Avinya Care Foundation - Interactive Modals & Drawers Manager
+ * Manages Donation, Volunteer, Guide, and Story Reader modal layers above all views (z-index: 3000).
  */
 
 class ModalManager {
@@ -7,10 +8,19 @@ class ModalManager {
     this.activeModal = null;
     this.selectedAmount = 100;
     this.isMonthly = true;
+    this.donateFormHTML = null;
+    this.volunteerFormHTML = null;
     this.init();
   }
 
   init() {
+    // Store initial form HTML templates for reliable re-opening
+    const donateContainer = document.querySelector('#donate-modal .modal-container');
+    if (donateContainer) this.donateFormHTML = donateContainer.innerHTML;
+
+    const volunteerContainer = document.querySelector('#volunteer-modal .modal-container');
+    if (volunteerContainer) this.volunteerFormHTML = volunteerContainer.innerHTML;
+
     // Backdrop click listener
     document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
       backdrop.addEventListener('click', (e) => {
@@ -29,7 +39,6 @@ class ModalManager {
   }
 
   openModal(modalId) {
-    this.closeAll();
     const modal = document.getElementById(modalId);
     if (modal) {
       modal.classList.add('active');
@@ -42,12 +51,23 @@ class ModalManager {
     document.querySelectorAll('.modal-backdrop').forEach(modal => {
       modal.classList.remove('active');
     });
-    document.body.style.overflow = '';
+
+    // Only restore body overflow if full-screen news view is NOT active
+    const newsModal = document.getElementById('news-detail-modal');
+    if (!newsModal || !newsModal.classList.contains('active')) {
+      document.body.style.overflow = '';
+    }
+
     this.activeModal = null;
   }
 
   // --- DONATION MODAL LOGIC ---
   openDonateModal(defaultAmount = 100) {
+    const donateContainer = document.querySelector('#donate-modal .modal-container');
+    if (donateContainer && this.donateFormHTML) {
+      donateContainer.innerHTML = this.donateFormHTML;
+    }
+
     this.selectedAmount = defaultAmount;
     this.openModal('donate-modal');
     this.updateDonateUI();
@@ -55,8 +75,8 @@ class ModalManager {
 
   setDonationFrequency(isMonthly) {
     this.isMonthly = isMonthly;
-    document.getElementById('freq-monthly').classList.toggle('active', isMonthly);
-    document.getElementById('freq-onetime').classList.toggle('active', !isMonthly);
+    document.getElementById('freq-monthly')?.classList.toggle('active', isMonthly);
+    document.getElementById('freq-onetime')?.classList.toggle('active', !isMonthly);
     this.updateDonateUI();
   }
 
@@ -144,6 +164,10 @@ class ModalManager {
 
   // --- VOLUNTEER MODAL ---
   openVolunteerModal() {
+    const volunteerContainer = document.querySelector('#volunteer-modal .modal-container');
+    if (volunteerContainer && this.volunteerFormHTML) {
+      volunteerContainer.innerHTML = this.volunteerFormHTML;
+    }
     this.openModal('volunteer-modal');
   }
 

@@ -11,24 +11,28 @@
   <meta property="og:title" content="Avinya Care Foundation | No one should face cancer alone.">
   <meta property="og:description" content="Cinematic humanitarian campaign bringing awareness, early detection, and compassionate community support to cancer patients and families.">
 
-  <!-- Fonts & Styles -->
+  <!-- Modern Typography (Inter Font) & Styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-  <!-- 1. ULTRA-MINIMAL APPLE-STYLE NAVBAR -->
+  <!-- 1. APPLE-STYLE MINIMAL NAVBAR -->
   <header>
-    <nav class="navbar" aria-label="Main Navigation">
+    <nav class="navbar scrolled-dark" aria-label="Main Navigation">
       <a href="#hero" class="nav-brand">
         <div class="brand-icon">♥</div>
         <span>Avinya Care</span>
       </a>
 
       <ul class="nav-links">
-        <li><a href="#hero" class="nav-link">Home</a></li>
+        <li><a href="#hero" class="nav-link active">Home</a></li>
         <li><a href="#understanding" class="nav-link">Our Mission</a></li>
         <li><a href="#journey" class="nav-link">Cancer Awareness</a></li>
         <li><a href="#stories" class="nav-link">Stories</a></li>
+        <li><a href="#news" class="nav-link">Health News</a></li>
         <li><a href="#impact" class="nav-link">Our Impact</a></li>
         <li><a href="#get-involved" class="nav-link">Get Involved</a></li>
       </ul>
@@ -38,7 +42,7 @@
           <span>Donate</span>
           <span>→</span>
         </button>
-        <button class="mobile-toggle" aria-label="Toggle Mobile Navigation">
+        <button class="mobile-toggle" aria-label="Toggle Mobile Navigation" aria-expanded="false">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -53,6 +57,7 @@
   <section id="hero" class="hero-scroll-container">
     <div class="hero-sticky-viewport">
       <canvas id="hero-canvas"></canvas>
+      <div class="hero-cinematic-overlay"></div>
 
       <!-- Floating Narrative Cards Synced with Scroll Progress -->
       <div class="hero-overlay">
@@ -68,16 +73,16 @@
           <p class="hero-subtitle">A conversation. A hand to hold. A reason to keep going.</p>
         </div>
 
-        <!-- Card 3: 40 - 65% Scroll (The Hug) -->
+        <!-- Card 3: 40 - 65% Scroll -->
         <div id="card-3" class="hero-narrative-card">
           <h2 class="hero-title">You are not alone.</h2>
           <p class="hero-subtitle">When compassion meets courage, healing begins.</p>
         </div>
 
-        <!-- Card 4: 65 - 85% Scroll (Hope Light Transition) -->
+        <!-- Card 4: 65 - 85% Scroll -->
         <div id="card-4" class="hero-narrative-card">
-          <h2 class="hero-title" style="color: #111412;">Together, we create hope.</h2>
-          <p class="hero-subtitle" style="color: #5A625D;">Together, we create stronger tomorrows.</p>
+          <h2 class="hero-title">Together, we create hope.</h2>
+          <p class="hero-subtitle">Together, we create stronger tomorrows.</p>
         </div>
       </div>
 
@@ -161,51 +166,53 @@
     </div>
   </section>
 
-  <!-- 4. SECTION 3 — THE CANCER JOURNEY TIMELINE -->
+  <!-- 4. SECTION 3 — CONTINUUM OF CARE (SCROLL STORYTELLING ANIMATION) -->
   <section id="journey" class="section-journey">
-    <div class="section-header">
-      <span class="category-tag">Continuum of Care</span>
-      <h2 class="section-title">Every journey is different.</h2>
-      <p class="body-large">
-        From early knowledge to recovery, we provide compassionate companionship at every milestone.
-      </p>
-    </div>
-
-    <div class="timeline-container">
-      <div class="timeline-line"></div>
-      <div class="timeline-progress"></div>
-
-      <div class="timeline-stages">
-        <div class="timeline-node active">
-          <div class="node-dot"></div>
-          <span class="node-step">01</span>
-          <span class="node-title">Awareness</span>
-        </div>
-        <div class="timeline-node">
-          <div class="node-dot"></div>
-          <span class="node-step">02</span>
-          <span class="node-title">Screening</span>
-        </div>
-        <div class="timeline-node">
-          <div class="node-dot"></div>
-          <span class="node-step">03</span>
-          <span class="node-title">Diagnosis</span>
-        </div>
-        <div class="timeline-node">
-          <div class="node-dot"></div>
-          <span class="node-step">04</span>
-          <span class="node-title">Treatment</span>
-        </div>
-        <div class="timeline-node">
-          <div class="node-dot"></div>
-          <span class="node-step">05</span>
-          <span class="node-title">Recovery</span>
-        </div>
+    <div class="journey-sticky-viewport">
+      <div class="section-header">
+        <span class="category-tag">Continuum of Care</span>
+        <h2 class="section-title">Every journey is different.</h2>
+        <p class="body-large">
+          From early knowledge to recovery, we provide compassionate companionship at every milestone.
+        </p>
       </div>
 
-      <!-- Active Stage Detail Box -->
-      <div id="journey-detail-card" class="journey-detail-card">
-        <!-- Rendered via js/timeline.js -->
+      <div class="timeline-container">
+        <div class="timeline-line"></div>
+        <div class="timeline-progress"></div>
+
+        <div class="timeline-stages">
+          <div class="timeline-node active">
+            <div class="node-dot"></div>
+            <span class="node-step">01</span>
+            <span class="node-title">Awareness</span>
+          </div>
+          <div class="timeline-node">
+            <div class="node-dot"></div>
+            <span class="node-step">02</span>
+            <span class="node-title">Screening</span>
+          </div>
+          <div class="timeline-node">
+            <div class="node-dot"></div>
+            <span class="node-step">03</span>
+            <span class="node-title">Diagnosis</span>
+          </div>
+          <div class="timeline-node">
+            <div class="node-dot"></div>
+            <span class="node-step">04</span>
+            <span class="node-title">Treatment</span>
+          </div>
+          <div class="timeline-node">
+            <div class="node-dot"></div>
+            <span class="node-step">05</span>
+            <span class="node-title">Recovery</span>
+          </div>
+        </div>
+
+        <!-- Active Stage Detail Box -->
+        <div id="journey-detail-card" class="journey-detail-card">
+          <!-- Rendered dynamically via js/timeline.js -->
+        </div>
       </div>
     </div>
   </section>
@@ -225,7 +232,7 @@
       <div class="story-card" onclick="window.AvinyaModals.openStoryModal('Ananya Roy', 'Breast Cancer Survivor', 'The day I received my diagnosis, fear froze me. But having a mentor walk me through every step restored my strength.', 'Ananya was diagnosed with Stage II breast cancer at age 34. Through Avinya\'s peer support network, she was paired with a survivor mentor who answered her questions and stood by her side during chemotherapy.', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80')">
         <div class="story-image-box">
           <span class="story-badge">Survivor</span>
-          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80" alt="Ananya Roy" class="story-image">
+          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80" alt="Ananya Roy" class="story-image" loading="lazy">
         </div>
         <div class="story-content">
           <p class="story-quote">"Having a mentor walk me through every step restored my strength."</p>
@@ -243,7 +250,7 @@
       <div class="story-card" onclick="window.AvinyaModals.openStoryModal('Marcus Vance', 'Caregiver & Husband', 'Caregivers carry emotional weight silently. Avinya gave me a safe space and practical support when my wife was in treatment.', 'When Marcus\'s wife began radiation therapy, balancing work, family, and hospital visits became overwhelming. Avinya\'s caregiver relief program provided respite care and emotional counseling.', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80')">
         <div class="story-image-box">
           <span class="story-badge">Caregiver</span>
-          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80" alt="Marcus Vance" class="story-image">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80" alt="Marcus Vance" class="story-image" loading="lazy">
         </div>
         <div class="story-content">
           <p class="story-quote">"Caregivers carry emotional weight silently. Avinya gave us a safe space."</p>
@@ -261,7 +268,7 @@
       <div class="story-card" onclick="window.AvinyaModals.openStoryModal('Dr. Priya Sharma', 'Oncology Volunteer', 'Early awareness changes lives. Seeing patients get diagnosed early and recover is the greatest reward.', 'Dr. Priya leads weekend rural screening drives across underserved regions, conducting early screening checkups and educating local communities.', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80')">
         <div class="story-image-box">
           <span class="story-badge">Volunteer Doctor</span>
-          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80" alt="Dr. Priya Sharma" class="story-image">
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80" alt="Dr. Priya Sharma" class="story-image" loading="lazy">
         </div>
         <div class="story-content">
           <p class="story-quote">"Early awareness changes lives. Seeing patients recover is our purpose."</p>
@@ -277,7 +284,45 @@
     </div>
   </section>
 
-  <!-- 6. SECTION 5 — IMPACT METRICS -->
+  <!-- 6. SECTION 5 — HEALTH & CANCER NEWS (API INTEGRATION) -->
+  <section id="news" class="section-news">
+    <div class="section-header">
+      <span class="category-tag">STAY INFORMED</span>
+      <h2 class="section-title">Health & Cancer News</h2>
+      <p class="body-large">
+        Trusted health stories, cancer research, awareness updates, and breakthroughs from around the world.
+      </p>
+      <div class="news-updated-wrapper" style="margin-top: 1.25rem; display: flex; justify-content: center;">
+        <div class="news-updated-pill">
+          <span class="live-dot"></span>
+          <span id="news-updated-timestamp">Updated 15 minutes ago</span>
+        </div>
+      </div>
+      <div id="news-status-message"></div>
+    </div>
+
+    <!-- Category Filter Tabs -->
+    <div class="news-category-tabs" id="news-category-tabs">
+      <button class="news-tab-btn active" data-category="all" onclick="window.AvinyaNewsUI.filterCategory('all', this)">All Stories</button>
+      <button class="news-tab-btn" data-category="Cancer Research" onclick="window.AvinyaNewsUI.filterCategory('Cancer Research', this)">Cancer Research</button>
+      <button class="news-tab-btn" data-category="Early Detection" onclick="window.AvinyaNewsUI.filterCategory('Early Detection', this)">Early Detection</button>
+      <button class="news-tab-btn" data-category="Immunotherapy" onclick="window.AvinyaNewsUI.filterCategory('Immunotherapy', this)">Immunotherapy</button>
+      <button class="news-tab-btn" data-category="Prevention" onclick="window.AvinyaNewsUI.filterCategory('Prevention', this)">Prevention & Wellness</button>
+    </div>
+
+    <div id="news-grid-container" class="news-grid">
+      <!-- Dynamic news card grid or skeletons rendered by js/components/news-ui.js -->
+    </div>
+
+    <!-- Show More / Show Less Button Bar -->
+    <div class="news-expand-bar" id="news-expand-bar">
+      <button id="news-show-more-btn" class="news-show-more-btn" onclick="window.AvinyaNewsUI.toggleShowMore()">
+        <span>Show More News Stories ↓</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- 7. SECTION 6 — IMPACT METRICS -->
   <section id="impact" class="section-impact">
     <div class="impact-header">
       <span class="category-tag" style="color: var(--accent-green);">Measurable Change</span>
@@ -307,7 +352,7 @@
     </div>
   </section>
 
-  <!-- 7. SECTION 6 — COMMUNITY -->
+  <!-- 8. SECTION 7 — COMMUNITY -->
   <section class="section-community">
     <div class="community-wrapper">
       <span class="category-tag">United for Hope</span>
@@ -318,22 +363,22 @@
 
       <div class="community-grid">
         <div class="community-card">
-          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Elena" class="community-avatar">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Elena R." class="community-avatar" loading="lazy">
           <div class="community-name">Elena R.</div>
           <span class="community-badge">5-Yr Survivor</span>
         </div>
         <div class="community-card">
-          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80" alt="David" class="community-avatar">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80" alt="David K." class="community-avatar" loading="lazy">
           <div class="community-name">David K.</div>
           <span class="community-badge">Caregiver</span>
         </div>
         <div class="community-card">
-          <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&q=80" alt="Sarah" class="community-avatar">
+          <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&q=80" alt="Sarah M." class="community-avatar" loading="lazy">
           <div class="community-name">Sarah M.</div>
           <span class="community-badge">Volunteer</span>
         </div>
         <div class="community-card">
-          <img src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=300&q=80" alt="Dr. Robert" class="community-avatar">
+          <img src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=300&q=80" alt="Dr. Robert L." class="community-avatar" loading="lazy">
           <div class="community-name">Dr. Robert L.</div>
           <span class="community-badge">Medical Advisor</span>
         </div>
@@ -341,7 +386,7 @@
     </div>
   </section>
 
-  <!-- 8. SECTION 7 — GET INVOLVED -->
+  <!-- 9. SECTION 8 — GET INVOLVED -->
   <section id="get-involved" class="section-get-involved">
     <div class="section-header">
       <span class="category-tag">Take Action</span>
@@ -355,8 +400,8 @@
       <!-- DONATE -->
       <div class="action-card donate-theme">
         <div>
-          <span style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.9;">Financial Contribution</span>
-          <h3 class="action-title" style="margin-top: 0.5rem;">Donate</h3>
+          <span class="small-label" style="color: rgba(255,255,255,0.9);">Financial Contribution</span>
+          <h3 class="action-title">Donate</h3>
           <p class="action-desc">
             Your contribution directly funds screening kits, patient navigation, and caregiver support programs.
           </p>
@@ -370,8 +415,8 @@
       <!-- VOLUNTEER -->
       <div class="action-card volunteer-theme">
         <div>
-          <span style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-teal);">Community Action</span>
-          <h3 class="action-title" style="margin-top: 0.5rem;">Volunteer</h3>
+          <span class="small-label">Community Action</span>
+          <h3 class="action-title">Volunteer</h3>
           <p class="action-desc">
             Share your time, professional skills, or emotional empathy as a community advocate or peer mentor.
           </p>
@@ -385,8 +430,8 @@
       <!-- SPREAD AWARENESS -->
       <div class="action-card awareness-theme">
         <div>
-          <span style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-coral);">Advocacy</span>
-          <h3 class="action-title" style="margin-top: 0.5rem;">Spread Awareness</h3>
+          <span class="small-label" style="color: var(--accent-coral);">Advocacy</span>
+          <h3 class="action-title">Spread Awareness</h3>
           <p class="action-desc">
             Share knowledge, encourage routine screening in your community, and start life-saving conversations.
           </p>
@@ -399,7 +444,7 @@
     </div>
   </section>
 
-  <!-- 9. SECTION 8 — FINAL CINEMATIC CTA & LOOP -->
+  <!-- 10. SECTION 9 — FINAL CINEMATIC CTA -->
   <section class="section-final-cta">
     <div class="cta-glow"></div>
     <div class="cta-box">
@@ -421,7 +466,7 @@
     </div>
   </section>
 
-  <!-- 10. FOOTER -->
+  <!-- 11. FOOTER -->
   <footer class="footer">
     <div class="footer-top">
       <div>
@@ -435,6 +480,7 @@
           <li><a href="#understanding" class="footer-link">Our Mission</a></li>
           <li><a href="#journey" class="footer-link">Cancer Awareness</a></li>
           <li><a href="#stories" class="footer-link">Human Stories</a></li>
+          <li><a href="#news" class="footer-link">Health News</a></li>
           <li><a href="#impact" class="footer-link">Our Impact</a></li>
         </ul>
       </div>
@@ -467,7 +513,7 @@
     </div>
   </footer>
 
-  <!-- 11. MODAL DIALOGS -->
+  <!-- 12. MODAL DIALOGS -->
   <!-- A. DONATION MODAL -->
   <div id="donate-modal" class="modal-backdrop">
     <div class="modal-container">
@@ -561,6 +607,8 @@
   <script src="js/timeline.js"></script>
   <script src="js/counters.js"></script>
   <script src="js/modals.js"></script>
+  <script src="js/services/newsService.js"></script>
+  <script src="js/components/news-ui.js"></script>
   <script src="js/app.js"></script>
 
 </body>

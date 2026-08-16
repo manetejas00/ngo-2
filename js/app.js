@@ -1,6 +1,6 @@
 /**
  * Avinya Care Foundation - Master Application Controller
- * Optimized scroll handling for non-blocking 60FPS animation.
+ * Optimized scroll handling for 60FPS animation & active section highlighting.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,11 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.JourneyTimeline) new window.JourneyTimeline();
   if (window.ImpactCounters) new window.ImpactCounters();
 
-  // 3. Optimized Passive Scroll Listener with RequestAnimationFrame Throttling
+  // 3. Scroll & Navbar Controller
   const heroContainer = document.querySelector('.hero-scroll-container');
   const navbar = document.querySelector('.navbar');
   const narrativeCards = document.querySelectorAll('.hero-narrative-card');
   const scrollIndicator = document.querySelector('.scroll-indicator');
+  const navLinkElems = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('section[id]');
 
   let isTicking = false;
 
@@ -41,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Pass progress to Canvas Engine
       if (heroEngine) heroEngine.updateScrollProgress(progress);
 
-      // Typography Reveals based on scroll percentages
+      // Hero typography reveals
       updateHeroNarrativeCards(progress, narrativeCards);
 
       // Fade out scroll indicator
@@ -49,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollIndicator.style.opacity = progress > 0.1 ? '0' : '1';
       }
 
-      // Dynamic Navbar Appearance
+      // Dynamic Navbar Theme
       if (progress < 0.6) {
         navbar.classList.add('scrolled-dark');
         navbar.classList.remove('scrolled-light');
@@ -57,6 +59,27 @@ document.addEventListener('DOMContentLoaded', () => {
         navbar.classList.remove('scrolled-dark');
         navbar.classList.add('scrolled-light');
       }
+    }
+
+    // Active Section Link Highlighting
+    let currentSectionId = '';
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop - 140;
+      const sectionHeight = section.offsetHeight;
+      if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+        currentSectionId = section.getAttribute('id');
+      }
+    });
+
+    if (currentSectionId) {
+      navLinkElems.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === `#${currentSectionId}`) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
     }
   }
 
@@ -84,14 +107,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 4. Mobile Navigation Toggle
-  const mobileToggleBtn = document.querySelector('.mobile-toggle');
-  const navLinks = document.querySelector('.nav-links');
+  // 4. Smooth Anchor Link Scrolling
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', (e) => {
+      const href = anchor.getAttribute('href');
+      if (href && href !== '#' && !href.startsWith('#news/')) {
+        const targetElem = document.querySelector(href);
+        if (targetElem) {
+          e.preventDefault();
+          targetElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+  });
 
-  if (mobileToggleBtn && navLinks) {
+  // 5. Mobile Navigation Toggle
+  const mobileToggleBtn = document.querySelector('.mobile-toggle');
+  const navLinksContainer = document.querySelector('.nav-links');
+
+  if (mobileToggleBtn && navLinksContainer) {
     mobileToggleBtn.addEventListener('click', () => {
-      const isOpened = navLinks.classList.toggle('active-mobile');
+      const isOpened = navLinksContainer.classList.toggle('active-mobile');
       mobileToggleBtn.setAttribute('aria-expanded', isOpened);
+    });
+
+    // Close mobile nav on link click
+    navLinkElems.forEach(link => {
+      link.addEventListener('click', () => {
+        navLinksContainer.classList.remove('active-mobile');
+        mobileToggleBtn.setAttribute('aria-expanded', 'false');
+      });
     });
   }
 });
