@@ -1,0 +1,14 @@
+# Hostinger LiteSpeed / Apache Configuration for Avinya Care Foundation
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Route /api/news to api/news.json if Node reverse proxy is inactive
+  RewriteRule ^api/news/?$ api/news.json [L,NC]
+  RewriteRule ^api/news/refresh/?$ api/news.json [L,NC]
+</IfModule>
+
+# Enable CORS & Caching Headers
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+  Header set Cache-Control "public, max-age=3600"
+</IfModule>
