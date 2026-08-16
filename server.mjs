@@ -230,6 +230,7 @@ Return ONLY a valid JSON object (no markdown, no backticks, no markdown code blo
     description: picked.description,
     category: picked.category,
     source: "Gemini AI Medical Engine",
+    apiProvider: "Gemini AI Engine",
     publishedAt: new Date().toISOString(),
     isAIGenerated: true,
     url: "#",
@@ -301,50 +302,106 @@ const FALLBACK_CANCER_NEWS = [
   }
 ];
 
-function fetchExternalNews() {
-  return new Promise((resolve) => {
-    const rawNewsKey = process.env.NEWS_API_KEY;
-    const apiKey = (rawNewsKey && !rawNewsKey.startsWith('YOUR_') && rawNewsKey.trim().length > 10) ? rawNewsKey.trim() : null;
-    // Public APIs Repository Endpoint (Zero auth open access for India & Global Health News)
-    const targetUrl = apiKey
-      ? `https://newsapi.org/v2/top-headlines?category=health&country=in&apiKey=${apiKey}`
-      : 'https://saurav.tech/NewsAPI/top-headlines/category/health/in.json';
+function getProviderNameFromUrl(url) {
+  if (url.includes('health/in.json')) return 'Saurav Tech (India Health)';
+  if (url.includes('health/us.json')) return 'Saurav Tech (US Health)';
+  if (url.includes('science/in.json')) return 'Saurav Tech (India Science)';
+  if (url.includes('science/us.json')) return 'Saurav Tech (US Science)';
+  if (url.includes('spaceflightnewsapi')) return 'Spaceflight News API';
+  if (url.includes('newsapi.org')) return 'NewsAPI.org';
+  return 'Public News API';
+}
 
-    const req = https.get(targetUrl, { timeout: 4000 }, (res) => {
+function fetchSingleNewsUrl(url) {
+  return new Promise((resolve) => {
+    const providerName = getProviderNameFromUrl(url);
+    const req = https.get(url, { timeout: 4000 }, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          if (parsed && Array.isArray(parsed.articles)) {
-            const formatted = parsed.articles.map((item, idx) => ({
-              id: `api-news-${idx}-${Date.now()}`,
+          const rawList = parsed.articles || parsed.results || parsed.data || [];
+          if (Array.isArray(rawList)) {
+            const formatted = rawList.map((item, idx) => ({
+              id: `api-news-${Math.random().toString(36).substring(2, 7)}-${idx}`,
               title: item.title ? item.title.split(' - ')[0] : 'Health Update',
-              description: item.description || item.content || 'Read full details regarding this health disclosure.',
-              category: item.title && item.title.toLowerCase().includes('cancer') ? 'Cancer Research' : 'Health & Oncology',
-              source: item.source?.name || 'Medical News',
-              publishedAt: item.publishedAt || new Date().toISOString(),
+              description: item.description || item.summary || item.content || 'Read full details regarding this health disclosure.',
+              category: (item.title && item.title.toLowerCase().includes('cancer')) ? 'Cancer Research' : 'Health & Oncology',
+              source: item.source?.name || item.newsSite || 'Medical Media',
+              apiProvider: providerName,
+              publishedAt: item.publishedAt || item.published_at || new Date().toISOString(),
               url: item.url || '#',
-              urlToImage: item.urlToImage || null
+              urlToImage: item.urlToImage || item.image_url || null,
+              isAIGenerated: false
             }));
-            
-            const filtered = formatted.filter(isCancerOrHealthNews);
-            resolve(filtered);
+            resolve(formatted.filter(isCancerOrHealthNews));
             return;
           }
-        } catch (e) {
-          // Parse error fallback
-        }
+        } catch (e) {}
         resolve([]);
       });
     });
-
     req.on('error', () => resolve([]));
-    req.on('timeout', () => {
-      req.destroy();
-      resolve([]);
-    });
+    req.on('timeout', () => { req.destroy(); resolve([]); });
   });
+}
+
+async function fetchExternalNews() {
+  const rawNewsKey = process.env.NEWS_API_KEY;
+  const apiKey = (rawNewsKey && !rawNewsKey.startsWith('YOUR_') && rawNewsKey.trim().length > 10) ? rawNewsKey.trim() : null;
+
+  // Extract all configured news environment variable URLs from .env
+  const envUrls = [];
+
+  if (process.env.NEWS_API_URLS) {
+    process.env.NEWS_API_URLS.split(',').forEach(u => {
+      const trimmed = u.trim();
+      if (trimmed && !trimmed.startsWith('YOUR_') && !envUrls.includes(trimmed)) envUrls.push(trimmed);
+    });
+  }
+
+  const individualVars = [
+    process.env.NEWS_API_HEALTH_IN,
+    process.env.NEWS_API_HEALTH_US,
+    process.env.NEWS_API_SCIENCE_IN,
+    process.env.NEWS_API_SCIENCE_US,
+    process.env.NEWS_API_SPACEFLIGHT,
+    process.env.NEWS_API_URL
+  ];
+
+  individualVars.forEach(u => {
+    if (u) {
+      const trimmed = u.trim();
+      if (trimmed && !trimmed.startsWith('YOUR_') && !envUrls.includes(trimmed)) envUrls.push(trimmed);
+    }
+  });
+
+  const defaultUrls = [
+    'https://saurav.tech/NewsAPI/top-headlines/category/health/in.json',
+    'https://saurav.tech/NewsAPI/top-headlines/category/health/us.json',
+    'https://saurav.tech/NewsAPI/top-headlines/category/science/in.json',
+    'https://saurav.tech/NewsAPI/top-headlines/category/science/us.json',
+    'https://api.spaceflightnewsapi.net/v4/blogs/?limit=10'
+  ];
+
+  const targetUrls = envUrls.length > 0 ? envUrls : defaultUrls;
+
+  if (apiKey) {
+    targetUrls.unshift(`https://newsapi.org/v2/top-headlines?category=health&country=in&apiKey=${apiKey}`);
+  }
+
+  // Fetch ALL public news APIs concurrently
+  const resultsList = await Promise.allSettled(targetUrls.map(fetchSingleNewsUrl));
+  const allArticles = [];
+
+  for (const res of resultsList) {
+    if (res.status === 'fulfilled' && Array.isArray(res.value)) {
+      allArticles.push(...res.value);
+    }
+  }
+
+  return allArticles;
 }
 
 async function refreshNewsCache(force = false) {
@@ -358,17 +415,27 @@ async function refreshNewsCache(force = false) {
     };
   }
 
-  // Fetch fresh external articles
+  // 1. Fetch fresh external news from NEWS_API_URL / NEWS_API_KEY (Public APIs)
   let liveArticles = await fetchExternalNews();
-  
-  // Merge with verified fallback dataset
-  let combined = [...liveArticles, ...FALLBACK_CANCER_NEWS];
+
+  // 2. Generate dynamic Gemini AI Oncology Research story
+  let aiStory = await generateGeminiNewsTopic("early detection & oncology research");
+
+  // 3. Combine BOTH Live News API articles & AI Generated news stories
+  let combined = [];
+  if (aiStory) combined.push(aiStory);
+  const fallbackFormatted = FALLBACK_CANCER_NEWS.map(item => ({
+    ...item,
+    apiProvider: item.apiProvider || "Verified Oncology Journal"
+  }));
+  combined.push(...liveArticles, ...fallbackFormatted);
+
   let deduplicated = deduplicateArticles(combined);
 
   // Sort newest first
   deduplicated.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 
-  // Top 12 health & oncology articles
+  // Top 12 combined health & oncology articles
   const finalArticles = deduplicated.slice(0, 12);
 
   newsCache = {

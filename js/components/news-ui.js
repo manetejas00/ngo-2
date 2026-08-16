@@ -85,18 +85,24 @@ class NewsUI {
     this.applyCategoryFilter();
   }
 
-  async generateAITopic() {
-    const btn = document.getElementById('ai-generate-topic-btn');
+  async generateAITopic(topicHint = null, clickedBtn = null) {
+    const btn = clickedBtn || document.getElementById('ai-generate-topic-btn');
+    const originalContent = btn ? btn.innerHTML : `<span class="ai-sparkle">✨</span> Generate AI Topic with Gemini`;
+
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = `<span class="ai-sparkle">✨</span> Generating Gemini AI Topic...`;
+      btn.innerHTML = `<span class="ai-sparkle">✨</span> Generating Gemini AI Story...`;
     }
 
     let article = null;
 
-    // 1. Try primary endpoint /api/news/generate
+    // 1. Try primary endpoint POST /api/news/generate
     try {
-      const res = await fetch('/api/news/generate');
+      const res = await fetch('/api/news/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topicHint: topicHint || 'oncology research & early detection' })
+      });
       if (res.ok) {
         const data = await res.json();
         if (data && data.article) article = data.article;
@@ -105,7 +111,18 @@ class NewsUI {
       console.warn('/api/news/generate fetch warning:', err);
     }
 
-    // 2. Try static fallback endpoint /api/news_generate.json
+    // 2. Try GET /api/news/generate fallback
+    if (!article) {
+      try {
+        const res = await fetch('/api/news/generate');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.article) article = data.article;
+        }
+      } catch (err) {}
+    }
+
+    // 3. Try static fallback endpoint /api/news_generate.json
     if (!article) {
       try {
         const res = await fetch('/api/news_generate.json');
@@ -113,12 +130,10 @@ class NewsUI {
           const data = await res.json();
           if (data && data.article) article = data.article;
         }
-      } catch (err) {
-        console.warn('/api/news_generate.json fetch warning:', err);
-      }
+      } catch (err) {}
     }
 
-    // 3. Dynamic Client AI Topic Synthesizer (Zero-failure guarantee)
+    // 4. Dynamic Client AI Topic Synthesizer (Zero-failure guarantee)
     if (!article) {
       const aiTopics = [
         {
@@ -147,6 +162,7 @@ class NewsUI {
         description: picked.description,
         category: picked.category,
         source: "Gemini AI Medical Engine",
+        apiProvider: "Gemini AI Engine",
         publishedAt: new Date().toISOString(),
         isAIGenerated: true,
         url: "#",
@@ -155,14 +171,20 @@ class NewsUI {
     }
 
     if (article) {
+      if (!article.apiProvider) article.apiProvider = "Gemini AI Engine";
+      article.isAIGenerated = true;
+
+      // Add to front of articles list
       this.allArticles = [article, ...this.allArticles.filter(a => a.id !== article.id)];
-      this.filterCategory('all');
+      this.applyCategoryFilter();
+
+      // DIRECTLY OPEN ARTICLE DETAILS MODAL
       this.openArticleDetail(article.id);
     }
 
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = `<span class="ai-sparkle">✨</span> Generate AI Topic with Gemini`;
+      btn.innerHTML = originalContent;
     }
   }
 
@@ -261,13 +283,17 @@ class NewsUI {
 
       const fallbackImg = "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80";
       const imageUrl = article.urlToImage || fallbackImg;
-      const aiBadge = article.isAIGenerated ? `<span class="ai-generated-badge">✨ Gemini AI Topic</span>` : '';
+      const newsSymbolBadge = article.isAIGenerated 
+        ? `<span class="ai-generated-badge">✨ AI GENERATED</span>` 
+        : `<span class="live-news-badge">🌐 LIVE NEWS API</span>`;
+
+      const sourceSymbol = article.isAIGenerated ? '✨' : '🌐';
 
       return `
-        <article class="news-card ${article.isAIGenerated ? 'ai-news-card' : ''}" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
+        <article class="news-card ${article.isAIGenerated ? 'ai-news-card' : 'live-news-card'}" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
           <div class="news-image-box">
             <span class="news-category-badge">${article.category || 'Health'}</span>
-            ${aiBadge}
+            ${newsSymbolBadge}
             <img src="${imageUrl}" alt="${article.title}" class="news-image" onerror="this.src='${fallbackImg}'" loading="lazy">
           </div>
           <div class="news-content">
@@ -275,7 +301,8 @@ class NewsUI {
             <p class="news-card-desc">${article.description}</p>
             <div class="news-card-meta">
               <div class="news-source-info">
-                <span class="news-source-name">${article.source}</span>
+                <span class="news-source-name">${sourceSymbol} ${article.source}</span>
+                ${article.apiProvider ? `<span class="news-api-provider-tag">📡 ${article.apiProvider}</span>` : ''}
                 <span class="news-date">${formattedDate}</span>
               </div>
               <span class="news-read-more">Read More →</span>
@@ -351,17 +378,17 @@ class NewsUI {
           <div class="news-meta-pills">
             <span class="category-tag-pill">${article.category || 'Health & Oncology'}</span>
             <span class="read-time-pill">⏱ 3 Min Read</span>
-            ${article.isAIGenerated ? `<span class="verified-pill" style="color: var(--accent-teal);">✨ Gemini AI Topic</span>` : `<span class="verified-pill">✓ Verified Research</span>`}
+            ${article.isAIGenerated ? `<span class="verified-pill ai-pill">✨ Gemini AI Generated Story</span>` : `<span class="verified-pill live-pill">🌐 Live News API Article</span>`}
           </div>
 
           <h1 class="news-editorial-title">${article.title}</h1>
 
           <div class="news-editorial-author-bar">
             <div class="news-publisher-badge">
-              <div class="publisher-avatar">${sourceInitial}</div>
+              <div class="publisher-avatar">${article.isAIGenerated ? '✨' : sourceInitial}</div>
               <div>
-                <div class="publisher-name">${article.source}</div>
-                <div class="publisher-role">${article.isAIGenerated ? 'AI Generated Oncology Insights' : 'Medical & Scientific News Publisher'}</div>
+                <div class="publisher-name">${article.isAIGenerated ? '✨' : '🌐'} ${article.source}</div>
+                <div class="publisher-role">${article.apiProvider ? `📡 API Source: ${article.apiProvider}` : (article.isAIGenerated ? 'Gemini AI Research Engine' : 'Live Medical & Scientific News')}</div>
               </div>
             </div>
 
@@ -417,7 +444,7 @@ class NewsUI {
           </aside>
 
           <!-- Right Column: Main Reading Content -->
-          <article class="news-article-body">
+          <article class="news-article-body ${article.isAIGenerated ? 'ai-story' : ''}">
             <!-- Main Featured Hero Image -->
             <div class="news-article-hero-image">
               <img src="${imageUrl}" alt="${article.title}" onerror="this.src='${fallbackImg}'">
