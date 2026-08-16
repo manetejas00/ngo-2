@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avinya Care Foundation | Cancer Awareness, Support & Hope</title>
+  <meta name="description" content="Avinya Care Foundation is a global humanitarian organization providing cancer awareness, early screening initiatives, caregiver support, and community hope. No one should face cancer alone.">
+
+  <!-- Open Graph / Meta -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Avinya Care Foundation | No one should face cancer alone.">
+  <meta property="og:description" content="Cinematic humanitarian campaign bringing awareness, early detection, and compassionate community support to cancer patients and families.">
+
+  <!-- Fonts & Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- 1. ULTRA-MINIMAL APPLE-STYLE NAVBAR -->
+  <header>
+    <nav class="navbar" aria-label="Main Navigation">
+      <a href="#hero" class="nav-brand">
+        <div class="brand-icon">♥</div>
+        <span>Avinya Care</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#hero" class="nav-link">Home</a></li>
+        <li><a href="#understanding" class="nav-link">Our Mission</a></li>
+        <li><a href="#journey" class="nav-link">Cancer Awareness</a></li>
+        <li><a href="#stories" class="nav-link">Stories</a></li>
+        <li><a href="#impact" class="nav-link">Our Impact</a></li>
+        <li><a href="#get-involved" class="nav-link">Get Involved</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="btn-primary" onclick="window.AvinyaModals.openDonateModal(100)">
+          <span>Donate</span>
+          <span>→</span>
+        </button>
+        <button class="mobile-toggle" aria-label="Toggle Mobile Navigation">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- 2. HERO EXPERIENCE — CINEMATIC SCROLLYTELLING CANVAS -->
+  <section id="hero" class="hero-scroll-container">
+    <div class="hero-sticky-viewport">
+      <canvas id="hero-canvas"></canvas>
+
+      <!-- Floating Narrative Cards Synced with Scroll Progress -->
+      <div class="hero-overlay">
+        <!-- Card 1: 0 - 20% Scroll -->
+        <div id="card-1" class="hero-narrative-card active">
+          <h1 class="hero-title">No one should face cancer alone.</h1>
+          <p class="hero-subtitle">Awareness, support and hope can change a journey.</p>
+        </div>
+
+        <!-- Card 2: 20 - 40% Scroll -->
+        <div id="card-2" class="hero-narrative-card">
+          <h2 class="hero-title">Sometimes, support begins with simply being there.</h2>
+          <p class="hero-subtitle">A conversation. A hand to hold. A reason to keep going.</p>
+        </div>
+
+        <!-- Card 3: 40 - 65% Scroll (The Hug) -->
+        <div id="card-3" class="hero-narrative-card">
+          <h2 class="hero-title">You are not alone.</h2>
+          <p class="hero-subtitle">When compassion meets courage, healing begins.</p>
+        </div>
+
+        <!-- Card 4: 65 - 85% Scroll (Hope Light Transition) -->
+        <div id="card-4" class="hero-narrative-card">
+          <h2 class="hero-title" style="color: #111412;">Together, we create hope.</h2>
+          <p class="hero-subtitle" style="color: #5A625D;">Together, we create stronger tomorrows.</p>
+        </div>
+      </div>
+
+      <div class="scroll-indicator">
+        <div class="scroll-mouse">
+          <div class="scroll-wheel"></div>
+        </div>
+        <span>Scroll to Explore Story</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. SECTION 2 — UNDERSTANDING CANCER -->
+  <section id="understanding" class="section-understanding">
+    <div class="section-header">
+      <span class="category-tag">Empowerment & Education</span>
+      <h2 class="section-title">Awareness is where change begins.</h2>
+      <p class="body-large">
+        Understanding cancer, recognizing early warning signs, and encouraging timely screening can help people make informed decisions about their health.
+      </p>
+    </div>
+
+    <div class="cards-grid">
+      <!-- Card 1: Learn -->
+      <div class="editorial-card">
+        <div>
+          <div class="card-icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h3 class="card-title">Learn</h3>
+          <p class="card-text">
+            Understand cancer types, early signals, lifestyle risk factors, and dispel common myths with evidence-based guidance.
+          </p>
+        </div>
+        <a href="#understanding" class="card-link" onclick="window.AvinyaModals.openGuideModal('Understanding Cancer')">
+          <span>Explore Knowledge Guide</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <!-- Card 2: Detect -->
+      <div class="editorial-card">
+        <div>
+          <div class="card-icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <h3 class="card-title">Detect</h3>
+          <p class="card-text">
+            Recognize the vital importance of routine health checkups, self-exams, and accessible screening clinics for early diagnosis.
+          </p>
+        </div>
+        <a href="#understanding" class="card-link" onclick="window.AvinyaModals.openGuideModal('Early Screening')">
+          <span>View Screening Checklist</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <!-- Card 3: Support -->
+      <div class="editorial-card">
+        <div>
+          <div class="card-icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </div>
+          <h3 class="card-title">Support</h3>
+          <p class="card-text">
+            Stand beside patients and families throughout treatment with emotional therapy, nutritional counseling, and caregiver aid.
+          </p>
+        </div>
+        <a href="#understanding" class="card-link" onclick="window.AvinyaModals.openDonateModal(50)">
+          <span>Sponsor Support Programs</span>
+          <span>→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. SECTION 3 — THE CANCER JOURNEY TIMELINE -->
+  <section id="journey" class="section-journey">
+    <div class="section-header">
+      <span class="category-tag">Continuum of Care</span>
+      <h2 class="section-title">Every journey is different.</h2>
+      <p class="body-large">
+        From early knowledge to recovery, we provide compassionate companionship at every milestone.
+      </p>
+    </div>
+
+    <div class="timeline-container">
+      <div class="timeline-line"></div>
+      <div class="timeline-progress"></div>
+
+      <div class="timeline-stages">
+        <div class="timeline-node active">
+          <div class="node-dot"></div>
+          <span class="node-step">01</span>
+          <span class="node-title">Awareness</span>
+        </div>
+        <div class="timeline-node">
+          <div class="node-dot"></div>
+          <span class="node-step">02</span>
+          <span class="node-title">Screening</span>
+        </div>
+        <div class="timeline-node">
+          <div class="node-dot"></div>
+          <span class="node-step">03</span>
+          <span class="node-title">Diagnosis</span>
+        </div>
+        <div class="timeline-node">
+          <div class="node-dot"></div>
+          <span class="node-step">04</span>
+          <span class="node-title">Treatment</span>
+        </div>
+        <div class="timeline-node">
+          <div class="node-dot"></div>
+          <span class="node-step">05</span>
+          <span class="node-title">Recovery</span>
+        </div>
+      </div>
+
+      <!-- Active Stage Detail Box -->
+      <div id="journey-detail-card" class="journey-detail-card">
+        <!-- Rendered via js/timeline.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. SECTION 4 — HUMAN STORIES -->
+  <section id="stories" class="section-stories">
+    <div class="section-header">
+      <span class="category-tag">Voices of Courage</span>
+      <h2 class="section-title">Behind every diagnosis is a person.</h2>
+      <p class="body-large">
+        Real stories of resilience, companionship, and hope from survivors, caregivers, and supporters.
+      </p>
+    </div>
+
+    <div class="stories-grid">
+      <!-- Story 1: Survivor -->
+      <div class="story-card" onclick="window.AvinyaModals.openStoryModal('Ananya Roy', 'Breast Cancer Survivor', 'The day I received my diagnosis, fear froze me. But having a mentor walk me through every step restored my strength.', 'Ananya was diagnosed with Stage II breast cancer at age 34. Through Avinya\'s peer support network, she was paired with a survivor mentor who answered her questions and stood by her side during chemotherapy.', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80')">
+        <div class="story-image-box">
+          <span class="story-badge">Survivor</span>
+          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80" alt="Ananya Roy" class="story-image">
+        </div>
+        <div class="story-content">
+          <p class="story-quote">"Having a mentor walk me through every step restored my strength."</p>
+          <div class="story-meta">
+            <div>
+              <div class="story-author">Ananya Roy</div>
+              <div class="story-role">Survivor & Advocate</div>
+            </div>
+            <span style="color: var(--accent-teal); font-weight: 700;">Read Story →</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Story 2: Caregiver -->
+      <div class="story-card" onclick="window.AvinyaModals.openStoryModal('Marcus Vance', 'Caregiver & Husband', 'Caregivers carry emotional weight silently. Avinya gave me a safe space and practical support when my wife was in treatment.', 'When Marcus\'s wife began radiation therapy, balancing work, family, and hospital visits became overwhelming. Avinya\'s caregiver relief program provided respite care and emotional counseling.', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80')">
+        <div class="story-image-box">
+          <span class="story-badge">Caregiver</span>
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80" alt="Marcus Vance" class="story-image">
+        </div>
+        <div class="story-content">
+          <p class="story-quote">"Caregivers carry emotional weight silently. Avinya gave us a safe space."</p>
+          <div class="story-meta">
+            <div>
+              <div class="story-author">Marcus Vance</div>
+              <div class="story-role">Family Caregiver</div>
+            </div>
+            <span style="color: var(--accent-teal); font-weight: 700;">Read Story →</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Story 3: Volunteer -->
+      <div class="story-card" onclick="window.AvinyaModals.openStoryModal('Dr. Priya Sharma', 'Oncology Volunteer', 'Early awareness changes lives. Seeing patients get diagnosed early and recover is the greatest reward.', 'Dr. Priya leads weekend rural screening drives across underserved regions, conducting early screening checkups and educating local communities.', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80')">
+        <div class="story-image-box">
+          <span class="story-badge">Volunteer Doctor</span>
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80" alt="Dr. Priya Sharma" class="story-image">
+        </div>
+        <div class="story-content">
+          <p class="story-quote">"Early awareness changes lives. Seeing patients recover is our purpose."</p>
+          <div class="story-meta">
+            <div>
+              <div class="story-author">Dr. Priya Sharma</div>
+              <div class="story-role">Volunteer Oncologist</div>
+            </div>
+            <span style="color: var(--accent-teal); font-weight: 700;">Read Story →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. SECTION 5 — IMPACT METRICS -->
+  <section id="impact" class="section-impact">
+    <div class="impact-header">
+      <span class="category-tag" style="color: var(--accent-green);">Measurable Change</span>
+      <h2 class="section-title" style="color: #ffffff;">Your support creates impact.</h2>
+      <p class="body-large-dark">
+        Every contribution directly empowers individuals with knowledge, early screening, and compassionate care.
+      </p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-number" data-target="10000" data-suffix="+">0</div>
+        <div class="stat-label">People Reached & Educated</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" data-target="5000" data-suffix="+">0</div>
+        <div class="stat-label">Awareness Interactions</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" data-target="1200" data-suffix="+">0</div>
+        <div class="stat-label">Screening & Support Initiatives</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" data-target="500" data-suffix="+">0</div>
+        <div class="stat-label">Active Volunteers & Advocates</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. SECTION 6 — COMMUNITY -->
+  <section class="section-community">
+    <div class="community-wrapper">
+      <span class="category-tag">United for Hope</span>
+      <h2 class="section-title">One person can make a difference.<br>Together, we can make it bigger.</h2>
+      <p class="body-large" style="max-width: 650px; margin: 0 auto;">
+        Our vibrant network brings together cancer survivors, family members, medical specialists, and compassionate volunteers.
+      </p>
+
+      <div class="community-grid">
+        <div class="community-card">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Elena" class="community-avatar">
+          <div class="community-name">Elena R.</div>
+          <span class="community-badge">5-Yr Survivor</span>
+        </div>
+        <div class="community-card">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80" alt="David" class="community-avatar">
+          <div class="community-name">David K.</div>
+          <span class="community-badge">Caregiver</span>
+        </div>
+        <div class="community-card">
+          <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&q=80" alt="Sarah" class="community-avatar">
+          <div class="community-name">Sarah M.</div>
+          <span class="community-badge">Volunteer</span>
+        </div>
+        <div class="community-card">
+          <img src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=300&q=80" alt="Dr. Robert" class="community-avatar">
+          <div class="community-name">Dr. Robert L.</div>
+          <span class="community-badge">Medical Advisor</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. SECTION 7 — GET INVOLVED -->
+  <section id="get-involved" class="section-get-involved">
+    <div class="section-header">
+      <span class="category-tag">Take Action</span>
+      <h2 class="section-title">Be the light in someone's journey.</h2>
+      <p class="body-large">
+        Choose how you would like to stand with those affected by cancer today.
+      </p>
+    </div>
+
+    <div class="action-grid">
+      <!-- DONATE -->
+      <div class="action-card donate-theme">
+        <div>
+          <span style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.9;">Financial Contribution</span>
+          <h3 class="action-title" style="margin-top: 0.5rem;">Donate</h3>
+          <p class="action-desc">
+            Your contribution directly funds screening kits, patient navigation, and caregiver support programs.
+          </p>
+        </div>
+        <button class="btn-primary" style="background-color: #ffffff; color: var(--accent-teal);" onclick="window.AvinyaModals.openDonateModal(100)">
+          <span>Donate Now</span>
+          <span>→</span>
+        </button>
+      </div>
+
+      <!-- VOLUNTEER -->
+      <div class="action-card volunteer-theme">
+        <div>
+          <span style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-teal);">Community Action</span>
+          <h3 class="action-title" style="margin-top: 0.5rem;">Volunteer</h3>
+          <p class="action-desc">
+            Share your time, professional skills, or emotional empathy as a community advocate or peer mentor.
+          </p>
+        </div>
+        <button class="btn-secondary" onclick="window.AvinyaModals.openVolunteerModal()">
+          <span>Become a Volunteer</span>
+          <span>→</span>
+        </button>
+      </div>
+
+      <!-- SPREAD AWARENESS -->
+      <div class="action-card awareness-theme">
+        <div>
+          <span style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-coral);">Advocacy</span>
+          <h3 class="action-title" style="margin-top: 0.5rem;">Spread Awareness</h3>
+          <p class="action-desc">
+            Share knowledge, encourage routine screening in your community, and start life-saving conversations.
+          </p>
+        </div>
+        <button class="btn-secondary" onclick="window.AvinyaModals.openGuideModal('Spread Awareness')">
+          <span>Get Awareness Toolkit</span>
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. SECTION 8 — FINAL CINEMATIC CTA & LOOP -->
+  <section class="section-final-cta">
+    <div class="cta-glow"></div>
+    <div class="cta-box">
+      <span class="category-tag" style="color: var(--accent-green);">Standing Together</span>
+      <h2 class="display-title" style="margin-bottom: 1.5rem;">No one should walk this journey alone.</h2>
+      <p class="body-large-dark" style="max-width: 680px; margin: 0 auto;">
+        Stand with those affected by cancer. Create awareness. Give support. Give hope.
+      </p>
+
+      <div class="cta-actions">
+        <button class="btn-primary" style="padding: 1rem 2.2rem; font-size: 1.05rem;" onclick="window.AvinyaModals.openDonateModal(100)">
+          <span>Support the Cause</span>
+          <span>→</span>
+        </button>
+        <button class="btn-secondary btn-secondary-dark" style="padding: 1rem 2.2rem; font-size: 1.05rem;" onclick="window.AvinyaModals.openGuideModal('Avinya Mission')">
+          <span>Learn More</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. FOOTER -->
+  <footer class="footer">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand">Avinya Care Foundation</div>
+        <p class="footer-tagline">“Together for a future without fear.”</p>
+      </div>
+      <div>
+        <h4 class="footer-heading">Navigation</h4>
+        <ul class="footer-links">
+          <li><a href="#hero" class="footer-link">Home</a></li>
+          <li><a href="#understanding" class="footer-link">Our Mission</a></li>
+          <li><a href="#journey" class="footer-link">Cancer Awareness</a></li>
+          <li><a href="#stories" class="footer-link">Human Stories</a></li>
+          <li><a href="#impact" class="footer-link">Our Impact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer-heading">Get Involved</h4>
+        <ul class="footer-links">
+          <li><a href="#get-involved" class="footer-link" onclick="window.AvinyaModals.openDonateModal(100)">Donate</a></li>
+          <li><a href="#get-involved" class="footer-link" onclick="window.AvinyaModals.openVolunteerModal()">Volunteer</a></li>
+          <li><a href="#get-involved" class="footer-link" onclick="window.AvinyaModals.openGuideModal('Partner With Us')">Partner With Us</a></li>
+          <li><a href="#get-involved" class="footer-link" onclick="window.AvinyaModals.openGuideModal('Toolkit')">Spread Awareness</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer-heading">Contact & Connect</h4>
+        <ul class="footer-links">
+          <li><span class="footer-link">care@avinyacare.org</span></li>
+          <li><span class="footer-link">+1 (800) 555-AVINYA</span></li>
+          <li><span class="footer-link">Global Support Headquarters</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Avinya Care Foundation. All rights reserved.</div>
+      <div style="display: flex; gap: 1.5rem;">
+        <a href="#" class="footer-link">Privacy Policy</a>
+        <a href="#" class="footer-link">Terms of Service</a>
+        <a href="#" class="footer-link">Accessibility Statement</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 11. MODAL DIALOGS -->
+  <!-- A. DONATION MODAL -->
+  <div id="donate-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      
+      <span class="category-tag">Impact Contribution</span>
+      <h2 style="font-size: 2rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">Stand with a Cancer Patient Today</h2>
+
+      <div class="donation-toggle">
+        <button id="freq-monthly" class="toggle-option active" onclick="window.AvinyaModals.setDonationFrequency(true)">Donate Monthly</button>
+        <button id="freq-onetime" class="toggle-option" onclick="window.AvinyaModals.setDonationFrequency(false)">Give One-Time</button>
+      </div>
+
+      <div class="amount-grid">
+        <button class="amount-btn" data-amount="25" onclick="window.AvinyaModals.setDonationAmount(25)">$25</button>
+        <button class="amount-btn" data-amount="50" onclick="window.AvinyaModals.setDonationAmount(50)">$50</button>
+        <button class="amount-btn active" data-amount="100" onclick="window.AvinyaModals.setDonationAmount(100)">$100</button>
+        <button class="amount-btn" data-amount="250" onclick="window.AvinyaModals.setDonationAmount(250)">$250</button>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <input type="number" id="custom-amount-input" placeholder="Or enter custom amount ($)" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); font-size: 1rem;" oninput="window.AvinyaModals.setCustomAmount(this.value)">
+      </div>
+
+      <div id="impact-calculator-text" class="impact-calculator-box">
+        <!-- Rendered via js/modals.js -->
+      </div>
+
+      <form onsubmit="window.AvinyaModals.handleDonationSubmit(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <input type="text" placeholder="First Name" required style="padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
+          <input type="text" placeholder="Last Name" required style="padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
+        </div>
+        <input type="email" placeholder="Email Address" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); margin-bottom: 1.5rem;">
+        
+        <button id="donate-submit-btn" type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
+          Donate $100/month
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- B. STORY READER MODAL -->
+  <div id="story-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <!-- Dynamic story content inserted via js/modals.js -->
+    </div>
+  </div>
+
+  <!-- C. VOLUNTEER MODAL -->
+  <div id="volunteer-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <span class="category-tag">Join Our Mission</span>
+      <h2 style="font-size: 2rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">Become an Avinya Volunteer</h2>
+
+      <form onsubmit="window.AvinyaModals.handleVolunteerSubmit(event)">
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Full Name</label>
+          <input type="text" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Email Address</label>
+          <input type="email" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">How would you like to contribute?</label>
+          <select style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); background: white;">
+            <option>Community Awareness & Event Ambassador</option>
+            <option>Peer Survivor Mentor</option>
+            <option>Medical & Nursing Volunteer</option>
+            <option>Caregiver Support Specialist</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
+          Submit Application
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- D. AWARENESS GUIDE MODAL -->
+  <div id="guide-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <!-- Dynamic guide content inserted via js/modals.js -->
+    </div>
+  </div>
+
+  <!-- JavaScript Engines -->
+  <script src="js/canvas-hero.js"></script>
+  <script src="js/timeline.js"></script>
+  <script src="js/counters.js"></script>
+  <script src="js/modals.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
