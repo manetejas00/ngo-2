@@ -52,7 +52,7 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
       });
 
       if (recipientUser) {
-        await transporter.sendMail({
+        const userRes = await transporter.sendMail({
           from: `"${senderName}" <${senderEmail}>`,
           to: recipientUser,
           subject: userEmailPayload.subject,
@@ -60,9 +60,10 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
           html: userEmailPayload.html,
           replyTo: senderEmail
         });
+        console.log(`[SMTP Sent] User email sent to ${recipientUser} | Response: ${userRes.response}`);
       }
 
-      await transporter.sendMail({
+      const adminRes = await transporter.sendMail({
         from: `"Avinya Care Operations" <${senderEmail}>`,
         to: adminEmail,
         subject: adminEmailPayload.subject,
@@ -70,6 +71,7 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
         html: adminEmailPayload.html,
         replyTo: recipientUser || senderEmail
       });
+      console.log(`[SMTP Sent] Admin alert email sent to ${adminEmail} | Response: ${adminRes.response}`);
 
       deliveryMethod = 'SMTP_NODEMAILER';
     } else {
