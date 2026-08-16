@@ -1037,6 +1037,67 @@ body, p {
   box-shadow: 0 4px 14px rgba(8, 127, 115, 0.25);
 }
 
+/* Gemini AI Topic Generator Button & Badges */
+.news-ai-gen-btn {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #F8FAFC;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.6rem 1.3rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
+}
+
+.news-ai-gen-btn:hover {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.35);
+  color: #38BDF8;
+}
+
+.news-ai-gen-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+  transform: none;
+}
+
+.ai-sparkle {
+  animation: aiSparklePulse 2s infinite ease-in-out;
+  display: inline-block;
+}
+
+@keyframes aiSparklePulse {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.25) rotate(15deg); opacity: 0.85; }
+}
+
+.ai-generated-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #38BDF8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  z-index: 5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.ai-news-card {
+  border: 1.5px solid rgba(56, 189, 248, 0.4) !important;
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.12) !important;
+}
+
 .news-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* 3 columns desktop */

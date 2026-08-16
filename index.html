@@ -301,13 +301,18 @@
       <div id="news-status-message"></div>
     </div>
 
-    <!-- Category Filter Tabs -->
+    <!-- Category Filter Tabs & Gemini AI Generator -->
     <div class="news-category-tabs" id="news-category-tabs">
       <button class="news-tab-btn active" data-category="all" onclick="window.AvinyaNewsUI.filterCategory('all', this)">All Stories</button>
       <button class="news-tab-btn" data-category="Cancer Research" onclick="window.AvinyaNewsUI.filterCategory('Cancer Research', this)">Cancer Research</button>
       <button class="news-tab-btn" data-category="Early Detection" onclick="window.AvinyaNewsUI.filterCategory('Early Detection', this)">Early Detection</button>
       <button class="news-tab-btn" data-category="Immunotherapy" onclick="window.AvinyaNewsUI.filterCategory('Immunotherapy', this)">Immunotherapy</button>
       <button class="news-tab-btn" data-category="Prevention" onclick="window.AvinyaNewsUI.filterCategory('Prevention', this)">Prevention & Wellness</button>
+
+      <button id="ai-generate-topic-btn" class="news-ai-gen-btn" onclick="window.AvinyaNewsUI.generateAITopic()">
+        <span class="ai-sparkle">✨</span>
+        <span>Generate AI Topic with Gemini</span>
+      </button>
     </div>
 
     <div id="news-grid-container" class="news-grid">

@@ -1,6 +1,6 @@
 /**
  * Avinya Care Foundation - Health & Cancer News UI Component Renderer
- * Displays 2 rows of health/cancer articles by default (6 cards), interactive category tabs, "Show More" expansion, skeleton loaders, 2-column detail page view, and related stories.
+ * Displays 2 rows of health/cancer articles, Gemini AI topic generator, interactive category tabs, "Show More" expansion, skeleton loaders, 2-column detail page view, and related stories.
  */
 
 class NewsUI {
@@ -83,6 +83,34 @@ class NewsUI {
     }
 
     this.applyCategoryFilter();
+  }
+
+  async generateAITopic() {
+    const btn = document.getElementById('ai-generate-topic-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<span class="ai-sparkle">✨</span> Generating Gemini AI Topic...`;
+    }
+
+    try {
+      const res = await fetch('/api/news/generate');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.article) {
+          const article = data.article;
+          this.allArticles = [article, ...this.allArticles.filter(a => a.id !== article.id)];
+          this.filterCategory('all');
+          this.openArticleDetail(article.id);
+        }
+      }
+    } catch (err) {
+      console.warn('Gemini AI Topic generation error:', err);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<span class="ai-sparkle">✨</span> Generate AI Topic with Gemini`;
+      }
+    }
   }
 
   filterCategory(category, clickedBtn) {
@@ -180,11 +208,13 @@ class NewsUI {
 
       const fallbackImg = "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80";
       const imageUrl = article.urlToImage || fallbackImg;
+      const aiBadge = article.isAIGenerated ? `<span class="ai-generated-badge">✨ Gemini AI Topic</span>` : '';
 
       return `
-        <article class="news-card" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
+        <article class="news-card ${article.isAIGenerated ? 'ai-news-card' : ''}" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
           <div class="news-image-box">
             <span class="news-category-badge">${article.category || 'Health'}</span>
+            ${aiBadge}
             <img src="${imageUrl}" alt="${article.title}" class="news-image" onerror="this.src='${fallbackImg}'" loading="lazy">
           </div>
           <div class="news-content">
@@ -204,7 +234,8 @@ class NewsUI {
   }
 
   openArticleDetail(articleId) {
-    const article = this.service.getArticleById(articleId);
+    let article = this.allArticles.find(a => a.id === articleId || encodeURIComponent(a.id) === articleId);
+    if (!article) article = this.service.getArticleById(articleId);
     if (!article) return;
 
     // Set URL hash without page jump
@@ -267,7 +298,7 @@ class NewsUI {
           <div class="news-meta-pills">
             <span class="category-tag-pill">${article.category || 'Health & Oncology'}</span>
             <span class="read-time-pill">⏱ 3 Min Read</span>
-            <span class="verified-pill">✓ Verified Research</span>
+            ${article.isAIGenerated ? `<span class="verified-pill" style="color: var(--accent-teal);">✨ Gemini AI Topic</span>` : `<span class="verified-pill">✓ Verified Research</span>`}
           </div>
 
           <h1 class="news-editorial-title">${article.title}</h1>
@@ -277,7 +308,7 @@ class NewsUI {
               <div class="publisher-avatar">${sourceInitial}</div>
               <div>
                 <div class="publisher-name">${article.source}</div>
-                <div class="publisher-role">Medical & Scientific News Publisher</div>
+                <div class="publisher-role">${article.isAIGenerated ? 'AI Generated Oncology Insights' : 'Medical & Scientific News Publisher'}</div>
               </div>
             </div>
 
@@ -316,9 +347,11 @@ class NewsUI {
               </ul>
 
               <div class="sidebar-actions">
-                <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="width: 100%; text-align: center; justify-content: center;">
-                  <span>Read Source Article ↗</span>
-                </a>
+                ${article.url && article.url !== '#' ? `
+                  <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="width: 100%; text-align: center; justify-content: center;">
+                    <span>Read Source Article ↗</span>
+                  </a>
+                ` : ''}
                 <button class="btn-secondary" style="width: 100%; justify-content: center;" onclick="window.AvinyaModals.openDonateModal(100)">
                   <span>Support Cancer Care</span>
                 </button>
@@ -340,7 +373,7 @@ class NewsUI {
 
             <!-- Executive Summary Lead Box -->
             <div class="news-executive-summary">
-              <span class="summary-label">Executive Summary</span>
+              <span class="summary-label">${article.isAIGenerated ? '✨ Gemini AI Executive Summary' : 'Executive Summary'}</span>
               <p class="summary-text">${article.description}</p>
             </div>
 
@@ -462,7 +495,8 @@ class NewsUI {
     const hash = window.location.hash;
     if (hash.startsWith('#news/')) {
       const articleId = decodeURIComponent(hash.replace('#news/', ''));
-      const article = this.service.getArticleById(articleId);
+      let article = this.allArticles.find(a => a.id === articleId || encodeURIComponent(a.id) === articleId);
+      if (!article) article = this.service.getArticleById(articleId);
       if (article) {
         this.renderDetailModal(article);
       }
