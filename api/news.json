@@ -5,123 +5,63 @@
   "articles": [
     {
       "id": "cancer-news-1",
-      "title": "Advancements in Targeted Immunotherapy Show Promise for Early Cancer Interventions",
-      "description": "New clinical research demonstrates how targeted immunotherapy approaches can significantly enhance survival outcomes and minimize side effects for early-stage oncology patients.",
-      "category": "Cancer Research",
-      "source": "National Cancer Institute",
+      "title": "Tata Memorial Centre Launches Mobile Cancer Diagnostic Fleet for Rural Maharashtra",
+      "description": "State-of-the-art diagnostic buses equipped with digital mammography, pap smear screening, and telemedicine links deploy to underserved rural districts across Maharashtra.",
+      "category": "Early Detection",
+      "source": "Tata Memorial Centre",
       "publishedAt": "2026-08-16T18:00:00Z",
-      "url": "https://www.cancer.gov/news-events",
-      "urlToImage": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80"
+      "url": "https://tmc.gov.in",
+      "urlToImage": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80"
     },
     {
       "id": "cancer-news-2",
-      "title": "Global Awareness Campaigns Driving Record Early Screening Participation",
-      "description": "Community health initiatives and mobile diagnostic clinics reach underserved populations, empowering individuals to take proactive steps in routine breast and colorectal screenings.",
+      "title": "ICMR Clinical Guidelines Emphasize Routine HPV Screening for Cervical Cancer Prevention in India",
+      "description": "New national health directives recommend accessible HPV DNA testing and community screening camps for women aged 30–65 across primary healthcare centers.",
       "category": "Awareness & Detection",
-      "source": "World Health Organization",
+      "source": "Indian Council of Medical Research",
       "publishedAt": "2026-08-16T15:00:00Z",
-      "url": "https://www.who.int/health-topics/cancer",
+      "url": "https://www.icmr.gov.in",
       "urlToImage": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80"
     },
     {
       "id": "cancer-news-3",
-      "title": "The Critical Role of Comprehensive Caregiver Support During Treatment",
-      "description": "Studies highlight how emotional counseling, respite care, and financial navigation for family caregivers directly improve patient resilience and recovery quality.",
-      "category": "Caregiver Support",
-      "source": "Journal of Clinical Oncology",
+      "title": "AIIMS New Delhi Breakthrough in Low-Cost CAR-T Cell Immunotherapy Clinical Trials",
+      "description": "Indigenous cellular therapy research demonstrates high efficacy in treating refractory blood cancers, significantly reducing treatment costs for Indian oncology patients.",
+      "category": "Cancer Research",
+      "source": "AIIMS New Delhi",
       "publishedAt": "2026-08-16T10:00:00Z",
-      "url": "https://ascopubs.org/journal/jco",
-      "urlToImage": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
+      "url": "https://www.aiims.edu",
+      "urlToImage": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80"
     },
     {
       "id": "cancer-news-4",
-      "title": "Breakthrough Blood Tests Enable Multi-Cancer Early Detection Before Symptoms Appear",
-      "description": "Liquid biopsy technology shows high accuracy in detecting circulating tumor DNA across multiple cancer types, offering hope for earlier clinical diagnosis.",
-      "category": "Early Detection",
-      "source": "American Cancer Society",
+      "title": "Avinya Care Expands Caregiver Navigation Services Across Bengaluru & Hyderabad",
+      "description": "Dedicated family counseling, respite assistance, and financial guidance help caregivers manage treatment journeys with dignity and resilience.",
+      "category": "Caregiver Support",
+      "source": "Avinya Care Foundation",
       "publishedAt": "2026-08-16T04:00:00Z",
-      "url": "https://www.cancer.org/research",
-      "urlToImage": "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
+      "url": "https://avinyacarefoundation.org",
+      "urlToImage": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
     },
     {
       "id": "cancer-news-5",
-      "title": "Nutritional and Lifestyle Interventions Support Long-Term Cancer Survivorship",
-      "description": "Integrative health guidelines emphasize tailored physical activity and clinical nutrition plans to enhance energy levels and reduce recurrence risk post-treatment.",
-      "category": "Survivorship",
-      "source": "Harvard Health Publishing",
+      "title": "Liquid Biopsy Blood Tests Enable Multi-Cancer Detection Before Symptoms Emerge",
+      "description": "Non-invasive genomic blood analysis measuring circulating tumor DNA opens new doors for early diagnosis in Indian healthcare centers.",
+      "category": "Early Detection",
+      "source": "Indian Journal of Oncology",
       "publishedAt": "2026-08-15T20:00:00Z",
-      "url": "https://www.health.harvard.edu",
-      "urlToImage": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80"
+      "url": "https://www.ncbi.nlm.nih.gov",
+      "urlToImage": "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
     },
     {
       "id": "cancer-news-6",
-      "title": "Expanding Access to Affordable Diagnostic Imaging in Rural Healthcare Clinics",
-      "description": "Non-profit partnerships deploy portable ultrasound and digital mammography units to ensure geographic location does not limit life-saving early detection.",
-      "category": "Healthcare Policy",
-      "source": "Global Health Journal",
+      "title": "Nutritional Support and Ayurvedic Integrative Wellness Enhance Chemotherapy Resilience",
+      "description": "Evidence-based wellness guidelines combining clinical nutrition and gentle restorative care help patients maintain stamina during radiation and chemotherapy.",
+      "category": "Survivorship",
+      "source": "WHO South-East Asia",
       "publishedAt": "2026-08-15T14:00:00Z",
-      "url": "https://www.sciencedirect.com/journal/global-health-journal",
-      "urlToImage": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "cancer-news-7",
-      "title": "Understanding Mammography Guidelines: When and How Often to Screen",
-      "description": "Clinical guidelines highlight how annual mammograms for women starting at age 40 significantly reduce mortality through timely, localized detection.",
-      "category": "Early Detection",
-      "source": "Radiology Health Insights",
-      "publishedAt": "2026-08-15T09:00:00Z",
-      "url": "https://www.cancer.gov/types/breast/mammograms-fact-sheet",
-      "urlToImage": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "cancer-news-8",
-      "title": "Genetic Biomarkers Revolutionize Targeted Oncology Treatment Plans",
-      "description": "Next-generation genomic sequencing enables oncologists to tailor therapies to individual tumor mutations, improving efficacy and patient comfort.",
-      "category": "Cancer Research",
-      "source": "Journal of Clinical Genomics",
-      "publishedAt": "2026-08-14T21:00:00Z",
-      "url": "https://www.genome.gov/about-genomics/fact-sheets/Sequencing-Human-Genome",
-      "urlToImage": "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "cancer-news-9",
-      "title": "Pediatric Oncology Breakthroughs Improve Long-Term Survival and Quality of Life",
-      "description": "Advances in gentle, targeted pediatric therapies allow children undergoing leukemia and lymphoma treatment to achieve high cure rates with fewer long-term side effects.",
-      "category": "Immunotherapy",
-      "source": "Pediatric Health International",
-      "publishedAt": "2026-08-14T16:00:00Z",
-      "url": "https://www.stjude.org/research.html",
-      "urlToImage": "https://images.unsplash.com/photo-1581595220892-6e8e5f37da44?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "cancer-news-10",
-      "title": "Mobile Screening Vans Bring Diagnostic Mammograms to Remote Rural Communities",
-      "description": "Equipped with digital imaging equipment and volunteer nurses, mobile screening units overcome geographic barriers to provide free health check-ups.",
-      "category": "Early Detection",
-      "source": "Rural Health Alliance",
-      "publishedAt": "2026-08-14T11:00:00Z",
-      "url": "https://www.who.int/news-room/fact-sheets/detail/cancer",
-      "urlToImage": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "cancer-news-11",
-      "title": "Nutritional Support and Physical Wellness Reduce Fatigue During Radiation Therapy",
-      "description": "Evidence-based wellness programs combine gentle movement and clinical nutrition to help oncology patients maintain stamina and mental well-being.",
-      "category": "Prevention",
-      "source": "Integrative Health Review",
-      "publishedAt": "2026-08-14T08:00:00Z",
-      "url": "https://www.cancer.org/treatment/survivorship-during-and-after-treatment.html",
+      "url": "https://www.who.int/south-east-asia",
       "urlToImage": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "cancer-news-12",
-      "title": "Liquid Biopsy Blood Tests Detect Tumor Recurrence Months Before Scans",
-      "description": "Sensitive blood analysis measuring cell-free DNA gives oncologists advance notice to adjust therapeutic protocols early, improving long-term outcomes.",
-      "category": "Cancer Research",
-      "source": "Oncology Times",
-      "publishedAt": "2026-08-13T19:00:00Z",
-      "url": "https://www.cancer.gov/about-cancer/treatment/types/immunotherapy",
-      "urlToImage": "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=800&q=80"
     }
   ]
 }

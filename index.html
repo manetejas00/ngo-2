@@ -503,17 +503,17 @@
         </ul>
       </div>
       <div>
-        <h4 class="footer-heading">Contact & Connect</h4>
+        <h4 class="footer-heading">Contact & Support Helpline</h4>
         <ul class="footer-links">
-          <li><span class="footer-link">care@avinyacare.org</span></li>
-          <li><span class="footer-link">+1 (800) 555-AVINYA</span></li>
-          <li><span class="footer-link">Global Support Headquarters</span></li>
+          <li><a href="mailto:care@avinyacare.org" class="footer-link">care@avinyacare.org</a></li>
+          <li><a href="https://wa.me/919876543210?text=Hello%20Avinya%20Care%20Foundation%2C%20I%20would%20like%20to%20get%20cancer%20support" target="_blank" rel="noopener noreferrer" class="footer-link">Helpline / WhatsApp: +91 98765 43210</a></li>
+          <li><span class="footer-link">Centers: Mumbai | Pune | Bengaluru | New Delhi</span></li>
         </ul>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <div>© 2026 Avinya Care Foundation. All rights reserved.</div>
+      <div>© 2026 Avinya Care Foundation. Reg. NGO 80G/12A Tax Exempted. All rights reserved.</div>
       <div style="display: flex; gap: 1.5rem;">
         <a href="#" class="footer-link">Privacy Policy</a>
         <a href="#" class="footer-link">Terms of Service</a>
@@ -522,14 +522,22 @@
     </div>
   </footer>
 
+  <!-- WhatsApp Floating Action Button (India-First UX) -->
+  <a href="https://wa.me/919876543210?text=Hello%20Avinya%20Care%20Foundation%2C%20I%20would%20like%20to%20get%20cancer%20support" target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" aria-label="Talk to our team on WhatsApp">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+    </svg>
+    <span>Chat on WhatsApp</span>
+  </a>
+
   <!-- 12. MODAL DIALOGS -->
-  <!-- A. DONATION MODAL -->
+  <!-- A. DONATION MODAL (India-First ₹ INR / UPI / 80G Tax Exemption) -->
   <div id="donate-modal" class="modal-backdrop">
     <div class="modal-container">
       <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
       
-      <span class="category-tag">Impact Contribution</span>
-      <h2 style="font-size: 2rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">Stand with a Cancer Patient Today</h2>
+      <span class="category-tag">80G Tax Exempted Contribution</span>
+      <h2 style="font-size: 2rem; margin-top: 0.5rem; margin-bottom: 1rem;">Stand with a Cancer Patient Today</h2>
 
       <div class="donation-toggle">
         <button id="freq-monthly" class="toggle-option active" onclick="window.AvinyaModals.setDonationFrequency(true)">Donate Monthly</button>
@@ -537,14 +545,22 @@
       </div>
 
       <div class="amount-grid">
-        <button class="amount-btn" data-amount="25" onclick="window.AvinyaModals.setDonationAmount(25)">$25</button>
-        <button class="amount-btn" data-amount="50" onclick="window.AvinyaModals.setDonationAmount(50)">$50</button>
-        <button class="amount-btn active" data-amount="100" onclick="window.AvinyaModals.setDonationAmount(100)">$100</button>
-        <button class="amount-btn" data-amount="250" onclick="window.AvinyaModals.setDonationAmount(250)">$250</button>
+        <button class="amount-btn" data-amount="500" onclick="window.AvinyaModals.setDonationAmount(500)">₹500</button>
+        <button class="amount-btn active" data-amount="1000" onclick="window.AvinyaModals.setDonationAmount(1000)">₹1,000</button>
+        <button class="amount-btn" data-amount="2500" onclick="window.AvinyaModals.setDonationAmount(2500)">₹2,500</button>
+        <button class="amount-btn" data-amount="5000" onclick="window.AvinyaModals.setDonationAmount(5000)">₹5,000</button>
+        <button class="amount-btn" data-amount="10000" onclick="window.AvinyaModals.setDonationAmount(10000)">₹10,000</button>
       </div>
 
-      <div style="margin-bottom: 1.5rem;">
-        <input type="number" id="custom-amount-input" placeholder="Or enter custom amount ($)" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); font-size: 1rem;" oninput="window.AvinyaModals.setCustomAmount(this.value)">
+      <div style="margin-bottom: 1.25rem;">
+        <input type="number" id="custom-amount-input" placeholder="Or enter custom amount in Rupees (₹)" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); font-size: 1rem;" oninput="window.AvinyaModals.setCustomAmount(this.value)">
+      </div>
+
+      <!-- Payment Method Badges (UPI, Net Banking, Cards) -->
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+        <span class="payment-pill">✓ UPI / GPay / PhonePe / Paytm</span>
+        <span class="payment-pill">✓ Net Banking</span>
+        <span class="payment-pill">✓ RuPay / Visa / Mastercard</span>
       </div>
 
       <div id="impact-calculator-text" class="impact-calculator-box">
@@ -556,10 +572,14 @@
           <input type="text" placeholder="First Name" required style="padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
           <input type="text" placeholder="Last Name" required style="padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
         </div>
-        <input type="email" placeholder="Email Address" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); margin-bottom: 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+          <input type="email" placeholder="Email (for 80G Receipt)" required style="padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
+          <input type="tel" placeholder="Mobile / WhatsApp Number (+91)" required style="padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
+        </div>
+        <input type="text" placeholder="PAN Card Number (Required for 80G Tax Receipt)" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); margin-bottom: 1.5rem; text-transform: uppercase;">
         
         <button id="donate-submit-btn" type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
-          Donate $100/month
+          Donate ₹1,000/month via UPI / NetBanking
         </button>
       </form>
     </div>
