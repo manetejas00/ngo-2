@@ -39,7 +39,7 @@ class HeroCanvasEngine {
   }
 
   preloadFrames() {
-    const frameFolder = 'ezgif-1e5c8a18d4eef6df-jpg';
+    const frameFolder = 'hero-sequence';
 
     // Phase 1: Rapid Keyframes (Every 5th frame for instant readiness)
     for (let i = 1; i <= this.frameCount; i += 5) {
