@@ -2,7 +2,10 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # Route /api/news, /api/news/refresh, and /api/news/generate to physical endpoints if Node proxy is inactive
+  # Route /api/submit-form to submit-form.php on Apache/PHP hosts
+  RewriteRule ^api/submit-form/?$ api/submit-form.php [L,NC]
+
+  # Route /api/news endpoints
   RewriteRule ^api/news/?$ api/news.json [L,NC]
   RewriteRule ^api/news/refresh/?$ api/news.json [L,NC]
   RewriteRule ^api/news/generate/?$ api/news_generate.json [L,NC]
@@ -11,4 +14,6 @@
 # Enable CORS Headers
 <IfModule mod_headers.c>
   Header set Access-Control-Allow-Origin "*"
+  Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+  Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
 </IfModule>
