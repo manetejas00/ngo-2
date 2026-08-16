@@ -23,19 +23,22 @@ const LOG_FILE = join(LOG_DIR, 'email_logs.json');
  */
 export async function sendFormEmails(userEmailPayload, adminEmailPayload, metadata) {
   const messageId = `MSG-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-  const senderEmail = process.env.SMTP_FROM || 'care@avinyacare.org';
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@avinyacare.org';
+  const senderEmail = process.env.SMTP_FROM || process.env.MAIL_FROM_ADDRESS || 'info@test.avinyacarefoundation.org';
+  const senderName = process.env.MAIL_FROM_NAME || 'Avinya Care Foundation';
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.MAIL_FROM_ADDRESS || 'info@test.avinyacarefoundation.org';
   const recipientUser = metadata.userEmail;
 
   let deliveryStatus = 'SENT';
   let deliveryMethod = 'VIRTUAL_MAILER';
 
-  // Send emails via SMTP if SMTP_HOST is configured (or MailHog at 127.0.0.1:1025)
-  const smtpHost = process.env.SMTP_HOST || '127.0.0.1';
-  const smtpPort = parseInt(process.env.SMTP_PORT || '1025', 10);
+  // Support both SMTP_* and MAIL_* environment variable schemas (Hostinger / Laravel / Node.js)
+  const smtpHost = process.env.SMTP_HOST || process.env.MAIL_HOST || '127.0.0.1';
+  const smtpPort = parseInt(process.env.SMTP_PORT || process.env.MAIL_PORT || '1025', 10);
+  const smtpUser = process.env.SMTP_USER || process.env.MAIL_USERNAME;
+  const smtpPass = process.env.SMTP_PASS || process.env.MAIL_PASSWORD;
+  const smtpSecure = process.env.SMTP_SECURE === 'true' || process.env.MAIL_ENCRYPTION === 'ssl' || smtpPort === 465;
 
   try {
-    // 1. Try nodemailer if installed
     let nodemailer = null;
     try { nodemailer = await import('nodemailer'); } catch (e) {}
 
@@ -43,14 +46,14 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
       const transporter = nodemailer.createTransport({
         host: smtpHost,
         port: smtpPort,
-        secure: process.env.SMTP_SECURE === 'true',
+        secure: smtpSecure,
         ignoreTLS: smtpHost === '127.0.0.1' || smtpHost === 'localhost',
-        auth: (process.env.SMTP_USER && process.env.SMTP_PASS) ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined
+        auth: (smtpUser && smtpPass) ? { user: smtpUser, pass: smtpPass } : undefined
       });
 
       if (recipientUser) {
         await transporter.sendMail({
-          from: `"Avinya Care Foundation" <${senderEmail}>`,
+          from: `"${senderName}" <${senderEmail}>`,
           to: recipientUser,
           subject: userEmailPayload.subject,
           text: userEmailPayload.text,
@@ -60,7 +63,7 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
       }
 
       await transporter.sendMail({
-        from: `"Avinya Care System" <${senderEmail}>`,
+        from: `"Avinya Care Operations" <${senderEmail}>`,
         to: adminEmail,
         subject: adminEmailPayload.subject,
         text: adminEmailPayload.text,
