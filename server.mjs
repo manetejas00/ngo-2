@@ -12,6 +12,7 @@ import https from 'node:https';
 import { generateFormEmails } from './services/ai/emailGenerator.mjs';
 import { renderUserEmail, renderAdminEmail } from './services/email/emailTemplate.mjs';
 import { sendFormEmails } from './services/email/emailService.mjs';
+import { startMailHogServer } from './services/email/mailhogServer.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -714,6 +715,11 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', async () => {
   console.log(`Avinya Care Node.js server running on http://0.0.0.0:${PORT}`);
+  try {
+    await startMailHogServer();
+  } catch (err) {
+    console.warn('[MailHog Startup Warning]', err.message);
+  }
 });

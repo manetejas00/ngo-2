@@ -30,22 +30,24 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
   let deliveryStatus = 'SENT';
   let deliveryMethod = 'VIRTUAL_MAILER';
 
-  // Check if real SMTP credentials exist in environment
-  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    try {
-      // Dynamic import to avoid crash if nodemailer is not installed
-      const nodemailer = await import('nodemailer');
+  // Send emails via SMTP if SMTP_HOST is configured (or MailHog at 127.0.0.1:1025)
+  const smtpHost = process.env.SMTP_HOST || '127.0.0.1';
+  const smtpPort = parseInt(process.env.SMTP_PORT || '1025', 10);
+
+  try {
+    // 1. Try nodemailer if installed
+    let nodemailer = null;
+    try { nodemailer = await import('nodemailer'); } catch (e) {}
+
+    if (nodemailer && nodemailer.createTransport) {
       const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587', 10),
+        host: smtpHost,
+        port: smtpPort,
         secure: process.env.SMTP_SECURE === 'true',
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS
-        }
+        ignoreTLS: smtpHost === '127.0.0.1' || smtpHost === 'localhost',
+        auth: (process.env.SMTP_USER && process.env.SMTP_PASS) ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined
       });
 
-      // Send User Email
       if (recipientUser) {
         await transporter.sendMail({
           from: `"Avinya Care Foundation" <${senderEmail}>`,
@@ -57,7 +59,6 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
         });
       }
 
-      // Send Admin Email
       await transporter.sendMail({
         from: `"Avinya Care System" <${senderEmail}>`,
         to: adminEmail,
@@ -67,11 +68,19 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
         replyTo: recipientUser || senderEmail
       });
 
-      deliveryMethod = 'SMTP_TRANSPORT';
-    } catch (err) {
-      console.warn('[Email Dispatch Warning] SMTP sending failed, falling back to virtual logger:', err.message);
-      deliveryStatus = 'SENT_VIA_VIRTUAL_FALLBACK';
+      deliveryMethod = 'SMTP_NODEMAILER';
+    } else {
+      // 2. Native socket SMTP transport for MailHog (Zero-dependency guarantee)
+      const { sendSmtpSocket } = await import('./smtpClient.mjs');
+      if (recipientUser) {
+        await sendSmtpSocket(smtpHost, smtpPort, senderEmail, recipientUser, userEmailPayload.subject, userEmailPayload.html || userEmailPayload.text);
+      }
+      await sendSmtpSocket(smtpHost, smtpPort, senderEmail, adminEmail, adminEmailPayload.subject, adminEmailPayload.html || adminEmailPayload.text);
+      deliveryMethod = 'MAILHOG_SMTP_SOCKET';
     }
+  } catch (err) {
+    console.warn('[Email Dispatch Warning] SMTP sending failed, using virtual logger:', err.message);
+    deliveryStatus = 'SENT_VIA_VIRTUAL_FALLBACK';
   }
 
   // Create safe log record (NO passwords, secrets, card info, or raw sensitive medical data)
