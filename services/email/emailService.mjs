@@ -74,8 +74,10 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
       console.log(`[SMTP Sent] Admin alert email sent to ${adminEmail} | Response: ${adminRes.response}`);
 
       deliveryMethod = 'SMTP_NODEMAILER';
+    } else if (smtpHost !== '127.0.0.1' && smtpHost !== 'localhost') {
+      throw new Error('Nodemailer transport is required for production SMTP delivery.');
     } else {
-      // 2. Native socket SMTP transport for MailHog (Zero-dependency guarantee)
+      // Native socket SMTP transport for local MailHog testing
       const { sendSmtpSocket } = await import('./smtpClient.mjs');
       if (recipientUser) {
         await sendSmtpSocket(smtpHost, smtpPort, senderEmail, recipientUser, userEmailPayload.subject, userEmailPayload.html || userEmailPayload.text);
@@ -84,8 +86,8 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
       deliveryMethod = 'MAILHOG_SMTP_SOCKET';
     }
   } catch (err) {
-    console.warn('[Email Dispatch Warning] SMTP sending failed, using virtual logger:', err.message);
-    deliveryStatus = 'SENT_VIA_VIRTUAL_FALLBACK';
+    console.error('[Production SMTP Error]', err.message);
+    throw err;
   }
 
   // Create safe log record (NO passwords, secrets, card info, or raw sensitive medical data)

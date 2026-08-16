@@ -100,28 +100,9 @@ class ModalManager {
         })
       });
 
-      let resData;
-      try {
-        const rawText = await response.text();
-        resData = JSON.parse(rawText);
-      } catch (jsonErr) {
-        // Fallback for static Apache / PHP hosting if non-JSON HTML is returned
-        resData = {
-          status: 'ok',
-          submissionId: 'SUB-' + Date.now().toString(36).toUpperCase(),
-          formType: formType,
-          isAIGenerated: false,
-          userEmail: {
-            subject: 'Thank You for Reaching Out — Avinya Care Foundation',
-            greeting: `Hello ${payload.name || 'Friend'},`,
-            body: 'Thank you for getting in touch with Avinya Care Foundation. We have received your submission and our team will follow up with you shortly.',
-            closing: 'Best regards,\nAvinya Care Foundation Team'
-          },
-          message: `Thank you, ${payload.name || 'Friend'}. Your submission has been received and confirmed.`
-        };
-      }
+      const resData = await response.json();
 
-      if (resData && (resData.status === 'ok' || response.ok)) {
+      if (response.ok && resData.status === 'ok') {
         const userEmail = resData.userEmail || {};
         const isAI = resData.isAIGenerated;
 

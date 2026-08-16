@@ -1,8 +1,7 @@
 <?php
 /**
- * Avinya Care Foundation - PHP Form Submission API Handler
- * Handles form submissions on Hostinger Apache / LiteSpeed hosting environments
- * when Node.js server proxy is inactive or running in static mode.
+ * Avinya Care Foundation - Production PHP Form Submission API Handler
+ * Executes real Hostinger email delivery for website form submissions.
  */
 
 header('Content-Type: application/json; charset=UTF-8');
@@ -24,33 +23,48 @@ $email = isset($data['email']) ? filter_var(trim($data['email']), FILTER_SANITIZ
 $submissionId = 'SUB-' . time() . '-' . strtoupper(substr(md5(uniqid()), 0, 5));
 $timestampIST = date('d F Y, g:i A \I\S\T');
 
-// Send notification email via PHP mail if email provided
-if (!empty($email)) {
-    $to = "info@test.avinyacarefoundation.org";
-    $subject = "[Avinya Care] New {$formType} Submission - {$name}";
-    $message = "AVINYA CARE OPERATIONAL ALERT\n\nForm Type: {$formType}\nSubmission ID: {$submissionId}\nSubmitted At: {$timestampIST}\nName: {$name}\nEmail: {$email}\n";
-    $headers = "From: info@test.avinyacarefoundation.org\r\nReply-To: {$email}\r\nX-Mailer: PHP/" . phpversion();
-    @mail($to, $subject, $message, $headers);
-    
-    // User confirmation email
-    $userSubject = "Thank You for Reaching Out - Avinya Care Foundation";
-    $userMessage = "Hello {$name},\n\nThank you for getting in touch with Avinya Care Foundation. We have received your submission and our team will follow up with you shortly.\n\nWith care,\nAvinya Care Foundation Team";
-    $userHeaders = "From: info@test.avinyacarefoundation.org\r\nX-Mailer: PHP/" . phpversion();
-    @mail($email, $userSubject, $userMessage, $userHeaders);
+if (empty($email)) {
+    http_response_code(400);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Please provide a valid email address.'
+    ]);
+    exit(0);
 }
 
-echo json_encode([
-    'status' => 'ok',
-    'submissionId' => $submissionId,
-    'formType' => $formType,
-    'isAIGenerated' => false,
-    'timestampIST' => $timestampIST,
-    'userEmail' => [
-        'subject' => "Thank You for Reaching Out — Avinya Care Foundation",
-        'greeting' => "Hello {$name},",
-        'body' => "Thank you for getting in touch with Avinya Care Foundation. We have safely received your submission and our team will follow up with you shortly.",
-        'closing' => "Best regards,\nAvinya Care Foundation Team"
-    ],
-    'message' => "Thank you, {$name}. Your submission has been received and confirmed via email."
-]);
+// 1. Dispatch Operational Alert to Admin
+$adminTo = "info@test.avinyacarefoundation.org";
+$adminSubject = "[Avinya Care] New {$formType} Submission - {$name}";
+$adminMessage = "AVINYA CARE OPERATIONAL ALERT\n\nForm Type: {$formType}\nSubmission ID: {$submissionId}\nSubmitted At: {$timestampIST}\nName: {$name}\nEmail: {$email}\n";
+$adminHeaders = "From: info@test.avinyacarefoundation.org\r\nReply-To: {$email}\r\nX-Mailer: PHP/" . phpversion();
+$adminSent = mail($adminTo, $adminSubject, $adminMessage, $adminHeaders);
+
+// 2. Dispatch User Confirmation Email
+$userSubject = "Thank You for Reaching Out - Avinya Care Foundation";
+$userMessage = "Hello {$name},\n\nThank you for getting in touch with Avinya Care Foundation. We have received your submission regarding \"{$formType}\" and our team will follow up with you shortly.\n\nWith care,\nAvinya Care Foundation Team";
+$userHeaders = "From: info@test.avinyacarefoundation.org\r\nReply-To: info@test.avinyacarefoundation.org\r\nX-Mailer: PHP/" . phpversion();
+$userSent = mail($email, $userSubject, $userMessage, $userHeaders);
+
+if ($adminSent || $userSent) {
+    echo json_encode([
+        'status' => 'ok',
+        'submissionId' => $submissionId,
+        'formType' => $formType,
+        'isAIGenerated' => false,
+        'timestampIST' => $timestampIST,
+        'userEmail' => [
+            'subject' => $userSubject,
+            'greeting' => "Hello {$name},",
+            'body' => "Thank you for getting in touch with Avinya Care Foundation. We have received your submission and sent a confirmation to your email.",
+            'closing' => "Best regards,\nAvinya Care Foundation Team"
+        ],
+        'message' => "Thank you, {$name}. Your submission has been received and confirmed via email."
+    ]);
+} else {
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Failed to dispatch emails via server mailer. Please try again.'
+    ]);
+}
 ?>
