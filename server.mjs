@@ -9,6 +9,9 @@ import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
 import { join, extname, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import https from 'node:https';
+import { generateFormEmails } from './services/ai/emailGenerator.mjs';
+import { renderUserEmail, renderAdminEmail } from './services/email/emailTemplate.mjs';
+import { sendFormEmails } from './services/email/emailService.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -300,10 +303,12 @@ const FALLBACK_CANCER_NEWS = [
 
 function fetchExternalNews() {
   return new Promise((resolve) => {
-    const apiKey = process.env.NEWS_API_KEY;
+    const rawNewsKey = process.env.NEWS_API_KEY;
+    const apiKey = (rawNewsKey && !rawNewsKey.startsWith('YOUR_') && rawNewsKey.trim().length > 10) ? rawNewsKey.trim() : null;
+    // Public APIs Repository Endpoint (Zero auth open access for India & Global Health News)
     const targetUrl = apiKey
-      ? `https://newsapi.org/v2/top-headlines?category=health&country=us&apiKey=${apiKey}`
-      : 'https://saurav.tech/NewsAPI/top-headlines/category/health/us.json';
+      ? `https://newsapi.org/v2/top-headlines?category=health&country=in&apiKey=${apiKey}`
+      : 'https://saurav.tech/NewsAPI/top-headlines/category/health/in.json';
 
     const req = https.get(targetUrl, { timeout: 4000 }, (res) => {
       let data = '';
@@ -383,11 +388,167 @@ async function refreshNewsCache(force = false) {
   };
 }
 
+const SUBMISSIONS_FILE = join(CACHE_DIR, 'submissions.json');
+
+async function saveSubmission(submissionRecord) {
+  try {
+    await mkdir(CACHE_DIR, { recursive: true });
+    let submissions = [];
+    try {
+      const raw = await readFile(SUBMISSIONS_FILE, 'utf-8');
+      submissions = JSON.parse(raw);
+      if (!Array.isArray(submissions)) submissions = [];
+    } catch (e) {
+      submissions = [];
+    }
+    submissions.unshift(submissionRecord);
+    if (submissions.length > 500) submissions = submissions.slice(0, 500);
+    await writeFile(SUBMISSIONS_FILE, JSON.stringify(submissions, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('[Submissions Save Warning]', err.message);
+  }
+}
+
+function getFormattedISTTimestamp() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
+  return `${dateStr}, ${timeStr} IST`;
+}
+
 // Initialize persistent cache from disk
 await initPersistentCache();
 
 const server = createServer(async (req, res) => {
   const urlPath = req.url.split('?')[0];
+
+  // Handle CORS OPTIONS preflight
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    });
+    res.end();
+    return;
+  }
+
+  // API Endpoint: /api/submit-form (Processes all form submissions with server-side AI email generation)
+  if (urlPath === '/api/submit-form' && req.method === 'POST') {
+    try {
+      let bodyStr = '';
+      req.on('data', chunk => { bodyStr += chunk; });
+      await new Promise((resolve, reject) => {
+        req.on('end', resolve);
+        req.on('error', reject);
+      });
+
+      let payload = {};
+      try {
+        payload = JSON.parse(bodyStr);
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        res.end(JSON.stringify({ status: 'error', message: 'Invalid JSON payload' }));
+        return;
+      }
+
+      const formType = (payload.form_type || payload.formType || 'contact').toLowerCase();
+      const email = (payload.email || '').trim();
+      const name = (payload.name || payload.fullName || `${payload.firstName || ''} ${payload.lastName || ''}`).trim() || 'Valued Supporter';
+
+      // Server-Side Validation per Form Type
+      if (!email || !email.includes('@')) {
+        res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        res.end(JSON.stringify({ status: 'error', message: 'A valid email address is required' }));
+        return;
+      }
+
+      if (formType === 'partnership' && !payload.organization && !payload.company) {
+        res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        res.end(JSON.stringify({ status: 'error', message: 'Organization name is required for partnership inquiries' }));
+        return;
+      }
+
+      if ((formType === 'feedback' || formType === 'contact') && !payload.message && !payload.feedback) {
+        res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        res.end(JSON.stringify({ status: 'error', message: 'Message content is required' }));
+        return;
+      }
+
+      const submissionId = `SUB-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+      const timestampIST = getFormattedISTTimestamp();
+
+      const formData = {
+        ...payload,
+        name,
+        email,
+        form_type: formType
+      };
+
+      // Save submission record
+      await saveSubmission({
+        submissionId,
+        formType,
+        name,
+        email,
+        phone: payload.phone || payload.mobile || '',
+        organization: payload.organization || payload.company || '',
+        interest: payload.interest || payload.category || payload.subject || '',
+        message: payload.message || payload.feedback || '',
+        amount: payload.amount || null,
+        paymentStatus: payload.payment_status || 'SUCCESS',
+        isSensitive: payload.is_sensitive || false,
+        timestampIST
+      });
+
+      // AI Email Generation (Server-Side)
+      const generatedEmails = await generateFormEmails(formData, formType, submissionId, timestampIST);
+
+      // Render Templates
+      const userEmailPayload = renderUserEmail(generatedEmails.user, formData, formType);
+      const adminEmailPayload = renderAdminEmail(generatedEmails.admin, formData, formType, submissionId, timestampIST);
+
+      // Send Emails
+      await sendFormEmails(userEmailPayload, adminEmailPayload, {
+        submissionId,
+        formType,
+        userEmail: email,
+        isAIGenerated: generatedEmails.isAIGenerated,
+        timestampIST
+      });
+
+      res.writeHead(200, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Access-Control-Allow-Origin': '*'
+      });
+      res.end(JSON.stringify({
+        status: 'ok',
+        submissionId,
+        formType,
+        isAIGenerated: generatedEmails.isAIGenerated,
+        timestampIST,
+        userEmail: {
+          subject: userEmailPayload.subject,
+          greeting: generatedEmails.user.greeting,
+          body: generatedEmails.user.body,
+          closing: generatedEmails.user.closing
+        },
+        adminEmail: {
+          subject: adminEmailPayload.subject,
+          summary: generatedEmails.admin.summary,
+          recommendedAction: generatedEmails.admin.recommendedAction
+        },
+        message: `Thank you, ${name}. Your ${formType} submission has been received and confirmed via email.`
+      }));
+      return;
+
+    } catch (err) {
+      console.error('[Form Submission Endpoint Error]', err);
+      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({ status: 'error', message: 'Internal server error processing form submission' }));
+      return;
+    }
+  }
 
   // API Endpoint: /api/news (Serves cached or fresh news)
   if (urlPath === '/api/news') {

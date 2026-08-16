@@ -2,9 +2,15 @@
 node_modules/
 npm-debug.log*
 
-# Server runtime cache
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Server runtime cache & logs
 cache/
+*.log
 
 # System / OS
 .DS_Store
-*.log
+

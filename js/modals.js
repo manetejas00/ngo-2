@@ -1,6 +1,7 @@
 /**
- * Avinya Care Foundation - Interactive Modals & Drawers Manager (India-First)
- * Manages Donation (₹ INR / UPI / Net Banking), Volunteer, Guide, and Story Reader modal layers above all views (z-index: 3000).
+ * Avinya Care Foundation - Interactive Modals & AI Form Manager
+ * Manages Donation, Volunteer, Patient Support, Contact, Partnership, Newsletter, and Feedback forms.
+ * All submissions communicate server-side with /api/submit-form for AI email generation.
  */
 
 class ModalManager {
@@ -8,18 +9,24 @@ class ModalManager {
     this.activeModal = null;
     this.selectedAmount = 1000;
     this.isMonthly = true;
-    this.donateFormHTML = null;
-    this.volunteerFormHTML = null;
+    
+    // Store original modal HTML templates for reliable re-opening
+    this.templates = {};
     this.init();
   }
 
   init() {
-    // Store initial form HTML templates for reliable re-opening
-    const donateContainer = document.querySelector('#donate-modal .modal-container');
-    if (donateContainer) this.donateFormHTML = donateContainer.innerHTML;
+    const modalIds = [
+      'donate-modal', 'volunteer-modal', 'support-modal',
+      'contact-modal', 'partnership-modal', 'newsletter-modal', 'feedback-modal'
+    ];
 
-    const volunteerContainer = document.querySelector('#volunteer-modal .modal-container');
-    if (volunteerContainer) this.volunteerFormHTML = volunteerContainer.innerHTML;
+    modalIds.forEach(id => {
+      const container = document.querySelector(`#${id} .modal-container`);
+      if (container) {
+        this.templates[id] = container.innerHTML;
+      }
+    });
 
     // Backdrop click listener
     document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
@@ -41,6 +48,12 @@ class ModalManager {
   openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
+      // Restore template if container exists
+      const container = modal.querySelector('.modal-container');
+      if (container && this.templates[modalId]) {
+        container.innerHTML = this.templates[modalId];
+      }
+
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
       this.activeModal = modal;
@@ -52,7 +65,6 @@ class ModalManager {
       modal.classList.remove('active');
     });
 
-    // Only restore body overflow if full-screen news view is NOT active
     const newsModal = document.getElementById('news-detail-modal');
     if (!newsModal || !newsModal.classList.contains('active')) {
       document.body.style.overflow = '';
@@ -61,15 +73,86 @@ class ModalManager {
     this.activeModal = null;
   }
 
-  // --- DONATION MODAL LOGIC (₹ INR / UPI / 80G Tax Exemption) ---
-  openDonateModal(defaultAmount = 1000) {
-    const donateContainer = document.querySelector('#donate-modal .modal-container');
-    if (donateContainer && this.donateFormHTML) {
-      donateContainer.innerHTML = this.donateFormHTML;
-    }
+  // Helper method: Send form payload to Node server AI endpoint
+  async submitFormToAPI(formType, payload, containerSelector, title) {
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
 
-    this.selectedAmount = defaultAmount;
+    // Loading State with AI Generation indicator
+    container.innerHTML = `
+      <div style="text-align: center; padding: 3rem 1.5rem;">
+        <div style="width: 56px; height: 56px; border: 4px solid rgba(8, 127, 115, 0.2); border-top-color: #087F73; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1.5rem;"></div>
+        <h3 style="font-size: 1.5rem; color: #111817; margin-bottom: 0.5rem;">Avinya Care AI Email Engine</h3>
+        <p style="color: var(--text-dark-muted); font-size: 0.95rem; line-height: 1.5;">
+          Generating personalized confirmation & notifying our operations desk...
+        </p>
+        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+      </div>
+    `;
+
+    try {
+      const response = await fetch('/api/submit-form', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          form_type: formType,
+          ...payload
+        })
+      });
+
+      const resData = await response.json();
+
+      if (response.ok && resData.status === 'ok') {
+        const userEmail = resData.userEmail || {};
+        const isAI = resData.isAIGenerated;
+
+        container.innerHTML = `
+          <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+          <div style="text-align: center; padding: 2rem 1rem;">
+            <div style="width: 68px; height: 68px; background: rgba(98, 181, 159, 0.2); border-radius: 50%; color: #087F73; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 1.25rem;">✓</div>
+            <span class="category-tag" style="margin-bottom: 0.5rem; display: inline-block;">${isAI ? '✨ Dynamic AI Email Generated' : '✓ Submission Confirmed'}</span>
+            <h2 style="font-size: 1.8rem; margin-bottom: 1rem; color: #111817;">${title || 'Dhanyawad!'}</h2>
+            <p style="color: var(--text-dark-muted); font-size: 1.05rem; margin-bottom: 1.5rem; line-height: 1.6;">
+              ${userEmail.greeting ? `<strong>${userEmail.greeting}</strong><br>` : ''}
+              ${resData.message || 'We have received your submission and sent a confirmation email to your address.'}
+            </p>
+
+            <div style="background: var(--bg-light); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; text-align: left; font-size: 0.9rem; border: 1px solid var(--border-light);">
+              <div style="font-weight: 700; color: #087F73; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                <span>📧 Confirmation Sent to: ${payload.email}</span>
+                <span style="font-size: 0.75rem; background: #087F73; color: white; padding: 2px 8px; border-radius: 10px;">${resData.submissionId}</span>
+              </div>
+              <div style="font-weight: 600; color: #111817; margin-bottom: 4px;">Subject: ${userEmail.subject || 'Submission Confirmation'}</div>
+              <div style="color: var(--text-dark-muted); line-height: 1.5; font-size: 0.85rem; font-style: italic;">
+                "${userEmail.body ? userEmail.body.slice(0, 180) + '...' : 'A personalized email response has been generated.'}"
+              </div>
+            </div>
+
+            <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="width: 100%; justify-content: center;">
+              Return to Website
+            </button>
+          </div>
+        `;
+      } else {
+        throw new Error(resData.message || 'Server response error');
+      }
+    } catch (err) {
+      container.innerHTML = `
+        <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+        <div style="text-align: center; padding: 2rem 1rem;">
+          <div style="width: 64px; height: 64px; background: #FEE2E2; border-radius: 50%; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1rem;">!</div>
+          <h3 style="font-size: 1.5rem; margin-bottom: 0.75rem;">Submission Failed</h3>
+          <p style="color: var(--text-dark-muted); margin-bottom: 1.5rem;">${err.message || 'Could not submit form. Please try again.'}</p>
+          <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="width: 100%; justify-content: center;">Close</button>
+        </div>
+      `;
+    }
+  }
+
+  // --- DONATION MODAL ---
+  openDonateModal(defaultAmount = 1000) {
     this.openModal('donate-modal');
+    this.selectedAmount = defaultAmount;
     this.updateDonateUI();
   }
 
@@ -129,24 +212,136 @@ class ModalManager {
 
   handleDonationSubmit(e) {
     e.preventDefault();
-    const modalContent = document.querySelector('#donate-modal .modal-container');
-    if (modalContent) {
-      const formattedVal = this.formatINR(this.selectedAmount);
-      modalContent.innerHTML = `
-        <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-        <div style="text-align: center; padding: 2rem 1rem;">
-          <div style="width: 72px; height: 72px; background: rgba(98, 181, 159, 0.2); border-radius: 50%; color: #087F73; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1.5rem;">✓</div>
-          <h2 style="font-size: 2rem; margin-bottom: 1rem;">Dhanyawad for Your Compassion!</h2>
-          <p style="color: var(--text-dark-muted); font-size: 1.05rem; margin-bottom: 1.5rem; line-height: 1.6;">
-            Your contribution of <strong>₹${formattedVal}${this.isMonthly ? '/month' : ''}</strong> directly brings healthcare dignity, early screening, and hope to cancer patients and families across India.
-          </p>
-          <div style="background: var(--bg-light); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-dark);">
-            <strong>80G Tax Certificate:</strong> An official tax exemption receipt with Registration No. AAETA80G1234 has been emailed to your address.
-          </div>
-          <button class="btn-primary" onclick="window.AvinyaModals.closeAll()">Return to Website</button>
-        </div>
-      `;
+    const form = e.target;
+    const firstName = form.querySelector('[name="firstName"]')?.value || form.querySelectorAll('input')[0]?.value || '';
+    const lastName = form.querySelector('[name="lastName"]')?.value || form.querySelectorAll('input')[1]?.value || '';
+    const email = form.querySelector('[name="email"]')?.value || form.querySelectorAll('input')[2]?.value || '';
+    const phone = form.querySelector('[name="phone"]')?.value || form.querySelectorAll('input')[3]?.value || '';
+    const pan = form.querySelector('[name="pan"]')?.value || form.querySelectorAll('input')[4]?.value || '';
+
+    const payload = {
+      name: `${firstName} ${lastName}`.trim(),
+      email,
+      phone,
+      pan,
+      amount: this.selectedAmount,
+      frequency: this.isMonthly ? 'monthly' : 'one-time',
+      payment_status: 'SUCCESS', // Backend supplied payment status
+      transaction_id: `TXN-${Date.now().toString().slice(-8)}`
+    };
+
+    this.submitFormToAPI('donation', payload, '#donate-modal .modal-container', 'Dhanyawad for Your Compassion!');
+  }
+
+  // --- VOLUNTEER MODAL ---
+  openVolunteerModal() {
+    this.openModal('volunteer-modal');
+  }
+
+  handleVolunteerSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.querySelector('[name="name"]')?.value || form.querySelectorAll('input')[0]?.value || '';
+    const email = form.querySelector('[name="email"]')?.value || form.querySelectorAll('input')[1]?.value || '';
+    const phone = form.querySelector('[name="phone"]')?.value || '';
+    const interest = form.querySelector('select')?.value || 'Community Awareness';
+    const message = form.querySelector('textarea')?.value || '';
+
+    const payload = { name, email, phone, interest, message };
+    this.submitFormToAPI('volunteer', payload, '#volunteer-modal .modal-container', 'Welcome to the Avinya Community!');
+  }
+
+  // --- PATIENT SUPPORT MODAL ---
+  openSupportModal() {
+    this.openModal('support-modal');
+  }
+
+  handleSupportSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.querySelector('[name="name"]')?.value || '';
+    const email = form.querySelector('[name="email"]')?.value || '';
+    const phone = form.querySelector('[name="phone"]')?.value || '';
+    const interest = form.querySelector('[name="category"]')?.value || 'Patient Care Navigation';
+    const message = form.querySelector('[name="message"]')?.value || '';
+    const is_sensitive = form.querySelector('[name="is_sensitive"]')?.checked || true;
+
+    const payload = { name, email, phone, interest, message, is_sensitive };
+    this.submitFormToAPI('support', payload, '#support-modal .modal-container', 'We Are Here for You');
+  }
+
+  // --- CONTACT US MODAL ---
+  openContactModal(subjectHint = '') {
+    this.openModal('contact-modal');
+    if (subjectHint) {
+      const select = document.querySelector('#contact-modal select[name="subject"]');
+      if (select) select.value = subjectHint;
     }
+  }
+
+  handleContactSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.querySelector('[name="name"]')?.value || '';
+    const email = form.querySelector('[name="email"]')?.value || '';
+    const phone = form.querySelector('[name="phone"]')?.value || '';
+    const interest = form.querySelector('[name="subject"]')?.value || 'General Inquiry';
+    const message = form.querySelector('[name="message"]')?.value || '';
+
+    const payload = { name, email, phone, interest, message };
+    this.submitFormToAPI('contact', payload, '#contact-modal .modal-container', 'Message Received!');
+  }
+
+  // --- CSR & PARTNERSHIP MODAL ---
+  openPartnershipModal() {
+    this.openModal('partnership-modal');
+  }
+
+  handlePartnershipSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.querySelector('[name="name"]')?.value || '';
+    const email = form.querySelector('[name="email"]')?.value || '';
+    const organization = form.querySelector('[name="organization"]')?.value || '';
+    const phone = form.querySelector('[name="phone"]')?.value || '';
+    const interest = form.querySelector('[name="partnershipType"]')?.value || 'Corporate CSR Partnership';
+    const message = form.querySelector('[name="message"]')?.value || '';
+
+    const payload = { name, email, organization, phone, interest, message };
+    this.submitFormToAPI('partnership', payload, '#partnership-modal .modal-container', 'Partnership Proposal Received');
+  }
+
+  // --- NEWSLETTER MODAL ---
+  openNewsletterModal() {
+    this.openModal('newsletter-modal');
+  }
+
+  handleNewsletterSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.querySelector('[name="name"]')?.value || 'Supporter';
+    const email = form.querySelector('[name="email"]')?.value || '';
+    const interest = form.querySelector('[name="interest"]')?.value || 'Cancer Awareness Updates';
+
+    const payload = { name, email, interest };
+    this.submitFormToAPI('newsletter', payload, '#newsletter-modal .modal-container', 'Welcome to Our Health Newsletter!');
+  }
+
+  // --- FEEDBACK MODAL ---
+  openFeedbackModal() {
+    this.openModal('feedback-modal');
+  }
+
+  handleFeedbackSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.querySelector('[name="name"]')?.value || '';
+    const email = form.querySelector('[name="email"]')?.value || '';
+    const interest = form.querySelector('[name="category"]')?.value || 'Website & Diagnostic Camp Experience';
+    const message = form.querySelector('[name="message"]')?.value || '';
+
+    const payload = { name, email, interest, message };
+    this.submitFormToAPI('feedback', payload, '#feedback-modal .modal-container', 'Thank You for Your Feedback!');
   }
 
   // --- STORY READER MODAL ---
@@ -172,33 +367,6 @@ class ModalManager {
       `;
     }
     this.openModal('story-modal');
-  }
-
-  // --- VOLUNTEER MODAL ---
-  openVolunteerModal() {
-    const volunteerContainer = document.querySelector('#volunteer-modal .modal-container');
-    if (volunteerContainer && this.volunteerFormHTML) {
-      volunteerContainer.innerHTML = this.volunteerFormHTML;
-    }
-    this.openModal('volunteer-modal');
-  }
-
-  handleVolunteerSubmit(e) {
-    e.preventDefault();
-    const modalContainer = document.querySelector('#volunteer-modal .modal-container');
-    if (modalContainer) {
-      modalContainer.innerHTML = `
-        <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-        <div style="text-align: center; padding: 2rem 1rem;">
-          <div style="width: 72px; height: 72px; background: rgba(98, 181, 159, 0.2); border-radius: 50%; color: #087F73; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1.5rem;">✓</div>
-          <h2 style="font-size: 2rem; margin-bottom: 1rem;">Welcome to the Avinya Community!</h2>
-          <p style="color: var(--text-dark-muted); font-size: 1.1rem; margin-bottom: 2rem;">
-            Thank you for applying to volunteer. Our community coordinator in Mumbai/Pune will reach out to you via Phone/WhatsApp within 24 hours.
-          </p>
-          <button class="btn-primary" onclick="window.AvinyaModals.closeAll()">Close</button>
-        </div>
-      `;
-    }
   }
 
   // --- CANCER AWARENESS GUIDE MODAL ---
