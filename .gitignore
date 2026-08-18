@@ -7,6 +7,8 @@ cache/
 *.log
 
 # System / OS
-.DS_Store
+# Archives
+*.zip
+
 
 

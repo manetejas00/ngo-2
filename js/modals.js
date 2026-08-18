@@ -66,11 +66,26 @@ class ModalManager {
     });
 
     const newsModal = document.getElementById('news-detail-modal');
-    if (!newsModal || !newsModal.classList.contains('active')) {
-      document.body.style.overflow = '';
+    if (newsModal) {
+      newsModal.classList.remove('active');
+      newsModal.innerHTML = '';
     }
 
+    const mobileNav = document.getElementById('mobile-nav-overlay');
+    if (mobileNav) {
+      mobileNav.classList.remove('active');
+    }
+
+    document.body.style.overflow = '';
     this.activeModal = null;
+  }
+
+  closeAllModals() {
+    this.closeAll();
+  }
+
+  closeModal() {
+    this.closeAll();
   }
 
   // Helper method: Send form payload to Node server AI endpoint

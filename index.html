@@ -1058,21 +1058,22 @@
     </div>
   </section>
 
-  <!-- 13. FINAL CINEMATIC CTA (DEEP BLACK #0A0A0A) -->
+  <!-- 13. NESTJS-STYLE MINIMALIST PREMIUM FINALE CTA SECTION -->
   <section class="section-final-cta">
     <div class="cta-box">
+      <div class="eyebrow-pill" style="margin: 0 auto 1.25rem;">
+        <span class="dot"></span>
+        <span>AVINYA CARE FOUNDATION</span>
+      </div>
       <h2 class="display-title">No one should face cancer alone.</h2>
-      <div class="red-accent-line"></div>
-      <p class="body-large-dark" style="margin: 0.5rem auto 0; max-width: 650px; font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">
-        Together, we create hope.
-      </p>
+      <p class="cta-subtitle">Together, we create hope.</p>
 
       <div class="cta-actions">
-        <button class="btn-primary" style="padding: 1rem 2.6rem; font-size: 1.05rem;" onclick="window.AvinyaModals.openSupportModal()">
-          <span>Get Support →</span>
+        <button class="btn-primary" style="padding: 1.05rem 2.6rem; font-size: 1.05rem;" onclick="window.AvinyaModals.openSupportModal()">
+          <span>Get Patient Support →</span>
         </button>
-        <button class="btn-secondary btn-secondary-dark" style="padding: 1rem 2.6rem; font-size: 1.05rem;" onclick="window.AvinyaModals.openDonateModal(2500)">
-          <span>Donate →</span>
+        <button class="btn-secondary btn-secondary-dark" style="padding: 1.05rem 2.6rem; font-size: 1.05rem;" onclick="window.AvinyaModals.openDonateModal(2500)">
+          <span>Sponsor Care & Screening →</span>
         </button>
       </div>
     </div>
@@ -1151,7 +1152,7 @@
   <!-- 1. Donate Modal -->
   <div id="donate-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
       <div class="category-tag">MAKE A DIFFERENCE</div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Sponsor Care & Early Detection</h3>
       <p style="color: var(--muted); font-size: 0.95rem;">Choose an amount to support cancer awareness and screening drives across India.</p>
@@ -1193,7 +1194,7 @@
   <!-- 2. Story Reader Modal -->
   <div id="story-modal" class="modal-backdrop">
     <div class="modal-container" style="width: min(750px, 100%);">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
       <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
         <img id="modal-story-img" src="" alt="Story Cover" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover;">
         <div>
@@ -1209,7 +1210,7 @@
   <!-- 3. Volunteer Application Modal -->
   <div id="volunteer-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
       <div class="category-tag">JOIN OUR COMMUNITY</div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Volunteer Application</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Join our care navigation team or assist in community screening drives.</p>
@@ -1234,7 +1235,7 @@
   <!-- 4. Guide & Toolkit Modal -->
   <div id="guide-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
       <div class="category-tag">KNOWLEDGE RESOURCE</div>
       <h3 id="modal-guide-title" style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Cancer Awareness Toolkit</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Enter your email to receive our comprehensive cancer screening checklist & multi-lingual guide PDF.</p>
@@ -1250,7 +1251,7 @@
   <!-- 5. Confidential Support Modal -->
   <div id="support-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
       <div class="category-tag">CONFIDENTIAL HELPLINE</div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Request Patient Navigation Support</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Our care navigators provide free, confidential support for patients, caregivers, and families.</p>
@@ -1268,7 +1269,7 @@
   <!-- 6. General Contact Modal -->
   <div id="contact-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
       <div class="category-tag">GET IN TOUCH</div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Contact Avinya Care</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Send us a message and our team will get back to you within 24 hours.</p>
@@ -1286,7 +1287,7 @@
   <!-- 7. CSR Partnership Modal -->
   <div id="csr-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
       <div class="category-tag">CORPORATE PARTNERSHIP</div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">CSR & Corporate Collaboration</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Partner with Avinya Care Foundation for employee wellness drives, mobile screening vans, and community health initiatives.</p>
@@ -1304,7 +1305,7 @@
   <!-- 8. Newsletter Modal -->
   <div id="newsletter-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
       <div class="category-tag">HEALTH JOURNAL</div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Subscribe to Health Insights</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Receive monthly oncology updates, screening tips, and survivor stories delivered to your inbox.</p>
@@ -1320,7 +1321,7 @@
   <!-- 9. Feedback Modal -->
   <div id="feedback-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
       <div class="category-tag">YOUR FEEDBACK</div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Share Your Experience</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Help us improve our community programs and patient support services.</p>
@@ -1337,6 +1338,7 @@
   <script src="js/canvas-hero.js"></script>
   <script src="js/components/scroll-typography.js"></script>
   <script src="js/components/stacked-panels.js"></script>
+  <script src="js/components/champion-cta.js"></script>
   <script src="js/timeline.js"></script>
   <script src="js/counters.js"></script>
   <script src="js/modals.js"></script>

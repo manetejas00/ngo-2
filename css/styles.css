@@ -698,7 +698,7 @@ button {
     radial-gradient(circle at 50% 0%, rgba(98, 181, 159, 0.05) 0%, transparent 65%);
   color: #FFFFFF !important;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .nestjs-stack-header {
@@ -904,16 +904,29 @@ button {
 @media (max-width: 1024px) {
   .nestjs-stack-container {
     overflow-x: auto;
+    overflow-y: visible;
     justify-content: flex-start;
-    padding-bottom: 2rem;
+    padding-bottom: 3.5rem !important;
+    padding-top: 3.5rem !important;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
   }
 
   .nestjs-stack-card {
     flex: 0 0 260px;
-    margin-left: -16px;
+    margin-left: -14px;
     scroll-snap-align: center;
+    transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 450ms, border-color 450ms;
+  }
+
+  .nestjs-stack-card.active {
+    z-index: 40 !important;
+    transform: translateY(-16px) scale(1.03) !important;
+    background-color: #241A1E !important;
+    background: linear-gradient(165deg, #2D1E24 0%, #1A1216 100%) !important;
+    border-color: rgba(224, 35, 78, 0.9) !important;
+    box-shadow: 0 25px 70px rgba(224, 35, 78, 0.55), 0 0 35px rgba(224, 35, 78, 0.35) !important;
+    opacity: 1 !important;
   }
 
   .nestjs-stack-card .stack-card-desc,
@@ -1391,9 +1404,9 @@ button {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 3rem;
-  max-width: 1200px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.8rem;
+  max-width: 1240px;
   margin: 0 auto;
   position: relative;
   z-index: 2;
@@ -1401,33 +1414,41 @@ button {
 
 .stat-item {
   text-align: center;
-  padding: 2.2rem 1rem;
-  border-radius: 20px;
+  padding: 2.8rem 1.25rem 2.4rem;
+  border-radius: 24px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .stat-item:hover {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(224, 35, 78, 0.4);
   transform: translateY(-6px);
+  box-shadow: 0 20px 45px rgba(224, 35, 78, 0.25);
 }
 
 .stat-number {
-  font-size: clamp(3.5rem, 6vw, 5.5rem);
-  font-weight: 900;
+  font-size: clamp(2.2rem, 3.2vw, 3.5rem);
+  font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   color: var(--brand) !important;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.85rem;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .stat-label {
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 800;
   color: #FFFFFF;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
 }
 
 /* ==========================================================================
@@ -2004,11 +2025,11 @@ button {
 }
 
 /* ==========================================================================
-   13. FINAL CINEMATIC CTA (DEEP BLACK #0A0A0A)
+   13. NESTJS-STYLE MINIMALIST PREMIUM FINALE CTA SECTION
    ========================================================================== */
 .section-final-cta {
-  padding: 9.5rem 5%;
-  background-color: var(--black) !important;
+  padding: 8.5rem 2% 8rem;
+  background-color: #080A09 !important;
   color: #FFFFFF !important;
   text-align: center;
   position: relative;
@@ -2016,35 +2037,62 @@ button {
 }
 
 .cta-box {
-  max-width: 880px;
+  width: calc(100% - 48px);
+  max-width: 1060px;
   margin: 0 auto;
+  padding: 4.8rem 3.5rem 4.5rem;
+  border-radius: 36px;
+  background-color: #121614 !important;
+  background: linear-gradient(165deg, #18201C 0%, #0F1412 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.32) !important;
+  box-shadow: 0 -15px 50px rgba(0, 0, 0, 0.5), 0 30px 80px rgba(0, 0, 0, 0.7);
   position: relative;
-  z-index: 2;
-}
-
-.red-accent-line {
-  width: 80px;
-  height: 4px;
-  background: var(--brand);
-  margin: 1.8rem auto;
-  border-radius: 2px;
+  z-index: 5;
 }
 
 .display-title {
-  font-size: clamp(2.6rem, 5.8vw, 5rem);
-  font-weight: 900;
-  letter-spacing: -0.045em;
+  font-size: clamp(2.5rem, 5.2vw, 4.6rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
   line-height: 1.05;
-  color: #FFFFFF;
+  color: #FFFFFF !important;
+  margin-bottom: 1rem;
+}
+
+.cta-subtitle {
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+  font-weight: 600;
+  color: #62B59F !important;
+  margin-bottom: 2.8rem;
 }
 
 .cta-actions {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.25rem;
-  margin-top: 3rem;
+  gap: 1.4rem;
   flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .cta-box {
+    width: calc(100% - 24px);
+    padding: 3.2rem 1.6rem 2.8rem;
+    border-radius: 24px;
+  }
+  .display-title {
+    font-size: clamp(2rem, 8vw, 3.2rem);
+  }
+  .cta-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .cta-actions .btn-primary,
+  .cta-actions .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* ==========================================================================
@@ -2118,30 +2166,59 @@ button {
   color: var(--text-light-sub);
 }
 
-/* Floating WhatsApp Support Button */
+/* Floating WhatsApp Support Button — Icon Only Default, Expands on Hover, Collapses on Mouse Leave */
 .whatsapp-float-btn {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
   z-index: 990;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.8rem 1.4rem;
+  justify-content: flex-start;
+  height: 56px;
+  width: 56px;
+  padding: 0 16px;
   border-radius: 9999px;
   background: #25D366;
   color: #FFFFFF;
   font-weight: 700;
   font-size: 0.95rem;
-  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
-  transition: all var(--transition-fast);
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.45);
+  transition: width 400ms cubic-bezier(0.22, 1, 0.36, 1), padding 400ms cubic-bezier(0.22, 1, 0.36, 1), background 300ms, transform 300ms, box-shadow 300ms;
   text-decoration: none;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
+.whatsapp-float-btn svg {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.whatsapp-float-btn span {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 380ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms cubic-bezier(0.22, 1, 0.36, 1), margin-left 300ms;
+  margin-left: 0;
+  pointer-events: none;
+}
+
+/* Expands ON HOVER only — collapses back to 56px icon on mouseleave */
 .whatsapp-float-btn:hover {
+  width: 310px;
+  padding: 0 1.5rem 0 1.2rem;
   background: #20BA5A;
-  transform: translateY(-3px) scale(1.03);
-  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 14px 35px rgba(37, 211, 102, 0.6);
+}
+
+.whatsapp-float-btn:hover span {
+  max-width: 260px;
+  opacity: 1;
+  margin-left: 0.65rem;
 }
 
 /* ==========================================================================
@@ -2190,22 +2267,29 @@ button {
 
 .modal-close-btn {
   position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  width: 38px;
-  height: 38px;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--gray-100);
+  border: none;
   color: var(--gray-900);
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background var(--transition-fast);
+  cursor: pointer;
+  z-index: 25;
+  transition: all var(--transition-fast);
+  user-select: none;
 }
 
 .modal-close-btn:hover {
-  background: var(--gray-200);
+  background: var(--brand);
+  color: #FFFFFF;
+  transform: rotate(90deg) scale(1.08);
 }
 
 .donation-toggle {
@@ -2294,6 +2378,7 @@ textarea:focus {
 }
 
 /* Responsive Breakpoints */
+/* Responsive Breakpoints & Mobile Optimization */
 @media (max-width: 1024px) {
   .nav-links {
     display: none;
@@ -2305,21 +2390,127 @@ textarea:focus {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  .deep-dive-card,
-  .deep-dive-card.reverse {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    padding: 2.5rem;
-  }
-  .deep-dive-card.reverse .deep-dive-media-box {
-    order: initial;
-  }
   .news-featured-lead {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
   .footer-top {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Section 3: Scroll Typography Mobile */
+  .section-scroll-typography {
+    height: 420vh;
+  }
+  .typo-word {
+    font-size: clamp(2.1rem, 8.5vw, 4.2rem);
+    line-height: 1.05;
+  }
+  .typography-sentence {
+    row-gap: 0.4rem;
+    column-gap: 0.8rem;
+  }
+  .final-sub-caption {
+    font-size: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  /* Section 4: NestJS 7-Card Stack Mobile Touch Scroll */
+  .nestjs-stack-container {
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 2rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-inline: 1rem;
+  }
+  .nestjs-stack-card {
+    flex: 0 0 270px;
+    margin-left: -14px;
+    scroll-snap-align: center;
+  }
+  .nestjs-stack-card .stack-card-desc,
+  .nestjs-stack-card .stack-card-action {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Section 5: Stacked Panels Mobile Sticky Stacking */
+  .section-stacked-panels {
+    padding: 6rem 2% 8rem;
+  }
+  .stacked-feature-panel {
+    width: calc(100% - 24px);
+    padding: 2.5rem 1.4rem 2rem;
+    border-radius: 24px;
+    min-height: auto;
+  }
+  .stacked-feature-panel:nth-child(1) { top: 75px; }
+  .stacked-feature-panel:nth-child(2) { top: 90px; }
+  .stacked-feature-panel:nth-child(3) { top: 105px; }
+  .panel-title {
+    font-size: clamp(2.1rem, 8.5vw, 3.4rem);
+  }
+  .panel-desc {
+    font-size: 0.98rem;
+  }
+  .panel-visual-frame {
+    height: 260px;
+    margin-bottom: 0;
+    border-radius: 18px;
+  }
+
+  /* Section 13: Champion Manifesto CTA Mobile */
+  .section-champion-manifesto {
+    height: 350vh;
+  }
+  .champion-headline {
+    font-size: clamp(2.2rem, 8.5vw, 4.2rem);
+    row-gap: 0.4rem;
+    column-gap: 0.8rem;
+  }
+  .champion-desc {
+    font-size: 0.98rem;
+    margin-bottom: 2rem;
+  }
+  .champion-visual-stage {
+    height: auto;
+    margin-bottom: 2rem;
+  }
+  .champion-node-ring {
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    justify-content: center;
+  }
+  .champion-node {
+    flex: 0 0 42%;
+  }
+  .center-heart-glow {
+    position: relative;
+    margin: 0 auto 1.5rem;
+  }
+  .champion-metrics-row {
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem 1.5rem;
+    border-radius: 20px;
+    width: 100%;
+  }
+  .metric-sep {
+    display: none;
+  }
+  .champion-actions-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  .btn-champion-primary,
+  .btn-champion-secondary {
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -2333,10 +2524,14 @@ textarea:focus {
   .footer-top {
     grid-template-columns: 1fr;
   }
-  .whatsapp-float-btn span {
-    display: none;
-  }
   .whatsapp-float-btn {
-    padding: 0.8rem;
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+  .modal-container {
+    width: 94vw;
+    max-height: 90vh;
+    padding: 1.8rem 1.4rem;
+    border-radius: 20px;
   }
 }
