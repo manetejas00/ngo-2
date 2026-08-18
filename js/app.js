@@ -1,6 +1,6 @@
 /**
  * Avinya Care Foundation - Master Application Controller
- * Optimized scroll handling for 60FPS animation & active section highlighting.
+ * NestJS-inspired scroll controller, 7-stage canvas hero cards, text reveal animation, & navbar themes.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,13 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.JourneyTimeline) new window.JourneyTimeline();
   if (window.ImpactCounters) new window.ImpactCounters();
 
-  // 3. Scroll & Navbar Controller
+  // 3. Scroll & Floating Navbar Controller
   const heroContainer = document.querySelector('.hero-scroll-container');
   const navbar = document.querySelector('.navbar');
   const narrativeCards = document.querySelectorAll('.hero-narrative-card');
   const scrollIndicator = document.querySelector('.scroll-indicator');
   const navLinkElems = document.querySelectorAll('.nav-link');
   const sections = document.querySelectorAll('section[id]');
+  const statementLines = document.querySelectorAll('.statement-line');
 
   let isTicking = false;
 
@@ -52,23 +53,34 @@ document.addEventListener('DOMContentLoaded', () => {
       const engine = window.heroEngine || heroEngine;
       if (engine) engine.updateScrollProgress(progress);
 
-      // Hero typography reveals
+      // Hero typography narrative cards (7 stages)
       updateHeroNarrativeCards(progress, narrativeCards);
 
-      // Fade out scroll indicator
+      // Fade out scroll indicator on scroll
       if (scrollIndicator) {
-        scrollIndicator.style.opacity = progress > 0.1 ? '0' : '1';
+        scrollIndicator.style.opacity = progress > 0.08 ? '0' : '1';
       }
 
-      // Dynamic Navbar Theme
-      if (progress < 0.6) {
-        navbar.classList.add('scrolled-dark');
-        navbar.classList.remove('scrolled-light');
-      } else {
-        navbar.classList.remove('scrolled-dark');
-        navbar.classList.add('scrolled-light');
+      // Dynamic Floating Navbar Theme (Dark over hero, Light over content)
+      if (navbar) {
+        if (progress < 0.65) {
+          navbar.classList.add('scrolled-dark');
+          navbar.classList.remove('scrolled-light');
+        } else {
+          navbar.classList.remove('scrolled-dark');
+          navbar.classList.add('scrolled-light');
+        }
       }
     }
+
+    // Scroll Text Reveal Transition Handler (.statement-line)
+    statementLines.forEach((line) => {
+      const lineTop = line.getBoundingClientRect().top;
+      const windowHeight = window.innerHeight;
+      if (lineTop < windowHeight * 0.85) {
+        line.classList.add('revealed');
+      }
+    });
 
     // Active Section Link Highlighting
     let currentSectionId = '';
@@ -92,19 +104,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Helper for Hero Text Cards
+  // 7-Stage Hero Narrative Card Scroll Progression
   let activeCardId = null;
   function updateHeroNarrativeCards(p, cards) {
     let currentId = null;
 
-    if (p >= 0 && p < 0.20) {
+    if (p >= 0 && p < 0.14) {
       currentId = 'card-1';
-    } else if (p >= 0.20 && p < 0.40) {
+    } else if (p >= 0.14 && p < 0.28) {
       currentId = 'card-2';
-    } else if (p >= 0.40 && p < 0.65) {
+    } else if (p >= 0.28 && p < 0.42) {
       currentId = 'card-3';
-    } else if (p >= 0.65 && p < 0.85) {
+    } else if (p >= 0.42 && p < 0.56) {
       currentId = 'card-4';
+    } else if (p >= 0.56 && p < 0.70) {
+      currentId = 'card-5';
+    } else if (p >= 0.70 && p < 0.86) {
+      currentId = 'card-6';
+    } else if (p >= 0.86 && p <= 1.0) {
+      currentId = 'card-7';
     }
 
     if (currentId !== activeCardId) {
@@ -116,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Initial calculation on page load and window load
+  // Initial trigger on load
   handleScroll();
   window.addEventListener('load', handleScroll);
 
@@ -129,25 +147,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (targetElem) {
           e.preventDefault();
           targetElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+          // Close mobile menu drawer if open
+          const mobileOverlay = document.getElementById('mobile-nav-overlay');
+          if (mobileOverlay) mobileOverlay.classList.remove('active');
         }
       }
     });
   });
 
-  // 5. Mobile Navigation Toggle
+  // 5. Mobile Drawer Toggle
   const mobileToggleBtn = document.querySelector('.mobile-toggle');
-  const navLinksContainer = document.querySelector('.nav-links');
+  const mobileOverlay = document.getElementById('mobile-nav-overlay');
 
-  if (mobileToggleBtn && navLinksContainer) {
+  if (mobileToggleBtn && mobileOverlay) {
     mobileToggleBtn.addEventListener('click', () => {
-      const isOpened = navLinksContainer.classList.toggle('active-mobile');
+      const isOpened = mobileOverlay.classList.toggle('active');
       mobileToggleBtn.setAttribute('aria-expanded', isOpened);
     });
 
-    // Close mobile nav on link click
-    navLinkElems.forEach(link => {
+    mobileOverlay.querySelectorAll('.mobile-nav-link').forEach(link => {
       link.addEventListener('click', () => {
-        navLinksContainer.classList.remove('active-mobile');
+        mobileOverlay.classList.remove('active');
         mobileToggleBtn.setAttribute('aria-expanded', 'false');
       });
     });

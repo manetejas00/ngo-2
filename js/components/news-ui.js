@@ -1,6 +1,6 @@
 /**
- * Avinya Care Foundation - Health & Cancer News UI Component Renderer
- * Displays 2 rows of health/cancer articles, Gemini AI topic generator, interactive category tabs, "Show More" expansion, skeleton loaders, 2-column detail page view, and related stories.
+ * Avinya Care Foundation - Modern Editorial Health & Cancer Newsroom
+ * NestJS Red + Black + White Editorial Layout featuring Lead Banner Article, Grid Stories, Gemini AI Synthesizer, Category Tabs, and Full-Screen Reader Modal.
  */
 
 class NewsUI {
@@ -29,8 +29,18 @@ class NewsUI {
 
   renderSkeletons() {
     if (!this.container) return;
-    let html = '';
-    for (let i = 0; i < 6; i++) {
+    let html = `
+      <div class="news-featured-lead skeleton-card" aria-hidden="true" style="grid-column: 1 / -1;">
+        <div class="news-featured-image-box skeleton-box"></div>
+        <div class="news-featured-content">
+          <div class="skeleton-line skeleton-tag" style="width: 140px; height: 24px;"></div>
+          <div class="skeleton-line skeleton-title" style="height: 36px; margin: 1rem 0;"></div>
+          <div class="skeleton-line skeleton-desc"></div>
+          <div class="skeleton-line skeleton-desc" style="width: 80%;"></div>
+        </div>
+      </div>
+    `;
+    for (let i = 0; i < 4; i++) {
       html += `
         <div class="news-card skeleton-card" aria-hidden="true">
           <div class="news-image-box skeleton-box"></div>
@@ -39,9 +49,6 @@ class NewsUI {
             <div class="skeleton-line skeleton-title"></div>
             <div class="skeleton-line skeleton-desc"></div>
             <div class="skeleton-line skeleton-desc" style="width: 70%;"></div>
-            <div class="skeleton-footer">
-              <div class="skeleton-line skeleton-source"></div>
-            </div>
           </div>
         </div>
       `;
@@ -60,43 +67,28 @@ class NewsUI {
     if (data.error && this.allArticles.length === 0) {
       if (this.statusMessageElem) {
         this.statusMessageElem.innerHTML = `
-          <div class="news-error-banner">
-            <span>⚠️ Health news is temporarily unavailable. Please check back shortly.</span>
+          <div class="news-error-banner" style="text-align: center; color: var(--brand); padding: 1rem;">
+            <span>⚠️ Health news service is temporarily offline. Showing embedded archives.</span>
           </div>
         `;
       }
-      this.container.innerHTML = `
-        <div class="news-empty-state">
-          <p>Health news updates are temporarily unavailable. Please verify your connection.</p>
-        </div>
-      `;
-      if (this.expandBarElem) this.expandBarElem.style.display = 'none';
-      return;
-    }
-
-    if (data.isFallback && this.statusMessageElem) {
-      this.statusMessageElem.innerHTML = `
-        <div class="news-cached-banner">
-          <span>Showing recently cached stories.</span>
-        </div>
-      `;
     }
 
     this.applyCategoryFilter();
   }
 
   async generateAITopic(topicHint = null, clickedBtn = null) {
-    const btn = clickedBtn || document.getElementById('ai-generate-topic-btn');
-    const originalContent = btn ? btn.innerHTML : `<span class="ai-sparkle">✨</span> Generate AI Topic with Gemini`;
+    const btn = clickedBtn || document.querySelector('.news-ai-gen-btn');
+    const originalContent = btn ? btn.innerHTML : `<span>✦ AI INSIGHT</span>`;
 
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = `<span class="ai-sparkle">✨</span> Generating Gemini AI Story...`;
+      btn.innerHTML = `<span>✦ GENERATING...</span>`;
     }
 
     let article = null;
 
-    // 1. Try primary endpoint POST /api/news/generate
+    // 1. Try primary API endpoint POST /api/news/generate
     try {
       const res = await fetch('/api/news/generate', {
         method: 'POST',
@@ -122,18 +114,7 @@ class NewsUI {
       } catch (err) {}
     }
 
-    // 3. Try static fallback endpoint /api/news_generate.json
-    if (!article) {
-      try {
-        const res = await fetch('/api/news_generate.json');
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.article) article = data.article;
-        }
-      } catch (err) {}
-    }
-
-    // 4. Dynamic Client AI Topic Synthesizer (Zero-failure guarantee)
+    // 3. Client-side AI Generator Fallback
     if (!article) {
       const aiTopics = [
         {
@@ -143,14 +124,14 @@ class NewsUI {
           image: "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
         },
         {
-          title: "Community Mobile Screening Vans Expand Early Cervical Cancer Checkups in Underserved Regions",
-          description: "Avinya Care Foundation and regional health partners deploy solar-powered diagnostic vans providing on-site Pap tests, HPV vaccinations, and physician consultations.",
+          title: "Solar-Powered Mobile Diagnostic Vans Expand Screening Camps in Rural Maharashtra",
+          description: "Avinya Care Foundation and regional health partners deploy equipped diagnostic vans providing on-site mammograms, Pap tests, HPV vaccinations, and specialist consultations.",
           category: "Early Detection",
           image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80"
         },
         {
-          title: "Personalized CAR-T Cell Immunotherapy Achieves Complete Remission in Refractory Lymphoma Trials",
-          description: "Next-generation cellular engineering modifies a patient's own immune T-cells to target specific tumor antigens while preserving healthy surrounding tissue.",
+          title: "Personalized CAR-T Cell Immunotherapy Achieves Remission in Refractory Lymphoma Trials",
+          description: "Next-generation cellular engineering modifies a patient's immune T-cells to target specific tumor antigens while preserving healthy surrounding tissue.",
           category: "Immunotherapy",
           image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80"
         }
@@ -178,7 +159,7 @@ class NewsUI {
       this.allArticles = [article, ...this.allArticles.filter(a => a.id !== article.id)];
       this.applyCategoryFilter();
 
-      // DIRECTLY OPEN ARTICLE DETAILS MODAL
+      // Open detail modal directly
       this.openArticleDetail(article.id);
     }
 
@@ -190,14 +171,9 @@ class NewsUI {
 
   filterCategory(category, clickedBtn) {
     this.currentCategory = category;
-
-    // Reset expansion state when changing category
     this.isExpanded = false;
 
-    // Update active tab state
-    document.querySelectorAll('.news-tab-btn').forEach(btn => {
-      btn.classList.remove('active');
-    });
+    document.querySelectorAll('.news-tab-btn').forEach(btn => btn.classList.remove('active'));
 
     if (clickedBtn) {
       clickedBtn.classList.add('active');
@@ -213,12 +189,9 @@ class NewsUI {
     this.isExpanded = !this.isExpanded;
     this.applyCategoryFilter();
 
-    // If collapsing back to 2 rows, scroll smoothly to the top of the news section
     if (!this.isExpanded) {
       const newsSection = document.getElementById('news');
-      if (newsSection) {
-        newsSection.scrollIntoView({ behavior: 'smooth' });
-      }
+      if (newsSection) newsSection.scrollIntoView({ behavior: 'smooth' });
     }
   }
 
@@ -232,28 +205,25 @@ class NewsUI {
         const articleCat = (article.category || '').toLowerCase();
         const articleTitle = (article.title || '').toLowerCase();
         const articleDesc = (article.description || '').toLowerCase();
-
         return articleCat.includes(cat) || articleTitle.includes(cat) || articleDesc.includes(cat);
       });
     }
 
-    // Determine how many articles to display (Default: 2 rows = 6 articles on 3-column desktop)
-    const limit = this.isExpanded ? filtered.length : Math.min(6, filtered.length);
+    const limit = this.isExpanded ? filtered.length : Math.min(7, filtered.length);
     const visibleArticles = filtered.slice(0, limit);
 
     this.renderArticles(visibleArticles);
 
-    // Update Show More / Show Less Button state
     if (this.expandBarElem && this.showMoreBtnElem) {
-      if (filtered.length <= 6) {
+      if (filtered.length <= 7) {
         this.expandBarElem.style.display = 'none';
       } else {
         this.expandBarElem.style.display = 'flex';
-        const remaining = filtered.length - 6;
+        const remaining = filtered.length - 7;
         if (this.isExpanded) {
           this.showMoreBtnElem.innerHTML = `<span>Show Less Stories ↑</span>`;
         } else {
-          this.showMoreBtnElem.innerHTML = `<span>Show More Stories (${remaining} More) ↓</span>`;
+          this.showMoreBtnElem.innerHTML = `<span>Show More News Stories (${remaining} More) ↓</span>`;
         }
       }
     }
@@ -264,53 +234,87 @@ class NewsUI {
 
     if (articles.length === 0) {
       this.container.innerHTML = `
-        <div class="news-empty-category" style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; background-color: var(--white); border-radius: 24px; border: 1px solid var(--border-light);">
+        <div class="news-empty-category" style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; background-color: var(--white); border-radius: 20px; border: 1px solid var(--gray-200);">
           <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔍</div>
-          <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--text-dark);">No stories found matching "${this.currentCategory}"</h3>
-          <p style="color: var(--text-dark-muted); margin-bottom: 1.5rem;">Explore all health stories, oncology research, and screening breakthroughs.</p>
+          <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--gray-900);">No stories found matching "${this.currentCategory}"</h3>
+          <p style="color: var(--muted); margin-bottom: 1.5rem;">Explore all oncology research, early detection drives, and health news.</p>
           <button class="btn-primary" onclick="window.AvinyaNewsUI.filterCategory('all')">Show All Stories</button>
         </div>
       `;
       return;
     }
 
-    this.container.innerHTML = articles.map(article => {
-      const formattedDate = new Date(article.publishedAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
+    const featured = articles[0];
+    const gridStories = articles.slice(1);
+    const fallbackImg = "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80";
 
-      const fallbackImg = "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80";
-      const imageUrl = article.urlToImage || fallbackImg;
-      const newsSymbolBadge = article.isAIGenerated 
-        ? `<span class="ai-generated-badge">✨ AI GENERATED</span>` 
-        : `<span class="live-news-badge">🌐 LIVE NEWS API</span>`;
+    // 1. Featured Lead Story Banner HTML
+    const featuredDate = new Date(featured.publishedAt).toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric'
+    });
+    const featuredImg = featured.urlToImage || fallbackImg;
+    const featuredBadge = featured.isAIGenerated 
+      ? `<span class="ai-generated-badge">✦ AI INSIGHT</span>` 
+      : `<span class="live-news-badge">🌐 FEATURED NEWS</span>`;
 
-      const sourceSymbol = article.isAIGenerated ? '✨' : '🌐';
-
-      return `
-        <article class="news-card ${article.isAIGenerated ? 'ai-news-card' : 'live-news-card'}" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
-          <div class="news-image-box">
-            <span class="news-category-badge">${article.category || 'Health'}</span>
-            ${newsSymbolBadge}
-            <img src="${imageUrl}" alt="${article.title}" class="news-image" onerror="this.src='${fallbackImg}'" loading="lazy">
+    let html = `
+      <div class="news-featured-lead" onclick="window.AvinyaNewsUI.openArticleDetail('${featured.id}')" style="grid-column: 1 / -1;">
+        <div class="news-featured-image-box">
+          <img src="${featuredImg}" alt="${featured.title}" class="news-featured-image" onerror="this.src='${fallbackImg}'" loading="lazy">
+        </div>
+        <div class="news-featured-content">
+          <div class="news-tag-group">
+            <span class="news-category-badge">${featured.category || 'Cancer Research'}</span>
+            ${featuredBadge}
           </div>
-          <div class="news-content">
-            <h3 class="news-card-title">${article.title}</h3>
-            <p class="news-card-desc">${article.description}</p>
-            <div class="news-card-meta">
-              <div class="news-source-info">
-                <span class="news-source-name">${sourceSymbol} ${article.source}</span>
-                ${article.apiProvider ? `<span class="news-api-provider-tag">📡 ${article.apiProvider}</span>` : ''}
-                <span class="news-date">${formattedDate}</span>
-              </div>
-              <span class="news-read-more">Read More →</span>
+          <h3 class="news-featured-title">${featured.title}</h3>
+          <p class="news-featured-desc">${featured.description}</p>
+          <div class="news-featured-footer">
+            <div class="news-source-meta">
+              <span>${featured.isAIGenerated ? '✦' : '🌐'} ${featured.source}</span>
+              <span>·</span>
+              <span>${featuredDate}</span>
             </div>
+            <span class="news-read-btn">Read Article →</span>
           </div>
-        </article>
-      `;
-    }).join('');
+        </div>
+      </div>
+    `;
+
+    // 2. Secondary Editorial Grid Stories HTML
+    if (gridStories.length > 0) {
+      html += gridStories.map(article => {
+        const formattedDate = new Date(article.publishedAt).toLocaleDateString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric'
+        });
+        const imageUrl = article.urlToImage || fallbackImg;
+        const badge = article.isAIGenerated 
+          ? `<span class="ai-generated-badge">✦ AI INSIGHT</span>` 
+          : `<span class="live-news-badge">🌐 LIVE NEWS</span>`;
+
+        return `
+          <article class="news-card" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
+            <div class="news-image-box">
+              <span class="news-category-badge" style="position: absolute; top: 1rem; left: 1rem; z-index: 2; background: rgba(10,10,10,0.85); color: white;">${article.category || 'Health'}</span>
+              <img src="${imageUrl}" alt="${article.title}" class="news-image" onerror="this.src='${fallbackImg}'" loading="lazy">
+            </div>
+            <div class="news-content">
+              <div>
+                <div style="margin-bottom: 0.6rem;">${badge}</div>
+                <h3 class="news-card-title">${article.title}</h3>
+                <p class="news-card-desc">${article.description}</p>
+              </div>
+              <div class="news-card-meta">
+                <span class="news-source-name">${article.source}</span>
+                <span class="news-read-more">Read Story →</span>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    this.container.innerHTML = html;
   }
 
   openArticleDetail(articleId) {
@@ -318,7 +322,6 @@ class NewsUI {
     if (!article) article = this.service.getArticleById(articleId);
     if (!article) return;
 
-    // Set URL hash without page jump
     window.history.pushState(null, '', `#news/${encodeURIComponent(article.id)}`);
     this.renderDetailModal(article);
   }
@@ -335,255 +338,76 @@ class NewsUI {
     }
 
     const formattedDate = new Date(article.publishedAt).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
     const fallbackImg = "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80";
     const imageUrl = article.urlToImage || fallbackImg;
     const related = this.service.getRelatedArticles(article, 3);
-    const sourceInitial = (article.source || 'M').charAt(0).toUpperCase();
 
     modal.innerHTML = `
-      <!-- Reading Progress Bar -->
-      <div id="news-read-progress-bar" class="news-read-progress-bar"></div>
+      <div class="modal-backdrop active" style="z-index: 2500;">
+        <div class="modal-container" style="width: min(850px, 95%); padding: 3.5rem 3rem;">
+          <button class="modal-close-btn" onclick="window.AvinyaNewsUI.closeArticleDetail()">✕</button>
 
-      <!-- Glassmorphic Fixed Top Header -->
-      <header class="news-fullscreen-header">
-        <div class="news-header-left">
-          <button class="news-back-btn" onclick="window.AvinyaNewsUI.closeDetailModal()">
-            <span>← Back to Health News</span>
-          </button>
-        </div>
-        
-        <div class="news-header-center">
-          <span class="news-header-brand">Avinya Health Journal</span>
-        </div>
-
-        <div class="news-header-right">
-          <button class="btn-secondary" style="padding: 0.45rem 1rem; font-size: 0.85rem;" onclick="navigator.clipboard.writeText(window.location.href); alert('Article link copied to clipboard!');">
-            <span>Share Article 🔗</span>
-          </button>
-          <button class="news-close-btn" onclick="window.AvinyaNewsUI.closeDetailModal()" aria-label="Close Article">
-            ✕
-          </button>
-        </div>
-      </header>
-
-      <!-- Editorial Hero Banner -->
-      <div class="news-editorial-hero-banner">
-        <div class="news-hero-container">
-          <div class="news-meta-pills">
-            <span class="category-tag-pill">${article.category || 'Health & Oncology'}</span>
-            <span class="read-time-pill">⏱ 3 Min Read</span>
-            ${article.isAIGenerated ? `<span class="verified-pill ai-pill">✨ Gemini AI Generated Story</span>` : `<span class="verified-pill live-pill">🌐 Live News API Article</span>`}
+          <div class="news-tag-group" style="margin-bottom: 1rem;">
+            <span class="news-category-badge">${article.category || 'Health & Oncology'}</span>
+            ${article.isAIGenerated ? `<span class="ai-generated-badge">✦ GEMINI AI INSIGHT</span>` : `<span class="live-news-badge">🌐 VERIFIED ONCOLOGY REPORT</span>`}
           </div>
 
-          <h1 class="news-editorial-title">${article.title}</h1>
+          <h1 style="font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 800; line-height: 1.25; margin-bottom: 1.25rem; color: var(--gray-900);">${article.title}</h1>
 
-          <div class="news-editorial-author-bar">
-            <div class="news-publisher-badge">
-              <div class="publisher-avatar">${article.isAIGenerated ? '✨' : sourceInitial}</div>
-              <div>
-                <div class="publisher-name">${article.isAIGenerated ? '✨' : '🌐'} ${article.source}</div>
-                <div class="publisher-role">${article.apiProvider ? `📡 API Source: ${article.apiProvider}` : (article.isAIGenerated ? 'Gemini AI Research Engine' : 'Live Medical & Scientific News')}</div>
-              </div>
-            </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.92rem; color: var(--muted); padding-bottom: 1.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--gray-200);">
+            <div><strong>Source:</strong> ${article.source} · ${formattedDate}</div>
+            ${article.url && article.url !== '#' ? `<a href="${article.url}" target="_blank" rel="noopener noreferrer" style="color: var(--brand); font-weight: 700;">View Original Article ↗</a>` : ''}
+          </div>
 
-            <div class="news-publish-date-box">
-              <span class="date-label">Published Date</span>
-              <span class="date-val">${formattedDate}</span>
+          <div style="width: 100%; height: 360px; border-radius: 16px; overflow: hidden; margin-bottom: 2.2rem; background: var(--black);">
+            <img src="${imageUrl}" alt="${article.title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='${fallbackImg}'">
+          </div>
+
+          <div style="font-size: 1.12rem; line-height: 1.8; color: var(--gray-900); margin-bottom: 2.5rem;">
+            <p style="margin-bottom: 1.5rem; font-weight: 600; font-size: 1.2rem; color: var(--gray-900);">${article.description}</p>
+            <p style="margin-bottom: 1.5rem;">Clinical awareness and timely diagnostic interventions form the cornerstone of effective oncology care. At Avinya Care Foundation, our mission is ensuring every individual has access to reliable health guidance, early screening facilities, and compassionate support throughout their journey.</p>
+            <p>Through community health programs and medical partnerships across India, early detection rates continue to improve, helping patients receive targeted therapy when it is most effective.</p>
+          </div>
+
+          <div style="background: var(--gray-100); border-radius: 16px; padding: 2rem; border: 1px solid var(--gray-200); margin-top: 3rem;">
+            <h4 style="font-weight: 800; margin-bottom: 1rem; font-size: 1.1rem; color: var(--gray-900);">Related Health Stories</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
+              ${related.map(rel => `
+                <div style="cursor: pointer;" onclick="window.AvinyaNewsUI.openArticleDetail('${rel.id}')">
+                  <div style="font-size: 0.75rem; font-weight: 800; color: var(--brand); margin-bottom: 4px;">${rel.category}</div>
+                  <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${rel.title}</div>
+                </div>
+              `).join('')}
             </div>
+          </div>
+
+          <div style="margin-top: 2.5rem; text-align: center;">
+            <button class="btn-primary" onclick="window.AvinyaNewsUI.closeArticleDetail()" style="padding: 0.85rem 2.5rem;">Close Article</button>
           </div>
         </div>
       </div>
-
-      <!-- 2-Column Main Content Layout -->
-      <main class="news-editorial-main">
-        <div class="news-layout-grid">
-          <!-- Left Column: Sticky Meta Sidebar -->
-          <aside class="news-sidebar-rail">
-            <div class="news-sidebar-box">
-              <h4 class="sidebar-heading">Article Metadata</h4>
-              <ul class="sidebar-meta-list">
-                <li>
-                  <span class="meta-label">Category</span>
-                  <span class="meta-val">${article.category || 'Oncology'}</span>
-                </li>
-                <li>
-                  <span class="meta-label">Source</span>
-                  <span class="meta-val">${article.source}</span>
-                </li>
-                <li>
-                  <span class="meta-label">Date</span>
-                  <span class="meta-val">${formattedDate}</span>
-                </li>
-                <li>
-                  <span class="meta-label">Reading Time</span>
-                  <span class="meta-val">3 Minutes</span>
-                </li>
-              </ul>
-
-              <div class="sidebar-actions">
-                ${article.url && article.url !== '#' ? `
-                  <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="width: 100%; text-align: center; justify-content: center;">
-                    <span>Read Source Article ↗</span>
-                  </a>
-                ` : ''}
-                <button class="btn-secondary" style="width: 100%; justify-content: center;" onclick="window.AvinyaModals.openDonateModal(100)">
-                  <span>Support Cancer Care</span>
-                </button>
-              </div>
-
-              <div class="sidebar-disclaimer-pill">
-                <span>ℹ️ Provided for educational awareness only.</span>
-              </div>
-            </div>
-          </aside>
-
-          <!-- Right Column: Main Reading Content -->
-          <article class="news-article-body ${article.isAIGenerated ? 'ai-story' : ''}">
-            <!-- Main Featured Hero Image -->
-            <div class="news-article-hero-image">
-              <img src="${imageUrl}" alt="${article.title}" onerror="this.src='${fallbackImg}'">
-              <div class="image-caption">Image courtesy of ${article.source} medical news archive.</div>
-            </div>
-
-            <!-- Executive Summary Lead Box -->
-            <div class="news-executive-summary">
-              <span class="summary-label">${article.isAIGenerated ? '✨ Gemini AI Executive Summary' : 'Executive Summary'}</span>
-              <p class="summary-text">${article.description}</p>
-            </div>
-
-            <!-- Core Analysis & Article Prose -->
-            <div class="article-prose">
-              <h3>Understanding the Clinical & Awareness Impact</h3>
-              <p>Medical developments in early cancer diagnosis and targeted oncology treatments represent a vital step forward for global healthcare. Early detection drastically improves 5-year survival outcomes and enables healthcare teams to administer tailored, less invasive treatment protocols.</p>
-
-              <div class="article-highlights-card">
-                <h4 style="margin-bottom: 0.75rem; font-weight: 700; color: var(--text-dark);">Key Research Takeaways:</h4>
-                <ul class="highlights-list">
-                  <li><strong>Timely Screening:</strong> Regular diagnostic check-ups enable healthcare teams to discover localized tissue changes early.</li>
-                  <li><strong>Targeted Precision:</strong> Modern medical research minimizes toxic side effects while maximizing therapeutic accuracy.</li>
-                  <li><strong>Community Empowerment:</strong> Disseminating accurate information removes healthcare stigma and encourages open family health conversations.</li>
-                </ul>
-              </div>
-
-              <h3>Why Early Knowledge Matters</h3>
-              <p>Navigating health choices begins with trustworthy information. Avinya Care Foundation curates clinical disclosures and medical research breakthroughs to ensure patients, caregivers, and communities have direct access to evidence-based guidance.</p>
-
-              <blockquote class="article-quote-block">
-                “When patients and families understand their options early, fear gives way to empowerment, informed action, and hope.”
-              </blockquote>
-            </div>
-
-            <!-- Official Medical Disclaimer Box -->
-            <div class="medical-disclaimer-box">
-              <span class="disclaimer-icon">⚕️</span>
-              <div>
-                <strong style="color: var(--text-dark); font-size: 1rem;">Medical Disclaimer & Health Notice</strong>
-                <p style="margin-top: 0.3rem;">This news coverage is published by <strong>Avinya Care Foundation</strong> for educational and awareness purposes only. It does not constitute medical advice or clinical diagnosis. Always consult a qualified oncologist or healthcare specialist regarding medical decisions.</p>
-              </div>
-            </div>
-
-            <!-- Primary Action Banner -->
-            <div class="article-bottom-action-banner">
-              <div>
-                <h3 style="margin-bottom: 0.5rem;">Stand with Cancer Patients Today</h3>
-                <p style="color: var(--text-dark-muted);">Your contribution directly funds screening kits, patient navigation, and caregiver support programs worldwide.</p>
-              </div>
-              <div class="banner-btns">
-                <button class="btn-primary" onclick="window.AvinyaModals.openDonateModal(100)">
-                  <span>Donate Now →</span>
-                </button>
-                <button class="btn-secondary" style="background: white;" onclick="window.AvinyaModals.openGuideModal('${article.category || 'Cancer Screening'}')">
-                  <span>View Screening Guide</span>
-                </button>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <!-- Related Articles Section -->
-        <section class="related-news-section">
-          <div class="related-news-header">
-            <span class="category-tag">RECOMMENDED HEALTH READS</span>
-            <h2 class="related-news-title">More Stories in ${article.category || 'Health & Cancer Research'}</h2>
-          </div>
-
-          <div class="related-news-grid">
-            ${related.map(rel => `
-              <div class="related-card" onclick="window.AvinyaNewsUI.openArticleDetail('${rel.id}')">
-                <div class="related-card-image-box">
-                  <img src="${rel.urlToImage || fallbackImg}" alt="${rel.title}" onerror="this.src='${fallbackImg}'" loading="lazy">
-                  <span class="related-category-pill">${rel.category || 'Oncology'}</span>
-                </div>
-                <div class="related-card-content">
-                  <h4 class="related-card-title">${rel.title}</h4>
-                  <p class="related-card-snippet">${rel.description}</p>
-                  <div class="related-card-footer">
-                    <span class="news-source-name">${rel.source}</span>
-                    <span class="news-read-more">Read Story →</span>
-                  </div>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </section>
-
-        <!-- Mini Page Footer -->
-        <footer class="news-detail-footer">
-          <div>© 2026 Avinya Care Foundation. Empowering communities with cancer awareness and support.</div>
-          <button class="news-back-to-top" onclick="document.getElementById('news-detail-modal').scrollTop = 0">
-            ↑ Back to Top
-          </button>
-        </footer>
-      </main>
     `;
 
-    modal.classList.add('active');
-    modal.scrollTop = 0;
     document.body.style.overflow = 'hidden';
-
-    // Reading Progress Indicator Handler
-    const progressBar = document.getElementById('news-read-progress-bar');
-    if (progressBar) {
-      modal.onscroll = () => {
-        const totalHeight = modal.scrollHeight - modal.clientHeight;
-        const progress = (modal.scrollTop / totalHeight) * 100;
-        progressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
-      };
-    }
   }
 
-  closeDetailModal() {
+  closeArticleDetail() {
     const modal = document.getElementById('news-detail-modal');
-    if (modal) {
-      modal.classList.remove('active');
-      modal.onscroll = null;
-    }
+    if (modal) modal.innerHTML = '';
     document.body.style.overflow = '';
-    
-    if (window.location.hash.startsWith('#news/')) {
-      window.history.pushState(null, '', '#news');
-    }
+    window.history.pushState(null, '', window.location.pathname);
   }
 
   checkHashRoute() {
     const hash = window.location.hash;
-    if (hash.startsWith('#news/')) {
+    if (hash && hash.startsWith('#news/')) {
       const articleId = decodeURIComponent(hash.replace('#news/', ''));
-      let article = this.allArticles.find(a => a.id === articleId || encodeURIComponent(a.id) === articleId);
-      if (!article) article = this.service.getArticleById(articleId);
-      if (article) {
-        this.renderDetailModal(article);
-      }
+      if (articleId) this.openArticleDetail(articleId);
     }
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  window.AvinyaNewsUI = new NewsUI();
-});
+window.AvinyaNewsUI = new NewsUI();

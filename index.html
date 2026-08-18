@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Avinya Care Foundation | Cancer Awareness, Support & Hope</title>
-  <meta name="description" content="Avinya Care Foundation is a global humanitarian organization providing cancer awareness, early screening initiatives, caregiver support, and community hope. No one should face cancer alone.">
+  <title>Avinya Care Foundation | No One Should Face Cancer Alone</title>
+  <meta name="description" content="Avinya Care Foundation is a humanitarian Indian oncology organization dedicated to cancer awareness, early screening drives, compassionate patient support, and caregiver navigation. No one should face cancer alone.">
 
   <!-- Open Graph / Meta -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Avinya Care Foundation | No one should face cancer alone.">
-  <meta property="og:description" content="Cinematic humanitarian campaign bringing awareness, early detection, and compassionate community support to cancer patients and families.">
+  <meta property="og:description" content="Cinematic humanitarian campaign bringing cancer awareness, early detection, and compassionate community support to patients and families across India.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="alternate icon" href="favicon.ico">
 
-  <!-- Modern Typography (Inter Font) & Styles -->
+  <!-- Modern Typography (Inter & Manrope Fonts) & Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-  <!-- 1. APPLE-STYLE MINIMAL NAVBAR -->
-  <header>
+  <!-- 1. MINIMAL FLOATING DOCK NAVIGATION (NESTJS STYLE) -->
+  <header class="navbar-wrapper">
     <nav class="navbar scrolled-dark" aria-label="Main Navigation">
       <a href="#hero" class="nav-brand">
         <div class="brand-icon">♥</div>
@@ -32,22 +32,21 @@
       </a>
 
       <ul class="nav-links">
-        <li><a href="#hero" class="nav-link active">Home</a></li>
-        <li><a href="#understanding" class="nav-link">Our Mission</a></li>
-        <li><a href="#journey" class="nav-link">Cancer Awareness</a></li>
+        <li><a href="#hero" class="nav-link active">About</a></li>
+        <li><a href="#what-we-do" class="nav-link">Awareness</a></li>
+        <li><a href="#journey" class="nav-link">Care</a></li>
         <li><a href="#stories" class="nav-link">Stories</a></li>
-        <li><a href="#news" class="nav-link">Health News</a></li>
-        <li><a href="#impact" class="nav-link">Our Impact</a></li>
-        <li><a href="#get-involved" class="nav-link">Get Involved</a></li>
+        <li><a href="#impact" class="nav-link">Impact</a></li>
+        <li><a href="#news" class="nav-link">News</a></li>
       </ul>
 
       <div class="nav-actions">
-        <button class="btn-primary" onclick="window.AvinyaModals.openDonateModal(100)">
+        <button class="btn-primary" onclick="window.AvinyaModals.openDonateModal(1000)">
           <span>Donate</span>
-          <span>→</span>
+          <span class="arrow">→</span>
         </button>
         <button class="mobile-toggle" aria-label="Toggle Mobile Navigation" aria-expanded="false">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -57,286 +56,796 @@
     </nav>
   </header>
 
-  <!-- 2. HERO EXPERIENCE — CINEMATIC SCROLLYTELLING CANVAS -->
+  <!-- Fullscreen Mobile Navigation Drawer -->
+  <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+    <button class="modal-close-btn" style="top: 2rem; right: 2rem; color: white; background: rgba(255,255,255,0.1);" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active')">✕</button>
+    <ul class="mobile-nav-menu">
+      <li><a href="#hero" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active')">About</a></li>
+      <li><a href="#what-we-do" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active')">Awareness</a></li>
+      <li><a href="#journey" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active')">Care</a></li>
+      <li><a href="#stories" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active')">Stories</a></li>
+      <li><a href="#impact" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active')">Impact</a></li>
+      <li><a href="#news" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active')">News</a></li>
+    </ul>
+    <div style="margin-top: 3rem;">
+      <button class="btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); window.AvinyaModals.openDonateModal(1000);">
+        <span>Donate Support</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. CENTERPIECE CANVAS HERO — DEEP BLACK (#0A0A0A) & 7-STAGE SCROLL STORY -->
   <section id="hero" class="hero-scroll-container">
     <div class="hero-sticky-viewport">
       <canvas id="hero-canvas"></canvas>
       <div class="hero-cinematic-overlay"></div>
 
-      <!-- Floating Narrative Cards Synced with Scroll Progress -->
       <div class="hero-overlay">
-        <!-- Card 1: 0 - 20% Scroll -->
+        <!-- Frame 1: 0 - 15% Scroll (One Person) -->
         <div id="card-1" class="hero-narrative-card active">
+          <div class="eyebrow-pill">
+            <span class="dot"></span>
+            <span>AVINYA CARE FOUNDATION</span>
+          </div>
           <h1 class="hero-title">No one should face cancer alone.</h1>
-          <p class="hero-subtitle">Awareness, support and hope can change a journey.</p>
+          <p class="hero-subtitle">
+            Building awareness, encouraging early detection, and standing beside patients, caregivers, and communities.
+          </p>
+          <div class="hero-cta-group">
+            <button class="btn-primary" onclick="window.AvinyaModals.openSupportModal()">
+              <span>Get Support</span>
+              <span class="arrow">→</span>
+            </button>
+            <a href="#hero-transition" class="btn-secondary btn-secondary-dark">
+              <span>Our Mission</span>
+            </a>
+          </div>
         </div>
 
-        <!-- Card 2: 20 - 40% Scroll -->
+        <!-- Frame 2: 15 - 30% Scroll (Awareness) -->
         <div id="card-2" class="hero-narrative-card">
-          <h2 class="hero-title">Sometimes, support begins with simply being there.</h2>
-          <p class="hero-subtitle">A conversation. A hand to hold. A reason to keep going.</p>
+          <div class="eyebrow-pill">
+            <span class="dot"></span>
+            <span>01 / AWARENESS</span>
+          </div>
+          <h2 class="hero-title">Awareness sparks early action.</h2>
+          <p class="hero-subtitle">Bringing life-saving oncology knowledge, warning signs, and screening tools to every family.</p>
+          <div class="hero-cta-group">
+            <button class="btn-primary" onclick="window.AvinyaModals.openGuideModal('Cancer Awareness Toolkit')">
+              <span>Explore Awareness Toolkit</span>
+              <span class="arrow">→</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Card 3: 40 - 65% Scroll -->
+        <!-- Frame 3: 30 - 45% Scroll (Screening Drives) -->
         <div id="card-3" class="hero-narrative-card">
-          <h2 class="hero-title">You are not alone.</h2>
-          <p class="hero-subtitle">When compassion meets courage, healing begins.</p>
+          <div class="eyebrow-pill">
+            <span class="dot"></span>
+            <span>02 / EARLY SCREENING</span>
+          </div>
+          <h2 class="hero-title">Catching signs before symptoms appear.</h2>
+          <p class="hero-subtitle">Mobile diagnostic camps and early detection initiatives empowering communities across India.</p>
+          <div class="hero-cta-group">
+            <button class="btn-primary" onclick="window.AvinyaModals.openGuideModal('Early Screening')">
+              <span>View Screening Guide</span>
+              <span class="arrow">→</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Card 4: 65 - 85% Scroll -->
+        <!-- Frame 4: 45 - 60% Scroll (Doctor & Patient Connection) -->
         <div id="card-4" class="hero-narrative-card">
-          <h2 class="hero-title">Together, we create hope.</h2>
-          <p class="hero-subtitle">Together, we create stronger tomorrows.</p>
+          <div class="eyebrow-pill">
+            <span class="dot"></span>
+            <span>03 / PATIENT NAVIGATION</span>
+          </div>
+          <h2 class="hero-title">Guiding every step of the medical journey.</h2>
+          <p class="hero-subtitle">Empowering patients and caregivers with clear treatment choices, medical clarity, and direct helpline support.</p>
+          <div class="hero-cta-group">
+            <button class="btn-primary" onclick="window.AvinyaModals.openSupportModal()">
+              <span>Talk to Care Navigator</span>
+              <span class="arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Frame 5: 60 - 75% Scroll (Community & Caregivers) -->
+        <div id="card-5" class="hero-narrative-card">
+          <div class="eyebrow-pill">
+            <span class="dot"></span>
+            <span>04 / CAREGIVER SUPPORT</span>
+          </div>
+          <h2 class="hero-title">Standing beside those who care.</h2>
+          <p class="hero-subtitle">Counseling, financial navigation, and respite support for family caregivers walking the journey together.</p>
+          <div class="hero-cta-group">
+            <button class="btn-primary" onclick="window.AvinyaModals.openVolunteerModal()">
+              <span>Join Care Network</span>
+              <span class="arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Frame 6: 75 - 90% Scroll (Hope & Community) -->
+        <div id="card-6" class="hero-narrative-card">
+          <div class="eyebrow-pill">
+            <span class="dot"></span>
+            <span>05 / SURVIVORSHIP & HOPE</span>
+          </div>
+          <h2 class="hero-title">A united community creates hope.</h2>
+          <p class="hero-subtitle">Connecting survivors, volunteers, and medical experts in a compassionate ecosystem of strength.</p>
+          <div class="hero-cta-group">
+            <button class="btn-primary" onclick="window.AvinyaModals.openDonateModal(1000)">
+              <span>Sponsor Support Drive</span>
+              <span class="arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Frame 7: 90 - 100% Scroll (Final Hero Statement) -->
+        <div id="card-7" class="hero-narrative-card">
+          <div class="eyebrow-pill">
+            <span class="dot"></span>
+            <span>TOGETHER FOR INDIA</span>
+          </div>
+          <h2 class="hero-title">No one should face cancer alone.</h2>
+          <p class="hero-subtitle">Join us in transforming cancer awareness, early screening, and patient navigation across India.</p>
+          <div class="hero-cta-group">
+            <button class="btn-primary" onclick="window.AvinyaModals.openSupportModal()">
+              <span>Get Support Now</span>
+              <span class="arrow">→</span>
+            </button>
+            <button class="btn-secondary btn-secondary-dark" onclick="window.AvinyaModals.openDonateModal(2500)">
+              <span>Donate ₹2,500</span>
+            </button>
+          </div>
         </div>
       </div>
 
+      <!-- Animated Scroll Indicator -->
       <div class="scroll-indicator">
         <div class="scroll-mouse">
           <div class="scroll-wheel"></div>
         </div>
-        <span>Scroll to Explore Story</span>
+        <span>SCROLL TO EXPLORE</span>
       </div>
     </div>
   </section>
 
-  <!-- 3. SECTION 2 — UNDERSTANDING CANCER -->
-  <section id="understanding" class="section-understanding">
-    <div class="section-header">
-      <span class="category-tag">Empowerment & Education</span>
-      <h2 class="section-title">Awareness is where change begins.</h2>
-      <p class="body-large">
-        Understanding cancer, recognizing early warning signs, and encouraging timely screening can help people make informed decisions about their health.
+  <!-- 3. NESTJS-STYLE CINEMATIC SCROLL TYPOGRAPHY SECTION (#hero-transition) -->
+  <section id="hero-transition" class="section-scroll-typography">
+    <div class="typography-sticky-viewport">
+      <!-- Lightweight Canvas for Floating Stars / Depth Particles -->
+      <canvas id="typography-particle-canvas"></canvas>
+
+      <div class="typography-stage-container">
+        <!-- Sentence 1: 0 - 18% Scroll -->
+        <div class="typography-sentence active" data-sentence="0">
+          <span class="typo-word">Cancer</span>
+          <span class="typo-word">can</span>
+          <span class="typo-word">feel</span>
+          <span class="typo-word">overwhelming.</span>
+        </div>
+
+        <!-- Sentence 2: 18 - 36% Scroll -->
+        <div class="typography-sentence" data-sentence="1">
+          <span class="typo-word">But</span>
+          <span class="typo-word">no</span>
+          <span class="typo-word">one</span>
+          <span class="typo-word">should</span>
+          <span class="typo-word">face</span>
+          <span class="typo-word">it</span>
+          <span class="typo-word">alone.</span>
+        </div>
+
+        <!-- Sentence 3: 36 - 54% Scroll -->
+        <div class="typography-sentence" data-sentence="2">
+          <span class="typo-word">Awareness</span>
+          <span class="typo-word">creates</span>
+          <span class="typo-word">understanding.</span>
+        </div>
+
+        <!-- Sentence 4: 54 - 72% Scroll -->
+        <div class="typography-sentence" data-sentence="3">
+          <span class="typo-word">Early</span>
+          <span class="typo-word">detection</span>
+          <span class="typo-word">creates</span>
+          <span class="typo-word">possibilities.</span>
+        </div>
+
+        <!-- Sentence 5: 72 - 86% Scroll -->
+        <div class="typography-sentence" data-sentence="4">
+          <span class="typo-word">Support</span>
+          <span class="typo-word">creates</span>
+          <span class="typo-word">strength.</span>
+        </div>
+
+        <!-- Sentence 6: 86 - 100% Scroll (Final Statement) -->
+        <div class="typography-sentence final-sentence" data-sentence="5">
+          <div class="final-headline">
+            <span class="typo-word">Together,</span>
+            <span class="typo-word">we</span>
+            <span class="typo-word">create</span>
+            <span class="typo-word accent-word">hope.</span>
+          </div>
+          <div class="final-sub-caption">
+            <span>AVINYA CARE FOUNDATION</span>
+            <span class="dot-sep">•</span>
+            <span>Awareness • Early Detection • Support</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. NESTJS 7-CARD INTERACTIVE OVERLAPPING HOVER STACK (#what-we-do) -->
+  <section id="what-we-do" class="section-nestjs-stack">
+    <div class="nestjs-stack-header">
+      <div class="eyebrow-pill" style="margin: 0 auto 1.25rem;">
+        <span class="dot"></span>
+        <span>AVINYA CARE CONTINUUM</span>
+      </div>
+      <h2 class="section-title section-title-dark" style="margin-bottom: 1.25rem;">
+        Support at <span style="color: var(--brand);">every step</span> of the journey.
+      </h2>
+      <p class="body-large-dark" style="max-width: 780px; margin: 0 auto;">
+        From initial awareness to long-term recovery, our 7-stage continuum ensures no individual or family faces cancer alone.
       </p>
     </div>
 
-    <div class="cards-grid">
-      <!-- Card 1: Learn -->
-      <div class="editorial-card">
-        <div>
-          <div class="card-icon-wrapper">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+    <!-- NestJS Interactive Card Stack Viewport -->
+    <div class="nestjs-stack-container" id="nestjs-card-stack">
+      
+      <!-- Card 01: Awareness -->
+      <div class="nestjs-stack-card" data-index="0" data-rot="-5" data-ty="14" tabindex="0" onclick="window.AvinyaModals.openGuideModal('Awareness')">
+        <div class="stack-card-inner">
+          <div class="stack-card-top">
+            <span class="stack-card-badge">01</span>
+            <div class="stack-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Ambient 3D Graphic Graphic -->
+          <div class="stack-card-graphic">
+            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
+              <circle cx="50" cy="50" r="40" stroke="url(#grad1)" stroke-width="1.5" stroke-dasharray="4 4"/>
+              <ellipse cx="50" cy="50" rx="35" ry="15" stroke="url(#grad1)" stroke-width="1"/>
+              <ellipse cx="50" cy="50" rx="15" ry="35" stroke="url(#grad1)" stroke-width="1"/>
+              <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#E0234E"/>
+                  <stop offset="100%" stop-color="#62B59F"/>
+                </linearGradient>
+              </defs>
             </svg>
           </div>
-          <h3 class="card-title">Learn</h3>
-          <p class="card-text">
-            Understand cancer types, early signals, lifestyle risk factors, and dispel common myths with evidence-based guidance.
-          </p>
+
+          <div class="stack-card-bottom">
+            <h3 class="stack-card-title">Awareness</h3>
+            <p class="stack-card-desc">Understand cancer risk, prevention, warning signs, and healthy choices.</p>
+            <div class="stack-card-action">
+              <span>Explore</span>
+              <span class="stack-arrow">→</span>
+            </div>
+          </div>
         </div>
-        <a href="#understanding" class="card-link" onclick="window.AvinyaModals.openGuideModal('Understanding Cancer')">
-          <span>Explore Knowledge Guide</span>
-          <span>→</span>
-        </a>
       </div>
 
-      <!-- Card 2: Detect -->
-      <div class="editorial-card">
-        <div>
-          <div class="card-icon-wrapper">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      <!-- Card 02: Screening -->
+      <div class="nestjs-stack-card" data-index="1" data-rot="6" data-ty="-8" tabindex="0" onclick="window.AvinyaModals.openGuideModal('Early Screening')">
+        <div class="stack-card-inner">
+          <div class="stack-card-top">
+            <span class="stack-card-badge">02</span>
+            <div class="stack-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Ambient 3D Graphic Graphic -->
+          <div class="stack-card-graphic">
+            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
+              <circle cx="50" cy="50" r="38" stroke="url(#grad2)" stroke-width="1.5"/>
+              <circle cx="50" cy="50" r="24" stroke="url(#grad2)" stroke-width="1" stroke-dasharray="6 3"/>
+              <circle cx="50" cy="50" r="10" stroke="url(#grad2)" stroke-width="1.5"/>
+              <defs>
+                <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#62B59F"/>
+                  <stop offset="100%" stop-color="#FFFFFF"/>
+                </linearGradient>
+              </defs>
             </svg>
           </div>
-          <h3 class="card-title">Detect</h3>
-          <p class="card-text">
-            Recognize the vital importance of routine health checkups, self-exams, and accessible screening clinics for early diagnosis.
-          </p>
+
+          <div class="stack-card-bottom">
+            <h3 class="stack-card-title">Screening</h3>
+            <p class="stack-card-desc">Encourage timely screening and early detection in communities.</p>
+            <div class="stack-card-action">
+              <span>Explore</span>
+              <span class="stack-arrow">→</span>
+            </div>
+          </div>
         </div>
-        <a href="#understanding" class="card-link" onclick="window.AvinyaModals.openGuideModal('Early Screening')">
-          <span>View Screening Checklist</span>
-          <span>→</span>
-        </a>
       </div>
 
-      <!-- Card 3: Support -->
-      <div class="editorial-card">
-        <div>
-          <div class="card-icon-wrapper">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      <!-- Card 03: Diagnosis -->
+      <div class="nestjs-stack-card" data-index="2" data-rot="-4" data-ty="18" tabindex="0" onclick="window.AvinyaModals.openSupportModal()">
+        <div class="stack-card-inner">
+          <div class="stack-card-top">
+            <span class="stack-card-badge">03</span>
+            <div class="stack-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Ambient 3D Graphic Graphic -->
+          <div class="stack-card-graphic">
+            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
+              <path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" stroke="url(#grad3)" stroke-width="1.5"/>
+              <path d="M50 25 L72 38 L72 62 L50 75 L28 62 L28 38 Z" stroke="url(#grad3)" stroke-width="1" stroke-dasharray="3 3"/>
+              <defs>
+                <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#E0234E"/>
+                  <stop offset="100%" stop-color="#FFFFFF"/>
+                </linearGradient>
+              </defs>
             </svg>
           </div>
-          <h3 class="card-title">Support</h3>
-          <p class="card-text">
-            Stand beside patients and families throughout treatment with emotional therapy, nutritional counseling, and caregiver aid.
-          </p>
+
+          <div class="stack-card-bottom">
+            <h3 class="stack-card-title">Diagnosis</h3>
+            <p class="stack-card-desc">Help people understand medical terminology & next steps after diagnosis.</p>
+            <div class="stack-card-action">
+              <span>Explore</span>
+              <span class="stack-arrow">→</span>
+            </div>
+          </div>
         </div>
-        <a href="#understanding" class="card-link" onclick="window.AvinyaModals.openDonateModal(50)">
-          <span>Sponsor Support Programs</span>
-          <span>→</span>
-        </a>
+      </div>
+
+      <!-- Card 04: Treatment -->
+      <div class="nestjs-stack-card" data-index="3" data-rot="3" data-ty="-12" tabindex="0" onclick="window.AvinyaModals.openSupportModal()">
+        <div class="stack-card-inner">
+          <div class="stack-card-top">
+            <span class="stack-card-badge">04</span>
+            <div class="stack-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Ambient 3D Graphic Graphic -->
+          <div class="stack-card-graphic">
+            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
+              <path d="M50 15 C 20 15, 15 45, 50 85 C 85 45, 80 15, 50 15 Z" stroke="url(#grad4)" stroke-width="1.5"/>
+              <path d="M50 30 C 30 30, 27 50, 50 75 C 73 50, 70 30, 50 30 Z" stroke="url(#grad4)" stroke-width="1" stroke-dasharray="4 3"/>
+              <defs>
+                <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#62B59F"/>
+                  <stop offset="100%" stop-color="#E0234E"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="stack-card-bottom">
+            <h3 class="stack-card-title">Treatment</h3>
+            <p class="stack-card-desc">Connect patients and families with clinical companions and resources.</p>
+            <div class="stack-card-action">
+              <span>Explore</span>
+              <span class="stack-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 05: Caregiving -->
+      <div class="nestjs-stack-card" data-index="4" data-rot="-3" data-ty="10" tabindex="0" onclick="window.AvinyaModals.openVolunteerModal()">
+        <div class="stack-card-inner">
+          <div class="stack-card-top">
+            <span class="stack-card-badge">05</span>
+            <div class="stack-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Ambient 3D Graphic Graphic -->
+          <div class="stack-card-graphic">
+            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
+              <circle cx="35" cy="45" r="22" stroke="url(#grad5)" stroke-width="1.5"/>
+              <circle cx="65" cy="45" r="22" stroke="url(#grad5)" stroke-width="1.5"/>
+              <circle cx="50" cy="65" r="18" stroke="url(#grad5)" stroke-width="1" stroke-dasharray="3 3"/>
+              <defs>
+                <linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#E0234E"/>
+                  <stop offset="100%" stop-color="#62B59F"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="stack-card-bottom">
+            <h3 class="stack-card-title">Caregiving</h3>
+            <p class="stack-card-desc">Support caregivers with respite care, emotional counseling, and guidance.</p>
+            <div class="stack-card-action">
+              <span>Explore</span>
+              <span class="stack-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 06: Recovery -->
+      <div class="nestjs-stack-card" data-index="5" data-rot="5" data-ty="-15" tabindex="0" onclick="window.AvinyaModals.openGuideModal('Recovery')">
+        <div class="stack-card-inner">
+          <div class="stack-card-top">
+            <span class="stack-card-badge">06</span>
+            <div class="stack-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Ambient 3D Graphic Graphic -->
+          <div class="stack-card-graphic">
+            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
+              <polygon points="50,10 63,35 90,40 70,60 75,88 50,75 25,88 30,60 10,40 37,35" stroke="url(#grad6)" stroke-width="1.5"/>
+              <polygon points="50,25 58,40 75,43 62,55 65,72 50,63 35,72 38,55 25,43 42,40" stroke="url(#grad6)" stroke-width="1" stroke-dasharray="3 3"/>
+              <defs>
+                <linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#62B59F"/>
+                  <stop offset="100%" stop-color="#FFFFFF"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="stack-card-bottom">
+            <h3 class="stack-card-title">Recovery</h3>
+            <p class="stack-card-desc">Encourage rehabilitation, long-term surveillance, and life beyond treatment.</p>
+            <div class="stack-card-action">
+              <span>Explore</span>
+              <span class="stack-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 07: Community -->
+      <div class="nestjs-stack-card" data-index="6" data-rot="-2" data-ty="8" tabindex="0" onclick="window.AvinyaModals.openDonateModal(1000)">
+        <div class="stack-card-inner">
+          <div class="stack-card-top">
+            <span class="stack-card-badge">07</span>
+            <div class="stack-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Ambient 3D Graphic Graphic -->
+          <div class="stack-card-graphic">
+            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
+              <circle cx="50" cy="50" r="35" stroke="url(#grad7)" stroke-width="1.5"/>
+              <path d="M15 50 Q 50 20 85 50 Q 50 80 15 50 Z" stroke="url(#grad7)" stroke-width="1.2"/>
+              <path d="M50 15 Q 20 50 50 85 Q 80 50 50 15 Z" stroke="url(#grad7)" stroke-width="1.2"/>
+              <defs>
+                <linearGradient id="grad7" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#E0234E"/>
+                  <stop offset="100%" stop-color="#62B59F"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="stack-card-bottom">
+            <h3 class="stack-card-title">Community</h3>
+            <p class="stack-card-desc">Build a compassionate ecosystem where no one faces cancer alone.</p>
+            <div class="stack-card-action">
+              <span>Explore</span>
+              <span class="stack-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 5. NESTJS-STYLE STACKED OVERLAPPING FEATURE PANELS (#deep-dives) -->
+  <section id="deep-dives" class="section-stacked-panels">
+    <div class="stacked-panels-header">
+      <span class="category-tag category-tag-dark">FEATURED CARE INITIATIVES</span>
+      <h2 class="section-title section-title-dark">Empowering patients & communities.</h2>
+      <p class="body-large-dark" style="max-width: 750px; margin: 0 auto;">
+        Explore our core operational pillars designed to detect cancer early and support families throughout their health journey.
+      </p>
+    </div>
+
+    <div class="stacked-panels-wrapper">
+      <!-- Panel 01: Deep Charcoal — AWARENESS & KNOWLEDGE -->
+      <div class="stacked-feature-panel dark-panel" data-panel="0">
+        <div class="panel-header">
+          <span class="panel-eyebrow">01 / AWARENESS & KNOWLEDGE</span>
+          <h3 class="panel-title">Know earlier.</h3>
+          <p class="panel-desc">
+            Knowledge is the first and strongest defense against cancer. By educating communities on early symptoms, risk factors, and routine self-examinations, we empower individuals to take control of their health long before clinical complications arise.
+          </p>
+          <button class="btn-primary" style="margin-top: 1.5rem;" onclick="window.AvinyaModals.openGuideModal('Cancer Awareness Toolkit')">
+            <span>Learn About Cancer Awareness</span>
+            <span class="arrow">→</span>
+          </button>
+        </div>
+
+        <div class="panel-visual-frame">
+          <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80" alt="Cancer Awareness Drive" class="panel-visual-image" loading="lazy">
+          <div class="panel-visual-overlay"></div>
+        </div>
+      </div>
+
+      <!-- Panel 02: Emerald Teal — EARLY SCREENING -->
+      <div class="stacked-feature-panel teal-panel" data-panel="1">
+        <div class="panel-header">
+          <span class="panel-eyebrow">02 / EARLY SCREENING</span>
+          <h3 class="panel-title">Don't wait for symptoms.</h3>
+          <p class="panel-desc">
+            Most early-stage cancers produce zero physical pain or symptoms. Our mobile diagnostic screening initiatives bring state-of-the-art screening closer to communities, making routine checkups accessible, affordable, and stress-free.
+          </p>
+          <button class="btn-primary" style="margin-top: 1.5rem; background: #FFFFFF; color: var(--brand);" onclick="window.AvinyaModals.openGuideModal('Early Screening')">
+            <span>View Screening Guide</span>
+            <span class="arrow">→</span>
+          </button>
+        </div>
+
+        <div class="panel-visual-frame">
+          <img src="https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=1200&q=80" alt="Early Screening Diagnostic" class="panel-visual-image" loading="lazy">
+          <div class="panel-visual-overlay"></div>
+        </div>
+      </div>
+
+      <!-- Panel 03: Warm Cream — HUMAN CARE -->
+      <div class="stacked-feature-panel light-panel" data-panel="2">
+        <div class="panel-header">
+          <span class="panel-eyebrow" style="color: var(--brand);">03 / HUMAN CARE</span>
+          <h3 class="panel-title" style="color: #0B0D0C;">Care doesn't end with diagnosis.</h3>
+          <p class="panel-desc" style="color: #404040;">
+            Navigating treatment options, medical terminology, and emotional strain can feel overwhelming. Our trained care navigators walk alongside patients and families every single step of the way.
+          </p>
+          <button class="btn-primary" style="margin-top: 1.5rem;" onclick="window.AvinyaModals.openSupportModal()">
+            <span>Get Patient Support</span>
+            <span class="arrow">→</span>
+          </button>
+        </div>
+
+        <div class="panel-visual-frame">
+          <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80" alt="Compassionate Care Navigator" class="panel-visual-image" loading="lazy">
+          <div class="panel-visual-overlay"></div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 4. SECTION 3 — CONTINUUM OF CARE (SCROLL STORYTELLING ANIMATION) -->
+  <!-- 6. CONTINUUM OF CARE — NESTJS 3D OVERLAPPING CARDS DECK (#journey) -->
   <section id="journey" class="section-journey">
-    <div class="journey-sticky-viewport">
-      <div class="section-header">
-        <span class="category-tag">Continuum of Care</span>
-        <h2 class="section-title">Every journey is different.</h2>
-        <p class="body-large">
-          From early knowledge to recovery, we provide compassionate companionship at every milestone.
-        </p>
+    <div class="journey-wrapper">
+      <div class="nestjs-split-header">
+        <div class="header-left">
+          <span class="category-tag category-tag-dark">THE CONTINUUM OF CARE</span>
+          <h2 class="section-title section-title-dark">Every step of your health journey.</h2>
+        </div>
+        <div class="header-right">
+          <p class="body-large-dark">
+            Built on human compassion and clinical excellence, Avinya Care guides individuals through every milestone — keeping hope clear, accessible, and supported at every stage.
+          </p>
+        </div>
       </div>
 
-      <div class="timeline-container">
-        <div class="timeline-line"></div>
-        <div class="timeline-progress"></div>
+      <!-- NestJS Stacked 3D Overlapping Card Deck Carousel -->
+      <div class="nestjs-card-deck-viewport">
+        <div id="nestjs-card-deck-track" class="nestjs-card-deck-track">
+          <!-- Card 01: Awareness -->
+          <div class="nestjs-deck-card active" data-index="0" onclick="window.AvinyaTimeline.goToStage(0)">
+            <div class="card-3d-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v4l3 3"/>
+              </svg>
+            </div>
+            <div>
+              <div class="card-step-num">01 / STAGE</div>
+              <h3 class="card-deck-title">Awareness & Education</h3>
+              <p class="card-deck-desc">
+                Recognizing early warning signs, understanding risk factors, and eliminating social stigma in communities.
+              </p>
+            </div>
+            <button class="btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;" onclick="window.AvinyaModals.openGuideModal('Awareness Toolkit')">
+              <span>View Toolkit →</span>
+            </button>
+          </div>
 
-        <div class="timeline-stages">
-          <div class="timeline-node active">
-            <div class="node-dot"></div>
-            <span class="node-step">01</span>
-            <span class="node-title">Awareness</span>
+          <!-- Card 02: Screening -->
+          <div class="nestjs-deck-card" data-index="1" onclick="window.AvinyaTimeline.goToStage(1)">
+            <div class="card-3d-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </div>
+            <div>
+              <div class="card-step-num">02 / STAGE</div>
+              <h3 class="card-deck-title">Early Detection</h3>
+              <p class="card-deck-desc">
+                Mobile screening vans, mammograms, and clinical checkups catching signs long before physical symptoms appear.
+              </p>
+            </div>
+            <button class="btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;" onclick="window.AvinyaModals.openGuideModal('Early Screening')">
+              <span>Find Screening Camp →</span>
+            </button>
           </div>
-          <div class="timeline-node">
-            <div class="node-dot"></div>
-            <span class="node-step">02</span>
-            <span class="node-title">Screening</span>
+
+          <!-- Card 03: Diagnosis -->
+          <div class="nestjs-deck-card" data-index="2" onclick="window.AvinyaTimeline.goToStage(2)">
+            <div class="card-3d-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="card-step-num">03 / STAGE</div>
+              <h3 class="card-deck-title">Clinical Navigation</h3>
+              <p class="card-deck-desc">
+                Helping patients interpret biopsy results, connect with leading oncologists, and navigate financial aid & 80G grants.
+              </p>
+            </div>
+            <button class="btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;" onclick="window.AvinyaModals.openSupportModal()">
+              <span>Speak with Navigator →</span>
+            </button>
           </div>
-          <div class="timeline-node">
-            <div class="node-dot"></div>
-            <span class="node-step">03</span>
-            <span class="node-title">Diagnosis</span>
+
+          <!-- Card 04: Treatment -->
+          <div class="nestjs-deck-card" data-index="3" onclick="window.AvinyaTimeline.goToStage(3)">
+            <div class="card-3d-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="card-step-num">04 / STAGE</div>
+              <h3 class="card-deck-title">Treatment Support</h3>
+              <p class="card-deck-desc">
+                Bedside companion volunteers, clinical nutrition management, and emotional support for family caregivers.
+              </p>
+            </div>
+            <button class="btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;" onclick="window.AvinyaModals.openSupportModal()">
+              <span>Request Companion →</span>
+            </button>
           </div>
-          <div class="timeline-node">
-            <div class="node-dot"></div>
-            <span class="node-step">04</span>
-            <span class="node-title">Treatment</span>
-          </div>
-          <div class="timeline-node">
-            <div class="node-dot"></div>
-            <span class="node-step">05</span>
-            <span class="node-title">Recovery</span>
+
+          <!-- Card 05: Recovery -->
+          <div class="nestjs-deck-card" data-index="4" onclick="window.AvinyaTimeline.goToStage(4)">
+            <div class="card-3d-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </div>
+            <div>
+              <div class="card-step-num">05 / STAGE</div>
+              <h3 class="card-deck-title">Survivorship & Hope</h3>
+              <p class="card-deck-desc">
+                Post-treatment rehabilitation, ongoing surveillance monitoring, and thriving survivor mentorship circles.
+              </p>
+            </div>
+            <button class="btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;" onclick="window.AvinyaModals.openVolunteerModal()">
+              <span>Join Survivor Circle →</span>
+            </button>
           </div>
         </div>
+      </div>
 
-        <!-- Active Stage Detail Box -->
-        <div id="journey-detail-card" class="journey-detail-card">
-          <!-- Rendered dynamically via js/timeline.js -->
+      <!-- Controls & Progress Dots -->
+      <div class="nestjs-deck-controls">
+        <button class="deck-arrow-btn prev" onclick="window.AvinyaTimeline.prevCard()" aria-label="Previous Stage">←</button>
+        <div class="deck-dots">
+          <span class="deck-dot active" onclick="window.AvinyaTimeline.goToStage(0)"></span>
+          <span class="deck-dot" onclick="window.AvinyaTimeline.goToStage(1)"></span>
+          <span class="deck-dot" onclick="window.AvinyaTimeline.goToStage(2)"></span>
+          <span class="deck-dot" onclick="window.AvinyaTimeline.goToStage(3)"></span>
+          <span class="deck-dot" onclick="window.AvinyaTimeline.goToStage(4)"></span>
         </div>
+        <button class="deck-arrow-btn next" onclick="window.AvinyaTimeline.nextCard()" aria-label="Next Stage">→</button>
       </div>
     </div>
   </section>
 
-  <!-- 5. SECTION 4 — HUMAN STORIES -->
+  <!-- 7. HUMAN STORIES (DEEP BLACK #0A0A0A) -->
   <section id="stories" class="section-stories">
-    <div class="section-header">
-      <span class="category-tag">Voices of Courage</span>
-      <h2 class="section-title">Behind every diagnosis is a person.</h2>
-      <p class="body-large">
-        Real stories of resilience, companionship, and hope from survivors, caregivers, and supporters.
+    <div class="section-header-center">
+      <span class="category-tag category-tag-dark">VOICES OF COURAGE</span>
+      <h2 class="section-title section-title-dark">Every journey has a story.</h2>
+      <p class="body-large-dark">
+        Behind every diagnosis is a person, a family, and a community standing together.
       </p>
     </div>
 
     <div class="stories-grid">
-      <!-- Story 1: Survivor -->
-      <div class="story-card" onclick="window.AvinyaModals.openStoryModal('Ananya Roy', 'Breast Cancer Survivor', 'The day I received my diagnosis, fear froze me. But having a mentor walk me through every step restored my strength.', 'Ananya was diagnosed with Stage II breast cancer at age 34. Through Avinya\'s peer support network, she was paired with a survivor mentor who answered her questions and stood by her side during chemotherapy.', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80')">
+      <!-- Story 1: Featured Survivor -->
+      <div class="story-card" onclick="window.AvinyaModals.openStoryModal('Ananya Roy', '5-Year Breast Cancer Survivor', 'The day I received my diagnosis, fear took over. But having a care navigator walk with me changed everything. I was never alone.', 'Ananya was diagnosed with Stage 2 breast cancer during a routine community screening drive organized by Avinya Care Foundation in Mumbai. Today, she mentors newly diagnosed patients.', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80')">
         <div class="story-image-box">
-          <span class="story-badge">Survivor</span>
-          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80" alt="Ananya Roy" class="story-image" loading="lazy">
+          <span class="story-badge">01 SURVIVOR</span>
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80" alt="Ananya Roy" class="story-image" loading="lazy">
         </div>
         <div class="story-content">
-          <p class="story-quote">"Having a mentor walk me through every step restored my strength."</p>
+          <p class="story-quote">"Having someone explain each medical step brought peace when everything felt uncertain."</p>
           <div class="story-meta">
             <div>
-              <div class="story-author">Ananya Roy</div>
-              <div class="story-role">Survivor & Advocate</div>
+              <div class="story-author">Ananya's Journey</div>
+              <div class="story-role">5-Year Survivor • Mumbai</div>
             </div>
-            <span style="color: var(--accent-teal); font-weight: 700;">Read Story →</span>
+            <span style="color: var(--brand); font-weight: 800; font-size: 0.95rem;">Read Story →</span>
           </div>
         </div>
       </div>
 
       <!-- Story 2: Caregiver -->
-      <div class="story-card" onclick="window.AvinyaModals.openStoryModal('Marcus Vance', 'Caregiver & Husband', 'Caregivers carry emotional weight silently. Avinya gave me a safe space and practical support when my wife was in treatment.', 'When Marcus\'s wife began radiation therapy, balancing work, family, and hospital visits became overwhelming. Avinya\'s caregiver relief program provided respite care and emotional counseling.', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80')">
+      <div class="story-card" onclick="window.AvinyaModals.openStoryModal('Marcus Vance', 'Family Caregiver', 'Caring for my father during chemotherapy was the hardest thing I have ever done. Avinya’s caregiver group gave me guidance and strength.', 'Marcus cared for his father through 8 rounds of treatment. He now leads caregiver peer support calls to help families navigate emotional burnout.', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80')">
         <div class="story-image-box">
-          <span class="story-badge">Caregiver</span>
+          <span class="story-badge">02 CAREGIVER</span>
           <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80" alt="Marcus Vance" class="story-image" loading="lazy">
         </div>
         <div class="story-content">
-          <p class="story-quote">"Caregivers carry emotional weight silently. Avinya gave us a safe space."</p>
+          <p class="story-quote">"Caregivers need support too. Knowing where to get answers made all the difference."</p>
           <div class="story-meta">
             <div>
-              <div class="story-author">Marcus Vance</div>
-              <div class="story-role">Family Caregiver</div>
+              <div class="story-author">Marcus's Journey</div>
+              <div class="story-role">Family Caregiver • Pune</div>
             </div>
-            <span style="color: var(--accent-teal); font-weight: 700;">Read Story →</span>
+            <span style="color: var(--brand); font-weight: 800; font-size: 0.95rem;">Read Story →</span>
           </div>
         </div>
       </div>
 
-      <!-- Story 3: Volunteer -->
-      <div class="story-card" onclick="window.AvinyaModals.openStoryModal('Dr. Priya Sharma', 'Oncology Volunteer', 'Early awareness changes lives. Seeing patients get diagnosed early and recover is the greatest reward.', 'Dr. Priya leads weekend rural screening drives across underserved regions, conducting early screening checkups and educating local communities.', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80')">
+      <!-- Story 3: Volunteer Doctor -->
+      <div class="story-card" onclick="window.AvinyaModals.openStoryModal('Dr. Priya Sharma', 'Oncology Volunteer', 'Early awareness changes lives. Seeing patients get diagnosed early and recover is the greatest reward.', 'Dr. Priya leads weekend rural screening drives across underserved regions in Maharashtra, conducting early checkups and educating local communities.', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80')">
         <div class="story-image-box">
-          <span class="story-badge">Volunteer Doctor</span>
+          <span class="story-badge">03 DOCTOR</span>
           <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80" alt="Dr. Priya Sharma" class="story-image" loading="lazy">
         </div>
         <div class="story-content">
           <p class="story-quote">"Early awareness changes lives. Seeing patients recover is our purpose."</p>
           <div class="story-meta">
             <div>
-              <div class="story-author">Dr. Priya Sharma</div>
-              <div class="story-role">Volunteer Oncologist</div>
+              <div class="story-author">Dr. Priya's Journey</div>
+              <div class="story-role">Volunteer Oncologist • Delhi</div>
             </div>
-            <span style="color: var(--accent-teal); font-weight: 700;">Read Story →</span>
+            <span style="color: var(--brand); font-weight: 800; font-size: 0.95rem;">Read Story →</span>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 6. SECTION 5 — HEALTH & CANCER NEWS (API INTEGRATION) -->
-  <section id="news" class="section-news">
-    <div class="section-header">
-      <span class="category-tag">STAY INFORMED</span>
-      <h2 class="section-title">Health & Cancer News</h2>
-      <p class="body-large">
-        Trusted health stories, cancer research, awareness updates, and breakthroughs from around the world.
-      </p>
-      <div class="news-updated-wrapper" style="margin-top: 1.25rem; display: flex; justify-content: center;">
-        <div class="news-updated-pill">
-          <span class="live-dot"></span>
-          <span id="news-updated-timestamp">Updated 15 minutes ago</span>
-        </div>
-      </div>
-      <div id="news-status-message"></div>
-    </div>
-
-    <!-- Category Filter Tabs & Gemini AI Generator -->
-    <div class="news-category-tabs" id="news-category-tabs">
-      <button class="news-tab-btn active" data-category="all" onclick="window.AvinyaNewsUI.filterCategory('all', this)">All Stories</button>
-      <button class="news-tab-btn" data-category="Cancer Research" onclick="window.AvinyaNewsUI.filterCategory('Cancer Research', this)">Cancer Research</button>
-      <button class="news-tab-btn" data-category="Early Detection" onclick="window.AvinyaNewsUI.filterCategory('Early Detection', this)">Early Detection</button>
-      <button class="news-tab-btn" data-category="Immunotherapy" onclick="window.AvinyaNewsUI.filterCategory('Immunotherapy', this)">Immunotherapy</button>
-      <button class="news-tab-btn" data-category="Prevention" onclick="window.AvinyaNewsUI.filterCategory('Prevention', this)">Prevention & Wellness</button>
-
-      <button id="ai-generate-topic-btn" class="news-ai-gen-btn" onclick="window.AvinyaNewsUI.generateAITopic(null, this)">
-        <span class="ai-sparkle">✨</span>
-        <span>Generate AI Topic with Gemini</span>
-      </button>
-    </div>
-
-    <div id="news-grid-container" class="news-grid">
-      <!-- Dynamic news card grid or skeletons rendered by js/components/news-ui.js -->
-    </div>
-
-    <!-- Show More / Show Less Button Bar -->
-    <div class="news-expand-bar" id="news-expand-bar">
-      <button id="news-show-more-btn" class="news-show-more-btn" onclick="window.AvinyaNewsUI.toggleShowMore()">
-        <span>Show More News Stories ↓</span>
-      </button>
-    </div>
-  </section>
-
-  <!-- 7. SECTION 6 — IMPACT METRICS -->
+  <!-- 8. CINEMATIC IMPACT METRICS (DEEP BLACK #0A0A0A & BRAND RED) -->
   <section id="impact" class="section-impact">
     <div class="impact-header">
-      <span class="category-tag" style="color: var(--accent-green);">Measurable Change</span>
-      <h2 class="section-title" style="color: #ffffff;">Your support creates impact.</h2>
-      <p class="body-large-dark">
+      <span class="category-tag category-tag-dark">MEASURABLE CHANGE</span>
+      <h2 class="section-title section-title-dark">Together, we create impact.</h2>
+      <p class="body-large-dark" style="margin: 0 auto;">
         Every contribution directly empowers individuals with knowledge, early screening, and compassionate care.
       </p>
     </div>
@@ -344,500 +853,496 @@
     <div class="stats-grid">
       <div class="stat-item">
         <div class="stat-number" data-target="10000" data-suffix="+">0</div>
-        <div class="stat-label">People Reached & Educated</div>
+        <div class="stat-label">PEOPLE REACHED</div>
       </div>
       <div class="stat-item">
         <div class="stat-number" data-target="5000" data-suffix="+">0</div>
-        <div class="stat-label">Awareness Interactions</div>
+        <div class="stat-label">AWARENESS INTERACTIONS</div>
       </div>
       <div class="stat-item">
         <div class="stat-number" data-target="1200" data-suffix="+">0</div>
-        <div class="stat-label">Screening & Support Initiatives</div>
+        <div class="stat-label">SCREENING INITIATIVES</div>
       </div>
       <div class="stat-item">
         <div class="stat-number" data-target="500" data-suffix="+">0</div>
-        <div class="stat-label">Active Volunteers & Advocates</div>
+        <div class="stat-label">VOLUNTEERS</div>
       </div>
     </div>
   </section>
 
-  <!-- 8. SECTION 7 — COMMUNITY -->
+  <!-- 9. INTERACTIVE COMMUNITY VISUAL MOSAIC -->
   <section class="section-community">
     <div class="community-wrapper">
-      <span class="category-tag">United for Hope</span>
-      <h2 class="section-title">One person can make a difference.<br>Together, we can make it bigger.</h2>
-      <p class="body-large" style="max-width: 650px; margin: 0 auto;">
-        Our vibrant network brings together cancer survivors, family members, medical specialists, and compassionate volunteers.
+      <span class="category-tag">UNITED FOR HOPE</span>
+      <h2 class="section-title">A community that stands together.</h2>
+      <p class="body-large" style="margin: 0 auto;">
+        Our network brings together survivors, caregivers, medical specialists, and advocates across India.
       </p>
 
-      <div class="community-grid">
-        <div class="community-card">
+      <div class="community-mosaic-grid">
+        <div class="community-mosaic-card">
           <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Elena R." class="community-avatar" loading="lazy">
           <div class="community-name">Elena R.</div>
           <span class="community-badge">5-Yr Survivor</span>
         </div>
-        <div class="community-card">
+        <div class="community-mosaic-card">
           <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80" alt="David K." class="community-avatar" loading="lazy">
           <div class="community-name">David K.</div>
           <span class="community-badge">Caregiver</span>
         </div>
-        <div class="community-card">
-          <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&q=80" alt="Sarah M." class="community-avatar" loading="lazy">
-          <div class="community-name">Sarah M.</div>
-          <span class="community-badge">Volunteer</span>
+        <div class="community-mosaic-card">
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80" alt="Dr. Alisha" class="community-avatar" loading="lazy">
+          <div class="community-name">Dr. Alisha M.</div>
+          <span class="community-badge">Oncologist</span>
         </div>
-        <div class="community-card">
-          <img src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=300&q=80" alt="Dr. Robert L." class="community-avatar" loading="lazy">
-          <div class="community-name">Dr. Robert L.</div>
-          <span class="community-badge">Medical Advisor</span>
+        <div class="community-mosaic-card">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80" alt="Rohan S." class="community-avatar" loading="lazy">
+          <div class="community-name">Rohan S.</div>
+          <span class="community-badge">Volunteer</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 9. SECTION 8 — GET INVOLVED -->
-  <section id="get-involved" class="section-get-involved">
-    <div class="section-header">
-      <span class="category-tag">Take Action</span>
-      <h2 class="section-title">Be the light in someone's journey.</h2>
+  <!-- 10. HEALTH & CANCER NEWSROOM (API INTEGRATION) -->
+  <section id="news" class="section-news">
+    <div class="section-header-center">
+      <div class="news-updated-pill">
+        <span class="live-dot"></span>
+        <span>HEALTH & ONCOLOGY JOURNAL</span>
+      </div>
+      <h2 class="section-title" style="margin-top: 1rem;">Cancer & Health Insights</h2>
       <p class="body-large">
-        Choose how you would like to stand with those affected by cancer today.
+        Stay informed with clinical research breakdowns, screening guidelines, and oncology news verified by medical advisors.
+      </p>
+
+      <!-- Category Filter Tabs + Gemini AI Badge -->
+      <div class="news-category-tabs">
+        <button class="news-tab-btn active" onclick="window.AvinyaNewsUI.filterCategory('all', this)">All</button>
+        <button class="news-tab-btn" onclick="window.AvinyaNewsUI.filterCategory('Cancer Research', this)">Cancer Research</button>
+        <button class="news-tab-btn" onclick="window.AvinyaNewsUI.filterCategory('Early Detection', this)">Early Detection</button>
+        <button class="news-tab-btn" onclick="window.AvinyaNewsUI.filterCategory('Prevention', this)">Prevention</button>
+        <button class="news-tab-btn" onclick="window.AvinyaNewsUI.filterCategory('Treatment', this)">Treatment</button>
+        <button class="news-tab-btn" onclick="window.AvinyaNewsUI.filterCategory('Care', this)">Care</button>
+        
+        <button class="news-ai-gen-btn" onclick="window.AvinyaNewsUI.generateAITopic()">
+          <span>✦ AI INSIGHT</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Dynamic Container: Featured Lead Banner Story -->
+    <div id="news-featured-container"></div>
+
+    <!-- Dynamic Container: 3-Column News Grid -->
+    <div id="news-grid-container" class="news-grid"></div>
+
+    <!-- Show More Action Bar -->
+    <div class="news-expand-bar">
+      <button id="news-show-more-btn" class="news-show-more-btn" onclick="window.AvinyaNewsUI.toggleShowMore()">
+        <span>Show More News Stories ↓</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- 11. TESTIMONIAL CAROUSEL SECTION (NESTJS STYLE) -->
+  <section class="section-testimonials">
+    <div class="section-header-center">
+      <span class="category-tag">COMMUNITY TRUST</span>
+      <h2 class="section-title">You don't have to walk this journey alone.</h2>
+      <p class="body-large">
+        Hear from patients, caregivers, and medical advisors supported by Avinya Care Foundation.
+      </p>
+    </div>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <p class="testimonial-quote">"When my mother was diagnosed, we were paralyzed by confusion. Avinya's navigator explained everything in plain language and guided us to the right hospital."</p>
+        <div class="testimonial-author-box">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" alt="Rajesh Kumar" class="testimonial-avatar">
+          <div>
+            <div class="testimonial-author-name">Rajesh Kumar</div>
+            <div class="testimonial-author-role">Caregiver • Bengaluru</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <p class="testimonial-quote">"The mobile screening camp saved my life. They caught a small anomaly early, before I felt any pain whatsoever. Early detection works."</p>
+        <div class="testimonial-author-box">
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80" alt="Meera Patel" class="testimonial-avatar">
+          <div>
+            <div class="testimonial-author-name">Meera Patel</div>
+            <div class="testimonial-author-role">3-Year Survivor • Ahmedabad</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <p class="testimonial-quote">"As an oncologist, seeing an organization bridge community awareness with timely hospital referrals is truly revolutionary for Indian cancer care."</p>
+        <div class="testimonial-author-box">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="Dr. Vikram Seth" class="testimonial-avatar">
+          <div>
+            <div class="testimonial-author-name">Dr. Vikram Seth</div>
+            <div class="testimonial-author-role">Senior Oncologist • Delhi</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. DONATE SECTION (DEEP BLACK #0A0A0A & BRAND RED) -->
+  <section id="get-involved" class="section-get-involved">
+    <div class="section-header-center">
+      <span class="category-tag category-tag-dark">MAKE A DIFFERENCE</span>
+      <h2 class="section-title section-title-dark">Your support can help someone take the next step.</h2>
+      <p class="body-large-dark">
+        Your contribution helps us build awareness, encourage early screening, and support people affected by cancer across India.
       </p>
     </div>
 
     <div class="action-grid">
-      <!-- DONATE -->
+      <!-- Donate Card (Brand Red Accent) -->
       <div class="action-card donate-theme">
         <div>
-          <span class="small-label" style="color: rgba(255,255,255,0.9);">Financial Contribution</span>
-          <h3 class="action-title">Donate</h3>
+          <span class="category-tag category-tag-dark" style="color: #FFFFFF;">DIRECT IMPACT</span>
+          <h3 class="action-title">Donate Support</h3>
           <p class="action-desc">
-            Your contribution directly funds screening kits, patient navigation, and caregiver support programs.
+            Fund early diagnostic screening camps, chemotherapy assistance, and caregiver care packages.
           </p>
+
+          <div class="indian-pay-badges">
+            <span class="pay-pill">₹ INR</span>
+            <span class="pay-pill">UPI</span>
+            <span class="pay-pill">GPay</span>
+            <span class="pay-pill">PhonePe</span>
+            <span class="pay-pill">Net Banking</span>
+            <span class="pay-pill">80G Tax Receipt</span>
+          </div>
         </div>
-        <button class="btn-primary" style="background-color: #ffffff; color: var(--accent-teal);" onclick="window.AvinyaModals.openDonateModal(100)">
-          <span>Donate Now</span>
-          <span>→</span>
+
+        <button class="btn-primary" style="background: #FFFFFF; color: var(--brand); width: 100%; justify-content: center;" onclick="window.AvinyaModals.openDonateModal(1000)">
+          <span>Donate Now →</span>
         </button>
       </div>
 
-      <!-- VOLUNTEER -->
+      <!-- Volunteer Card -->
       <div class="action-card volunteer-theme">
         <div>
-          <span class="small-label">Community Action</span>
-          <h3 class="action-title">Volunteer</h3>
-          <p class="action-desc">
-            Share your time, professional skills, or emotional empathy as a community advocate or peer mentor.
+          <span class="category-tag category-tag-dark">JOIN OUR NETWORK</span>
+          <h3 class="action-title" style="color: #FFFFFF;">Become a Volunteer</h3>
+          <p class="action-desc" style="color: var(--text-light-muted);">
+            Join our care navigation team, assist in community screening drives, or provide bedside patient companionship.
           </p>
         </div>
-        <button class="btn-secondary" onclick="window.AvinyaModals.openVolunteerModal()">
-          <span>Become a Volunteer</span>
-          <span>→</span>
+
+        <button class="btn-secondary btn-secondary-dark" style="width: 100%; justify-content: center;" onclick="window.AvinyaModals.openVolunteerModal()">
+          <span>Volunteer Application →</span>
         </button>
       </div>
 
-      <!-- SPREAD AWARENESS -->
+      <!-- Partner Card -->
       <div class="action-card awareness-theme">
         <div>
-          <span class="small-label" style="color: var(--accent-coral);">Advocacy</span>
-          <h3 class="action-title">Spread Awareness</h3>
-          <p class="action-desc">
-            Share knowledge, encourage routine screening in your community, and start life-saving conversations.
+          <span class="category-tag category-tag-dark">CORPORATE & CSR</span>
+          <h3 class="action-title" style="color: #FFFFFF;">Partner With Us</h3>
+          <p class="action-desc" style="color: var(--text-light-muted);">
+            Sponsor mobile diagnostic vans, corporate employee wellness drives, and regional health initiatives.
           </p>
         </div>
-        <button class="btn-secondary" onclick="window.AvinyaModals.openGuideModal('Spread Awareness')">
-          <span>Get Awareness Toolkit</span>
-          <span>→</span>
+
+        <button class="btn-secondary btn-secondary-dark" style="width: 100%; justify-content: center;" onclick="window.AvinyaModals.openCSRModal()">
+          <span>CSR Partnership →</span>
         </button>
       </div>
     </div>
   </section>
 
-  <!-- 10. SECTION 9 — FINAL CINEMATIC CTA -->
+  <!-- 13. FINAL CINEMATIC CTA (DEEP BLACK #0A0A0A) -->
   <section class="section-final-cta">
-    <div class="cta-glow"></div>
     <div class="cta-box">
-      <span class="category-tag" style="color: var(--accent-green);">Standing Together</span>
-      <h2 class="display-title" style="margin-bottom: 1.5rem;">No one should walk this journey alone.</h2>
-      <p class="body-large-dark" style="max-width: 680px; margin: 0 auto;">
-        Stand with those affected by cancer. Create awareness. Give support. Give hope.
+      <h2 class="display-title">No one should face cancer alone.</h2>
+      <div class="red-accent-line"></div>
+      <p class="body-large-dark" style="margin: 0.5rem auto 0; max-width: 650px; font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">
+        Together, we create hope.
       </p>
 
       <div class="cta-actions">
-        <button class="btn-primary" style="padding: 1rem 2.2rem; font-size: 1.05rem;" onclick="window.AvinyaModals.openDonateModal(100)">
-          <span>Support the Cause</span>
-          <span>→</span>
+        <button class="btn-primary" style="padding: 1rem 2.6rem; font-size: 1.05rem;" onclick="window.AvinyaModals.openSupportModal()">
+          <span>Get Support →</span>
         </button>
-        <button class="btn-secondary btn-secondary-dark" style="padding: 1rem 2.2rem; font-size: 1.05rem;" onclick="window.AvinyaModals.openGuideModal('Avinya Mission')">
-          <span>Learn More</span>
+        <button class="btn-secondary btn-secondary-dark" style="padding: 1rem 2.6rem; font-size: 1.05rem;" onclick="window.AvinyaModals.openDonateModal(2500)">
+          <span>Donate →</span>
         </button>
       </div>
     </div>
   </section>
 
-  <!-- 11. FOOTER -->
+  <!-- 14. NESTJS-INSPIRED MINIMAL FOOTER (DEEP BLACK #0A0A0A) -->
   <footer class="footer">
     <div class="footer-top">
       <div>
         <div class="footer-brand">Avinya Care Foundation</div>
-        <p class="footer-tagline">“Together for a future without fear.”</p>
+        <p class="footer-tagline">No one should face cancer alone.</p>
+        <p style="font-size: 0.88rem; color: var(--text-light-sub); line-height: 1.6;">
+          Registered Non-Profit Indian Humanitarian Organization.<br>
+          80G & 12A Tax Exempted under IT Act.
+        </p>
       </div>
+
       <div>
-        <h4 class="footer-heading">Navigation</h4>
+        <h4 class="footer-heading">Explore</h4>
         <ul class="footer-links">
-          <li><a href="#hero" class="footer-link">Home</a></li>
-          <li><a href="#understanding" class="footer-link">Our Mission</a></li>
-          <li><a href="#journey" class="footer-link">Cancer Awareness</a></li>
-          <li><a href="#stories" class="footer-link">Human Stories</a></li>
-          <li><a href="#news" class="footer-link">Health News</a></li>
-          <li><a href="#impact" class="footer-link">Our Impact</a></li>
+          <li><a href="#hero" class="footer-link">About</a></li>
+          <li><a href="#what-we-do" class="footer-link">Awareness</a></li>
+          <li><a href="#stories" class="footer-link">Stories</a></li>
+          <li><a href="#impact" class="footer-link">Impact</a></li>
+          <li><a href="#news" class="footer-link">News</a></li>
         </ul>
       </div>
+
       <div>
-        <h4 class="footer-heading">Get Involved & Forms</h4>
+        <h4 class="footer-heading">Get Involved</h4>
         <ul class="footer-links">
-          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openDonateModal(1000)">Donate (80G Receipt)</a></li>
-          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openVolunteerModal()">Become a Volunteer</a></li>
-          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openPartnershipModal()">Corporate CSR & Partner</a></li>
-          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openNewsletterModal()">Subscribe to Newsletter</a></li>
-          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openFeedbackModal()">Share Feedback</a></li>
+          <li><a href="#get-involved" class="footer-link" onclick="window.AvinyaModals.openDonateModal(1000)">Donate</a></li>
+          <li><a href="#get-involved" class="footer-link" onclick="window.AvinyaModals.openVolunteerModal()">Volunteer</a></li>
+          <li><a href="#get-involved" class="footer-link" onclick="window.AvinyaModals.openCSRModal()">CSR</a></li>
+          <li><a href="#get-involved" class="footer-link" onclick="window.AvinyaModals.openCSRModal()">Partner</a></li>
         </ul>
       </div>
+
       <div>
-        <h4 class="footer-heading">Contact & Patient Helpline</h4>
+        <h4 class="footer-heading">Support</h4>
         <ul class="footer-links">
-          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openSupportModal()">Patient & Caregiver Support</a></li>
-          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openContactModal()">Contact Us</a></li>
-          <li><a href="mailto:care@avinyacare.org" class="footer-link">care@avinyacare.org</a></li>
-          <li><a href="https://wa.me/919876543210?text=Hello%20Avinya%20Care%20Foundation%2C%20I%20would%20like%20to%20get%20cancer%20support" target="_blank" rel="noopener noreferrer" class="footer-link">Helpline / WhatsApp: +91 98765 43210</a></li>
-          <li><span class="footer-link">Centers: Mumbai | Pune | Bengaluru | New Delhi</span></li>
+          <li><a href="#" class="footer-link" onclick="window.AvinyaModals.openSupportModal(); return false;">Patient Support</a></li>
+          <li><a href="#" class="footer-link" onclick="window.AvinyaModals.openContactModal(); return false;">Contact</a></li>
+          <li><a href="https://wa.me/919876543210" target="_blank" class="footer-link">WhatsApp</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">Legal</h4>
+        <ul class="footer-links">
+          <li><a href="#" class="footer-link" onclick="alert('Avinya Care Foundation Privacy Policy: All information is confidential.'); return false;">Privacy</a></li>
+          <li><a href="#" class="footer-link" onclick="alert('Terms of Service: Avinya Care provides educational navigation support.'); return false;">Terms</a></li>
+          <li><a href="#" class="footer-link" onclick="alert('Disclaimer: Educational purpose only.'); return false;">Disclaimer</a></li>
+          <li><a href="#" class="footer-link" onclick="alert('80G Certificate: All donations are eligible for 80G tax benefit.'); return false;">80G / 12A</a></li>
         </ul>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <div>© 2026 Avinya Care Foundation. Reg. NGO 80G/12A Tax Exempted. All rights reserved.</div>
-      <div style="display: flex; gap: 1.5rem;">
-        <a href="#" class="footer-link">Privacy Policy</a>
-        <a href="#" class="footer-link">Terms of Service</a>
-        <a href="#" class="footer-link">Accessibility Statement</a>
-      </div>
+      <div>© 2026 Avinya Care Foundation. All rights reserved.</div>
+      <div>Confidential Helpline: <strong>+91 98765 43210</strong> (24/7 Support)</div>
     </div>
   </footer>
 
-  <!-- WhatsApp Floating Action Button (India-First UX) -->
-  <a href="https://wa.me/919876543210?text=Hello%20Avinya%20Care%20Foundation%2C%20I%20would%20like%20to%20get%20cancer%20support" target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" aria-label="Talk to our team on WhatsApp">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+  <!-- Floating WhatsApp Support Button -->
+  <a href="https://wa.me/919876543210" target="_blank" class="whatsapp-float-btn" aria-label="Chat with Support on WhatsApp">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-0.999 3.648 3.742-.981z"/>
     </svg>
-    <span>Chat on WhatsApp</span>
+    <span>Need support? Chat on WhatsApp</span>
   </a>
 
-  <!-- 12. MODAL DIALOGS -->
-  <!-- A. DONATION MODAL (India-First ₹ INR / UPI / 80G Tax Exemption) -->
+  <!-- ==========================================================================
+     15. APPLE-STYLE 9 MODAL DIALOGS
+     ========================================================================== -->
+  <!-- 1. Donate Modal -->
   <div id="donate-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      
-      <span class="category-tag">80G Tax Exempted Contribution</span>
-      <h2 style="font-size: 2rem; margin-top: 0.5rem; margin-bottom: 1rem;">Stand with a Cancer Patient Today</h2>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <div class="category-tag">MAKE A DIFFERENCE</div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Sponsor Care & Early Detection</h3>
+      <p style="color: var(--muted); font-size: 0.95rem;">Choose an amount to support cancer awareness and screening drives across India.</p>
 
       <div class="donation-toggle">
-        <button id="freq-monthly" class="toggle-option active" onclick="window.AvinyaModals.setDonationFrequency(true)">Donate Monthly</button>
-        <button id="freq-onetime" class="toggle-option" onclick="window.AvinyaModals.setDonationFrequency(false)">Give One-Time</button>
+        <button id="toggle-one-time" class="toggle-option active" onclick="window.AvinyaModals.setDonationType('one-time')">One-Time</button>
+        <button id="toggle-monthly" class="toggle-option" onclick="window.AvinyaModals.setDonationType('monthly')">Monthly</button>
       </div>
 
       <div class="amount-grid">
-        <button class="amount-btn" data-amount="500" onclick="window.AvinyaModals.setDonationAmount(500)">₹500</button>
-        <button class="amount-btn active" data-amount="1000" onclick="window.AvinyaModals.setDonationAmount(1000)">₹1,000</button>
-        <button class="amount-btn" data-amount="2500" onclick="window.AvinyaModals.setDonationAmount(2500)">₹2,500</button>
-        <button class="amount-btn" data-amount="5000" onclick="window.AvinyaModals.setDonationAmount(5000)">₹5,000</button>
-        <button class="amount-btn" data-amount="10000" onclick="window.AvinyaModals.setDonationAmount(10000)">₹10,000</button>
+        <button class="amount-btn" onclick="window.AvinyaModals.selectAmount(500)">₹500</button>
+        <button class="amount-btn active" onclick="window.AvinyaModals.selectAmount(1000)">₹1,000</button>
+        <button class="amount-btn" onclick="window.AvinyaModals.selectAmount(2500)">₹2,500</button>
+        <button class="amount-btn" onclick="window.AvinyaModals.selectAmount(5000)">₹5,000</button>
+        <button class="amount-btn" onclick="window.AvinyaModals.selectAmount(10000)">₹10k</button>
       </div>
 
-      <div style="margin-bottom: 1.25rem;">
-        <input type="number" id="custom-amount-input" placeholder="Or enter custom amount in Rupees (₹)" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); font-size: 1rem;" oninput="window.AvinyaModals.setCustomAmount(this.value)">
+      <div id="impact-calculator-statement" class="impact-calculator-box">
+        ✨ <strong>Impact:</strong> ₹1,000 provides early screening kit & guidance for 2 individuals.
       </div>
 
-      <!-- Payment Method Badges (UPI, Net Banking, Cards) -->
-      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
-        <span class="payment-pill">✓ UPI / GPay / PhonePe / Paytm</span>
-        <span class="payment-pill">✓ Net Banking</span>
-        <span class="payment-pill">✓ RuPay / Visa / Mastercard</span>
-      </div>
-
-      <div id="impact-calculator-text" class="impact-calculator-box">
-        <!-- Rendered via js/modals.js -->
-      </div>
-
-      <form onsubmit="window.AvinyaModals.handleDonationSubmit(event)">
+      <form onsubmit="window.AvinyaModals.submitDonation(event)">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <input type="text" placeholder="First Name" required style="padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-          <input type="text" placeholder="Last Name" required style="padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
+          <input type="text" id="donor-name" placeholder="Full Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
+          <input type="email" id="donor-email" placeholder="Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-          <input type="email" placeholder="Email (for 80G Receipt)" required style="padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-          <input type="tel" placeholder="Mobile / WhatsApp Number (+91)" required style="padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <input type="tel" id="donor-phone" placeholder="Phone (For 80G Receipt) *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
+          <input type="text" id="donor-pan" placeholder="PAN Card (Optional 80G Tax)" style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
         </div>
-        <input type="text" placeholder="PAN Card Number (Required for 80G Tax Receipt)" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); margin-bottom: 1.5rem; text-transform: uppercase;">
-        
-        <button id="donate-submit-btn" type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
-          Donate ₹1,000/month via UPI / NetBanking
+
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
+          <span>Proceed to Payment (UPI / Cards / NetBanking) →</span>
         </button>
       </form>
     </div>
   </div>
 
-  <!-- B. STORY READER MODAL -->
+  <!-- 2. Story Reader Modal -->
   <div id="story-modal" class="modal-backdrop">
-    <div class="modal-container">
-      <!-- Dynamic story content inserted via js/modals.js -->
+    <div class="modal-container" style="width: min(750px, 100%);">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <img id="modal-story-img" src="" alt="Story Cover" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover;">
+        <div>
+          <span id="modal-story-role" class="category-tag">STORY</span>
+          <h3 id="modal-story-author" style="font-size: 1.8rem; font-weight: 800;">Author Name</h3>
+        </div>
+      </div>
+      <p id="modal-story-quote" style="font-size: 1.2rem; font-style: italic; color: var(--brand); margin-bottom: 1.25rem; font-weight: 600;"></p>
+      <p id="modal-story-body" style="font-size: 1rem; color: var(--muted); line-height: 1.7;"></p>
     </div>
   </div>
 
-  <!-- C. VOLUNTEER MODAL -->
+  <!-- 3. Volunteer Application Modal -->
   <div id="volunteer-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <span class="category-tag">Join Our Mission</span>
-      <h2 style="font-size: 2rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">Become an Avinya Volunteer</h2>
-
-      <form onsubmit="window.AvinyaModals.handleVolunteerSubmit(event)">
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Full Name</label>
-          <input type="text" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-        </div>
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Email Address</label>
-          <input type="email" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-        </div>
-        <div style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">How would you like to contribute?</label>
-          <select style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); background: white;">
-            <option>Community Awareness & Event Ambassador</option>
-            <option>Peer Survivor Mentor</option>
-            <option>Medical & Nursing Volunteer</option>
-            <option>Caregiver Support Specialist</option>
-          </select>
-        </div>
-        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
-          Submit Application
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <div class="category-tag">JOIN OUR COMMUNITY</div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Volunteer Application</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Join our care navigation team or assist in community screening drives.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Volunteer Application')">
+        <input type="text" placeholder="Full Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="email" placeholder="Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="tel" placeholder="Phone Number *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <select required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.5rem;">
+          <option value="">Select Volunteer Role</option>
+          <option value="Care Companion">Care Companion / Patient Helper</option>
+          <option value="Medical Specialist">Medical Specialist / Oncologist</option>
+          <option value="Community Organizer">Community Screening Organizer</option>
+          <option value="Event Helper">Event & Logistics Helper</option>
+        </select>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Submit Volunteer Profile →</span>
         </button>
       </form>
     </div>
   </div>
 
-  <!-- D. AWARENESS GUIDE MODAL -->
+  <!-- 4. Guide & Toolkit Modal -->
   <div id="guide-modal" class="modal-backdrop">
     <div class="modal-container">
-      <!-- Dynamic guide content inserted via js/modals.js -->
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <div class="category-tag">KNOWLEDGE RESOURCE</div>
+      <h3 id="modal-guide-title" style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Cancer Awareness Toolkit</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Enter your email to receive our comprehensive cancer screening checklist & multi-lingual guide PDF.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Guide Download')">
+        <input type="email" placeholder="Your Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.25rem;">
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Download Free Toolkit PDF →</span>
+        </button>
+      </form>
     </div>
   </div>
 
-  <!-- E. PATIENT SUPPORT HELPLINE MODAL -->
+  <!-- 5. Confidential Support Modal -->
   <div id="support-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <span class="category-tag">Compassionate Care Navigation</span>
-      <h2 style="font-size: 2rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">Request Patient & Family Support</h2>
-
-      <form onsubmit="window.AvinyaModals.handleSupportSubmit(event)">
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Full Name</label>
-          <input type="text" name="name" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div>
-            <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Email Address</label>
-            <input type="email" name="email" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-          </div>
-          <div>
-            <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Mobile / WhatsApp Number (+91)</label>
-            <input type="tel" name="phone" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-          </div>
-        </div>
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Support Needed</label>
-          <select name="category" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); background: white;">
-            <option>Early Screening Navigation & Camp Schedule</option>
-            <option>Emotional & Caregiver Support Group</option>
-            <option>Treatment & Financial Navigation Guidance</option>
-            <option>Post-Treatment Survivorship Wellness</option>
-          </select>
-        </div>
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">How can our care team assist you?</label>
-          <textarea name="message" rows="3" placeholder="Share any relevant context or questions safely..." style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);"></textarea>
-        </div>
-        <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-dark-muted);">
-          <input type="checkbox" name="is_sensitive" id="support-sensitive-check" checked style="width: 16px; height: 16px;">
-          <label for="support-sensitive-check">Treat this submission with strict confidentiality</label>
-        </div>
-        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
-          Submit Confidential Support Request
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <div class="category-tag">CONFIDENTIAL HELPLINE</div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Request Patient Navigation Support</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Our care navigators provide free, confidential support for patients, caregivers, and families.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Support Request')">
+        <input type="text" placeholder="Patient or Caregiver Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="tel" placeholder="Phone Number (For Call / WhatsApp) *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <textarea placeholder="How can our care navigators support you? (e.g., screening guidance, hospital navigation, counseling)" rows="3" style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.5rem;"></textarea>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Request Confidential Callback →</span>
         </button>
       </form>
     </div>
   </div>
 
-  <!-- F. CONTACT US MODAL -->
+  <!-- 6. General Contact Modal -->
   <div id="contact-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <span class="category-tag">Get in Touch</span>
-      <h2 style="font-size: 2rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">Contact Avinya Care Foundation</h2>
-
-      <form onsubmit="window.AvinyaModals.handleContactSubmit(event)">
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Your Full Name</label>
-          <input type="text" name="name" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div>
-            <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Email Address</label>
-            <input type="email" name="email" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-          </div>
-          <div>
-            <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Mobile / Phone Number</label>
-            <input type="tel" name="phone" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-          </div>
-        </div>
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Subject / Enquiry Category</label>
-          <select name="subject" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); background: white;">
-            <option>General Healthcare Inquiry</option>
-            <option>Diagnostic Mobile Camps Information</option>
-            <option>Media & Press Inquiry</option>
-            <option>80G Tax Receipt Support</option>
-          </select>
-        </div>
-        <div style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Message</label>
-          <textarea name="message" rows="3" required placeholder="Type your inquiry message here..." style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);"></textarea>
-        </div>
-        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
-          Send Message
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <div class="category-tag">GET IN TOUCH</div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Contact Avinya Care</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Send us a message and our team will get back to you within 24 hours.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Contact Message')">
+        <input type="text" placeholder="Your Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="email" placeholder="Your Email *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <textarea placeholder="Your Message *" rows="3" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.5rem;"></textarea>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Send Message →</span>
         </button>
       </form>
     </div>
   </div>
 
-  <!-- G. CORPORATE CSR & PARTNERSHIP MODAL -->
-  <div id="partnership-modal" class="modal-backdrop">
+  <!-- 7. CSR Partnership Modal -->
+  <div id="csr-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <span class="category-tag">Institutional Alliances</span>
-      <h2 style="font-size: 2rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">Corporate CSR & Partner With Us</h2>
-
-      <form onsubmit="window.AvinyaModals.handlePartnershipSubmit(event)">
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Contact Person Name</label>
-          <input type="text" name="name" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-          <div>
-            <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Official Email Address</label>
-            <input type="email" name="email" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-          </div>
-          <div>
-            <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Company / Organization Name</label>
-            <input type="text" name="organization" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-          </div>
-        </div>
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Partnership Type</label>
-          <select name="partnershipType" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); background: white;">
-            <option>Corporate CSR Screening Van Sponsorship</option>
-            <option>Hospital & Oncology Clinical Collaboration</option>
-            <option>Employee Health & Wellness Awareness Camps</option>
-            <option>Institutional Grant Partnership</option>
-          </select>
-        </div>
-        <div style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Proposal Overview / Message</label>
-          <textarea name="message" rows="3" placeholder="Briefly describe your partnership goals or CSR vision..." style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);"></textarea>
-        </div>
-        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
-          Submit Partnership Lead
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <div class="category-tag">CORPORATE PARTNERSHIP</div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">CSR & Corporate Collaboration</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Partner with Avinya Care Foundation for employee wellness drives, mobile screening vans, and community health initiatives.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'CSR Inquiry')">
+        <input type="text" placeholder="Organization / Company Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="text" placeholder="Contact Person Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="email" placeholder="Work Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.5rem;">
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Request CSR Proposal →</span>
         </button>
       </form>
     </div>
   </div>
 
-  <!-- H. NEWSLETTER SUBSCRIPTION MODAL -->
+  <!-- 8. Newsletter Modal -->
   <div id="newsletter-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <span class="category-tag">Stay Informed</span>
-      <h2 style="font-size: 2rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">Subscribe to Monthly Health Bulletin</h2>
-
-      <form onsubmit="window.AvinyaModals.handleNewsletterSubmit(event)">
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Your Name</label>
-          <input type="text" name="name" placeholder="Rahul" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-        </div>
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Email Address</label>
-          <input type="email" name="email" required placeholder="rahul@example.com" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-        </div>
-        <div style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Primary Interest</label>
-          <select name="interest" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); background: white;">
-            <option>Early Cancer Screening & Prevention Guidelines</option>
-            <option>Oncology Medical Research & Clinical Updates</option>
-            <option>Survivor Stories & Community Care</option>
-          </select>
-        </div>
-        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
-          Subscribe Now
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <div class="category-tag">HEALTH JOURNAL</div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Subscribe to Health Insights</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Receive monthly oncology updates, screening tips, and survivor stories delivered to your inbox.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Newsletter Subscription')">
+        <input type="email" placeholder="Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.25rem;">
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Subscribe Now →</span>
         </button>
       </form>
     </div>
   </div>
 
-  <!-- I. WEBSITE & CAMP FEEDBACK MODAL -->
+  <!-- 9. Feedback Modal -->
   <div id="feedback-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <span class="category-tag">Community Insights</span>
-      <h2 style="font-size: 2rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">Share Your Feedback</h2>
-
-      <form onsubmit="window.AvinyaModals.handleFeedbackSubmit(event)">
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Your Name</label>
-          <input type="text" name="name" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-        </div>
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Email Address</label>
-          <input type="email" name="email" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);">
-        </div>
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Feedback Category</label>
-          <select name="category" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light); background: white;">
-            <option>Mobile Diagnostic Camp Experience</option>
-            <option>Website Usability & Health Resources</option>
-            <option>Volunteer & Event Ambassador Program</option>
-            <option>General Suggestions</option>
-          </select>
-        </div>
-        <div style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-weight: 600; margin-bottom: 0.4rem;">Your Thoughts & Feedback</label>
-          <textarea name="message" rows="3" required placeholder="Tell us about your experience or suggestion..." style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; border: 1.5px solid var(--border-light);"></textarea>
-        </div>
-        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
-          Submit Feedback
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAllModals()">✕</button>
+      <div class="category-tag">YOUR FEEDBACK</div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Share Your Experience</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Help us improve our community programs and patient support services.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Feedback Submission')">
+        <textarea placeholder="Your thoughts or suggestions..." rows="3" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.5rem;"></textarea>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Submit Feedback →</span>
         </button>
       </form>
     </div>
   </div>
 
-  <!-- JavaScript Engines -->
+  <!-- JavaScript Application Architecture -->
   <script src="js/canvas-hero.js"></script>
+  <script src="js/components/scroll-typography.js"></script>
+  <script src="js/components/stacked-panels.js"></script>
   <script src="js/timeline.js"></script>
   <script src="js/counters.js"></script>
   <script src="js/modals.js"></script>
   <script src="js/services/newsService.js"></script>
   <script src="js/components/news-ui.js"></script>
+  <script src="js/components/nestjs-cards.js"></script>
   <script src="js/app.js"></script>
 
 </body>
