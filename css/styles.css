@@ -395,12 +395,14 @@ button {
   align-items: center;
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: opacity var(--transition-normal), visibility var(--transition-normal);
 }
 
 .mobile-nav-overlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .mobile-nav-menu {
@@ -413,8 +415,14 @@ button {
 
 .mobile-nav-link {
   font-size: 1.8rem;
-  font-weight: 800;
-  color: rgba(255, 255, 255, 0.88);
+  font-weight: 700;
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+  transition: color var(--transition-fast);
+}
+
+.mobile-nav-link:hover {
+  color: var(--brand) !important;
 }
 
 /* ==========================================================================

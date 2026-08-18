@@ -74,6 +74,7 @@ class ModalManager {
     const mobileNav = document.getElementById('mobile-nav-overlay');
     if (mobileNav) {
       mobileNav.classList.remove('active');
+      mobileNav.style.display = 'none';
     }
 
     document.body.style.overflow = '';
