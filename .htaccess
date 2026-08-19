@@ -13,9 +13,16 @@ DirectoryIndex index.html index.php
   RewriteRule ^api/news/generate/?$ api/news_generate.json [L,NC]
 </IfModule>
 
-# Enable CORS Headers
+# Enable CORS Headers & Cache Control
 <IfModule mod_headers.c>
   Header set Access-Control-Allow-Origin "*"
   Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
   Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+
+  # Prevent aggressive caching of HTML and PHP API files
+  <FilesMatch "\.(html|htm|php)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
 </IfModule>
