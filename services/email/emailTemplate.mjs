@@ -62,7 +62,7 @@ export function renderUserEmail(emailContent, formData, formType) {
           
           <!-- Header Banner -->
           <tr>
-            <td style="background-color: #0A0A0A; padding: 28px 32px; text-align: center; border-bottom: 3px solid #E0234E;">
+            <td style="background-color: #0A0A0A; padding: 28px 32px; text-align: center; border-bottom: 3px solid #F47528;">
               <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center" style="margin: 0 auto 12px auto;">
                 <tr>
                   <td align="center">
@@ -170,7 +170,7 @@ export function renderAdminEmail(emailContent, formData, formType, submissionId,
           
           <!-- Header Banner -->
           <tr>
-            <td style="background-color: #0A0A0A; padding: 24px 32px; border-bottom: 3px solid #E0234E;">
+            <td style="background-color: #0A0A0A; padding: 24px 32px; border-bottom: 3px solid #F47528;">
               <table role="presentation" border="0" cellspacing="0" cellpadding="0" width="100%">
                 <tr>
                   <td valign="middle" style="width: 44px;">

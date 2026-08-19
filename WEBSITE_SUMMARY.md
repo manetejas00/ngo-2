@@ -22,9 +22,9 @@ The visual design system combines a cinematic dark aesthetic with clean white su
 
 | Token / Variable | Hex Code | Color Role & Description |
 | :--- | :--- | :--- |
-| `--brand` | `#E0234E` | **Primary Brand Red** — CTA buttons, active states, badges, glowing accents |
-| `--brand-hover` | `#C81E43` | **Red Hover State** — Darker crimson on hover and button clicks |
-| `--brand-light` | `#FCE7EC` | **Brand Tint** — Soft light pink/red background for badges and pills |
+| `--brand` | `#F47528` | **Primary Brand Red** — CTA buttons, active states, badges, glowing accents |
+| `--brand-hover` | `#D95F16` | **Red Hover State** — Darker crimson on hover and button clicks |
+| `--brand-light` | `#FFF1E8` | **Brand Tint** — Soft light pink/red background for badges and pills |
 | `--brand-ember` | `#F58220` | **Warm Ember Orange** — Emblem glow, sub-tag (*"Foundation"*) accent |
 | `--teal-accent` | `#62B59F` | **Healing Teal** — Ambient 3D graphics, secondary card highlights |
 | `--teal-dark` | `#087F73` | **Diagnostic Teal** — Early screening feature panel background |

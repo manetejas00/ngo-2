@@ -7,9 +7,9 @@
 
 :root {
   /* NestJS Brand Color Tokens */
-  --brand: #E0234E;          /* NestJS Primary Accent Red */
-  --brand-hover: #C81E43;    /* Red Hover State */
-  --brand-light: #FCE7EC;    /* Soft Tint Backgrounds */
+  --brand: #F47528;          /* NestJS Primary Accent Red */
+  --brand-hover: #D95F16;    /* Red Hover State */
+  --brand-light: #FFF1E8;    /* Soft Tint Backgrounds */
 
   --black: #0A0A0A;          /* Deep Black (Hero, Impact, Stories, Final CTA, Footer) */
   --background: #FAFAFA;     /* Main Website Off-White Background */
@@ -27,9 +27,9 @@
 
   /* Borders & Shadows */
   --border-light: #E5E5E5;
-  --border-light-hover: rgba(224, 35, 78, 0.4);
+  --border-light-hover: rgba(244, 117, 40, 0.4);
   --border-dark: rgba(255, 255, 255, 0.12);
-  --border-dark-hover: rgba(224, 35, 78, 0.5);
+  --border-dark-hover: rgba(244, 117, 40, 0.5);
 
   --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.06);
@@ -218,13 +218,13 @@ button {
   font-weight: 700;
   font-size: 0.95rem;
   transition: all var(--transition-fast);
-  box-shadow: 0 4px 16px rgba(224, 35, 78, 0.3);
+  box-shadow: 0 4px 16px rgba(244, 117, 40, 0.3);
 }
 
 .btn-primary:hover {
   background-color: var(--brand-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(224, 35, 78, 0.4);
+  box-shadow: 0 8px 24px rgba(244, 117, 40, 0.4);
 }
 
 .btn-primary:active {
@@ -377,7 +377,7 @@ button {
   justify-content: center;
   color: #FFFFFF;
   font-size: 0.95rem;
-  box-shadow: 0 4px 12px rgba(224, 35, 78, 0.35);
+  box-shadow: 0 4px 12px rgba(244, 117, 40, 0.35);
 }
 
 .nav-links {
@@ -733,7 +733,7 @@ button {
 
 .typo-word.accent-word.illuminated {
   color: #FFFFFF;
-  text-shadow: 0 0 40px rgba(224, 35, 78, 0.6);
+  text-shadow: 0 0 40px rgba(244, 117, 40, 0.6);
 }
 
 .final-sentence {
@@ -780,7 +780,7 @@ button {
   padding: 9.5rem 2% 9rem;
   background-color: #080A09 !important;
   background-image: 
-    radial-gradient(ellipse 65% 45% at 50% 50%, rgba(224, 35, 78, 0.08) 0%, transparent 75%),
+    radial-gradient(ellipse 65% 45% at 50% 50%, rgba(244, 117, 40, 0.08) 0%, transparent 75%),
     radial-gradient(circle at 50% 0%, rgba(98, 181, 159, 0.05) 0%, transparent 65%);
   color: #FFFFFF !important;
   position: relative;
@@ -862,7 +862,7 @@ button {
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  box-shadow: 0 4px 12px rgba(224, 35, 78, 0.3);
+  box-shadow: 0 4px 12px rgba(244, 117, 40, 0.3);
 }
 
 .stack-card-icon {
@@ -899,8 +899,8 @@ button {
 
 .nestjs-stack-card:hover .stack-card-graphic {
   transform: translate(-50%, -50%) scale(1.15) rotate(10deg);
-  background: rgba(224, 35, 78, 0.1);
-  border-color: rgba(224, 35, 78, 0.3);
+  background: rgba(244, 117, 40, 0.1);
+  border-color: rgba(244, 117, 40, 0.3);
 }
 
 .stack-card-bottom {
@@ -948,9 +948,9 @@ button {
   z-index: 40 !important;
   background-color: #241A1E !important;
   background: linear-gradient(165deg, #2D1E24 0%, #1A1216 100%) !important;
-  border-color: rgba(224, 35, 78, 0.85) !important;
+  border-color: rgba(244, 117, 40, 0.85) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.5) !important;
-  box-shadow: 0 35px 90px rgba(224, 35, 78, 0.5), 0 0 35px rgba(224, 35, 78, 0.3) !important;
+  box-shadow: 0 35px 90px rgba(244, 117, 40, 0.5), 0 0 35px rgba(244, 117, 40, 0.3) !important;
   opacity: 1 !important;
 }
 
@@ -959,7 +959,7 @@ button {
   color: #FFFFFF;
   background: var(--brand) !important;
   border-color: var(--brand) !important;
-  box-shadow: 0 8px 24px rgba(224, 35, 78, 0.6);
+  box-shadow: 0 8px 24px rgba(244, 117, 40, 0.6);
 }
 
 .nestjs-stack-card.active .stack-card-desc,
@@ -1010,8 +1010,8 @@ button {
     transform: translateY(-16px) scale(1.03) !important;
     background-color: #241A1E !important;
     background: linear-gradient(165deg, #2D1E24 0%, #1A1216 100%) !important;
-    border-color: rgba(224, 35, 78, 0.9) !important;
-    box-shadow: 0 25px 70px rgba(224, 35, 78, 0.55), 0 0 35px rgba(224, 35, 78, 0.35) !important;
+    border-color: rgba(244, 117, 40, 0.9) !important;
+    box-shadow: 0 25px 70px rgba(244, 117, 40, 0.55), 0 0 35px rgba(244, 117, 40, 0.35) !important;
     opacity: 1 !important;
   }
 
@@ -1268,7 +1268,7 @@ button {
   transform: scale(1.04) translateY(-14px) rotateY(0deg);
   opacity: 1;
   border-color: var(--brand);
-  box-shadow: 0 30px 70px rgba(224, 35, 78, 0.35);
+  box-shadow: 0 30px 70px rgba(244, 117, 40, 0.35);
   z-index: 10;
 }
 
@@ -1514,9 +1514,9 @@ button {
 
 .stat-item:hover {
   background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(224, 35, 78, 0.4);
+  border-color: rgba(244, 117, 40, 0.4);
   transform: translateY(-6px);
-  box-shadow: 0 20px 45px rgba(224, 35, 78, 0.25);
+  box-shadow: 0 20px 45px rgba(244, 117, 40, 0.25);
 }
 
 .stat-number {
@@ -1671,14 +1671,14 @@ button {
   background: var(--brand);
   color: #FFFFFF;
   border-color: var(--brand);
-  box-shadow: 0 4px 16px rgba(224, 35, 78, 0.3);
+  box-shadow: 0 4px 16px rgba(244, 117, 40, 0.3);
 }
 
 .news-ai-gen-btn {
   padding: 0.65rem 1.5rem;
   border-radius: 8px;
   background: var(--brand-light);
-  border: 1px solid rgba(224, 35, 78, 0.3);
+  border: 1px solid rgba(244, 117, 40, 0.3);
   color: var(--brand);
   font-weight: 800;
   font-size: 0.9rem;
@@ -1691,7 +1691,7 @@ button {
 .news-ai-gen-btn:hover {
   background: var(--brand);
   color: #FFFFFF;
-  box-shadow: 0 6px 20px rgba(224, 35, 78, 0.35);
+  box-shadow: 0 6px 20px rgba(244, 117, 40, 0.35);
   transform: translateY(-2px);
 }
 
@@ -1944,7 +1944,7 @@ button {
 .news-show-more-btn:hover {
   background: var(--brand);
   color: #FFFFFF;
-  box-shadow: 0 6px 20px rgba(224, 35, 78, 0.3);
+  box-shadow: 0 6px 20px rgba(244, 117, 40, 0.3);
 }
 
 /* ==========================================================================
@@ -2048,12 +2048,12 @@ button {
 .donate-theme {
   background: var(--brand);
   color: #FFFFFF;
-  box-shadow: 0 16px 40px rgba(224, 35, 78, 0.4);
+  box-shadow: 0 16px 40px rgba(244, 117, 40, 0.4);
 }
 
 .donate-theme:hover {
   transform: translateY(-6px);
-  box-shadow: 0 24px 50px rgba(224, 35, 78, 0.5);
+  box-shadow: 0 24px 50px rgba(244, 117, 40, 0.5);
 }
 
 .volunteer-theme {
