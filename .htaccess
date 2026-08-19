@@ -1,4 +1,6 @@
 # Hostinger LiteSpeed / Apache Configuration for Avinya Care Foundation
+DirectoryIndex index.html index.php
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
