@@ -18,9 +18,19 @@ $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true) ?: $_POST;
 
 $formType = isset($data['form_type']) ? strtolower(trim($data['form_type'])) : (isset($data['formType']) ? strtolower(trim($data['formType'])) : 'contact');
-$name = isset($data['name']) ? htmlspecialchars(trim($data['name'])) : 'Valued Supporter';
+$name = isset($data['name']) ? htmlspecialchars(trim($data['name'])) : (isset($data['fullName']) ? htmlspecialchars(trim($data['fullName'])) : 'Valued Supporter');
 $email = isset($data['email']) ? filter_var(trim($data['email']), FILTER_SANITIZE_EMAIL) : '';
+$phone = isset($data['phone']) ? htmlspecialchars(trim($data['phone'])) : (isset($data['mobile']) ? htmlspecialchars(trim($data['mobile'])) : '');
+$amount = isset($data['amount']) ? floatval($data['amount']) : 0;
+$frequency = isset($data['frequency']) ? htmlspecialchars(trim($data['frequency'])) : 'one-time';
+$pan = isset($data['pan']) ? htmlspecialchars(trim($data['pan'])) : '';
+$transactionId = isset($data['transaction_id']) ? htmlspecialchars(trim($data['transaction_id'])) : ('TXN-' . time());
+$organization = isset($data['organization']) ? htmlspecialchars(trim($data['organization'])) : (isset($data['company']) ? htmlspecialchars(trim($data['company'])) : '');
+$interest = isset($data['interest']) ? htmlspecialchars(trim($data['interest'])) : (isset($data['subject']) ? htmlspecialchars(trim($data['subject'])) : '');
+$message = isset($data['message']) ? htmlspecialchars(trim($data['message'])) : (isset($data['feedback']) ? htmlspecialchars(trim($data['feedback'])) : '');
+
 $submissionId = 'SUB-' . time() . '-' . strtoupper(substr(md5(uniqid()), 0, 5));
+date_default_timezone_set('Asia/Kolkata');
 $timestampIST = date('d F Y, g:i A \I\S\T');
 
 if (empty($email)) {
@@ -45,8 +55,7 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
 
     $socket = @fsockopen($host, $port, $errno, $errstr, 12);
     if (!$socket) {
-        // Fallback to PHP mail if socket connection is blocked
-        $headers  = "From: Avinya Care Foundation <{$from}>\r\n";
+        $headers  = "From: {$fromName} <{$from}>\r\n";
         $headers .= "Reply-To: " . ($replyTo ?: $from) . "\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
         $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
@@ -78,14 +87,15 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
     fputs($socket, "DATA\r\n");
     fgets($socket, 512);
 
+    $encodedSubject = "=?UTF-8?B?" . base64_encode($subject) . "?=";
     $headers = [
         "From: {$fromName} <{$from}>",
         "To: <{$to}>",
-        "Subject: {$subject}",
+        "Subject: {$encodedSubject}",
         "Reply-To: " . ($replyTo ?: $from),
         "MIME-Version: 1.0",
         "Content-Type: text/html; charset=UTF-8",
-        "X-Mailer: AvinyaCare-PHP-SMTP/1.0"
+        "X-Mailer: AvinyaCare-PHP-SMTP/2.0"
     ];
 
     fputs($socket, implode("\r\n", $headers) . "\r\n\r\n" . $htmlBody . "\r\n.\r\n");
@@ -97,11 +107,65 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
     return (substr($dataRes, 0, 3) == "250");
 }
 
+// -------------------------------------------------------------
+// Form-Specific Content Generation (Donations, Volunteer, Support, etc.)
+// -------------------------------------------------------------
+$formattedAmount = number_format($amount);
+
+if ($formType === 'donation') {
+    $userSubject = "Thank You for Your Generous Support of ₹{$formattedAmount} — Avinya Care Foundation";
+    $greeting = "Dear {$name},";
+    $bodyText = "Dhanyawad for your generous contribution of <strong>₹{$formattedAmount}</strong> ({$frequency}) towards Avinya Care Foundation. Your compassionate gift directly funds our life-saving mobile cancer screening camps, diagnostic navigation, and vital clinical nutrition for patients across underserved communities in India.";
+    $adminSubject = "[Avinya Care] New Donation Received — {$name} (₹{$formattedAmount})";
+} elseif ($formType === 'volunteer') {
+    $userSubject = "Thank You for Wanting to Volunteer with Avinya Care — Avinya Care Foundation";
+    $greeting = "Dear {$name},";
+    $bodyText = "Thank you for stepping forward to volunteer with Avinya Care Foundation. Volunteers like you form the heartbeat of our community outreach, early cancer awareness campaigns, and patient navigation efforts.";
+    $adminSubject = "[Avinya Care] New Volunteer Application — {$name}";
+} elseif ($formType === 'support') {
+    $userSubject = "Avinya Care Support Helpline — We Have Received Your Request — Avinya Care Foundation";
+    $greeting = "Dear {$name},";
+    $bodyText = "We have received your patient care inquiry. Facing cancer can feel overwhelming, but please know you are not alone. Our compassionate patient support navigators will review your details with the utmost confidentiality.";
+    $adminSubject = "[Avinya Care] URGENT: Patient Support Inquiry — {$name}";
+} elseif ($formType === 'partnership') {
+    $userSubject = "Partnership & Corporate CSR Inquiry — Avinya Care Foundation";
+    $greeting = "Dear {$name},";
+    $bodyText = "Thank you for reaching out regarding partnership and CSR collaboration with Avinya Care Foundation on behalf of <strong>" . ($organization ?: 'your organization') . "</strong>. Our leadership team will review your proposal.";
+    $adminSubject = "[Avinya Care] New CSR & Partnership Lead — " . ($organization ?: $name);
+} elseif ($formType === 'newsletter') {
+    $userSubject = "Welcome to the Avinya Care Community Newsletter — Avinya Care Foundation";
+    $greeting = "Hello {$name},";
+    $bodyText = "Welcome to the Avinya Care Foundation community! You are now subscribed to our health bulletin, featuring verified oncology research, early detection screening guidelines, and patient stories.";
+    $adminSubject = "[Avinya Care] New Newsletter Subscriber — {$name}";
+} elseif ($formType === 'feedback') {
+    $userSubject = "Thank You for Sharing Your Feedback with Avinya Care — Avinya Care Foundation";
+    $greeting = "Hello {$name},";
+    $bodyText = "Thank you for sharing your valuable feedback regarding our healthcare services and awareness initiatives. Your insights help us continuously elevate our care and community reach.";
+    $adminSubject = "[Avinya Care] Website Feedback Received — {$name}";
+} else {
+    $userSubject = "We Have Received Your Message — Avinya Care Foundation";
+    $greeting = "Hello {$name},";
+    $bodyText = "Thank you for getting in touch with Avinya Care Foundation. Our team has received your message and will connect with you shortly.";
+    $adminSubject = "[Avinya Care] New Website Contact Inquiry — {$name}";
+}
+
+$closingText = "With deepest gratitude and care,<br><strong>Avinya Care Foundation Team</strong>";
+
 // Build User Email HTML Template
-$userSubject = "Thank You for Reaching Out - Avinya Care Foundation";
-$greeting = "Hello {$name},";
-$bodyText = "Thank you for getting in touch with Avinya Care Foundation regarding <strong>" . strtoupper($formType) . "</strong>. Our team is dedicated to providing healthcare dignity, early cancer screening navigation, and compassionate community support across India.";
-$closingText = "With care and commitment,<br><strong>Avinya Care Foundation Team</strong>";
+$donationBoxHtml = '';
+if ($formType === 'donation') {
+    $donationBoxHtml = '
+    <div style="background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+        <div style="font-size: 13px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Official Donation Receipt Details</div>
+        <table style="width: 100%; font-size: 14px; color: #111817; line-height: 1.8;">
+            <tr><td style="width: 45%; color: #4B5563;">Donation Amount:</td><td><strong style="color: #087F73; font-size: 16px;">₹' . $formattedAmount . ' (' . strtoupper($frequency) . ')</strong></td></tr>
+            <tr><td style="color: #4B5563;">Transaction Ref:</td><td><code style="background: #E2E8F0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">' . htmlspecialchars($transactionId) . '</code></td></tr>
+            <tr><td style="color: #4B5563;">Payment Status:</td><td><span style="color: #16A34A; font-weight: 700;">✓ SUCCESS</span></td></tr>
+            ' . ($pan ? '<tr><td style="color: #4B5563;">PAN (for 80G):</td><td><code style="font-family: monospace;">' . htmlspecialchars($pan) . '</code></td></tr>' : '') . '
+            <tr><td style="color: #4B5563;">Tax Deduction:</td><td><span style="color: #087F73; font-weight: 600;">Eligible under Section 80G of Income Tax Act</span></td></tr>
+        </table>
+    </div>';
+}
 
 $userHtmlContent = '<!DOCTYPE html>
 <html lang="en">
@@ -114,13 +178,13 @@ $userHtmlContent = '<!DOCTYPE html>
   <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #F6F4EF; padding: 32px 16px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; overflow: hidden; border: 1px solid #E2E8F0; box-shadow: 0 4px 20px rgba(8, 127, 115, 0.08);">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 620px; background-color: #FFFFFF; border-radius: 16px; overflow: hidden; border: 1px solid #E2E8F0; box-shadow: 0 4px 20px rgba(8, 127, 115, 0.08);">
           
           <!-- Header Banner -->
           <tr>
-            <td style="background-color: #087F73; padding: 32px 36px; text-align: center;">
+            <td style="background-color: #087F73; padding: 36px 36px 30px 36px; text-align: center;">
               <div style="color: #62B59F; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">Avinya Care Foundation</div>
-              <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">Healthcare Dignity & Cancer Awareness</h1>
+              <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">Healthcare Dignity & Cancer Awareness</h1>
             </td>
           </tr>
 
@@ -131,8 +195,9 @@ $userHtmlContent = '<!DOCTYPE html>
               
               <div style="font-size: 15px; color: #111817; line-height: 1.7; margin-bottom: 24px;">
                 <p style="margin: 0 0 16px 0;">' . $bodyText . '</p>
-                <p style="margin: 0;">Representative team members will review your details and connect with you as soon as possible.</p>
               </div>
+
+              ' . $donationBoxHtml . '
 
               <!-- Metadata Summary Box -->
               <div style="background-color: #F6F4EF; border-left: 4px solid #087F73; border-radius: 8px; padding: 16px 20px; margin-bottom: 28px;">
@@ -161,7 +226,7 @@ $userHtmlContent = '<!DOCTYPE html>
                 Email: <a href="mailto:info@test.avinyacarefoundation.org" style="color: #087F73; text-decoration: none; font-weight: 600;">info@test.avinyacarefoundation.org</a> | Helpline: <a href="tel:+919876543210" style="color: #087F73; text-decoration: none; font-weight: 600;">+91 98765 43210</a>
               </p>
               <p style="margin: 0; font-size: 11px; color: #717D7A; border-top: 1px dashed #CBD5E1; padding-top: 12px;">
-                <strong>Medical & Legal Disclaimer:</strong> Avinya Care Foundation communications provide general health awareness and screening navigation. We do not provide medical prescriptions, diagnoses, or direct clinical medical advice. Please consult a qualified medical oncologist for health concerns.
+                <strong>Medical & Legal Disclaimer:</strong> Avinya Care Foundation communications provide general health awareness and screening navigation. We do not provide medical prescriptions, diagnoses, or direct clinical medical advice.
               </p>
             </td>
           </tr>
@@ -177,7 +242,6 @@ $userHtmlContent = '<!DOCTYPE html>
 $userSent = sendPHPSMTP($email, $userSubject, $userHtmlContent);
 
 // Build Admin Operational Alert HTML Template
-$adminSubject = "[Avinya Care] New {$formType} Submission - {$name}";
 $adminHtmlContent = '<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -195,7 +259,7 @@ $adminHtmlContent = '<!DOCTYPE html>
           <tr>
             <td style="background-color: #111817; padding: 24px 32px;">
               <div style="color: #62B59F; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Avinya Care Internal Desk</div>
-              <h2 style="color: #FFFFFF; font-size: 20px; font-weight: 700; margin: 0;">Operational Alert: Form Submission</h2>
+              <h2 style="color: #FFFFFF; font-size: 20px; font-weight: 700; margin: 0;">Operational Alert: ' . strtoupper(htmlspecialchars($formType)) . '</h2>
             </td>
           </tr>
 
@@ -203,17 +267,24 @@ $adminHtmlContent = '<!DOCTYPE html>
           <tr>
             <td style="padding: 32px 32px 20px 32px;">
               <div style="background-color: #F6F4EF; border-left: 4px solid #087F73; border-radius: 8px; padding: 18px 22px; margin-bottom: 24px;">
-                <div style="font-size: 12px; font-weight: 700; color: #087F73; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Submission Metadata</div>
-                <div style="font-size: 14px; color: #111817; line-height: 1.7;">
+                <div style="font-size: 12px; font-weight: 700; color: #087F73; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Submission Details</div>
+                <div style="font-size: 14px; color: #111817; line-height: 1.8;">
                   <strong>Form Type:</strong> ' . strtoupper(htmlspecialchars($formType)) . '<br>
                   <strong>Submission ID:</strong> <code style="font-family: monospace; color: #087F73;">' . htmlspecialchars($submissionId) . '</code><br>
                   <strong>Submitted At:</strong> ' . htmlspecialchars($timestampIST) . '<br>
                   <strong>Name:</strong> ' . htmlspecialchars($name) . '<br>
-                  <strong>User Email:</strong> <a href="mailto:' . htmlspecialchars($email) . '" style="color: #087F73; text-decoration: none; font-weight: 600;">' . htmlspecialchars($email) . '</a>
+                  <strong>User Email:</strong> <a href="mailto:' . htmlspecialchars($email) . '" style="color: #087F73; text-decoration: none; font-weight: 600;">' . htmlspecialchars($email) . '</a><br>
+                  ' . ($phone ? '<strong>Phone:</strong> ' . htmlspecialchars($phone) . '<br>' : '') . '
+                  ' . ($amount > 0 ? '<strong>Donation Amount:</strong> ₹' . $formattedAmount . ' (' . strtoupper($frequency) . ')<br>' : '') . '
+                  ' . ($pan ? '<strong>PAN:</strong> ' . htmlspecialchars($pan) . '<br>' : '') . '
+                  ' . ($transactionId ? '<strong>Transaction ID:</strong> ' . htmlspecialchars($transactionId) . '<br>' : '') . '
+                  ' . ($organization ? '<strong>Organization:</strong> ' . htmlspecialchars($organization) . '<br>' : '') . '
+                  ' . ($interest ? '<strong>Subject / Category:</strong> ' . htmlspecialchars($interest) . '<br>' : '') . '
+                  ' . ($message ? '<strong>Message:</strong> ' . nl2br(htmlspecialchars($message)) . '<br>' : '') . '
                 </div>
               </div>
 
-              <p style="font-size: 14px; color: #5F6865; margin: 0;"><strong>Action Required:</strong> Review user submission details and route to the appropriate department (Medical, Volunteer, Financial, or Operations).</p>
+              <p style="font-size: 14px; color: #5F6865; margin: 0;"><strong>Action Required:</strong> Review user submission details and process 80G tax receipt or route to the appropriate department.</p>
             </td>
           </tr>
 
@@ -236,10 +307,10 @@ echo json_encode([
     'timestampIST' => $timestampIST,
     'userEmail' => [
         'subject' => $userSubject,
-        'greeting' => "Hello {$name},",
-        'body' => "Thank you for getting in touch with Avinya Care Foundation regarding " . strtoupper($formType) . ". Our team will follow up with you as soon as possible.",
-        'closing' => "Best regards,\nAvinya Care Foundation Team"
+        'greeting' => $greeting,
+        'body' => $bodyText,
+        'closing' => "With deepest gratitude and care,\nAvinya Care Foundation Team"
     ],
-    'message' => "Thank you, {$name}. Your submission has been received and confirmed via email."
+    'message' => "Thank you, {$name}. Your {$formType} submission has been received and confirmed via email."
 ]);
 ?>

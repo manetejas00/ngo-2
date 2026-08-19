@@ -39,10 +39,12 @@ conn.on('ready', () => {
 
       console.log('Deploying and synchronizing on Hostinger server (both test & prod)...');
       const deployCmd = `
-        cd ${testDir} &&
+        cd ~/${testDir} &&
         unzip -o ${zipFile} &&
         rm -f ${zipFile} &&
-        cp -r * .htaccess .env ~/${prodDir}/ &&
+        cp -rf * .htaccess .env ~/${prodDir}/ &&
+        mkdir -p ~/${prodDir}/api && cp -rf api/* ~/${prodDir}/api/ &&
+        mkdir -p ~/${prodDir}/services && cp -rf services/* ~/${prodDir}/services/ 2>/dev/null || true &&
         echo "DEPLOYMENT_SYNC_SUCCESS"
       `;
 
