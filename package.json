@@ -21,5 +21,9 @@
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "nodemailer": "^9.0.5",
+    "ssh2": "^1.17.0"
   }
 }

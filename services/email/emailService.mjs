@@ -1,7 +1,7 @@
 /**
  * Avinya Care Foundation - Email Dispatch & Delivery Service
  * Sends dual emails (User confirmation & Admin operational notification).
- * Integrates SMTP delivery when configured with virtual email logging fallback.
+ * Integrates SMTP delivery via Nodemailer (with connection pooling) + Native TLS Socket fallback.
  */
 
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
@@ -14,12 +14,47 @@ const __dirname = dirname(__filename);
 const LOG_DIR = join(__dirname, '../../cache');
 const LOG_FILE = join(LOG_DIR, 'email_logs.json');
 
+// Reusable Transporter instance
+let cachedTransporter = null;
+let cachedTransporterKey = '';
+
+async function getOrCreateTransporter(smtpHost, smtpPort, smtpSecure, smtpUser, smtpPass) {
+  const currentKey = `${smtpHost}:${smtpPort}:${smtpSecure}:${smtpUser}`;
+  if (cachedTransporter && cachedTransporterKey === currentKey) {
+    return cachedTransporter;
+  }
+
+  try {
+    const nodemailer = await import('nodemailer');
+    if (nodemailer && nodemailer.createTransport) {
+      cachedTransporter = nodemailer.createTransport({
+        pool: true,
+        maxConnections: 3,
+        maxMessages: 100,
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpSecure,
+        ignoreTLS: smtpHost === '127.0.0.1' || smtpHost === 'localhost',
+        auth: (smtpUser && smtpPass) ? { user: smtpUser, pass: smtpPass } : undefined,
+        connectionTimeout: 8000,
+        greetingTimeout: 6000,
+        socketTimeout: 10000
+      });
+      cachedTransporterKey = currentKey;
+      return cachedTransporter;
+    }
+  } catch (e) {
+    // Nodemailer not available
+  }
+  return null;
+}
+
 /**
  * Dispatches both User confirmation email and Admin notification email.
  * @param {Object} userEmailPayload - Rendered user email ({ subject, html, text })
  * @param {Object} adminEmailPayload - Rendered admin email ({ subject, html, text })
  * @param {Object} metadata - Submission metadata (submissionId, formType, userEmail, isAIGenerated, timestampIST)
- * @returns {Promise<{ success: boolean, messageId: string, deliveryStatus: string }>} Dispatch result
+ * @returns {Promise<{ success: boolean, messageId: string, deliveryStatus: string, deliveryMethod: string }>} Dispatch result
  */
 export async function sendFormEmails(userEmailPayload, adminEmailPayload, metadata) {
   const messageId = `MSG-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
@@ -30,28 +65,24 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
 
   let deliveryStatus = 'SENT';
   let deliveryMethod = 'VIRTUAL_MAILER';
+  let deliveryError = null;
 
-  // Support both SMTP_* and MAIL_* environment variable schemas (Hostinger / Laravel / Node.js)
+  // Support both SMTP_* and MAIL_* environment variable schemas
   const smtpHost = process.env.SMTP_HOST || process.env.MAIL_HOST || '127.0.0.1';
   const smtpPort = parseInt(process.env.SMTP_PORT || process.env.MAIL_PORT || '1025', 10);
   const smtpUser = process.env.SMTP_USER || process.env.MAIL_USERNAME;
   const smtpPass = process.env.SMTP_PASS || process.env.MAIL_PASSWORD;
   const smtpSecure = process.env.SMTP_SECURE === 'true' || process.env.MAIL_ENCRYPTION === 'ssl' || smtpPort === 465;
 
+  let userEmailSent = !recipientUser;
+  let adminEmailSent = false;
+
+  // 1. Attempt delivery via Nodemailer pooled transporter
   try {
-    let nodemailer = null;
-    try { nodemailer = await import('nodemailer'); } catch (e) {}
+    const transporter = await getOrCreateTransporter(smtpHost, smtpPort, smtpSecure, smtpUser, smtpPass);
 
-    if (nodemailer && nodemailer.createTransport) {
-      const transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: smtpPort,
-        secure: smtpSecure,
-        ignoreTLS: smtpHost === '127.0.0.1' || smtpHost === 'localhost',
-        auth: (smtpUser && smtpPass) ? { user: smtpUser, pass: smtpPass } : undefined
-      });
-
-      if (recipientUser) {
+    if (transporter) {
+      if (!userEmailSent && recipientUser) {
         const userRes = await transporter.sendMail({
           from: `"${senderName}" <${senderEmail}>`,
           to: recipientUser,
@@ -60,34 +91,81 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
           html: userEmailPayload.html,
           replyTo: senderEmail
         });
-        console.log(`[SMTP Sent] User email sent to ${recipientUser} | Response: ${userRes.response}`);
+        userEmailSent = true;
+        console.log(`[SMTP Sent via Nodemailer] User email sent to ${recipientUser} | ID: ${userRes.messageId || 'ok'}`);
       }
 
-      const adminRes = await transporter.sendMail({
-        from: `"Avinya Care Operations" <${senderEmail}>`,
-        to: adminEmail,
-        subject: adminEmailPayload.subject,
-        text: adminEmailPayload.text,
-        html: adminEmailPayload.html,
-        replyTo: recipientUser || senderEmail
-      });
-      console.log(`[SMTP Sent] Admin alert email sent to ${adminEmail} | Response: ${adminRes.response}`);
+      if (!adminEmailSent) {
+        const adminRes = await transporter.sendMail({
+          from: `"Avinya Care Operations" <${senderEmail}>`,
+          to: adminEmail,
+          subject: adminEmailPayload.subject,
+          text: adminEmailPayload.text,
+          html: adminEmailPayload.html,
+          replyTo: recipientUser || senderEmail
+        });
+        adminEmailSent = true;
+        console.log(`[SMTP Sent via Nodemailer] Admin alert sent to ${adminEmail} | ID: ${adminRes.messageId || 'ok'}`);
+      }
 
       deliveryMethod = 'SMTP_NODEMAILER';
-    } else if (smtpHost !== '127.0.0.1' && smtpHost !== 'localhost') {
-      throw new Error('Nodemailer transport is required for production SMTP delivery.');
-    } else {
-      // Native socket SMTP transport for local MailHog testing
-      const { sendSmtpSocket } = await import('./smtpClient.mjs');
-      if (recipientUser) {
-        await sendSmtpSocket(smtpHost, smtpPort, senderEmail, recipientUser, userEmailPayload.subject, userEmailPayload.html || userEmailPayload.text);
-      }
-      await sendSmtpSocket(smtpHost, smtpPort, senderEmail, adminEmail, adminEmailPayload.subject, adminEmailPayload.html || adminEmailPayload.text);
-      deliveryMethod = 'MAILHOG_SMTP_SOCKET';
+      deliveryStatus = 'SENT';
     }
-  } catch (err) {
-    console.error('[Production SMTP Error]', err.message);
-    throw err;
+  } catch (nodemailerErr) {
+    console.warn('[Nodemailer Delivery Warning]', nodemailerErr.message, '— Switching to Native TLS Socket...');
+  }
+
+  // 2. Fallback to Native TLS Socket Client for any pending emails
+  if (!userEmailSent || !adminEmailSent) {
+    try {
+      const { sendSmtpSocket } = await import('./smtpClient.mjs');
+
+      if (!userEmailSent && recipientUser) {
+        await sendSmtpSocket({
+          host: smtpHost,
+          port: smtpPort,
+          secure: smtpSecure,
+          user: smtpUser,
+          pass: smtpPass,
+          from: senderEmail,
+          fromName: senderName,
+          to: recipientUser,
+          subject: userEmailPayload.subject,
+          htmlContent: userEmailPayload.html,
+          textContent: userEmailPayload.text,
+          replyTo: senderEmail
+        });
+        userEmailSent = true;
+        console.log(`[Native TLS Socket Sent] User email sent to ${recipientUser}`);
+      }
+
+      if (!adminEmailSent) {
+        await sendSmtpSocket({
+          host: smtpHost,
+          port: smtpPort,
+          secure: smtpSecure,
+          user: smtpUser,
+          pass: smtpPass,
+          from: senderEmail,
+          fromName: 'Avinya Care Operations',
+          to: adminEmail,
+          subject: adminEmailPayload.subject,
+          htmlContent: adminEmailPayload.html,
+          textContent: adminEmailPayload.text,
+          replyTo: recipientUser || senderEmail
+        });
+        adminEmailSent = true;
+        console.log(`[Native TLS Socket Sent] Admin alert sent to ${adminEmail}`);
+      }
+
+      deliveryMethod = smtpSecure || smtpPort === 465 ? 'SMTP_TLS_SOCKET' : 'SMTP_SOCKET';
+      deliveryStatus = 'SENT';
+    } catch (socketErr) {
+      console.error('[Native Socket SMTP Error]', socketErr.message);
+      deliveryError = socketErr.message;
+      deliveryStatus = userEmailSent || adminEmailSent ? 'PARTIAL' : 'FAILED';
+      deliveryMethod = 'FAILED';
+    }
   }
 
   // Create safe log record (NO passwords, secrets, card info, or raw sensitive medical data)
@@ -101,6 +179,7 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
     isAIGenerated: metadata.isAIGenerated,
     deliveryStatus,
     deliveryMethod,
+    deliveryError,
     userSubject: userEmailPayload.subject,
     adminSubject: adminEmailPayload.subject,
     timestampIST: metadata.timestampIST
@@ -108,12 +187,14 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
 
   await logEmailDispatch(logRecord);
 
-  console.log(`[Email Service] Emails successfully dispatched for submission ${metadata.submissionId} (Form: ${metadata.formType}, AI: ${metadata.isAIGenerated ? 'YES' : 'FALLBACK'})`);
+  console.log(`[Email Service] Emails status: ${deliveryStatus} (${deliveryMethod}) for submission ${metadata.submissionId} (Form: ${metadata.formType}, AI: ${metadata.isAIGenerated ? 'YES' : 'FALLBACK'})`);
 
   return {
-    success: true,
+    success: deliveryStatus === 'SENT' || deliveryStatus === 'PARTIAL',
     messageId,
-    deliveryStatus
+    deliveryStatus,
+    deliveryMethod,
+    error: deliveryError
   };
 }
 
