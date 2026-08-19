@@ -25,5 +25,8 @@
   "dependencies": {
     "nodemailer": "^9.0.5",
     "ssh2": "^1.17.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
   }
 }

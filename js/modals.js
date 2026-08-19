@@ -1,14 +1,14 @@
 /**
- * Avinya Care Foundation - Interactive Modals & AI Form Manager
+ * Avinya Care Foundation - Interactive Modals & Form Manager
  * Manages Donation, Volunteer, Patient Support, Contact, Partnership, Newsletter, and Feedback forms.
- * All submissions communicate server-side with /api/submit-form for AI email generation.
+ * All submissions communicate server-side with /api/submit-form and display live email delivery status.
  */
 
 class ModalManager {
   constructor() {
     this.activeModal = null;
     this.selectedAmount = 1000;
-    this.isMonthly = true;
+    this.isMonthly = false;
     
     // Store original modal HTML templates for reliable re-opening
     this.templates = {};
@@ -18,7 +18,7 @@ class ModalManager {
   init() {
     const modalIds = [
       'donate-modal', 'volunteer-modal', 'support-modal',
-      'contact-modal', 'partnership-modal', 'newsletter-modal', 'feedback-modal'
+      'contact-modal', 'csr-modal', 'newsletter-modal', 'feedback-modal', 'guide-modal', 'story-modal'
     ];
 
     modalIds.forEach(id => {
@@ -57,6 +57,10 @@ class ModalManager {
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
       this.activeModal = modal;
+
+      if (modalId === 'donate-modal') {
+        this.selectAmount(this.selectedAmount || 1000);
+      }
     }
   }
 
@@ -89,7 +93,51 @@ class ModalManager {
     this.closeAll();
   }
 
-  // Helper method: Send form payload to Node server AI endpoint
+  // --- DONATION CONTROLS ---
+  setDonationType(type) {
+    this.isMonthly = (type === 'monthly');
+    const oneTimeBtn = document.getElementById('toggle-one-time');
+    const monthlyBtn = document.getElementById('toggle-monthly');
+    if (oneTimeBtn && monthlyBtn) {
+      oneTimeBtn.classList.toggle('active', !this.isMonthly);
+      monthlyBtn.classList.toggle('active', this.isMonthly);
+    }
+    this.updateImpactStatement();
+  }
+
+  selectAmount(amount) {
+    this.selectedAmount = amount;
+    document.querySelectorAll('#donate-modal .amount-btn').forEach(btn => {
+      const btnText = btn.textContent.replace(/[^\d]/g, '');
+      const btnAmount = parseInt(btnText, 10);
+      btn.classList.toggle('active', btnAmount === amount || (btnText === '10' && amount === 10000));
+    });
+    this.updateImpactStatement();
+  }
+
+  updateImpactStatement() {
+    const statement = document.getElementById('impact-calculator-statement');
+    if (!statement) return;
+    const amount = this.selectedAmount;
+    const freq = this.isMonthly ? 'monthly' : 'one-time';
+
+    let desc = `₹${new Intl.NumberFormat('en-IN').format(amount)} provides early screening kits and medical counseling for patients in need.`;
+    if (amount <= 500) {
+      desc = `₹500 sponsors primary oral & breast cancer awareness kits for 1 rural family.`;
+    } else if (amount <= 1000) {
+      desc = `₹1,000 provides diagnostic screening guidance and local travel assistance for 2 individuals.`;
+    } else if (amount <= 2500) {
+      desc = `₹2,500 funds 2 clinical oncology diagnostic screenings + specialist counseling at mobile health camps.`;
+    } else if (amount <= 5000) {
+      desc = `₹5,000 provides 1 month of clinical nutrition packages and compassionate caregiver navigation.`;
+    } else {
+      desc = `₹10,000 sponsors advanced diagnostic imaging support and palliative care navigation for 3 patients.`;
+    }
+
+    statement.innerHTML = `✨ <strong>Impact (${freq}):</strong> ${desc}<br><span style="font-size: 0.8rem; color: #087F73; font-weight: 600; display: inline-block; margin-top: 4px;">✓ 100% Eligible for 80G Tax Exemption (Receipt delivered via email)</span>`;
+  }
+
+  // --- SUBMIT FORM TO API ---
   async submitFormToAPI(formType, payload, containerSelector, title) {
     const container = document.querySelector(containerSelector);
     if (!container) return;
@@ -98,7 +146,7 @@ class ModalManager {
     container.innerHTML = `
       <div style="text-align: center; padding: 3rem 1.5rem;">
         <div style="width: 56px; height: 56px; border: 4px solid rgba(8, 127, 115, 0.2); border-top-color: #087F73; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1.5rem;"></div>
-        <h3 style="font-size: 1.5rem; color: #111817; margin-bottom: 0.5rem;">Avinya Care AI Email Engine</h3>
+        <h3 style="font-size: 1.5rem; color: #111817; margin-bottom: 0.5rem;">Avinya Care Email Dispatch Engine</h3>
         <p style="color: var(--text-dark-muted); font-size: 0.95rem; line-height: 1.5;">
           Generating personalized confirmation & notifying our operations desk...
         </p>
@@ -149,11 +197,11 @@ class ModalManager {
               <div style="color: ${hasDeliveryWarning ? '#92400E' : '#15803D'}; line-height: 1.6;">
                 <div style="display: flex; align-items: center; gap: 6px;">
                   <span>${isUserSent ? '✅' : '❌'}</span>
-                  <span>User Email (<strong>${payload.email}</strong>): ${isUserSent ? 'Dispatched' : (delivery.userEmailError || 'Delivery Failed')}</span>
+                  <span>User Email (<strong>${payload.email || 'Recipient'}</strong>): ${isUserSent ? 'Dispatched' : (delivery.userEmailError || 'Delivery Failed')}</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
                   <span>${isAdminSent ? '✅' : '❌'}</span>
-                  <span>Operations Alert (<strong>info@test.avinyacarefoundation.org</strong>): ${isAdminSent ? 'Dispatched' : (delivery.adminEmailError || 'Delivery Failed')}</span>
+                  <span>Operations Alert (<strong>${delivery.adminEmailRecipient || 'info@test.avinyacarefoundation.org'}</strong>): ${isAdminSent ? 'Dispatched' : (delivery.adminEmailError || 'Delivery Failed')}</span>
                 </div>
                 ${delivery.successMessage ? `<div style="font-size: 0.78rem; color: #166534; margin-top: 6px; border-top: 1px dashed #BBF7D0; padding-top: 4px;">✓ ${delivery.successMessage}</div>` : ''}
                 ${delivery.errorMessage ? `<div style="font-size: 0.78rem; color: #DC2626; margin-top: 6px; border-top: 1px dashed #FECACA; padding-top: 4px;">⚠ ${delivery.errorMessage}</div>` : ''}
@@ -168,7 +216,7 @@ class ModalManager {
               </div>
               <div style="font-weight: 600; color: #111817; margin-bottom: 4px;">Subject: ${userEmail.subject || 'Submission Confirmation'}</div>
               <div style="color: var(--text-dark-muted); line-height: 1.5; font-size: 0.85rem; font-style: italic;">
-                "${userEmail.body ? userEmail.body.slice(0, 180) + '...' : 'A personalized email response has been generated.'}"
+                "${userEmail.body ? userEmail.body.slice(0, 180).replace(/<[^>]*>?/gm, '') + '...' : 'A personalized email response has been generated.'}"
               </div>
             </div>
 
@@ -199,196 +247,75 @@ class ModalManager {
   // --- DONATION MODAL ---
   openDonateModal(defaultAmount = 1000) {
     this.openModal('donate-modal');
-    this.selectedAmount = defaultAmount;
-    this.updateDonateUI();
+    this.selectAmount(defaultAmount);
   }
 
-  setDonationFrequency(isMonthly) {
-    this.isMonthly = isMonthly;
-    document.getElementById('freq-monthly')?.classList.toggle('active', isMonthly);
-    document.getElementById('freq-onetime')?.classList.toggle('active', !isMonthly);
-    this.updateDonateUI();
-  }
-
-  setDonationAmount(amount) {
-    this.selectedAmount = amount;
-    document.querySelectorAll('.amount-btn').forEach(btn => {
-      btn.classList.toggle('active', parseInt(btn.getAttribute('data-amount'), 10) === amount);
-    });
-    const customInput = document.getElementById('custom-amount-input');
-    if (customInput) customInput.value = '';
-    this.updateDonateUI();
-  }
-
-  setCustomAmount(val) {
-    const num = parseInt(val, 10);
-    if (!isNaN(num) && num > 0) {
-      this.selectedAmount = num;
-      document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
-      this.updateDonateUI();
-    }
-  }
-
-  formatINR(num) {
-    return new Intl.NumberFormat('en-IN').format(num);
-  }
-
-  updateDonateUI() {
-    const impactText = document.getElementById('impact-calculator-text');
-    const submitBtn = document.getElementById('donate-submit-btn');
-
-    let text = "";
-    if (this.selectedAmount < 1000) {
-      text = `Provides 1 early diagnostic screening kit and local transport assistance for a rural patient in Maharashtra.`;
-    } else if (this.selectedAmount < 3000) {
-      text = `Funds 2 clinical breast & cervical diagnostic screenings + counseling at mobile health camps.`;
-    } else if (this.selectedAmount < 8000) {
-      text = `Sponsors 1 month of essential clinical nutrition packages and patient navigation support.`;
-    } else {
-      text = `Sponsors complete diagnostic biopsies, emotional therapy, and palliative care navigation for 3 patients.`;
-    }
-
-    const freqStr = this.isMonthly ? '/month' : ' one-time';
-    const formattedVal = this.formatINR(this.selectedAmount);
-
-    if (impactText) {
-      impactText.innerHTML = `<strong>Your ₹${formattedVal}${freqStr} impact:</strong> ${text}<br><span style="font-size: 0.85rem; color: var(--accent-teal); margin-top: 4px; display: inline-block;">✓ Eligible for 80G Tax Deduction under Indian Income Tax Act</span>`;
-    }
-    if (submitBtn) submitBtn.textContent = `Donate ₹${formattedVal}${freqStr} via UPI / NetBanking / Card`;
-  }
-
-  handleDonationSubmit(e) {
+  submitDonation(e) {
     e.preventDefault();
     const form = e.target;
-    const firstName = form.querySelector('[name="firstName"]')?.value || form.querySelectorAll('input')[0]?.value || '';
-    const lastName = form.querySelector('[name="lastName"]')?.value || form.querySelectorAll('input')[1]?.value || '';
-    const email = form.querySelector('[name="email"]')?.value || form.querySelectorAll('input')[2]?.value || '';
-    const phone = form.querySelector('[name="phone"]')?.value || form.querySelectorAll('input')[3]?.value || '';
-    const pan = form.querySelector('[name="pan"]')?.value || form.querySelectorAll('input')[4]?.value || '';
+    const name = form.querySelector('#donor-name')?.value || '';
+    const email = form.querySelector('#donor-email')?.value || '';
+    const phone = form.querySelector('#donor-phone')?.value || '';
+    const pan = form.querySelector('#donor-pan')?.value || '';
 
     const payload = {
-      name: `${firstName} ${lastName}`.trim(),
+      name,
       email,
       phone,
       pan,
-      amount: this.selectedAmount,
+      amount: this.selectedAmount || 1000,
       frequency: this.isMonthly ? 'monthly' : 'one-time',
-      payment_status: 'SUCCESS', // Backend supplied payment status
+      payment_status: 'SUCCESS',
       transaction_id: `TXN-${Date.now().toString().slice(-8)}`
     };
 
     this.submitFormToAPI('donation', payload, '#donate-modal .modal-container', 'Dhanyawad for Your Compassion!');
   }
 
-  // --- VOLUNTEER MODAL ---
-  openVolunteerModal() {
-    this.openModal('volunteer-modal');
-  }
-
-  handleVolunteerSubmit(e) {
+  // Generic form handler for all modals (volunteer, support, contact, csr, newsletter, feedback, guide)
+  submitForm(e, formTitle) {
     e.preventDefault();
     const form = e.target;
-    const name = form.querySelector('[name="name"]')?.value || form.querySelectorAll('input')[0]?.value || '';
-    const email = form.querySelector('[name="email"]')?.value || form.querySelectorAll('input')[1]?.value || '';
-    const phone = form.querySelector('[name="phone"]')?.value || '';
-    const interest = form.querySelector('select')?.value || 'Community Awareness';
-    const message = form.querySelector('textarea')?.value || '';
+    const modal = form.closest('.modal-backdrop');
+    const modalId = modal ? modal.id : 'form-modal';
+    
+    let formType = 'contact';
+    const titleLower = (formTitle || '').toLowerCase();
+    if (modalId.includes('volunteer') || titleLower.includes('volunteer')) formType = 'volunteer';
+    else if (modalId.includes('support') || titleLower.includes('support')) formType = 'support';
+    else if (modalId.includes('csr') || titleLower.includes('csr') || titleLower.includes('partner')) formType = 'partnership';
+    else if (modalId.includes('news') || titleLower.includes('news')) formType = 'newsletter';
+    else if (modalId.includes('feed') || titleLower.includes('feed')) formType = 'feedback';
+    else if (modalId.includes('guide') || titleLower.includes('guide')) formType = 'guide';
 
-    const payload = { name, email, phone, interest, message };
-    this.submitFormToAPI('volunteer', payload, '#volunteer-modal .modal-container', 'Welcome to the Avinya Community!');
-  }
+    const inputs = Array.from(form.querySelectorAll('input, select, textarea'));
+    const payload = {};
+    
+    inputs.forEach(input => {
+      const val = input.value.trim();
+      if (!val) return;
+      if (input.type === 'email' || input.placeholder?.toLowerCase().includes('email')) {
+        payload.email = val;
+      } else if (input.type === 'tel' || input.placeholder?.toLowerCase().includes('phone')) {
+        payload.phone = val;
+      } else if (input.placeholder?.toLowerCase().includes('name') && !payload.name) {
+        payload.name = val;
+      } else if (input.placeholder?.toLowerCase().includes('org') || input.placeholder?.toLowerCase().includes('company')) {
+        payload.organization = val;
+      } else if (input.tagName === 'SELECT') {
+        payload.interest = val;
+      } else if (input.tagName === 'TEXTAREA' || input.placeholder?.toLowerCase().includes('message') || input.placeholder?.toLowerCase().includes('thought')) {
+        payload.message = val;
+      }
+    });
 
-  // --- PATIENT SUPPORT MODAL ---
-  openSupportModal() {
-    this.openModal('support-modal');
-  }
-
-  handleSupportSubmit(e) {
-    e.preventDefault();
-    const form = e.target;
-    const name = form.querySelector('[name="name"]')?.value || '';
-    const email = form.querySelector('[name="email"]')?.value || '';
-    const phone = form.querySelector('[name="phone"]')?.value || '';
-    const interest = form.querySelector('[name="category"]')?.value || 'Patient Care Navigation';
-    const message = form.querySelector('[name="message"]')?.value || '';
-    const is_sensitive = form.querySelector('[name="is_sensitive"]')?.checked || true;
-
-    const payload = { name, email, phone, interest, message, is_sensitive };
-    this.submitFormToAPI('support', payload, '#support-modal .modal-container', 'We Are Here for You');
-  }
-
-  // --- CONTACT US MODAL ---
-  openContactModal(subjectHint = '') {
-    this.openModal('contact-modal');
-    if (subjectHint) {
-      const select = document.querySelector('#contact-modal select[name="subject"]');
-      if (select) select.value = subjectHint;
+    if (!payload.name) payload.name = 'Valued Supporter';
+    if (!payload.email) {
+      const emailInput = inputs.find(i => i.type === 'email' || i.placeholder?.toLowerCase().includes('email'));
+      if (emailInput) payload.email = emailInput.value;
     }
-  }
 
-  handleContactSubmit(e) {
-    e.preventDefault();
-    const form = e.target;
-    const name = form.querySelector('[name="name"]')?.value || '';
-    const email = form.querySelector('[name="email"]')?.value || '';
-    const phone = form.querySelector('[name="phone"]')?.value || '';
-    const interest = form.querySelector('[name="subject"]')?.value || 'General Inquiry';
-    const message = form.querySelector('[name="message"]')?.value || '';
-
-    const payload = { name, email, phone, interest, message };
-    this.submitFormToAPI('contact', payload, '#contact-modal .modal-container', 'Message Received!');
-  }
-
-  // --- CSR & PARTNERSHIP MODAL ---
-  openPartnershipModal() {
-    this.openModal('partnership-modal');
-  }
-
-  handlePartnershipSubmit(e) {
-    e.preventDefault();
-    const form = e.target;
-    const name = form.querySelector('[name="name"]')?.value || '';
-    const email = form.querySelector('[name="email"]')?.value || '';
-    const organization = form.querySelector('[name="organization"]')?.value || '';
-    const phone = form.querySelector('[name="phone"]')?.value || '';
-    const interest = form.querySelector('[name="partnershipType"]')?.value || 'Corporate CSR Partnership';
-    const message = form.querySelector('[name="message"]')?.value || '';
-
-    const payload = { name, email, organization, phone, interest, message };
-    this.submitFormToAPI('partnership', payload, '#partnership-modal .modal-container', 'Partnership Proposal Received');
-  }
-
-  // --- NEWSLETTER MODAL ---
-  openNewsletterModal() {
-    this.openModal('newsletter-modal');
-  }
-
-  handleNewsletterSubmit(e) {
-    e.preventDefault();
-    const form = e.target;
-    const name = form.querySelector('[name="name"]')?.value || 'Supporter';
-    const email = form.querySelector('[name="email"]')?.value || '';
-    const interest = form.querySelector('[name="interest"]')?.value || 'Cancer Awareness Updates';
-
-    const payload = { name, email, interest };
-    this.submitFormToAPI('newsletter', payload, '#newsletter-modal .modal-container', 'Welcome to Our Health Newsletter!');
-  }
-
-  // --- FEEDBACK MODAL ---
-  openFeedbackModal() {
-    this.openModal('feedback-modal');
-  }
-
-  handleFeedbackSubmit(e) {
-    e.preventDefault();
-    const form = e.target;
-    const name = form.querySelector('[name="name"]')?.value || '';
-    const email = form.querySelector('[name="email"]')?.value || '';
-    const interest = form.querySelector('[name="category"]')?.value || 'Website & Diagnostic Camp Experience';
-    const message = form.querySelector('[name="message"]')?.value || '';
-
-    const payload = { name, email, interest, message };
-    this.submitFormToAPI('feedback', payload, '#feedback-modal .modal-container', 'Thank You for Your Feedback!');
+    this.submitFormToAPI(formType, payload, `#${modalId} .modal-container`, formTitle || 'Submission Received');
   }
 
   // --- STORY READER MODAL ---
@@ -404,7 +331,7 @@ class ModalManager {
         <div style="width: 100%; height: 260px; border-radius: 20px; overflow: hidden; margin-bottom: 1.5rem;">
           <img src="${imgUrl}" alt="${author}" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
-        <blockquote style="font-size: 1.25rem; font-style: italic; color: var(--accent-teal); border-left: 4px solid var(--accent-teal); padding-left: 1rem; margin-bottom: 1.5rem;">
+        <blockquote style="font-size: 1.25rem; font-style: italic; color: #087F73; border-left: 4px solid #087F73; padding-left: 1rem; margin-bottom: 1.5rem;">
           "${quote}"
         </blockquote>
         <div style="color: var(--text-dark-muted); font-size: 1.05rem; line-height: 1.7;">
