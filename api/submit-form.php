@@ -306,8 +306,51 @@ $adminSentResult = sendPHPSMTP($adminTo, $adminSubject, $adminHtmlContent, $emai
 $adminEmailSent = ($adminSentResult === true || $adminSentResult === 1);
 $adminEmailError = !$adminEmailSent ? "Admin operational alert delivery failed via Hostinger SSL SMTP." : null;
 
+// 3. If any email delivery failed, automatically dispatch error diagnostic alert to admin
+if (!$userEmailSent) {
+    $errorAlertSubject = "[Avinya Care ALERT] Email Delivery Failed — " . strtoupper($formType) . " (ID: {$submissionId})";
+    $errorAlertHtml = '<!DOCTYPE html>
+    <html lang="en">
+    <head><meta charset="UTF-8"><title>' . htmlspecialchars($errorAlertSubject) . '</title></head>
+    <body style="margin: 0; padding: 24px; background-color: #FEF2F2; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; color: #111817;">
+      <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 620px; margin: 0 auto; background: #FFFFFF; border-radius: 12px; border: 1px solid #FECACA; overflow: hidden;">
+        <tr>
+          <td style="background-color: #DC2626; color: #FFFFFF; padding: 20px 24px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; color: #FEE2E2;">Avinya Care System Diagnostics</div>
+            <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: #FFFFFF;">⚠️ Outbound Email Delivery Failed</h2>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 24px;">
+            <p style="margin-top: 0; font-size: 14px; line-height: 1.6; color: #374151;">
+              An automated email dispatch for a recent <strong>' . strtoupper(htmlspecialchars($formType)) . '</strong> form submission failed to deliver to <strong>' . htmlspecialchars($email) . '</strong>.
+            </p>
+            <div style="background-color: #FEF2F2; border-left: 4px solid #DC2626; border-radius: 6px; padding: 14px 16px; margin: 18px 0; font-size: 13px; line-height: 1.6; color: #991B1B;">
+              <strong>Error Reason:</strong><br>
+              <code>' . htmlspecialchars($userEmailError ?: 'SMTP Delivery Failure') . '</code>
+            </div>
+            <div style="background-color: #F9FAFB; border-radius: 8px; padding: 16px; font-size: 13px; line-height: 1.8; color: #111817; border: 1px solid #E5E7EB;">
+              <strong>Submission ID:</strong> <code style="color: #DC2626; font-weight: 700;">' . htmlspecialchars($submissionId) . '</code><br>
+              <strong>Form Category:</strong> ' . strtoupper(htmlspecialchars($formType)) . '<br>
+              <strong>User Name:</strong> ' . htmlspecialchars($name) . '<br>
+              <strong>Target Email:</strong> <a href="mailto:' . htmlspecialchars($email) . '" style="color: #DC2626; font-weight: 600;">' . htmlspecialchars($email) . '</a><br>
+              ' . ($phone ? '<strong>Phone:</strong> ' . htmlspecialchars($phone) . '<br>' : '') . '
+              <strong>Timestamp:</strong> ' . htmlspecialchars($timestampIST) . '<br>
+            </div>
+            <p style="font-size: 13px; color: #6B7280; margin: 20px 0 0 0; line-height: 1.5;">
+              <strong>Recommended Action:</strong> Please verify the user\'s email address or reach out to them directly via phone or internal desk.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>';
+
+    @sendPHPSMTP($adminTo, $errorAlertSubject, $errorAlertHtml, $email);
+}
+
 $deliveryStatus = ($userEmailSent && $adminEmailSent) ? 'SENT' : (($userEmailSent || $adminEmailSent) ? 'PARTIAL' : 'FAILED');
-$successMessage = ($userEmailSent && $adminEmailSent) ? "All emails dispatched successfully via Hostinger SSL SMTP (Port 465)." : (($userEmailSent || $adminEmailSent) ? "Partial email delivery completed." : null);
+$successMessage = ($userEmailSent && $adminEmailSent) ? "All emails dispatched successfully via Hostinger SSL SMTP (Port 465)." : (($userEmailSent || $adminEmailSent) ? "Partial email delivery completed. Error alert sent to admin." : "Email delivery failed. Error alert sent to admin.");
 $errorMessage = (!$userEmailSent && !$adminEmailSent) ? "Email dispatch failed on both recipient channels." : ($userEmailError ?: $adminEmailError);
 
 echo json_encode([

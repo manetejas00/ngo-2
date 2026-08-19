@@ -2,7 +2,7 @@
  * Avinya Care Foundation - Email Dispatch & Delivery Service
  * Sends dual emails (User confirmation & Admin operational notification).
  * Integrates SMTP delivery via Nodemailer (with connection pooling) + Native TLS Socket fallback.
- * Exposes detailed delivery success and error reporting for every email dispatch.
+ * Automatically dispatches error alert emails to info@test.avinyacarefoundation.org if any email fails.
  */
 
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
@@ -51,6 +51,89 @@ async function getOrCreateTransporter(smtpHost, smtpPort, smtpSecure, smtpUser, 
 }
 
 /**
+ * Sends an automated diagnostic error alert email to info@test.avinyacarefoundation.org if any email dispatch fails.
+ */
+async function sendDeliveryErrorAlertToAdmin(details) {
+  const {
+    adminEmail,
+    senderEmail,
+    senderName,
+    smtpHost,
+    smtpPort,
+    smtpSecure,
+    smtpUser,
+    smtpPass,
+    metadata,
+    userEmailError,
+    deliveryError
+  } = details;
+
+  try {
+    const errorSubject = `[Avinya Care ALERT] Email Delivery Failed — ${metadata.formType?.toUpperCase()} (ID: ${metadata.submissionId})`;
+    const errorHtml = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>${errorSubject}</title></head>
+<body style="margin: 0; padding: 24px; background-color: #FEF2F2; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #111817;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 620px; margin: 0 auto; background: #FFFFFF; border-radius: 12px; border: 1px solid #FECACA; overflow: hidden; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.08);">
+    <tr>
+      <td style="background-color: #DC2626; color: #FFFFFF; padding: 20px 24px;">
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; color: #FEE2E2;">Avinya Care System Diagnostics</div>
+        <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: #FFFFFF;">⚠️ Outbound Email Delivery Failed</h2>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 24px;">
+        <p style="margin-top: 0; font-size: 14px; line-height: 1.6; color: #374151;">
+          An automated email dispatch for a recent <strong>${metadata.formType?.toUpperCase()}</strong> form submission failed to deliver to <strong>${metadata.userEmail || 'User'}</strong>.
+        </p>
+        
+        <div style="background-color: #FEF2F2; border-left: 4px solid #DC2626; border-radius: 6px; padding: 14px 16px; margin: 18px 0; font-size: 13px; line-height: 1.6; color: #991B1B;">
+          <strong>Error Details:</strong><br>
+          <code style="font-family: monospace; word-break: break-all;">${userEmailError || deliveryError || 'SMTP Outbound Connection Failure'}</code>
+        </div>
+
+        <div style="background-color: #F9FAFB; border-radius: 8px; padding: 16px; font-size: 13px; line-height: 1.8; color: #111817; border: 1px solid #E5E7EB;">
+          <strong>Submission ID:</strong> <code style="color: #DC2626; font-weight: 700;">${metadata.submissionId}</code><br>
+          <strong>Form Category:</strong> ${metadata.formType?.toUpperCase()}<br>
+          <strong>Target Recipient:</strong> <a href="mailto:${metadata.userEmail}" style="color: #DC2626; font-weight: 600;">${metadata.userEmail || 'N/A'}</a><br>
+          <strong>Timestamp:</strong> ${metadata.timestampIST}<br>
+          <strong>Hostinger SMTP Host:</strong> ${smtpHost}:${smtpPort}
+        </div>
+
+        <p style="font-size: 13px; color: #6B7280; margin: 20px 0 0 0; line-height: 1.5;">
+          <strong>Recommended Action:</strong> Please verify the user's email address or reach out to them directly via phone or dashboard.
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    const errorText = `[AVINYA CARE ALERT] Email Delivery Failed\n\nSubmission ID: ${metadata.submissionId}\nForm Type: ${metadata.formType}\nTarget Recipient: ${metadata.userEmail}\nError: ${userEmailError || deliveryError}\nTimestamp: ${metadata.timestampIST}\nSMTP Server: ${smtpHost}:${smtpPort}`;
+
+    const { sendSmtpSocket } = await import('./smtpClient.mjs');
+    await sendSmtpSocket({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpSecure,
+      user: smtpUser,
+      pass: smtpPass,
+      from: senderEmail,
+      fromName: 'Avinya Care System Alerts',
+      to: adminEmail,
+      subject: errorSubject,
+      htmlContent: errorHtml,
+      textContent: errorText,
+      replyTo: senderEmail
+    });
+
+    console.log(`[Diagnostic Alert Sent] Dispatched delivery failure alert to ${adminEmail} for submission ${metadata.submissionId}`);
+  } catch (alertErr) {
+    console.error('[Diagnostic Alert Failure]', alertErr.message);
+  }
+}
+
+/**
  * Dispatches both User confirmation email and Admin notification email.
  * @param {Object} userEmailPayload - Rendered user email ({ subject, html, text })
  * @param {Object} adminEmailPayload - Rendered admin email ({ subject, html, text })
@@ -59,9 +142,9 @@ async function getOrCreateTransporter(smtpHost, smtpPort, smtpSecure, smtpUser, 
  */
 export async function sendFormEmails(userEmailPayload, adminEmailPayload, metadata) {
   const messageId = `MSG-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-  const senderEmail = process.env.SMTP_FROM || process.env.MAIL_FROM_ADDRESS || 'info@test.avinyacarefoundation.org';
-  const senderName = process.env.MAIL_FROM_NAME || 'Avinya Care Foundation';
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.MAIL_FROM_ADDRESS || 'info@test.avinyacarefoundation.org';
+  const senderEmail = process.env.SMTP_FROM || 'info@test.avinyacarefoundation.org';
+  const senderName = process.env.SMTP_FROM_NAME || 'Avinya Care Foundation';
+  const adminEmail = process.env.ADMIN_EMAIL || 'info@test.avinyacarefoundation.org';
   const recipientUser = metadata.userEmail;
 
   let deliveryStatus = 'SENT';
@@ -70,12 +153,11 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
   let userEmailError = null;
   let adminEmailError = null;
 
-  // Support both SMTP_* and MAIL_* environment variable schemas
-  const smtpHost = process.env.SMTP_HOST || process.env.MAIL_HOST || '127.0.0.1';
-  const smtpPort = parseInt(process.env.SMTP_PORT || process.env.MAIL_PORT || '1025', 10);
-  const smtpUser = process.env.SMTP_USER || process.env.MAIL_USERNAME;
-  const smtpPass = process.env.SMTP_PASS || process.env.MAIL_PASSWORD;
-  const smtpSecure = process.env.SMTP_SECURE === 'true' || process.env.MAIL_ENCRYPTION === 'ssl' || smtpPort === 465;
+  const smtpHost = process.env.SMTP_HOST || 'smtp.hostinger.com';
+  const smtpPort = parseInt(process.env.SMTP_PORT || '465', 10);
+  const smtpUser = process.env.SMTP_USER || 'info@test.avinyacarefoundation.org';
+  const smtpPass = process.env.SMTP_PASS || '@qLVTyL|J5';
+  const smtpSecure = process.env.SMTP_SECURE === 'true' || smtpPort === 465;
 
   let userEmailSent = !recipientUser;
   let adminEmailSent = false;
@@ -197,11 +279,26 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
 
   if (!userEmailSent || !adminEmailSent) {
     deliveryError = userEmailError || adminEmailError || deliveryError || 'Failed to dispatch one or more emails.';
+
+    // Automatically send error alert email to admin (info@test.avinyacarefoundation.org)
+    await sendDeliveryErrorAlertToAdmin({
+      adminEmail,
+      senderEmail,
+      senderName,
+      smtpHost,
+      smtpPort,
+      smtpSecure,
+      smtpUser,
+      smtpPass,
+      metadata,
+      userEmailError,
+      deliveryError
+    });
   }
 
   const successMessage = (userEmailSent && adminEmailSent)
     ? `All emails successfully dispatched via Hostinger SSL SMTP (Port ${smtpPort}).`
-    : (userEmailSent || adminEmailSent ? 'Partial email delivery completed.' : null);
+    : (userEmailSent || adminEmailSent ? 'Partial email delivery completed. Admin error alert dispatched.' : 'Email delivery failed. Admin error alert dispatched.');
 
   // Create safe log record (NO passwords, secrets, card info, or raw sensitive medical data)
   const logRecord = {
