@@ -10,10 +10,14 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Avinya Care Foundation | No one should face cancer alone.">
   <meta property="og:description" content="Cinematic humanitarian campaign bringing cancer awareness, early detection, and compassionate community support to patients and families across India.">
+  <meta property="og:image" content="assets/logo.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="assets/logo.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="alternate icon" href="favicon.ico">
+  <link rel="alternate icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="assets/logo-icon.png">
 
   <!-- Modern Typography (Inter & Manrope Fonts) & Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,9 +30,12 @@
   <!-- 1. MINIMAL FLOATING DOCK NAVIGATION (NESTJS STYLE) -->
   <header class="navbar-wrapper">
     <nav class="navbar scrolled-dark" aria-label="Main Navigation">
-      <a href="#hero" class="nav-brand">
-        <div class="brand-icon">♥</div>
-        <span>Avinya Care</span>
+      <a href="#hero" class="nav-brand" aria-label="Avinya Care Foundation Home">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Foundation Logo" class="brand-logo-img">
+        <div class="brand-text">
+          <span class="brand-name">Avinya Care</span>
+          <span class="brand-tag">Foundation</span>
+        </div>
       </a>
 
       <ul class="nav-links">
@@ -59,6 +66,11 @@
   <!-- Fullscreen Mobile Navigation Drawer -->
   <div class="mobile-nav-overlay" id="mobile-nav-overlay" style="display: none;">
     <button class="modal-close-btn" style="top: 2rem; right: 2rem; color: white; background: rgba(255,255,255,0.1);" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active')">✕</button>
+    <div class="mobile-nav-brand-header">
+      <img src="assets/logo-white.png" alt="Avinya Care Foundation" class="mobile-nav-logo">
+      <div class="mobile-nav-title">Avinya Care Foundation</div>
+      <div class="mobile-nav-tagline">No one should face cancer alone</div>
+    </div>
     <ul class="mobile-nav-menu">
       <li><a href="#hero" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active')">About</a></li>
       <li><a href="#what-we-do" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active')">Awareness</a></li>
@@ -67,7 +79,7 @@
       <li><a href="#impact" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active')">Impact</a></li>
       <li><a href="#news" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active')">News</a></li>
     </ul>
-    <div style="margin-top: 3rem;">
+    <div style="margin-top: 2.5rem;">
       <button class="btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); window.AvinyaModals.openDonateModal(1000);">
         <span>Donate Support</span>
         <span>→</span>
@@ -85,7 +97,7 @@
         <!-- Frame 1: 0 - 15% Scroll (One Person) -->
         <div id="card-1" class="hero-narrative-card active">
           <div class="eyebrow-pill">
-            <span class="dot"></span>
+            <img src="assets/logo-emblem.png" alt="" class="pill-logo-emblem">
             <span>AVINYA CARE FOUNDATION</span>
           </div>
           <h1 class="hero-title">No one should face cancer alone.</h1>
@@ -1062,7 +1074,7 @@
   <section class="section-final-cta">
     <div class="cta-box">
       <div class="eyebrow-pill" style="margin: 0 auto 1.25rem;">
-        <span class="dot"></span>
+        <img src="assets/logo-emblem.png" alt="" class="pill-logo-emblem">
         <span>AVINYA CARE FOUNDATION</span>
       </div>
       <h2 class="display-title">No one should face cancer alone.</h2>
@@ -1082,9 +1094,14 @@
   <!-- 14. NESTJS-INSPIRED MINIMAL FOOTER (DEEP BLACK #0A0A0A) -->
   <footer class="footer">
     <div class="footer-top">
-      <div>
-        <div class="footer-brand">Avinya Care Foundation</div>
-        <p class="footer-tagline">No one should face cancer alone.</p>
+      <div class="footer-brand-col">
+        <div class="footer-brand-badge">
+          <img src="assets/logo-white.png" alt="Avinya Care Foundation" class="footer-brand-logo">
+          <div>
+            <div class="footer-brand">Avinya Care Foundation</div>
+            <p class="footer-tagline">No one should face cancer alone.</p>
+          </div>
+        </div>
         <p style="font-size: 0.88rem; color: var(--text-light-sub); line-height: 1.6;">
           Registered Non-Profit Indian Humanitarian Organization.<br>
           80G & 12A Tax Exempted under IT Act.
@@ -1153,7 +1170,10 @@
   <div id="donate-modal" class="modal-backdrop">
     <div class="modal-container">
       <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <div class="category-tag">MAKE A DIFFERENCE</div>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">MAKE A DIFFERENCE</div>
+      </div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Sponsor Care & Early Detection</h3>
       <p style="color: var(--muted); font-size: 0.95rem;">Choose an amount to support cancer awareness and screening drives across India.</p>
 
@@ -1198,7 +1218,10 @@
       <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
         <img id="modal-story-img" src="" alt="Story Cover" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover;">
         <div>
-          <span id="modal-story-role" class="category-tag">STORY</span>
+          <div class="modal-header-brand" style="margin-bottom: 0.25rem;">
+            <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+            <span id="modal-story-role" class="category-tag" style="margin-bottom: 0;">STORY</span>
+          </div>
           <h3 id="modal-story-author" style="font-size: 1.8rem; font-weight: 800;">Author Name</h3>
         </div>
       </div>
@@ -1211,7 +1234,10 @@
   <div id="volunteer-modal" class="modal-backdrop">
     <div class="modal-container">
       <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <div class="category-tag">JOIN OUR COMMUNITY</div>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">JOIN OUR COMMUNITY</div>
+      </div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Volunteer Application</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Join our care navigation team or assist in community screening drives.</p>
       <form onsubmit="window.AvinyaModals.submitForm(event, 'Volunteer Application')">
@@ -1236,7 +1262,10 @@
   <div id="guide-modal" class="modal-backdrop">
     <div class="modal-container">
       <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <div class="category-tag">KNOWLEDGE RESOURCE</div>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">KNOWLEDGE RESOURCE</div>
+      </div>
       <h3 id="modal-guide-title" style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Cancer Awareness Toolkit</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Enter your email to receive our comprehensive cancer screening checklist & multi-lingual guide PDF.</p>
       <form onsubmit="window.AvinyaModals.submitForm(event, 'Guide Download')">
@@ -1252,7 +1281,10 @@
   <div id="support-modal" class="modal-backdrop">
     <div class="modal-container">
       <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <div class="category-tag">CONFIDENTIAL HELPLINE</div>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">CONFIDENTIAL HELPLINE</div>
+      </div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Request Patient Navigation Support</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Our care navigators provide free, confidential support for patients, caregivers, and families.</p>
       <form onsubmit="window.AvinyaModals.submitForm(event, 'Support Request')">
@@ -1270,7 +1302,10 @@
   <div id="contact-modal" class="modal-backdrop">
     <div class="modal-container">
       <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <div class="category-tag">GET IN TOUCH</div>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">GET IN TOUCH</div>
+      </div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Contact Avinya Care</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Send us a message and our team will get back to you within 24 hours.</p>
       <form onsubmit="window.AvinyaModals.submitForm(event, 'Contact Message')">
@@ -1288,7 +1323,10 @@
   <div id="csr-modal" class="modal-backdrop">
     <div class="modal-container">
       <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <div class="category-tag">CORPORATE PARTNERSHIP</div>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">CORPORATE PARTNERSHIP</div>
+      </div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">CSR & Corporate Collaboration</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Partner with Avinya Care Foundation for employee wellness drives, mobile screening vans, and community health initiatives.</p>
       <form onsubmit="window.AvinyaModals.submitForm(event, 'CSR Inquiry')">
@@ -1306,7 +1344,10 @@
   <div id="newsletter-modal" class="modal-backdrop">
     <div class="modal-container">
       <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <div class="category-tag">HEALTH JOURNAL</div>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">HEALTH JOURNAL</div>
+      </div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Subscribe to Health Insights</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Receive monthly oncology updates, screening tips, and survivor stories delivered to your inbox.</p>
       <form onsubmit="window.AvinyaModals.submitForm(event, 'Newsletter Subscription')">
@@ -1322,7 +1363,10 @@
   <div id="feedback-modal" class="modal-backdrop">
     <div class="modal-container">
       <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-      <div class="category-tag">YOUR FEEDBACK</div>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">YOUR FEEDBACK</div>
+      </div>
       <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Share Your Experience</h3>
       <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Help us improve our community programs and patient support services.</p>
       <form onsubmit="window.AvinyaModals.submitForm(event, 'Feedback Submission')">

@@ -62,9 +62,18 @@ export function renderUserEmail(emailContent, formData, formType) {
           
           <!-- Header Banner -->
           <tr>
-            <td style="background-color: #087F73; padding: 28px 32px; text-align: center;">
-              <div style="color: #62B59F; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Avinya Care Foundation</div>
-              <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">Healthcare Dignity & Cancer Awareness</h1>
+            <td style="background-color: #0A0A0A; padding: 28px 32px; text-align: center; border-bottom: 3px solid #E0234E;">
+              <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center" style="margin: 0 auto 12px auto;">
+                <tr>
+                  <td align="center">
+                    <div style="display: inline-block; background-color: #FFFFFF; border-radius: 50%; padding: 6px; box-shadow: 0 4px 12px rgba(245, 130, 32, 0.3);">
+                      <img src="https://avinyacare.org/assets/logo.png" alt="Avinya Care Foundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0;" />
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Avinya Care Foundation</div>
+              <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">No One Should Face Cancer Alone</h1>
             </td>
           </tr>
 
@@ -161,9 +170,20 @@ export function renderAdminEmail(emailContent, formData, formType, submissionId,
           
           <!-- Header Banner -->
           <tr>
-            <td style="background-color: #111817; padding: 24px 32px;">
-              <div style="color: #62B59F; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Avinya Care Internal Desk</div>
-              <h2 style="color: #FFFFFF; font-size: 20px; font-weight: 700; margin: 0;">Operational Alert: Form Submission</h2>
+            <td style="background-color: #0A0A0A; padding: 24px 32px; border-bottom: 3px solid #E0234E;">
+              <table role="presentation" border="0" cellspacing="0" cellpadding="0" width="100%">
+                <tr>
+                  <td valign="middle" style="width: 44px;">
+                    <div style="background-color: #FFFFFF; border-radius: 50%; padding: 4px; display: inline-block;">
+                      <img src="https://avinyacare.org/assets/logo.png" alt="Avinya Care" width="36" height="36" style="display: block; width: 36px; height: 36px; border: 0;" />
+                    </div>
+                  </td>
+                  <td valign="middle" style="padding-left: 12px;">
+                    <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">Avinya Care Internal Operations</div>
+                    <h2 style="color: #FFFFFF; font-size: 19px; font-weight: 700; margin: 2px 0 0 0;">New Form Submission: ${escapeHTML(formType.toUpperCase())}</h2>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 

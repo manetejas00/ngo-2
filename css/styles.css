@@ -155,6 +155,16 @@ button {
   margin-bottom: 1.6rem;
 }
 
+.pill-logo-emblem {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px rgba(245, 130, 32, 0.6));
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
 .eyebrow-pill .dot {
   width: 7px;
   height: 7px;
@@ -310,13 +320,51 @@ button {
 }
 
 .nav-brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 1.15rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.nav-brand:hover {
+  transform: translateY(-1px);
+  opacity: 0.96;
+}
+
+.brand-logo-img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(245, 130, 32, 0.45));
+  transition: transform var(--transition-normal);
+  flex-shrink: 0;
+}
+
+.nav-brand:hover .brand-logo-img {
+  transform: scale(1.08) rotate(6deg);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand-name {
+  font-size: 1.12rem;
   font-weight: 800;
   letter-spacing: -0.03em;
   color: inherit;
+}
+
+.brand-tag {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #F58220;
 }
 
 .brand-icon {
@@ -403,6 +451,36 @@ button {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+}
+
+.mobile-nav-brand-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 2.2rem;
+}
+
+.mobile-nav-logo {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 4px 20px rgba(245, 130, 32, 0.4));
+}
+
+.mobile-nav-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+}
+
+.mobile-nav-tagline {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  margin-top: 0.2rem;
 }
 
 .mobile-nav-menu {
@@ -2122,17 +2200,38 @@ button {
   margin: 0 auto 5rem;
 }
 
+.footer-brand-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+  margin-bottom: 1.25rem;
+}
+
+.footer-brand-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 16px rgba(245, 130, 32, 0.4));
+  flex-shrink: 0;
+}
+
 .footer-brand {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: #FFFFFF;
-  margin-bottom: 0.85rem;
+  line-height: 1.2;
 }
 
 .footer-tagline {
   font-style: italic;
   color: var(--text-light-sub);
-  margin-bottom: 1.5rem;
+  font-size: 0.92rem;
+  margin-top: 0.25rem;
 }
 
 .footer-heading {
@@ -2271,6 +2370,21 @@ button {
 
 .modal-backdrop.active .modal-container {
   transform: scale(1) translateY(0);
+}
+
+.modal-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.modal-brand-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(245, 130, 32, 0.4));
+  flex-shrink: 0;
 }
 
 .modal-close-btn {

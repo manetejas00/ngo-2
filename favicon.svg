@@ -1,32 +1,74 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0F172A"/>
-      <stop offset="100%" stop-color="#087F73"/>
-    </linearGradient>
-    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38BDF8"/>
-      <stop offset="50%" stop-color="#087F73"/>
-      <stop offset="100%" stop-color="#F43F5E"/>
-    </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="2" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    <!-- Background subtle radial glow -->
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#FFF8EE"/>
+      <stop offset="70%" stop-color="#FFF2DC"/>
+      <stop offset="100%" stop-color="#FFE8C2"/>
+    </radialGradient>
+    <filter id="badgeShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.12"/>
     </filter>
   </defs>
 
-  <!-- Circular Base -->
-  <rect width="64" height="64" rx="16" fill="url(#bgGrad)"/>
+  <!-- Circular Backplate -->
+  <circle cx="256" cy="256" r="248" fill="url(#sunGlow)" stroke="#F58220" stroke-width="4" stroke-opacity="0.25"/>
 
-  <!-- Glowing Heart Healthcare Ribbon Symbol -->
-  <path d="M32 52 C 14 38, 8 26, 16 16 C 22 8, 30 12, 32 18 C 34 12, 42 8, 48 16 C 56 26, 50 38, 32 52 Z" 
-        fill="url(#heartGrad)" 
-        filter="url(#glow)"/>
+  <!-- Sun Rays Group -->
+  <g fill="#F58220" transform="translate(256, 235)">
+    <!-- 24 Radiant Sunburst Rays -->
+    <g id="rays">
+      <!-- 24 rays evenly spaced -->
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(0) scale(1)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(15) scale(0.85)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(30) scale(1)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(45) scale(0.85)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(60) scale(1)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(75) scale(0.85)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(90) scale(1)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(105) scale(0.85)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(120) scale(1)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(135) scale(0.85)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(150) scale(1)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(165) scale(0.85)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(180) scale(1)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(195) scale(0.85)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(210) scale(1)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(225) scale(0.85)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(240) scale(1)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(255) scale(0.85)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(270) scale(1)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(285) scale(0.85)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(300) scale(1)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(315) scale(0.85)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(330) scale(1)" />
+      <path d="M-5,-165 Q-8,-190 0,-215 Q8,-190 5,-165 Z" transform="rotate(345) scale(0.85)" />
+    </g>
+  </g>
 
-  <!-- Subtle Medical Cross Accent -->
-  <path d="M32 24 V34 M27 29 H37" 
-        stroke="#FFFFFF" 
-        stroke-width="2.5" 
-        stroke-linecap="round" 
-        opacity="0.9"/>
+  <!-- Center Emblem (Shield + Caregivers) -->
+  <g transform="translate(256, 235)" filter="url(#badgeShadow)">
+    <!-- Bottom Orange Base Arc -->
+    <path d="M-105,10 C-70,68 70,68 105,10 C60,54 -60,54 -105,10 Z" fill="#E87928"/>
+
+    <!-- Left Blue Figure & Arm -->
+    <circle cx="-75" cy="-28" r="22" fill="#0B75BA"/>
+    <path d="M-98,-12 C-98,32 -55,56 -10,50 C-40,42 -72,25 -82,-8 C-85,-2 -90,-8 -98,-12 Z" fill="#0B75BA"/>
+    <path d="M-60,-55 C-56,-15 -25,25 -5,35 C-20,18 -42,-18 -48,-50 Z" fill="#0B75BA"/>
+
+    <!-- Right Blue Figure & Arm -->
+    <circle cx="75" cy="-28" r="22" fill="#0B75BA"/>
+    <path d="M98,-12 C98,32 55,56 10,50 C40,42 72,25 82,-8 C85,-2 90,-8 98,-12 Z" fill="#0B75BA"/>
+    <path d="M60,-55 C56,-15 25,25 5,35 C20,18 42,-18 48,-50 Z" fill="#0B75BA"/>
+
+    <!-- Green Shield Center -->
+    <path d="M0,-72 C48,-72 58,-40 58,5 C58,45 25,75 0,92 C-25,75 -58,45 -58,5 C-58,-40 -48,-72 0,-72 Z" fill="#FFFFFF" stroke="#66C024" stroke-width="12" stroke-linejoin="round"/>
+    
+    <!-- Medical Healthcare Cross -->
+    <path d="M-9,-32 H9 V-9 H32 V9 H9 V32 H-9 V9 H-32 V-9 H-9 Z" fill="#66C024"/>
+  </g>
+
+  <!-- Brand Subtext in Favicon Base -->
+  <text x="256" y="420" font-family="'Cinzel', 'Times New Roman', Georgia, serif" font-size="28" font-weight="700" letter-spacing="4" fill="#111827" text-anchor="middle">AVINYA CARE</text>
+  <text x="256" y="448" font-family="'Inter', sans-serif" font-size="14" font-weight="600" letter-spacing="6" fill="#4B5563" text-anchor="middle">FOUNDATION</text>
 </svg>
