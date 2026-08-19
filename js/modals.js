@@ -120,22 +120,50 @@ class ModalManager {
 
       if (response.ok && resData.status === 'ok') {
         const userEmail = resData.userEmail || {};
+        const delivery = resData.emailDelivery || {};
         const isAI = resData.isAIGenerated;
+
+        const isUserSent = delivery.userEmailSent !== false;
+        const isAdminSent = delivery.adminEmailSent !== false;
+        const hasDeliveryWarning = delivery.status === 'FAILED' || delivery.status === 'PARTIAL' || Boolean(delivery.errorMessage);
 
         container.innerHTML = `
           <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
           <div style="text-align: center; padding: 2rem 1rem;">
             <div style="width: 68px; height: 68px; background: rgba(98, 181, 159, 0.2); border-radius: 50%; color: #087F73; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 1.25rem;">✓</div>
             <span class="category-tag" style="margin-bottom: 0.5rem; display: inline-block;">${isAI ? '✨ Dynamic AI Email Generated' : '✓ Submission Confirmed'}</span>
-            <h2 style="font-size: 1.8rem; margin-bottom: 1rem; color: #111817;">${title || 'Dhanyawad!'}</h2>
-            <p style="color: var(--text-dark-muted); font-size: 1.05rem; margin-bottom: 1.5rem; line-height: 1.6;">
+            <h2 style="font-size: 1.8rem; margin-bottom: 0.75rem; color: #111817;">${title || 'Dhanyawad!'}</h2>
+            <p style="color: var(--text-dark-muted); font-size: 1.05rem; margin-bottom: 1.25rem; line-height: 1.6;">
               ${userEmail.greeting ? `<strong>${userEmail.greeting}</strong><br>` : ''}
               ${resData.message || 'We have received your submission and sent a confirmation email to your address.'}
             </p>
 
+            <!-- Live Email Dispatch Status (Success / Error Indicators) -->
+            <div style="background: ${hasDeliveryWarning ? '#FFFBEB' : '#F0FDF4'}; border: 1px solid ${hasDeliveryWarning ? '#FDE68A' : '#BBF7D0'}; border-radius: 12px; padding: 14px 16px; margin-bottom: 1.25rem; text-align: left; font-size: 0.85rem;">
+              <div style="font-weight: 700; color: ${hasDeliveryWarning ? '#B45309' : '#166534'}; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                <span>${hasDeliveryWarning ? '⚠️ Email Dispatch Status' : '✓ Live Email Delivery Status'}</span>
+                <span style="font-size: 0.75rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: ${isUserSent && isAdminSent ? '#DCFCE7; color: #166534;' : '#FEF3C7; color: #92400E;'}">
+                  ${delivery.status || 'SENT'}
+                </span>
+              </div>
+              <div style="color: ${hasDeliveryWarning ? '#92400E' : '#15803D'}; line-height: 1.6;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span>${isUserSent ? '✅' : '❌'}</span>
+                  <span>User Email (<strong>${payload.email}</strong>): ${isUserSent ? 'Dispatched' : (delivery.userEmailError || 'Delivery Failed')}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                  <span>${isAdminSent ? '✅' : '❌'}</span>
+                  <span>Operations Alert (<strong>info@test.avinyacarefoundation.org</strong>): ${isAdminSent ? 'Dispatched' : (delivery.adminEmailError || 'Delivery Failed')}</span>
+                </div>
+                ${delivery.successMessage ? `<div style="font-size: 0.78rem; color: #166534; margin-top: 6px; border-top: 1px dashed #BBF7D0; padding-top: 4px;">✓ ${delivery.successMessage}</div>` : ''}
+                ${delivery.errorMessage ? `<div style="font-size: 0.78rem; color: #DC2626; margin-top: 6px; border-top: 1px dashed #FECACA; padding-top: 4px;">⚠ ${delivery.errorMessage}</div>` : ''}
+              </div>
+            </div>
+
+            <!-- Email Content Preview Card -->
             <div style="background: var(--bg-light); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; text-align: left; font-size: 0.9rem; border: 1px solid var(--border-light);">
               <div style="font-weight: 700; color: #087F73; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
-                <span>📧 Confirmation Sent to: ${payload.email}</span>
+                <span>📧 Confirmation Email Preview</span>
                 <span style="font-size: 0.75rem; background: #087F73; color: white; padding: 2px 8px; border-radius: 10px;">${resData.submissionId}</span>
               </div>
               <div style="font-weight: 600; color: #111817; margin-bottom: 4px;">Subject: ${userEmail.subject || 'Submission Confirmation'}</div>
@@ -150,15 +178,18 @@ class ModalManager {
           </div>
         `;
       } else {
-        throw new Error(resData.message || 'Server response error');
+        throw new Error(resData.message || resData.errorMessage || 'Server response error');
       }
     } catch (err) {
       container.innerHTML = `
         <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
         <div style="text-align: center; padding: 2rem 1rem;">
           <div style="width: 64px; height: 64px; background: #FEE2E2; border-radius: 50%; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1rem;">!</div>
-          <h3 style="font-size: 1.5rem; margin-bottom: 0.75rem;">Submission Failed</h3>
-          <p style="color: var(--text-dark-muted); margin-bottom: 1.5rem;">${err.message || 'Could not submit form. Please try again.'}</p>
+          <h3 style="font-size: 1.5rem; margin-bottom: 0.75rem; color: #111817;">Submission Failed</h3>
+          <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 10px; padding: 12px 16px; margin-bottom: 1.5rem; text-align: left; font-size: 0.9rem; color: #991B1B; line-height: 1.5;">
+            <strong>Error Details:</strong><br>
+            ${err.message || 'Could not submit form. Please check your network connection or try again.'}
+          </div>
           <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="width: 100%; justify-content: center;">Close</button>
         </div>
       `;

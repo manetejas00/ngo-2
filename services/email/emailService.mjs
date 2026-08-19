@@ -2,6 +2,7 @@
  * Avinya Care Foundation - Email Dispatch & Delivery Service
  * Sends dual emails (User confirmation & Admin operational notification).
  * Integrates SMTP delivery via Nodemailer (with connection pooling) + Native TLS Socket fallback.
+ * Exposes detailed delivery success and error reporting for every email dispatch.
  */
 
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
@@ -54,7 +55,7 @@ async function getOrCreateTransporter(smtpHost, smtpPort, smtpSecure, smtpUser, 
  * @param {Object} userEmailPayload - Rendered user email ({ subject, html, text })
  * @param {Object} adminEmailPayload - Rendered admin email ({ subject, html, text })
  * @param {Object} metadata - Submission metadata (submissionId, formType, userEmail, isAIGenerated, timestampIST)
- * @returns {Promise<{ success: boolean, messageId: string, deliveryStatus: string, deliveryMethod: string }>} Dispatch result
+ * @returns {Promise<{ success: boolean, messageId: string, deliveryStatus: string, deliveryMethod: string, userEmail: Object, adminEmail: Object, successMessage: string, errorMessage: string }>} Dispatch result
  */
 export async function sendFormEmails(userEmailPayload, adminEmailPayload, metadata) {
   const messageId = `MSG-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
@@ -66,6 +67,8 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
   let deliveryStatus = 'SENT';
   let deliveryMethod = 'VIRTUAL_MAILER';
   let deliveryError = null;
+  let userEmailError = null;
+  let adminEmailError = null;
 
   // Support both SMTP_* and MAIL_* environment variable schemas
   const smtpHost = process.env.SMTP_HOST || process.env.MAIL_HOST || '127.0.0.1';
@@ -83,33 +86,45 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
 
     if (transporter) {
       if (!userEmailSent && recipientUser) {
-        const userRes = await transporter.sendMail({
-          from: `"${senderName}" <${senderEmail}>`,
-          to: recipientUser,
-          subject: userEmailPayload.subject,
-          text: userEmailPayload.text,
-          html: userEmailPayload.html,
-          replyTo: senderEmail
-        });
-        userEmailSent = true;
-        console.log(`[SMTP Sent via Nodemailer] User email sent to ${recipientUser} | ID: ${userRes.messageId || 'ok'}`);
+        try {
+          const userRes = await transporter.sendMail({
+            from: `"${senderName}" <${senderEmail}>`,
+            to: recipientUser,
+            subject: userEmailPayload.subject,
+            text: userEmailPayload.text,
+            html: userEmailPayload.html,
+            replyTo: senderEmail
+          });
+          userEmailSent = true;
+          console.log(`[SMTP Sent via Nodemailer] User email sent to ${recipientUser} | ID: ${userRes.messageId || 'ok'}`);
+        } catch (uErr) {
+          userEmailError = uErr.message;
+          console.warn('[Nodemailer User Email Warning]', uErr.message);
+        }
       }
 
       if (!adminEmailSent) {
-        const adminRes = await transporter.sendMail({
-          from: `"Avinya Care Operations" <${senderEmail}>`,
-          to: adminEmail,
-          subject: adminEmailPayload.subject,
-          text: adminEmailPayload.text,
-          html: adminEmailPayload.html,
-          replyTo: recipientUser || senderEmail
-        });
-        adminEmailSent = true;
-        console.log(`[SMTP Sent via Nodemailer] Admin alert sent to ${adminEmail} | ID: ${adminRes.messageId || 'ok'}`);
+        try {
+          const adminRes = await transporter.sendMail({
+            from: `"Avinya Care Operations" <${senderEmail}>`,
+            to: adminEmail,
+            subject: adminEmailPayload.subject,
+            text: adminEmailPayload.text,
+            html: adminEmailPayload.html,
+            replyTo: recipientUser || senderEmail
+          });
+          adminEmailSent = true;
+          console.log(`[SMTP Sent via Nodemailer] Admin alert sent to ${adminEmail} | ID: ${adminRes.messageId || 'ok'}`);
+        } catch (aErr) {
+          adminEmailError = aErr.message;
+          console.warn('[Nodemailer Admin Email Warning]', aErr.message);
+        }
       }
 
-      deliveryMethod = 'SMTP_NODEMAILER';
-      deliveryStatus = 'SENT';
+      if (userEmailSent && adminEmailSent) {
+        deliveryMethod = 'SMTP_NODEMAILER';
+        deliveryStatus = 'SENT';
+      }
     }
   } catch (nodemailerErr) {
     console.warn('[Nodemailer Delivery Warning]', nodemailerErr.message, '— Switching to Native TLS Socket...');
@@ -121,45 +136,57 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
       const { sendSmtpSocket } = await import('./smtpClient.mjs');
 
       if (!userEmailSent && recipientUser) {
-        await sendSmtpSocket({
-          host: smtpHost,
-          port: smtpPort,
-          secure: smtpSecure,
-          user: smtpUser,
-          pass: smtpPass,
-          from: senderEmail,
-          fromName: senderName,
-          to: recipientUser,
-          subject: userEmailPayload.subject,
-          htmlContent: userEmailPayload.html,
-          textContent: userEmailPayload.text,
-          replyTo: senderEmail
-        });
-        userEmailSent = true;
-        console.log(`[Native TLS Socket Sent] User email sent to ${recipientUser}`);
+        try {
+          await sendSmtpSocket({
+            host: smtpHost,
+            port: smtpPort,
+            secure: smtpSecure,
+            user: smtpUser,
+            pass: smtpPass,
+            from: senderEmail,
+            fromName: senderName,
+            to: recipientUser,
+            subject: userEmailPayload.subject,
+            htmlContent: userEmailPayload.html,
+            textContent: userEmailPayload.text,
+            replyTo: senderEmail
+          });
+          userEmailSent = true;
+          userEmailError = null;
+          console.log(`[Native TLS Socket Sent] User email sent to ${recipientUser}`);
+        } catch (sUserErr) {
+          userEmailError = sUserErr.message;
+          console.error('[Native Socket User Email Error]', sUserErr.message);
+        }
       }
 
       if (!adminEmailSent) {
-        await sendSmtpSocket({
-          host: smtpHost,
-          port: smtpPort,
-          secure: smtpSecure,
-          user: smtpUser,
-          pass: smtpPass,
-          from: senderEmail,
-          fromName: 'Avinya Care Operations',
-          to: adminEmail,
-          subject: adminEmailPayload.subject,
-          htmlContent: adminEmailPayload.html,
-          textContent: adminEmailPayload.text,
-          replyTo: recipientUser || senderEmail
-        });
-        adminEmailSent = true;
-        console.log(`[Native TLS Socket Sent] Admin alert sent to ${adminEmail}`);
+        try {
+          await sendSmtpSocket({
+            host: smtpHost,
+            port: smtpPort,
+            secure: smtpSecure,
+            user: smtpUser,
+            pass: smtpPass,
+            from: senderEmail,
+            fromName: 'Avinya Care Operations',
+            to: adminEmail,
+            subject: adminEmailPayload.subject,
+            htmlContent: adminEmailPayload.html,
+            textContent: adminEmailPayload.text,
+            replyTo: recipientUser || senderEmail
+          });
+          adminEmailSent = true;
+          adminEmailError = null;
+          console.log(`[Native TLS Socket Sent] Admin alert sent to ${adminEmail}`);
+        } catch (sAdminErr) {
+          adminEmailError = sAdminErr.message;
+          console.error('[Native Socket Admin Email Error]', sAdminErr.message);
+        }
       }
 
       deliveryMethod = smtpSecure || smtpPort === 465 ? 'SMTP_TLS_SOCKET' : 'SMTP_SOCKET';
-      deliveryStatus = 'SENT';
+      deliveryStatus = userEmailSent && adminEmailSent ? 'SENT' : (userEmailSent || adminEmailSent ? 'PARTIAL' : 'FAILED');
     } catch (socketErr) {
       console.error('[Native Socket SMTP Error]', socketErr.message);
       deliveryError = socketErr.message;
@@ -167,6 +194,14 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
       deliveryMethod = 'FAILED';
     }
   }
+
+  if (!userEmailSent || !adminEmailSent) {
+    deliveryError = userEmailError || adminEmailError || deliveryError || 'Failed to dispatch one or more emails.';
+  }
+
+  const successMessage = (userEmailSent && adminEmailSent)
+    ? `All emails successfully dispatched via Hostinger SSL SMTP (Port ${smtpPort}).`
+    : (userEmailSent || adminEmailSent ? 'Partial email delivery completed.' : null);
 
   // Create safe log record (NO passwords, secrets, card info, or raw sensitive medical data)
   const logRecord = {
@@ -179,7 +214,12 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
     isAIGenerated: metadata.isAIGenerated,
     deliveryStatus,
     deliveryMethod,
+    userEmailSent,
+    adminEmailSent,
+    userEmailError,
+    adminEmailError,
     deliveryError,
+    successMessage,
     userSubject: userEmailPayload.subject,
     adminSubject: adminEmailPayload.subject,
     timestampIST: metadata.timestampIST
@@ -190,11 +230,26 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
   console.log(`[Email Service] Emails status: ${deliveryStatus} (${deliveryMethod}) for submission ${metadata.submissionId} (Form: ${metadata.formType}, AI: ${metadata.isAIGenerated ? 'YES' : 'FALLBACK'})`);
 
   return {
-    success: deliveryStatus === 'SENT' || deliveryStatus === 'PARTIAL',
+    success: userEmailSent && adminEmailSent,
     messageId,
     deliveryStatus,
     deliveryMethod,
-    error: deliveryError
+    userEmail: {
+      sent: userEmailSent,
+      recipient: recipientUser || 'N/A',
+      subject: userEmailPayload.subject,
+      statusMessage: userEmailSent ? `Confirmation email dispatched to ${recipientUser}` : `Delivery failed for ${recipientUser}`,
+      error: userEmailError
+    },
+    adminEmail: {
+      sent: adminEmailSent,
+      recipient: adminEmail,
+      subject: adminEmailPayload.subject,
+      statusMessage: adminEmailSent ? `Operational alert dispatched to ${adminEmail}` : `Delivery failed for admin alert`,
+      error: adminEmailError
+    },
+    successMessage,
+    errorMessage: deliveryError
   };
 }
 

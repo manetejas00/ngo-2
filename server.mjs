@@ -577,7 +577,7 @@ const server = createServer(async (req, res) => {
       const adminEmailPayload = renderAdminEmail(generatedEmails.admin, formData, formType, submissionId, timestampIST);
 
       // Send Emails
-      await sendFormEmails(userEmailPayload, adminEmailPayload, {
+      const dispatchResult = await sendFormEmails(userEmailPayload, adminEmailPayload, {
         submissionId,
         formType,
         userEmail: email,
@@ -595,6 +595,18 @@ const server = createServer(async (req, res) => {
         formType,
         isAIGenerated: generatedEmails.isAIGenerated,
         timestampIST,
+        emailDelivery: {
+          status: dispatchResult.deliveryStatus,
+          deliveryMethod: dispatchResult.deliveryMethod,
+          userEmailSent: dispatchResult.userEmail?.sent ?? false,
+          adminEmailSent: dispatchResult.adminEmail?.sent ?? false,
+          userEmailRecipient: dispatchResult.userEmail?.recipient ?? email,
+          adminEmailRecipient: dispatchResult.adminEmail?.recipient ?? (process.env.ADMIN_EMAIL || 'info@test.avinyacarefoundation.org'),
+          successMessage: dispatchResult.successMessage,
+          errorMessage: dispatchResult.errorMessage,
+          userEmailError: dispatchResult.userEmail?.error || null,
+          adminEmailError: dispatchResult.adminEmail?.error || null
+        },
         userEmail: {
           subject: userEmailPayload.subject,
           greeting: generatedEmails.user.greeting,
@@ -613,7 +625,11 @@ const server = createServer(async (req, res) => {
     } catch (err) {
       console.error('[Form Submission Endpoint Error]', err);
       res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-      res.end(JSON.stringify({ status: 'error', message: 'Internal server error processing form submission' }));
+      res.end(JSON.stringify({
+        status: 'error',
+        message: 'Internal server error processing form submission',
+        errorMessage: err.message
+      }));
       return;
     }
   }

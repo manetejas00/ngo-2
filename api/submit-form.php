@@ -295,9 +295,20 @@ $adminHtmlContent = '<!DOCTYPE html>
 </body>
 </html>';
 
+// 1. Dispatch User Confirmation HTML Email via Authenticated SSL SMTP
+$userSentResult = sendPHPSMTP($email, $userSubject, $userHtmlContent);
+$userEmailSent = ($userSentResult === true || $userSentResult === 1);
+$userEmailError = !$userEmailSent ? "User confirmation email delivery failed via Hostinger SSL SMTP." : null;
+
 // 2. Dispatch Admin Alert HTML Email via Authenticated SSL SMTP
 $adminTo = "info@test.avinyacarefoundation.org";
-$adminSent = sendPHPSMTP($adminTo, $adminSubject, $adminHtmlContent, $email);
+$adminSentResult = sendPHPSMTP($adminTo, $adminSubject, $adminHtmlContent, $email);
+$adminEmailSent = ($adminSentResult === true || $adminSentResult === 1);
+$adminEmailError = !$adminEmailSent ? "Admin operational alert delivery failed via Hostinger SSL SMTP." : null;
+
+$deliveryStatus = ($userEmailSent && $adminEmailSent) ? 'SENT' : (($userEmailSent || $adminEmailSent) ? 'PARTIAL' : 'FAILED');
+$successMessage = ($userEmailSent && $adminEmailSent) ? "All emails dispatched successfully via Hostinger SSL SMTP (Port 465)." : (($userEmailSent || $adminEmailSent) ? "Partial email delivery completed." : null);
+$errorMessage = (!$userEmailSent && !$adminEmailSent) ? "Email dispatch failed on both recipient channels." : ($userEmailError ?: $adminEmailError);
 
 echo json_encode([
     'status' => 'ok',
@@ -305,6 +316,18 @@ echo json_encode([
     'formType' => $formType,
     'isAIGenerated' => false,
     'timestampIST' => $timestampIST,
+    'emailDelivery' => [
+        'status' => $deliveryStatus,
+        'deliveryMethod' => 'HOSTINGER_SSL_SMTP_465',
+        'userEmailSent' => $userEmailSent,
+        'adminEmailSent' => $adminEmailSent,
+        'userEmailRecipient' => $email,
+        'adminEmailRecipient' => $adminTo,
+        'successMessage' => $successMessage,
+        'errorMessage' => $errorMessage,
+        'userEmailError' => $userEmailError,
+        'adminEmailError' => $adminEmailError
+    ],
     'userEmail' => [
         'subject' => $userSubject,
         'greeting' => $greeting,
