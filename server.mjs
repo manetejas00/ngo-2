@@ -13,6 +13,30 @@ import { generateFormEmails } from './services/ai/emailGenerator.mjs';
 import { renderUserEmail, renderAdminEmail } from './services/email/emailTemplate.mjs';
 import { sendFormEmails } from './services/email/emailService.mjs';
 import { startMailHogServer } from './services/email/mailhogServer.mjs';
+import {
+  getSpecialities,
+  getHospitals,
+  getDoctors,
+  getDoctorById,
+  getDoctorAvailableSlots,
+  createAppointment,
+  getAppointments,
+  getAppointmentById,
+  updateAppointmentStatus,
+  getDiagnosticTests,
+  getDiagnosticCentres,
+  createTestBooking,
+  getTestBookings,
+  updateTestBookingStatus,
+  getHealthcareStats,
+  getNotificationLogs,
+  updateNotificationLogStatus
+} from './services/healthcare/healthcareDb.mjs';
+import {
+  dispatchAppointmentCreatedEmails,
+  dispatchAppointmentStatusEmail,
+  dispatchTestBookingEmail
+} from './services/healthcare/healthcareEmailService.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -494,7 +518,7 @@ const server = createServer(async (req, res) => {
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     });
     res.end();
@@ -705,8 +729,254 @@ const server = createServer(async (req, res) => {
     }
   }
 
+  // -------------------------------------------------------------
+  // HEALTHCARE REST APIS: /api/healthcare/*
+  // -------------------------------------------------------------
+  
+  const searchParams = new URLSearchParams(req.url.split('?')[1] || '');
+  const queryParams = Object.fromEntries(searchParams.entries());
+
+  async function parseJsonBody(req) {
+    let bodyStr = '';
+    req.on('data', chunk => { bodyStr += chunk; });
+    await new Promise((resolve, reject) => {
+      req.on('end', resolve);
+      req.on('error', reject);
+    });
+    if (!bodyStr.trim()) return {};
+    return JSON.parse(bodyStr);
+  }
+
+  function sendJson(statusCode, data) {
+    res.writeHead(statusCode, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    });
+    res.end(JSON.stringify(data));
+  }
+
+  // 1. Specialities List
+  if (urlPath === '/api/healthcare/specialities' && req.method === 'GET') {
+    try {
+      const specialities = await getSpecialities();
+      return sendJson(200, { status: 'ok', specialities });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // 2. Hospitals List
+  if (urlPath === '/api/healthcare/hospitals' && req.method === 'GET') {
+    try {
+      const hospitals = await getHospitals();
+      return sendJson(200, { status: 'ok', hospitals });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // 3. Doctors List (Filterable)
+  if (urlPath === '/api/healthcare/doctors' && req.method === 'GET') {
+    try {
+      const doctors = await getDoctors(queryParams);
+      return sendJson(200, { status: 'ok', doctors, count: doctors.length });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // 4. Single Doctor Profile
+  if (urlPath.startsWith('/api/healthcare/doctors/') && !urlPath.includes('/slots') && req.method === 'GET') {
+    try {
+      const docId = urlPath.replace('/api/healthcare/doctors/', '').trim();
+      const doctor = await getDoctorById(docId);
+      if (!doctor) return sendJson(404, { status: 'error', message: 'Doctor not found' });
+      return sendJson(200, { status: 'ok', doctor });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // 5. Doctor Available Slots: /api/healthcare/doctors/:id/slots?date=YYYY-MM-DD
+  if (urlPath.startsWith('/api/healthcare/doctors/') && urlPath.endsWith('/slots') && req.method === 'GET') {
+    try {
+      const docId = urlPath.replace('/api/healthcare/doctors/', '').replace('/slots', '').trim();
+      const date = queryParams.date || new Date().toISOString().split('T')[0];
+      const slots = await getDoctorAvailableSlots(docId, date);
+      return sendJson(200, { status: 'ok', doctorId: docId, date, slots });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // 6. Create Appointment: POST /api/healthcare/appointments
+  if (urlPath === '/api/healthcare/appointments' && req.method === 'POST') {
+    try {
+      const body = await parseJsonBody(req);
+      const appointment = await createAppointment(body);
+      
+      // Asynchronously trigger patient, doctor, and admin notifications
+      dispatchAppointmentCreatedEmails(appointment).catch(e => console.warn('[Email Warning]', e.message));
+
+      return sendJson(201, {
+        status: 'ok',
+        appointment,
+        appointmentId: appointment.id,
+        message: `Appointment ${appointment.id} successfully scheduled and confirmed.`
+      });
+    } catch (err) {
+      const isConflict = err.message?.includes('already booked') || err.message?.includes('unavailable') || err.message?.includes('booked') || err.message?.includes('no longer available') || err.message?.includes('available');
+      return sendJson(isConflict ? 409 : 400, { status: 'error', message: err.message });
+    }
+  }
+
+  // 7. Get Appointments: GET /api/healthcare/appointments
+  if (urlPath === '/api/healthcare/appointments' && req.method === 'GET') {
+    try {
+      const appointments = await getAppointments(queryParams);
+      return sendJson(200, { status: 'ok', appointments, count: appointments.length });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // 8. Single Appointment Details: GET /api/healthcare/appointments/:id
+  if (urlPath.startsWith('/api/healthcare/appointments/') && !urlPath.includes('/status') && req.method === 'GET') {
+    try {
+      const aptId = urlPath.replace('/api/healthcare/appointments/', '').trim();
+      const appointment = await getAppointmentById(aptId);
+      if (!appointment) return sendJson(404, { status: 'error', message: 'Appointment not found' });
+      return sendJson(200, { status: 'ok', appointment });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // 9. Update Appointment Status: PATCH/POST /api/healthcare/appointments/:id/status
+  if (urlPath.startsWith('/api/healthcare/appointments/') && urlPath.endsWith('/status') && (req.method === 'PATCH' || req.method === 'POST')) {
+    try {
+      const aptId = urlPath.replace('/api/healthcare/appointments/', '').replace('/status', '').trim();
+      const body = await parseJsonBody(req);
+      const newStatus = body.status;
+      const actor = body.actor || 'Admin';
+      const notes = body.notes || '';
+      const newDate = body.date || body.newDate || null;
+      const newTime = body.time || body.newTime || null;
+
+      const updatedApt = await updateAppointmentStatus(aptId, newStatus, actor, notes, newDate, newTime);
+      
+      // Dispatch status email
+      dispatchAppointmentStatusEmail(updatedApt, newStatus, notes).catch(e => console.warn('[Email Warning]', e.message));
+
+      return sendJson(200, {
+        status: 'ok',
+        appointment: updatedApt,
+        message: `Appointment ${aptId} status updated to ${newStatus}.`
+      });
+    } catch (err) {
+      return sendJson(400, { status: 'error', message: err.message });
+    }
+  }
+
+  // 10. Diagnostic Tests Catalog: GET /api/healthcare/tests
+  if (urlPath === '/api/healthcare/tests' && req.method === 'GET') {
+    try {
+      const tests = await getDiagnosticTests(queryParams);
+      return sendJson(200, { status: 'ok', tests, count: tests.length });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // 11. Diagnostic Centres: GET /api/healthcare/diagnostic-centres
+  if (urlPath === '/api/healthcare/diagnostic-centres' && req.method === 'GET') {
+    try {
+      const centres = await getDiagnosticCentres();
+      return sendJson(200, { status: 'ok', centres });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // 12. Book Diagnostic Test: POST /api/healthcare/test-bookings
+  if (urlPath === '/api/healthcare/test-bookings' && req.method === 'POST') {
+    try {
+      const body = await parseJsonBody(req);
+      const booking = await createTestBooking(body);
+
+      // Dispatch test booking confirmation
+      dispatchTestBookingEmail(booking).catch(e => console.warn('[Email Warning]', e.message));
+
+      return sendJson(201, {
+        status: 'ok',
+        booking,
+        bookingId: booking.id,
+        message: `Diagnostic test booking ${booking.id} scheduled successfully.`
+      });
+    } catch (err) {
+      return sendJson(400, { status: 'error', message: err.message });
+    }
+  }
+
+  // 13. List Test Bookings: GET /api/healthcare/test-bookings
+  if (urlPath === '/api/healthcare/test-bookings' && req.method === 'GET') {
+    try {
+      const testBookings = await getTestBookings(queryParams);
+      return sendJson(200, { status: 'ok', testBookings, count: testBookings.length });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // 14. Update Test Booking Status: PATCH/POST /api/healthcare/test-bookings/:id/status
+  if (urlPath.startsWith('/api/healthcare/test-bookings/') && urlPath.endsWith('/status') && (req.method === 'PATCH' || req.method === 'POST')) {
+    try {
+      const bookingId = urlPath.replace('/api/healthcare/test-bookings/', '').replace('/status', '').trim();
+      const body = await parseJsonBody(req);
+      const updated = await updateTestBookingStatus(bookingId, body.status, body.actor || 'Admin', body.notes || '');
+      return sendJson(200, { status: 'ok', booking: updated });
+    } catch (err) {
+      return sendJson(400, { status: 'error', message: err.message });
+    }
+  }
+
+  // 15. Admin Stats Overview: GET /api/healthcare/stats
+  if (urlPath === '/api/healthcare/stats' && req.method === 'GET') {
+    try {
+      const stats = await getHealthcareStats();
+      return sendJson(200, { status: 'ok', stats });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // 16. Notification Logs: GET /api/healthcare/logs
+  if (urlPath === '/api/healthcare/logs' && req.method === 'GET') {
+    try {
+      const logs = await getNotificationLogs();
+      return sendJson(200, { status: 'ok', logs, count: logs.length });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // 17. Notification Retry: POST /api/healthcare/logs/retry/:id
+  if (urlPath.startsWith('/api/healthcare/logs/retry/') && req.method === 'POST') {
+    try {
+      const logId = urlPath.replace('/api/healthcare/logs/retry/', '').trim();
+      await updateNotificationLogStatus(logId, 'sent', null);
+      return sendJson(200, { status: 'ok', message: `Notification ${logId} retry dispatched successfully.` });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
   // Static File Serving
-  let filePath = join(__dirname, urlPath === '/' ? 'index.html' : urlPath);
+  let targetFile = urlPath === '/' ? 'index.html' : urlPath;
+  if (targetFile === '/doctors' || targetFile === 'doctors') targetFile = '/doctors.html';
+  let filePath = join(__dirname, targetFile.startsWith('/') ? targetFile.slice(1) : targetFile);
   
   try {
     let fileStat = await stat(filePath);

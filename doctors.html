@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctors & Diagnostic Tests | Avinya Care Foundation</title>
+  <meta name="description" content="Book appointments with certified oncologists, medical specialists, and access subsidized diagnostic tests and cancer screening packages through Avinyacare Foundation.">
+
+  <!-- Open Graph / Meta -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Doctors & Diagnostic Tests | Avinya Care Foundation">
+  <meta property="og:description" content="Find the right doctor, book confirmed appointments, and access certified diagnostic health tests through Avinyacare.">
+  <meta property="og:image" content="assets/logo.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="alternate icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="assets/logo-icon.png">
+
+  <!-- Typography (Google Fonts Inter & Manrope) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/styles.css?v=2.3">
+  <link rel="stylesheet" href="css/healthcare.css?v=1.1">
+</head>
+<body class="healthcare-page-body" style="background-color: var(--hc-bg); color: var(--hc-text-main);">
+  <div id="doctors-tests-platform">
+
+  <!-- 1. UNIFIED LUXURY FLOATING HEALTHCARE NAVIGATION DOCK -->
+  <header class="navbar-wrapper hc-navbar-dock">
+    <nav class="navbar scrolled-dark hc-navbar" aria-label="Healthcare Platform Navigation">
+      <!-- Brand Emblem -->
+      <a href="index.html" class="nav-brand" aria-label="Avinya Care Foundation Home">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Foundation Logo" class="brand-logo-img">
+        <div class="brand-text">
+          <div style="display: flex; align-items: center; gap: 0.45rem;">
+            <span class="brand-name">Avinya Care</span>
+            <span class="hc-nav-badge">Health Connect</span>
+          </div>
+          <span class="brand-tag">Doctors & Tests</span>
+        </div>
+      </a>
+
+      <!-- Primary Healthcare Links -->
+      <ul class="nav-links hc-nav-links">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="#hc-doctors-anchor" class="nav-link active" onclick="document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">Specialists</a></li>
+        <li><a href="#hc-tests-anchor" class="nav-link" onclick="document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">Diagnostic Tests</a></li>
+        <li><a href="#hc-cancer-priority-anchor" class="nav-link" onclick="document.getElementById('hc-cancer-priority-anchor').scrollIntoView({behavior: 'smooth'})">🎗️ Cancer Care</a></li>
+        <li><a href="#hc-dashboard-anchor" class="nav-link" onclick="document.getElementById('hc-dashboard-anchor').scrollIntoView({behavior: 'smooth'})">My Hub</a></li>
+      </ul>
+
+      <!-- Right Actions: Role Switcher Pill + Book CTA -->
+      <div class="nav-actions hc-nav-actions">
+        <div class="hc-role-pill-group" title="Switch Portal View">
+          <button class="hc-role-btn active" data-role="patient" onclick="window.HealthcareApp.switchRole('patient')">Patient</button>
+          <button class="hc-role-btn" data-role="doctor" onclick="window.HealthcareApp.switchRole('doctor')">Doctor</button>
+          <button class="hc-role-btn" data-role="admin" onclick="window.HealthcareApp.switchRole('admin')">Admin</button>
+        </div>
+
+        <button class="btn-primary hc-book-cta" onclick="document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">
+          <span>Book Slot</span>
+          <span class="arrow">→</span>
+        </button>
+
+        <button class="mobile-toggle" aria-label="Toggle Mobile Navigation" aria-expanded="false">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Fullscreen Mobile Navigation Drawer -->
+  <div class="mobile-nav-overlay" id="mobile-nav-overlay" style="display: none;">
+    <button class="modal-close-btn" style="top: 2rem; right: 2rem; color: white; background: rgba(255,255,255,0.1);" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none';">✕</button>
+    <div class="mobile-nav-brand-header">
+      <img src="assets/logo-white.png" alt="Avinya Care Foundation" class="mobile-nav-logo">
+      <div class="mobile-nav-title">Avinya Health Connect</div>
+      <div class="mobile-nav-tagline">The Right Doctor. The Right Care.</div>
+    </div>
+    <ul class="mobile-nav-menu">
+      <li><a href="index.html" class="mobile-nav-link">← Foundation Home</a></li>
+      <li><a href="#hc-doctors-anchor" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'});">Specialists</a></li>
+      <li><a href="#hc-tests-anchor" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'});">Diagnostic Tests</a></li>
+      <li><a href="#hc-cancer-priority-anchor" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-cancer-priority-anchor').scrollIntoView({behavior: 'smooth'});">🎗️ Cancer Care</a></li>
+      <li><a href="#hc-dashboard-anchor" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-dashboard-anchor').scrollIntoView({behavior: 'smooth'});">My Hub</a></li>
+    </ul>
+    <div style="margin-top: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1.25rem;">
+      <div class="hc-role-pill-group" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);">
+        <button class="hc-role-btn active" data-role="patient" onclick="window.HealthcareApp.switchRole('patient')">Patient</button>
+        <button class="hc-role-btn" data-role="doctor" onclick="window.HealthcareApp.switchRole('doctor')">Doctor</button>
+        <button class="hc-role-btn" data-role="admin" onclick="window.HealthcareApp.switchRole('admin')">Admin</button>
+      </div>
+      <button class="btn-primary" style="padding: 0.95rem 2.5rem; font-size: 1.05rem;" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'});">
+        <span>Book Appointment Now →</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 3. PREMIUM FRAMER-STYLE HERO & 6-STAGE SCROLL STORY -->
+  <section class="hc-hero-scroll-wrapper" id="hc-hero-scroll">
+    <div class="hc-hero-ambient-glow"></div>
+    
+    <div class="hc-hero-sticky-stage">
+      <!-- Background Image Overlay -->
+      <div style="position: absolute; inset: 0; background: url('assets/healthcare/hero-telehealth.jpg') center/cover no-repeat; opacity: 0.18; pointer-events: none; mix-blend-mode: luminosity;"></div>
+
+      <!-- Stage 1: Healthcare Introduction -->
+      <div class="hc-hero-stage-card active" id="hc-stage-1">
+        <div class="hc-stage-badge">
+          <span>✨</span> AVINYA HEALTHCARE PLATFORM
+        </div>
+        <h1 class="hc-hero-heading">
+          The Right Doctor.<br>
+          The Right Time.<br>
+          The Right Care.
+        </h1>
+        <p class="hc-hero-subheading">
+          Find certified oncologists and medical specialists, book confirmed appointments, and access subsidized diagnostic tests through Avinyacare.
+        </p>
+        <div class="hc-hero-actions">
+          <button class="hc-btn-primary" onclick="document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">
+            <span>Find a Doctor →</span>
+          </button>
+          <button class="hc-btn-secondary" onclick="document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">
+            <span>Book a Test</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stage 2: Find Specialist (Search & Filters) -->
+      <div class="hc-hero-stage-card" id="hc-stage-2">
+        <div class="hc-stage-badge">
+          <span>01 / DISCOVERY</span>
+        </div>
+        <h2 class="hc-hero-heading" style="font-size: clamp(2rem, 3.5vw, 3rem);">
+          Find the right specialist
+        </h2>
+        <p class="hc-hero-subheading">
+          Search top oncology, cardiology, and internal medicine doctors across leading hospitals in India.
+        </p>
+        <div class="hc-hero-widget-box" style="max-width: 600px; margin: 0 auto;">
+          <div class="hc-stage-search-bar">
+            <input type="text" placeholder="Search doctor, speciality or condition..." onkeyup="window.HealthcareApp.handleSearchInput(this.value)">
+            <button onclick="document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">Search</button>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; justify-content: center;">
+            <span class="hc-test-tag" style="background: rgba(255,255,255,0.1); color: #FFF; cursor: pointer;" onclick="window.HealthcareApp.filterBySpeciality('oncology'); document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">🧬 Oncology</span>
+            <span class="hc-test-tag" style="background: rgba(255,255,255,0.1); color: #FFF; cursor: pointer;" onclick="window.HealthcareApp.filterBySpeciality('cardiology'); document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">🫀 Cardiology</span>
+            <span class="hc-test-tag" style="background: rgba(255,255,255,0.1); color: #FFF; cursor: pointer;" onclick="window.HealthcareApp.filterBySpeciality('gynecology'); document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">🌸 Gynecology</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 3: Select Doctor Preview -->
+      <div class="hc-hero-stage-card" id="hc-stage-3">
+        <div class="hc-stage-badge">
+          <span>02 / SPECIALIST PROFILE</span>
+        </div>
+        <h2 class="hc-hero-heading" style="font-size: clamp(1.9rem, 3.2vw, 2.7rem);">
+          Expert clinical guidance
+        </h2>
+        <p class="hc-hero-subheading">
+          Review qualifications, hospital affiliations, patient reviews, and next available consultation slots.
+        </p>
+        <div class="hc-hero-widget-box hc-hero-doctor-preview" style="max-width: 540px; margin: 0 auto; display: flex; align-items: center; gap: 1.25rem;">
+          <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=200&q=80" alt="Doctor" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--hc-primary);">
+          <div style="flex: 1; text-align: left;">
+            <div style="color: var(--hc-primary); font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">Lead Oncology Volunteer</div>
+            <h4 style="margin: 0; font-size: 1.15rem; color: #FFF;">Dr. Priya Sharma</h4>
+            <div style="font-size: 0.85rem; color: #94A3B8;">Tata Memorial Hospital, Mumbai • 16+ Yrs Exp</div>
+          </div>
+          <button class="hc-btn-book" onclick="window.HealthcareApp.startBooking('doc-1')">Book</button>
+        </div>
+      </div>
+
+      <!-- Stage 4: Date & Time Scheduler -->
+      <div class="hc-hero-stage-card" id="hc-stage-4">
+        <div class="hc-stage-badge">
+          <span>03 / TIME SLOT</span>
+        </div>
+        <h2 class="hc-hero-heading" style="font-size: clamp(1.9rem, 3.2vw, 2.7rem);">
+          Choose a time that works for you
+        </h2>
+        <p class="hc-hero-subheading">
+          Live real-time slot synchronization prevents double-booking and confirms your consultation instantly.
+        </p>
+        <div class="hc-hero-widget-box" style="max-width: 480px; margin: 0 auto;">
+          <div class="hc-hero-slot-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+            <div class="hc-time-slot-btn selected" style="background: var(--hc-primary); color: #FFF;">09:30 AM</div>
+            <div class="hc-time-slot-btn" style="background: rgba(255,255,255,0.1); color: #FFF;">11:00 AM</div>
+            <div class="hc-time-slot-btn" style="background: rgba(255,255,255,0.1); color: #FFF;">02:30 PM</div>
+            <div class="hc-time-slot-btn" style="background: rgba(255,255,255,0.1); color: #FFF;">04:00 PM</div>
+            <div class="hc-time-slot-btn" style="background: rgba(255,255,255,0.1); color: #FFF;">05:30 PM</div>
+            <div class="hc-time-slot-btn" style="background: rgba(255,255,255,0.1); color: #FFF;">06:00 PM</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 5: Patient Details -->
+      <div class="hc-hero-stage-card" id="hc-stage-5">
+        <div class="hc-stage-badge">
+          <span>04 / PATIENT INTAKE</span>
+        </div>
+        <h2 class="hc-hero-heading" style="font-size: clamp(1.9rem, 3.2vw, 2.7rem);">
+          Seamless, secure intake
+        </h2>
+        <p class="hc-hero-subheading">
+          Patient health records are encrypted and shared solely with your assigned healthcare specialist.
+        </p>
+        <div class="hc-hero-actions">
+          <button class="hc-btn-primary" onclick="document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">
+            <span>Explore Specialist Directory →</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stage 6: Appointment Ready & Confirmation -->
+      <div class="hc-hero-stage-card" id="hc-stage-6">
+        <div class="hc-stage-badge">
+          <span>05 / CONFIRMED</span>
+        </div>
+        <h2 class="hc-hero-heading" style="font-size: clamp(1.9rem, 3.2vw, 2.7rem);">
+          Appointment Confirmed
+        </h2>
+        <p class="hc-hero-subheading">
+          Instant unique Appointment ID generation, automated 3-party email dispatch, and calendar integration.
+        </p>
+        <div class="hc-hero-actions">
+          <button class="hc-btn-primary" onclick="document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">
+            <span>Book Appointment Now →</span>
+          </button>
+          <button class="hc-btn-secondary" onclick="window.HealthcareApp.switchRole('patient'); document.getElementById('hc-dashboard-anchor').scrollIntoView({behavior: 'smooth'});">
+            <span>My Appointments Hub</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hero Stepper Dots Indicator -->
+      <div class="hc-hero-stepper">
+        <div class="hc-step-dot active" title="Stage 1: Introduction"></div>
+        <div class="hc-step-dot" title="Stage 2: Search Specialist"></div>
+        <div class="hc-step-dot" title="Stage 3: Doctor Selection"></div>
+        <div class="hc-step-dot" title="Stage 4: Time Slot"></div>
+        <div class="hc-step-dot" title="Stage 5: Patient Intake"></div>
+        <div class="hc-step-dot" title="Stage 6: Confirmation"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. DOCTOR DIRECTORY SECTION -->
+  <section class="hc-section" id="hc-doctors-anchor">
+    <div class="hc-section-header">
+      <div class="hc-section-eyebrow">
+        <span>🩺</span> SPECIALIST NETWORK
+      </div>
+      <h2 class="hc-section-title">Find a Doctor</h2>
+      <p class="hc-section-desc">
+        Consult with verified oncologists, surgeons, cardiologists, and physicians across partner medical institutions.
+      </p>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="hc-filter-card">
+      <div class="hc-filter-top-row">
+        <div class="hc-input-group">
+          <label class="hc-input-label">Search Doctor or Condition</label>
+          <input type="text" id="hc-doctor-search-input" class="hc-search-input" placeholder="Search by name, hospital or expertise..." onkeyup="window.HealthcareApp.handleSearchInput(this.value)">
+        </div>
+
+        <div class="hc-input-group">
+          <label class="hc-input-label">City / Location</label>
+          <select class="hc-select-input" onchange="window.HealthcareApp.filterByLocation(this.value)">
+            <option value="all">All Locations</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="New Delhi">New Delhi</option>
+            <option value="Gurugram">Gurugram</option>
+            <option value="Bengaluru">Bengaluru</option>
+            <option value="Pune">Pune</option>
+          </select>
+        </div>
+
+        <div class="hc-input-group">
+          <label class="hc-input-label">Hospital / Center</label>
+          <select class="hc-select-input" onchange="window.HealthcareApp.renderDoctorDirectory()">
+            <option value="all">All Hospitals</option>
+            <option value="tmh">Tata Memorial Hospital</option>
+            <option value="apollo">Apollo Hospitals</option>
+            <option value="max">Max Super Speciality</option>
+            <option value="fortis">Fortis Healthcare</option>
+            <option value="avinya">Avinya Community Clinic</option>
+          </select>
+        </div>
+
+        <div class="hc-input-group">
+          <label class="hc-input-label">Consultation Mode</label>
+          <select class="hc-select-input" onchange="window.HealthcareApp.renderDoctorDirectory()">
+            <option value="all">In-Clinic & Video</option>
+            <option value="online">Online Video Telehealth</option>
+            <option value="in-clinic">In-Clinic Visit</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Speciality Filter Pills -->
+      <div id="hc-speciality-pills" class="hc-speciality-pills">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+    <!-- Doctor Cards Grid -->
+    <div id="hc-doctor-grid" class="hc-doctor-grid">
+      <!-- Dynamically rendered via JS -->
+    </div>
+  </section>
+
+  <!-- 5. CANCER SCREENING PRIORITY HIGHLIGHT BANNER -->
+  <div class="hc-cancer-priority-banner" id="hc-cancer-priority-anchor">
+    <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 45%; background: url('assets/healthcare/cancer-screening-lab.jpg') center/cover no-repeat; opacity: 0.22; pointer-events: none; mix-blend-mode: luminosity;"></div>
+    <div class="hc-priority-banner-content">
+      <div class="hc-priority-eyebrow">
+        <span>🎗️</span> ONCOLOGY FOCUS INITIATIVE
+      </div>
+      <h2 class="hc-priority-title">Early Detection Can Save Lives</h2>
+      <p class="hc-priority-desc">
+        Explore cancer screening panels and oncologist consultation options through Avinyacare Foundation. Up to 50% subsidized screening for underserved families.
+      </p>
+      <div class="hc-priority-actions" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <button class="hc-btn-primary" onclick="window.HealthcareApp.filterTests('Cancer Screening'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">
+          <span>Explore Cancer Screening Tests →</span>
+        </button>
+        <button class="hc-btn-secondary" onclick="window.HealthcareApp.filterBySpeciality('oncology'); document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">
+          <span>Consult Oncologists</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. DIAGNOSTIC TESTS CATALOG -->
+  <section class="hc-tests-section" id="hc-tests-anchor">
+    <div class="hc-section-header">
+      <div class="hc-section-eyebrow">
+        <span>🔬</span> CERTIFIED DIAGNOSTICS
+      </div>
+      <h2 class="hc-section-title">Book a Diagnostic Test</h2>
+      <p class="hc-section-desc">
+        Comprehensive pathology panels, multi-cancer tumor markers, and preventive checkups with free home collection options.
+      </p>
+
+      <!-- Category Buttons -->
+      <div class="hc-test-filter-row" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem;">
+        <button class="hc-spec-chip hc-test-filter-btn active" data-category="all" onclick="window.HealthcareApp.filterTests('all')">All Tests</button>
+        <button class="hc-spec-chip hc-test-filter-btn" data-category="Cancer Screening" onclick="window.HealthcareApp.filterTests('Cancer Screening')">🎗️ Cancer Screening</button>
+        <button class="hc-spec-chip hc-test-filter-btn" data-category="Full Body Checkup" onclick="window.HealthcareApp.filterTests('Full Body Checkup')">🩺 Full Body</button>
+        <button class="hc-spec-chip hc-test-filter-btn" data-category="Heart Tests" onclick="window.HealthcareApp.filterTests('Heart Tests')">🫀 Heart</button>
+        <button class="hc-spec-chip hc-test-filter-btn" data-category="Women's Health" onclick="window.HealthcareApp.filterTests('Women\'s Health')">🌸 Women's Health</button>
+        <button class="hc-spec-chip hc-test-filter-btn" data-category="Diabetes Tests" onclick="window.HealthcareApp.filterTests('Diabetes Tests')">🩸 Diabetes</button>
+        <button class="hc-spec-chip hc-test-filter-btn" data-category="Senior Citizen Health" onclick="window.HealthcareApp.filterTests('Senior Citizen Health')">🕊️ Senior Citizen</button>
+      </div>
+    </div>
+
+    <div id="hc-test-grid" class="hc-test-grid" style="max-width: 1320px; margin: 0 auto;">
+      <!-- Dynamically rendered via JS -->
+    </div>
+  </section>
+
+  <!-- 7. ROLE-BASED DASHBOARDS (PATIENT, DOCTOR, ADMIN) -->
+  <section class="hc-dashboard-container" id="hc-dashboard-anchor">
+    <!-- 7A. Patient Dashboard -->
+    <div id="hc-patient-dashboard-view">
+      <div class="hc-dash-header">
+        <div>
+          <h3 class="hc-dash-title">My Health Hub & Appointments</h3>
+          <p class="hc-dash-subtitle">Track your upcoming doctor consultations, test bookings, and medical calendar invites.</p>
+        </div>
+        <button class="hc-btn-primary" onclick="document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">
+          <span>+ Book New Appointment</span>
+        </button>
+      </div>
+
+      <div class="hc-patient-panels" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div>
+          <h4 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 1rem 0;">📅 Doctor Appointments</h4>
+          <div id="hc-patient-appointments-list">
+            <!-- Dynamically loaded -->
+          </div>
+        </div>
+        <div>
+          <h4 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 1rem 0;">🔬 Diagnostic Test Bookings</h4>
+          <div id="hc-patient-tests-list">
+            <!-- Dynamically loaded -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7B. Doctor Dashboard -->
+    <div id="hc-doctor-dashboard-view" style="display: none;">
+      <div class="hc-dash-header">
+        <div>
+          <h3 class="hc-dash-title">Doctor Consultation Portal</h3>
+          <p class="hc-dash-subtitle">Manage today's schedule, conduct teleconsults, and update clinical case notes.</p>
+        </div>
+        <div class="hc-doctor-portal-controls" style="display: flex; align-items: center; gap: 0.75rem;">
+          <label class="hc-input-label" style="margin: 0;">Switch Doctor Profile:</label>
+          <select id="hc-doctor-select-portal" class="hc-select-input" style="width: auto;" onchange="window.HealthcareApp.loadDoctorDashboard()">
+            <option value="doc-1">Dr. Priya Sharma (Oncology)</option>
+            <option value="doc-2">Dr. Rajesh K. Varma (Cardiology)</option>
+            <option value="doc-3">Dr. Ananya Sengupta (Gynecology)</option>
+            <option value="doc-5">Dr. Meera Nambiar (General Physician)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hc-table-wrapper">
+        <table class="hc-table">
+          <thead>
+            <tr>
+              <th>Appointment ID</th>
+              <th>Patient Details</th>
+              <th>Schedule</th>
+              <th>Status</th>
+              <th>Mode</th>
+              <th>Doctor Actions</th>
+            </tr>
+          </thead>
+          <tbody id="hc-doctor-appointments-table">
+            <!-- Dynamically loaded -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 7C. Admin Dashboard -->
+    <div id="hc-admin-dashboard-view" style="display: none;">
+      <div class="hc-dash-header">
+        <div>
+          <h3 class="hc-dash-title">Platform Operations & Admin Console</h3>
+          <p class="hc-dash-subtitle">Real-time KPI metrics, booking status management, and notification delivery audit logs.</p>
+        </div>
+        <button class="hc-btn-view-profile" onclick="window.HealthcareApp.loadAdminDashboard()">🔄 Refresh Realtime Stats</button>
+      </div>
+
+      <!-- KPI Metrics Grid -->
+      <div id="hc-admin-kpi-grid" class="hc-kpi-grid">
+        <!-- Dynamically loaded -->
+      </div>
+
+      <h4 style="font-size: 1.15rem; font-weight: 800; margin: 2rem 0 1rem 0;">All Scheduled Consultations</h4>
+      <div class="hc-table-wrapper" style="margin-bottom: 2.5rem;">
+        <table class="hc-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Patient</th>
+              <th>Doctor</th>
+              <th>Schedule</th>
+              <th>Status</th>
+              <th>Change Status</th>
+            </tr>
+          </thead>
+          <tbody id="hc-admin-appointments-table">
+            <!-- Dynamically loaded -->
+          </tbody>
+        </table>
+      </div>
+
+      <h4 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 1rem 0;">📧 Notification Audit & Delivery Logs</h4>
+      <div class="hc-table-wrapper" style="padding: 1rem 1.5rem;" id="hc-admin-notification-logs">
+        <!-- Dynamically loaded -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. HEALTHCARE MODALS -->
+  <!-- 8A. Doctor Profile Modal -->
+  <div id="hc-doctor-profile-modal" class="hc-modal-backdrop">
+    <div class="hc-modal-window">
+      <div class="hc-modal-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.2rem;">🩺</span>
+          <strong style="font-size: 1rem;">Doctor Profile</strong>
+        </div>
+        <button class="hc-modal-close" onclick="window.HealthcareApp.closeModals()">✕</button>
+      </div>
+      <div class="hc-modal-body" id="hc-profile-modal-content">
+        <!-- Dynamic Profile Content -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 8B. 7-Step Appointment Booking Modal -->
+  <div id="hc-booking-modal" class="hc-modal-backdrop">
+    <div class="hc-modal-window">
+      <div class="hc-modal-header">
+        <h3 id="hc-booking-modal-title" style="margin: 0; font-size: 1.25rem; font-weight: 800;">Book Appointment</h3>
+        <button class="hc-modal-close" onclick="window.HealthcareApp.closeModals()">✕</button>
+      </div>
+      <div class="hc-modal-body">
+        <div class="hc-booking-steps-bar">
+          <div class="hc-step-item active" id="hc-step-item-1">
+            <div class="hc-step-circle">1</div>
+            <span>Slot</span>
+          </div>
+          <div class="hc-step-item" id="hc-step-item-2">
+            <div class="hc-step-circle">2</div>
+            <span>Patient</span>
+          </div>
+          <div class="hc-step-item" id="hc-step-item-3">
+            <div class="hc-step-circle">3</div>
+            <span>Review</span>
+          </div>
+          <div class="hc-step-item" id="hc-step-item-4">
+            <div class="hc-step-circle">4</div>
+            <span>Confirmed</span>
+          </div>
+        </div>
+
+        <div id="hc-booking-step-container">
+          <!-- Dynamic Step Content -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8C. Diagnostic Test Booking Modal -->
+  <div id="hc-test-booking-modal" class="hc-modal-backdrop">
+    <div class="hc-modal-window">
+      <div class="hc-modal-header">
+        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800;">Schedule Diagnostic Test</h3>
+        <button class="hc-modal-close" onclick="window.HealthcareApp.closeModals()">✕</button>
+      </div>
+      <div class="hc-modal-body" id="hc-test-modal-content">
+        <!-- Dynamic Test Booking Form -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. MINIMALIST FOOTER -->
+  <footer class="footer" style="margin-top: 4rem;">
+    <div class="footer-top">
+      <div class="footer-brand-col">
+        <div class="footer-brand-badge">
+          <img src="assets/logo-white.png" alt="Avinya Care Foundation" class="footer-brand-logo">
+          <div>
+            <div class="footer-brand">Avinya Care Foundation</div>
+            <p class="footer-tagline">No one should face cancer alone.</p>
+          </div>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--text-light-sub); line-height: 1.6;">
+          Registered Non-Profit Indian Humanitarian Organization.<br>
+          80G & 12A Tax Exempted under IT Act.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">Platform</h4>
+        <ul class="footer-links">
+          <li><a href="doctors.html#hc-doctors-anchor" class="footer-link">Find Doctors</a></li>
+          <li><a href="doctors.html#hc-tests-anchor" class="footer-link">Diagnostic Tests</a></li>
+          <li><a href="doctors.html#hc-cancer-priority-anchor" class="footer-link">Cancer Screening</a></li>
+          <li><a href="doctors.html#hc-dashboard-anchor" class="footer-link">My Appointments</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">Foundation</h4>
+        <ul class="footer-links">
+          <li><a href="index.html#hero" class="footer-link">About Mission</a></li>
+          <li><a href="index.html#what-we-do" class="footer-link">Awareness Drives</a></li>
+          <li><a href="index.html#stories" class="footer-link">Human Stories</a></li>
+          <li><a href="index.html#news" class="footer-link">Oncology News</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">Support</h4>
+        <ul class="footer-links">
+          <li><a href="https://wa.me/919876543210" target="_blank" class="footer-link">WhatsApp Support</a></li>
+          <li><a href="tel:+919876543210" class="footer-link">24/7 Helpline</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">Legal</h4>
+        <ul class="footer-links">
+          <li><a href="#" class="footer-link" onclick="alert('All patient data is encrypted and confidential under HIPAA / Medical Ethics standards.'); return false;">Patient Privacy</a></li>
+          <li><a href="#" class="footer-link" onclick="alert('Avinya Care Foundation: 80G Tax Exempted.'); return false;">80G Exemption</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Avinya Care Foundation. All healthcare records strictly confidential.</div>
+      <div>Confidential 24/7 Medical Helpline: <strong>+91 98765 43210</strong></div>
+    </div>
+  </footer>
+
+  <!-- Floating WhatsApp Support Button -->
+  <a href="https://wa.me/919876543210" target="_blank" class="whatsapp-float-btn" aria-label="Chat with Support on WhatsApp">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-0.999 3.648 3.742-.981z"/>
+    </svg>
+    <span>Need help? Chat on WhatsApp</span>
+  </a>
+
+  <!-- Healthcare Application Scripts -->
+  </div>
+
+  <script src="js/healthcare/healthcare-app.js?v=1.1"></script>
+  <script>
+    // Robust mobile drawer controller for doctors.html
+    (function() {
+      const mobileBtn = document.querySelector('.mobile-toggle');
+      const mobileOverlay = document.getElementById('mobile-nav-overlay');
+      if (mobileBtn && mobileOverlay) {
+        function toggleDrawer(open) {
+          const shouldOpen = open !== undefined ? open : !mobileOverlay.classList.contains('active');
+          mobileOverlay.classList.toggle('active', shouldOpen);
+          mobileOverlay.style.display = shouldOpen ? 'flex' : 'none';
+          mobileBtn.setAttribute('aria-expanded', shouldOpen);
+          document.body.style.overflow = shouldOpen ? 'hidden' : '';
+        }
+
+        mobileBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          toggleDrawer();
+        });
+
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && mobileOverlay.classList.contains('active')) {
+            toggleDrawer(false);
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
