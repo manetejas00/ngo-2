@@ -774,64 +774,142 @@ button {
 }
 
 /* ==========================================================================
-   4. NESTJS 7-CARD INTERACTIVE OVERLAPPING HOVER STACK (#what-we-do)
+   4. CONTINUUM OF CARE / THE JOURNEY (#what-we-do)
+   Apple-Grade Spacing, Cinematic Depth, Glassmorphic Cards & Atmospheric Lighting
    ========================================================================== */
 .section-nestjs-stack {
-  padding: 9.5rem 2% 9rem;
+  padding: 10rem 2% 10rem;
   background-color: #080A09 !important;
   background-image: 
-    radial-gradient(ellipse 65% 45% at 50% 50%, rgba(244, 117, 40, 0.08) 0%, transparent 75%),
-    radial-gradient(circle at 50% 0%, rgba(98, 181, 159, 0.05) 0%, transparent 65%);
+    radial-gradient(ellipse 60% 45% at 75% 55%, rgba(244, 117, 40, 0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 25% 50%, rgba(16, 111, 175, 0.08) 0%, transparent 65%),
+    radial-gradient(circle at 50% 0%, rgba(98, 181, 159, 0.04) 0%, transparent 55%);
   color: #FFFFFF !important;
   position: relative;
   overflow: visible;
 }
 
+.section-nestjs-stack::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 30%, rgba(244, 117, 40, 0.3) 50%, rgba(255, 255, 255, 0.08) 70%, transparent 100%);
+  pointer-events: none;
+}
+
 .nestjs-stack-header {
   text-align: center;
   max-width: 900px;
-  margin: 0 auto 5rem;
+  margin: 0 auto 4.5rem;
   position: relative;
   z-index: 5;
+}
+
+.journey-section-title {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(2.4rem, 4.2vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  color: #FFFFFF;
+  margin-bottom: 1.35rem;
+}
+
+.journey-accent-word {
+  position: relative;
+  display: inline-block;
+  color: var(--brand);
+}
+
+.journey-accent-word::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand), rgba(244, 117, 40, 0.2));
+  border-radius: 2px;
+}
+
+.journey-accent-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background-color: var(--brand);
+  border-radius: 50%;
+  margin-left: 2px;
+  vertical-align: middle;
+  box-shadow: 0 0 10px rgba(244, 117, 40, 0.7);
+}
+
+.journey-section-subtitle {
+  font-family: var(--font-primary);
+  font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.65;
+  max-width: 760px;
+  margin: 0 auto;
+  letter-spacing: -0.01em;
 }
 
 .nestjs-stack-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: 1480px;
+  max-width: 1540px;
   margin: 0 auto;
-  padding: 4.5rem 1rem 5.5rem;
-  perspective: 1200px;
+  padding: 4rem 1.5rem 3.5rem;
+  perspective: 1400px;
   position: relative;
   z-index: 5;
 }
 
 .nestjs-stack-card {
-  flex: 0 0 235px;
+  flex: 0 0 242px;
   height: 410px;
-  margin-left: -26px;
-  border-radius: 28px;
-  background-color: #141A17 !important; /* 100% Solid Opaque Fill — Zero Bleed */
-  background: linear-gradient(165deg, #1A221E 0%, #121815 60%, #0E1310 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.32) !important; /* Metallic Rim Light */
-  box-shadow: -14px 12px 35px rgba(0, 0, 0, 0.88), 0 24px 60px rgba(0, 0, 0, 0.9) !important;
-  padding: 2.2rem 1.6rem 2rem;
+  margin-left: -28px;
+  border-radius: 26px;
+  background: rgba(18, 20, 22, 0.92) !important;
+  background-image: linear-gradient(170deg, rgba(26, 28, 30, 0.95) 0%, rgba(14, 16, 17, 0.98) 100%) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.11) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 
+    0 16px 40px rgba(0, 0, 0, 0.65), 
+    0 0 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  padding: 1.85rem 1.55rem 1.65rem;
   cursor: pointer;
   transform-style: preserve-3d;
   transition: 
-    transform 650ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 500ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 500ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
-    background 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform 600ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 450ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 450ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 450ms cubic-bezier(0.16, 1, 0.3, 1),
+    background 450ms cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   user-select: none;
+  opacity: 0.9;
 }
 
 .nestjs-stack-card:first-child {
   margin-left: 0;
+}
+
+/* Inactive Card Hover: gentle lift, soft ambient rim */
+.nestjs-stack-card:hover:not(.active) {
+  opacity: 1;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 
+    0 22px 50px rgba(0, 0, 0, 0.75), 
+    0 0 25px rgba(244, 117, 40, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
 }
 
 /* Base Card Content Inner */
@@ -844,146 +922,194 @@ button {
   position: relative;
 }
 
-.stack-card-top {
+.stack-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   z-index: 2;
+  margin-bottom: auto;
 }
 
+/* Stage Number Capsule */
 .stack-card-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.3rem 0.75rem;
+  padding: 0.28rem 0.7rem;
   border-radius: 9999px;
-  background: #24141A !important;
-  border: 1px solid var(--brand) !important;
+  background: rgba(244, 117, 40, 0.08) !important;
+  border: 1px solid rgba(244, 117, 40, 0.28) !important;
   color: var(--brand) !important;
-  font-size: 0.78rem;
+  font-family: var(--font-primary);
+  font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  box-shadow: 0 4px 12px rgba(244, 117, 40, 0.3);
+  box-shadow: 0 2px 8px rgba(244, 117, 40, 0.12);
+  transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Healthcare Glass Icon Box */
 .stack-card-icon {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   border-radius: 16px;
-  background: #18221D !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #62B59F;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1), color 500ms, background 500ms;
+  color: var(--brand);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1), color 400ms, background 400ms, border-color 400ms, box-shadow 400ms;
 }
 
-/* Center 3D Ambient Graphic Container */
-.stack-card-graphic {
-  position: absolute;
-  top: 42%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90px;
-  height: 90px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1), opacity 500ms, background 500ms, border-color 500ms;
-}
-
-.nestjs-stack-card:hover .stack-card-graphic {
-  transform: translate(-50%, -50%) scale(1.15) rotate(10deg);
-  background: rgba(244, 117, 40, 0.1);
-  border-color: rgba(244, 117, 40, 0.3);
-}
-
-.stack-card-bottom {
+.stack-card-body {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
   z-index: 2;
 }
 
 .stack-card-title {
+  font-family: 'Manrope', sans-serif;
   font-size: 1.55rem;
   font-weight: 800;
   color: #FFFFFF;
-  line-height: 1.18;
-  letter-spacing: -0.03em;
-  margin-bottom: 0.6rem;
-  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.55rem;
+  transition: color 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .stack-card-desc {
   font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.82);
-  line-height: 1.5;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 450ms cubic-bezier(0.22, 1, 0.36, 1) 50ms, transform 450ms cubic-bezier(0.22, 1, 0.36, 1) 50ms;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.55;
+  opacity: 0.85;
+  transition: opacity 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stack-card-footer {
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 2;
 }
 
 .stack-card-action {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  font-size: 0.9rem;
+  gap: 0.45rem;
+  font-size: 0.85rem;
   font-weight: 800;
   color: var(--brand);
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 450ms cubic-bezier(0.22, 1, 0.36, 1) 100ms, transform 450ms cubic-bezier(0.22, 1, 0.36, 1) 100ms;
+  letter-spacing: 0.02em;
+  transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .stack-arrow {
-  transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  display: inline-block;
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Hover & Active States (Neighbor / Distant Responses) */
+/* ACTIVE CARD STATE (Sophisticated warm ambient light, refined orange rim, white typography) */
 .nestjs-stack-card.active {
   z-index: 40 !important;
-  background-color: #241A1E !important;
-  background: linear-gradient(165deg, #2D1E24 0%, #1A1216 100%) !important;
-  border-color: rgba(244, 117, 40, 0.85) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.5) !important;
-  box-shadow: 0 35px 90px rgba(244, 117, 40, 0.5), 0 0 35px rgba(244, 117, 40, 0.3) !important;
+  background: rgba(28, 22, 18, 0.97) !important;
+  background-image: linear-gradient(170deg, rgba(34, 26, 20, 0.98) 0%, rgba(18, 14, 12, 0.99) 100%) !important;
+  border-color: rgba(244, 117, 40, 0.8) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 
+    0 25px 70px rgba(0, 0, 0, 0.65), 
+    0 0 45px rgba(244, 117, 40, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
   opacity: 1 !important;
 }
 
+.nestjs-stack-card.active .stack-card-badge {
+  background: var(--brand) !important;
+  border-color: var(--brand) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(244, 117, 40, 0.4);
+}
+
 .nestjs-stack-card.active .stack-card-icon {
-  transform: scale(1.12) rotate(6deg);
+  transform: scale(1.08) rotate(4deg);
   color: #FFFFFF;
   background: var(--brand) !important;
   border-color: var(--brand) !important;
-  box-shadow: 0 8px 24px rgba(244, 117, 40, 0.6);
+  box-shadow: 0 8px 22px rgba(244, 117, 40, 0.4);
 }
 
-.nestjs-stack-card.active .stack-card-desc,
-.nestjs-stack-card.active .stack-card-action {
+.nestjs-stack-card.active .stack-card-desc {
   opacity: 1;
-  transform: translateY(0);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.nestjs-stack-card.active .stack-card-footer {
+  border-top-color: rgba(244, 117, 40, 0.25);
 }
 
 .nestjs-stack-card.active .stack-arrow {
-  transform: translateX(8px);
+  transform: translateX(6px);
 }
 
-.nestjs-stack-card.adjacent-left {
-  z-index: 25;
-  opacity: 0.9;
-}
-
+.nestjs-stack-card.adjacent-left,
 .nestjs-stack-card.adjacent-right {
   z-index: 25;
-  opacity: 0.9;
+  opacity: 0.92;
 }
 
 .nestjs-stack-card.distant {
-  opacity: 0.65;
+  opacity: 0.75;
+}
+
+/* Stage Progress Indicator Track below card deck */
+.journey-stage-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2.2rem;
+  position: relative;
+  z-index: 5;
+}
+
+.journey-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.5);
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 350ms cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  padding: 0;
+}
+
+.journey-dot:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.journey-dot.active {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #FFFFFF;
+  box-shadow: 0 0 16px rgba(244, 117, 40, 0.45);
+  transform: scale(1.12);
+}
+
+.journey-line {
+  width: 18px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 /* Mobile Responsive Adjustments */
@@ -992,26 +1118,26 @@ button {
     overflow-x: auto;
     overflow-y: visible;
     justify-content: flex-start;
-    padding-bottom: 3.5rem !important;
-    padding-top: 3.5rem !important;
+    padding-bottom: 2.5rem !important;
+    padding-top: 2.5rem !important;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
   }
 
   .nestjs-stack-card {
     flex: 0 0 260px;
-    margin-left: -14px;
+    margin-left: -12px;
     scroll-snap-align: center;
-    transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 450ms, border-color 450ms;
+    transition: transform 450ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 450ms, border-color 450ms;
   }
 
   .nestjs-stack-card.active {
     z-index: 40 !important;
     transform: translateY(-16px) scale(1.03) !important;
-    background-color: #241A1E !important;
-    background: linear-gradient(165deg, #2D1E24 0%, #1A1216 100%) !important;
-    border-color: rgba(244, 117, 40, 0.9) !important;
-    box-shadow: 0 25px 70px rgba(244, 117, 40, 0.55), 0 0 35px rgba(244, 117, 40, 0.35) !important;
+    background: rgba(30, 24, 20, 0.96) !important;
+    background-image: linear-gradient(170deg, rgba(38, 28, 23, 0.97) 0%, rgba(22, 17, 14, 0.99) 100%) !important;
+    border-color: rgba(244, 117, 40, 0.8) !important;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.6), 0 0 35px rgba(244, 117, 40, 0.22) !important;
     opacity: 1 !important;
   }
 

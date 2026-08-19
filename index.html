@@ -294,14 +294,14 @@
   <!-- 4. NESTJS 7-CARD INTERACTIVE OVERLAPPING HOVER STACK (#what-we-do) -->
   <section id="what-we-do" class="section-nestjs-stack">
     <div class="nestjs-stack-header">
-      <div class="eyebrow-pill" style="margin: 0 auto 1.25rem;">
-        <span class="dot"></span>
+      <div class="eyebrow-pill eyebrow-pill-dark" style="margin: 0 auto 1.25rem;">
+        <img src="assets/logo-emblem.png" class="pill-logo-emblem" alt="Avinya Care Logo">
         <span>AVINYA CARE CONTINUUM</span>
       </div>
-      <h2 class="section-title section-title-dark" style="margin-bottom: 1.25rem;">
-        Support at <span style="color: var(--brand);">every step</span> of the journey.
+      <h2 class="journey-section-title">
+        Support at <span class="journey-accent-word">every step<span class="journey-accent-dot"></span></span> of the journey.
       </h2>
-      <p class="body-large-dark" style="max-width: 780px; margin: 0 auto;">
+      <p class="journey-section-subtitle">
         From initial awareness to long-term recovery, our 7-stage continuum ensures no individual or family faces cancer alone.
       </p>
     </div>
@@ -310,38 +310,26 @@
     <div class="nestjs-stack-container" id="nestjs-card-stack">
       
       <!-- Card 01: Awareness -->
-      <div class="nestjs-stack-card" data-index="0" data-rot="-5" data-ty="14" tabindex="0" onclick="window.AvinyaModals.openGuideModal('Awareness')">
+      <div class="nestjs-stack-card" data-index="0" data-rot="-6" data-ty="12" tabindex="0" onclick="window.AvinyaModals.openGuideModal('Awareness')">
         <div class="stack-card-inner">
-          <div class="stack-card-top">
-            <span class="stack-card-badge">01</span>
+          <div class="stack-card-header">
+            <span class="stack-card-badge">STAGE 01</span>
             <div class="stack-card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                <circle cx="12" cy="12" r="3.5"/>
               </svg>
             </div>
           </div>
 
-          <!-- Ambient 3D Graphic Graphic -->
-          <div class="stack-card-graphic">
-            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
-              <circle cx="50" cy="50" r="40" stroke="url(#grad1)" stroke-width="1.5" stroke-dasharray="4 4"/>
-              <ellipse cx="50" cy="50" rx="35" ry="15" stroke="url(#grad1)" stroke-width="1"/>
-              <ellipse cx="50" cy="50" rx="15" ry="35" stroke="url(#grad1)" stroke-width="1"/>
-              <defs>
-                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#F47528"/>
-                  <stop offset="100%" stop-color="#62B59F"/>
-                </linearGradient>
-              </defs>
-            </svg>
+          <div class="stack-card-body">
+            <h3 class="stack-card-title">Awareness</h3>
+            <p class="stack-card-desc">Understand cancer risks, warning signs, prevention, and proactive health habits.</p>
           </div>
 
-          <div class="stack-card-bottom">
-            <h3 class="stack-card-title">Awareness</h3>
-            <p class="stack-card-desc">Understand cancer risk, prevention, warning signs, and healthy choices.</p>
+          <div class="stack-card-footer">
             <div class="stack-card-action">
-              <span>Explore</span>
+              <span>Explore Guide</span>
               <span class="stack-arrow">→</span>
             </div>
           </div>
@@ -349,38 +337,27 @@
       </div>
 
       <!-- Card 02: Screening -->
-      <div class="nestjs-stack-card" data-index="1" data-rot="6" data-ty="-8" tabindex="0" onclick="window.AvinyaModals.openGuideModal('Early Screening')">
+      <div class="nestjs-stack-card" data-index="1" data-rot="-4" data-ty="-4" tabindex="0" onclick="window.AvinyaModals.openGuideModal('Early Screening')">
         <div class="stack-card-inner">
-          <div class="stack-card-top">
-            <span class="stack-card-badge">02</span>
+          <div class="stack-card-header">
+            <span class="stack-card-badge">STAGE 02</span>
             <div class="stack-card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"/>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"/>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <path d="M11 8v6M8 11h6"/>
               </svg>
             </div>
           </div>
 
-          <!-- Ambient 3D Graphic Graphic -->
-          <div class="stack-card-graphic">
-            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
-              <circle cx="50" cy="50" r="38" stroke="url(#grad2)" stroke-width="1.5"/>
-              <circle cx="50" cy="50" r="24" stroke="url(#grad2)" stroke-width="1" stroke-dasharray="6 3"/>
-              <circle cx="50" cy="50" r="10" stroke="url(#grad2)" stroke-width="1.5"/>
-              <defs>
-                <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#62B59F"/>
-                  <stop offset="100%" stop-color="#FFFFFF"/>
-                </linearGradient>
-              </defs>
-            </svg>
+          <div class="stack-card-body">
+            <h3 class="stack-card-title">Screening</h3>
+            <p class="stack-card-desc">Encourage regular diagnostic screenings and early detection across all communities.</p>
           </div>
 
-          <div class="stack-card-bottom">
-            <h3 class="stack-card-title">Screening</h3>
-            <p class="stack-card-desc">Encourage timely screening and early detection in communities.</p>
+          <div class="stack-card-footer">
             <div class="stack-card-action">
-              <span>Explore</span>
+              <span>Explore Screening</span>
               <span class="stack-arrow">→</span>
             </div>
           </div>
@@ -388,36 +365,26 @@
       </div>
 
       <!-- Card 03: Diagnosis -->
-      <div class="nestjs-stack-card" data-index="2" data-rot="-4" data-ty="18" tabindex="0" onclick="window.AvinyaModals.openSupportModal()">
+      <div class="nestjs-stack-card" data-index="2" data-rot="-2" data-ty="14" tabindex="0" onclick="window.AvinyaModals.openSupportModal()">
         <div class="stack-card-inner">
-          <div class="stack-card-top">
-            <span class="stack-card-badge">03</span>
+          <div class="stack-card-header">
+            <span class="stack-card-badge">STAGE 03</span>
             <div class="stack-card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L3 7v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V7l-9-5z"/>
+                <path d="M9 12h6M12 9v6"/>
               </svg>
             </div>
           </div>
 
-          <!-- Ambient 3D Graphic Graphic -->
-          <div class="stack-card-graphic">
-            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
-              <path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" stroke="url(#grad3)" stroke-width="1.5"/>
-              <path d="M50 25 L72 38 L72 62 L50 75 L28 62 L28 38 Z" stroke="url(#grad3)" stroke-width="1" stroke-dasharray="3 3"/>
-              <defs>
-                <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#F47528"/>
-                  <stop offset="100%" stop-color="#FFFFFF"/>
-                </linearGradient>
-              </defs>
-            </svg>
+          <div class="stack-card-body">
+            <h3 class="stack-card-title">Diagnosis</h3>
+            <p class="stack-card-desc">Help patients demystify clinical pathology reports and map urgent next steps.</p>
           </div>
 
-          <div class="stack-card-bottom">
-            <h3 class="stack-card-title">Diagnosis</h3>
-            <p class="stack-card-desc">Help people understand medical terminology & next steps after diagnosis.</p>
+          <div class="stack-card-footer">
             <div class="stack-card-action">
-              <span>Explore</span>
+              <span>Patient Support</span>
               <span class="stack-arrow">→</span>
             </div>
           </div>
@@ -425,36 +392,26 @@
       </div>
 
       <!-- Card 04: Treatment -->
-      <div class="nestjs-stack-card" data-index="3" data-rot="3" data-ty="-12" tabindex="0" onclick="window.AvinyaModals.openSupportModal()">
+      <div class="nestjs-stack-card" data-index="3" data-rot="0" data-ty="-8" tabindex="0" onclick="window.AvinyaModals.openSupportModal()">
         <div class="stack-card-inner">
-          <div class="stack-card-top">
-            <span class="stack-card-badge">04</span>
+          <div class="stack-card-header">
+            <span class="stack-card-badge">STAGE 04</span>
             <div class="stack-card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                <path d="M12 8v5M9.5 10.5h5"/>
               </svg>
             </div>
           </div>
 
-          <!-- Ambient 3D Graphic Graphic -->
-          <div class="stack-card-graphic">
-            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
-              <path d="M50 15 C 20 15, 15 45, 50 85 C 85 45, 80 15, 50 15 Z" stroke="url(#grad4)" stroke-width="1.5"/>
-              <path d="M50 30 C 30 30, 27 50, 50 75 C 73 50, 70 30, 50 30 Z" stroke="url(#grad4)" stroke-width="1" stroke-dasharray="4 3"/>
-              <defs>
-                <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#62B59F"/>
-                  <stop offset="100%" stop-color="#F47528"/>
-                </linearGradient>
-              </defs>
-            </svg>
+          <div class="stack-card-body">
+            <h3 class="stack-card-title">Treatment</h3>
+            <p class="stack-card-desc">Connect patients and families with treatment companions, subsidies, and care navigation.</p>
           </div>
 
-          <div class="stack-card-bottom">
-            <h3 class="stack-card-title">Treatment</h3>
-            <p class="stack-card-desc">Connect patients and families with clinical companions and resources.</p>
+          <div class="stack-card-footer">
             <div class="stack-card-action">
-              <span>Explore</span>
+              <span>Treatment Aid</span>
               <span class="stack-arrow">→</span>
             </div>
           </div>
@@ -462,12 +419,68 @@
       </div>
 
       <!-- Card 05: Caregiving -->
-      <div class="nestjs-stack-card" data-index="4" data-rot="-3" data-ty="10" tabindex="0" onclick="window.AvinyaModals.openVolunteerModal()">
+      <div class="nestjs-stack-card" data-index="4" data-rot="2" data-ty="10" tabindex="0" onclick="window.AvinyaModals.openVolunteerModal()">
         <div class="stack-card-inner">
-          <div class="stack-card-top">
-            <span class="stack-card-badge">05</span>
+          <div class="stack-card-header">
+            <span class="stack-card-badge">STAGE 05</span>
             <div class="stack-card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="stack-card-body">
+            <h3 class="stack-card-title">Caregiving</h3>
+            <p class="stack-card-desc">Equip caregivers with respite resources, emotional counseling, and practical care tools.</p>
+          </div>
+
+          <div class="stack-card-footer">
+            <div class="stack-card-action">
+              <span>Caregiver Circle</span>
+              <span class="stack-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 06: Recovery -->
+      <div class="nestjs-stack-card" data-index="5" data-rot="4" data-ty="-12" tabindex="0" onclick="window.AvinyaModals.openGuideModal('Recovery')">
+        <div class="stack-card-inner">
+          <div class="stack-card-header">
+            <span class="stack-card-badge">STAGE 06</span>
+            <div class="stack-card-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v3M12 19v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M2 12h3M19 12h3M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="stack-card-body">
+            <h3 class="stack-card-title">Recovery</h3>
+            <p class="stack-card-desc">Support survivor wellness, post-treatment surveillance, and rebuilding strength.</p>
+          </div>
+
+          <div class="stack-card-footer">
+            <div class="stack-card-action">
+              <span>Survivor Care</span>
+              <span class="stack-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 07: Community -->
+      <div class="nestjs-stack-card" data-index="6" data-rot="6" data-ty="8" tabindex="0" onclick="window.AvinyaModals.openDonateModal(1000)">
+        <div class="stack-card-inner">
+          <div class="stack-card-header">
+            <span class="stack-card-badge">STAGE 07</span>
+            <div class="stack-card-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -476,107 +489,37 @@
             </div>
           </div>
 
-          <!-- Ambient 3D Graphic Graphic -->
-          <div class="stack-card-graphic">
-            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
-              <circle cx="35" cy="45" r="22" stroke="url(#grad5)" stroke-width="1.5"/>
-              <circle cx="65" cy="45" r="22" stroke="url(#grad5)" stroke-width="1.5"/>
-              <circle cx="50" cy="65" r="18" stroke="url(#grad5)" stroke-width="1" stroke-dasharray="3 3"/>
-              <defs>
-                <linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#F47528"/>
-                  <stop offset="100%" stop-color="#62B59F"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-
-          <div class="stack-card-bottom">
-            <h3 class="stack-card-title">Caregiving</h3>
-            <p class="stack-card-desc">Support caregivers with respite care, emotional counseling, and guidance.</p>
-            <div class="stack-card-action">
-              <span>Explore</span>
-              <span class="stack-arrow">→</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 06: Recovery -->
-      <div class="nestjs-stack-card" data-index="5" data-rot="5" data-ty="-15" tabindex="0" onclick="window.AvinyaModals.openGuideModal('Recovery')">
-        <div class="stack-card-inner">
-          <div class="stack-card-top">
-            <span class="stack-card-badge">06</span>
-            <div class="stack-card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-              </svg>
-            </div>
-          </div>
-
-          <!-- Ambient 3D Graphic Graphic -->
-          <div class="stack-card-graphic">
-            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
-              <polygon points="50,10 63,35 90,40 70,60 75,88 50,75 25,88 30,60 10,40 37,35" stroke="url(#grad6)" stroke-width="1.5"/>
-              <polygon points="50,25 58,40 75,43 62,55 65,72 50,63 35,72 38,55 25,43 42,40" stroke="url(#grad6)" stroke-width="1" stroke-dasharray="3 3"/>
-              <defs>
-                <linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#62B59F"/>
-                  <stop offset="100%" stop-color="#FFFFFF"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-
-          <div class="stack-card-bottom">
-            <h3 class="stack-card-title">Recovery</h3>
-            <p class="stack-card-desc">Encourage rehabilitation, long-term surveillance, and life beyond treatment.</p>
-            <div class="stack-card-action">
-              <span>Explore</span>
-              <span class="stack-arrow">→</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 07: Community -->
-      <div class="nestjs-stack-card" data-index="6" data-rot="-2" data-ty="8" tabindex="0" onclick="window.AvinyaModals.openDonateModal(1000)">
-        <div class="stack-card-inner">
-          <div class="stack-card-top">
-            <span class="stack-card-badge">07</span>
-            <div class="stack-card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-              </svg>
-            </div>
-          </div>
-
-          <!-- Ambient 3D Graphic Graphic -->
-          <div class="stack-card-graphic">
-            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" opacity="0.45">
-              <circle cx="50" cy="50" r="35" stroke="url(#grad7)" stroke-width="1.5"/>
-              <path d="M15 50 Q 50 20 85 50 Q 50 80 15 50 Z" stroke="url(#grad7)" stroke-width="1.2"/>
-              <path d="M50 15 Q 20 50 50 85 Q 80 50 50 15 Z" stroke="url(#grad7)" stroke-width="1.2"/>
-              <defs>
-                <linearGradient id="grad7" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#F47528"/>
-                  <stop offset="100%" stop-color="#62B59F"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-
-          <div class="stack-card-bottom">
+          <div class="stack-card-body">
             <h3 class="stack-card-title">Community</h3>
-            <p class="stack-card-desc">Build a compassionate ecosystem where no one faces cancer alone.</p>
+            <p class="stack-card-desc">Unite donors, volunteers, and advocates to ensure no family faces cancer alone.</p>
+          </div>
+
+          <div class="stack-card-footer">
             <div class="stack-card-action">
-              <span>Explore</span>
+              <span>Join Movement</span>
               <span class="stack-arrow">→</span>
             </div>
           </div>
         </div>
       </div>
 
+    </div>
+
+    <!-- Subtle Stage Progress Indicator Track -->
+    <div class="journey-stage-progress" id="journey-stage-dots" aria-label="Continuum of Care Stages">
+      <button type="button" class="journey-dot active" data-step="0" aria-label="Stage 01 Awareness">01</button>
+      <span class="journey-line" aria-hidden="true"></span>
+      <button type="button" class="journey-dot" data-step="1" aria-label="Stage 02 Screening">02</button>
+      <span class="journey-line" aria-hidden="true"></span>
+      <button type="button" class="journey-dot" data-step="2" aria-label="Stage 03 Diagnosis">03</button>
+      <span class="journey-line" aria-hidden="true"></span>
+      <button type="button" class="journey-dot" data-step="3" aria-label="Stage 04 Treatment">04</button>
+      <span class="journey-line" aria-hidden="true"></span>
+      <button type="button" class="journey-dot" data-step="4" aria-label="Stage 05 Caregiving">05</button>
+      <span class="journey-line" aria-hidden="true"></span>
+      <button type="button" class="journey-dot" data-step="5" aria-label="Stage 06 Recovery">06</button>
+      <span class="journey-line" aria-hidden="true"></span>
+      <button type="button" class="journey-dot" data-step="6" aria-label="Stage 07 Community">07</button>
     </div>
   </section>
 

@@ -10,6 +10,7 @@ class NestJSCardStack {
     if (!this.container) return;
 
     this.cards = Array.from(this.container.querySelectorAll('.nestjs-stack-card'));
+    this.dots = Array.from(document.querySelectorAll('#journey-stage-dots .journey-dot'));
     this.activeIndex = -1;
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -42,14 +43,27 @@ class NestJSCardStack {
       });
     });
 
-    // 2. Mobile Horizontal Scroll Center Detection
+    // 2. Stage Progress Dots Click Listeners
+    if (this.dots && this.dots.length) {
+      this.dots.forEach((dot, dIdx) => {
+        dot.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.handleMouseEnter(dIdx);
+          if (this.cards[dIdx] && window.innerWidth <= 1024) {
+            this.cards[dIdx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          }
+        });
+      });
+    }
+
+    // 3. Mobile Horizontal Scroll Center Detection
     this.container.addEventListener('scroll', () => {
       if (window.innerWidth <= 1024) {
         requestAnimationFrame(() => this.detectMobileCenterCard());
       }
     }, { passive: true });
 
-    // 3. IntersectionObserver for viewport scroll entry animation
+    // 4. IntersectionObserver for viewport scroll entry animation
     this.observeEntrance();
   }
 
@@ -78,6 +92,13 @@ class NestJSCardStack {
 
   handleMouseEnter(index) {
     this.activeIndex = index;
+
+    // Update subtle stage progress indicator
+    if (this.dots && this.dots.length) {
+      this.dots.forEach((dot, dIdx) => {
+        dot.classList.toggle('active', dIdx === index);
+      });
+    }
 
     const isMobile = window.innerWidth <= 768;
     const liftY = isMobile ? -24 : -40;
@@ -137,6 +158,13 @@ class NestJSCardStack {
     if (window.innerWidth <= 768) return; // Keep active selection on mobile touch
 
     this.activeIndex = -1;
+
+    // Reset dots to 01 if no card active
+    if (this.dots && this.dots.length) {
+      this.dots.forEach((dot, dIdx) => {
+        dot.classList.toggle('active', dIdx === 0);
+      });
+    }
 
     this.cards.forEach((card, idx) => {
       card.classList.remove('active', 'adjacent-left', 'adjacent-right', 'distant');
