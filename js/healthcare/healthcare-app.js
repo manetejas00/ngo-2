@@ -55,6 +55,11 @@ class HealthcarePlatform {
     this.specialitiesCache = [];
     this.testsCache = [];
     this.selectedDoctorForPortal = 'doc-1';
+    this.staticEndpoints = {
+      doctors: '/api/healthcare/doctors.json',
+      specialities: '/api/healthcare/specialities.json',
+      tests: '/api/healthcare/tests.json'
+    };
 
     this.init();
   }
@@ -140,25 +145,73 @@ class HealthcarePlatform {
   // -------------------------------------------------------------
   // Data Loading
   // -------------------------------------------------------------
-  async loadInitialData() {
+  async fetchJsonEndpoint(endpoint) {
+    const res = await fetch(endpoint, {
+      headers: { Accept: 'application/json' }
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} from ${endpoint}`);
+    }
+
+    const raw = await res.text();
+    const text = raw.trim();
+
+    if (!text) {
+      throw new Error(`Empty response from ${endpoint}`);
+    }
+
+    if (text.startsWith('<')) {
+      throw new Error(`Expected JSON from ${endpoint}, received HTML instead`);
+    }
+
     try {
-      const [docRes, specRes, testRes] = await Promise.all([
-        fetch('/api/healthcare/doctors'),
-        fetch('/api/healthcare/specialities'),
-        fetch('/api/healthcare/tests')
-      ]);
-
-      const docData = await docRes.json();
-      const specData = await specRes.json();
-      const testData = await testRes.json();
-
-      if (docData.status === 'ok') this.doctorsCache = docData.doctors;
-      if (specData.status === 'ok') this.specialitiesCache = specData.specialities;
-      if (testData.status === 'ok') this.testsCache = testData.tests;
-
-      this.renderSpecialityPills();
+      return JSON.parse(text);
     } catch (err) {
-      console.warn('[Healthcare Platform] Failed to load remote data, fallback active:', err.message);
+      throw new Error(`Invalid JSON from ${endpoint}: ${err.message}`);
+    }
+  }
+
+  async fetchJsonWithFallback(primaryEndpoint, fallbackEndpoint, label) {
+    try {
+      return await this.fetchJsonEndpoint(primaryEndpoint);
+    } catch (primaryErr) {
+      console.warn(`[Healthcare Platform] ${label} primary endpoint failed:`, primaryErr.message);
+    }
+
+    if (!fallbackEndpoint) return null;
+
+    try {
+      return await this.fetchJsonEndpoint(fallbackEndpoint);
+    } catch (fallbackErr) {
+      console.warn(`[Healthcare Platform] ${label} fallback endpoint failed:`, fallbackErr.message);
+      return null;
+    }
+  }
+
+  async loadInitialData() {
+    const [docData, specData, testData] = await Promise.all([
+      this.fetchJsonWithFallback('/api/healthcare/doctors', this.staticEndpoints.doctors, 'Doctors'),
+      this.fetchJsonWithFallback('/api/healthcare/specialities', this.staticEndpoints.specialities, 'Specialities'),
+      this.fetchJsonWithFallback('/api/healthcare/tests', this.staticEndpoints.tests, 'Tests')
+    ]);
+
+    if (docData?.status === 'ok' && Array.isArray(docData.doctors)) {
+      this.doctorsCache = docData.doctors;
+    }
+
+    if (specData?.status === 'ok' && Array.isArray(specData.specialities)) {
+      this.specialitiesCache = specData.specialities;
+    }
+
+    if (testData?.status === 'ok' && Array.isArray(testData.tests)) {
+      this.testsCache = testData.tests;
+    }
+
+    this.renderSpecialityPills();
+
+    if (!this.doctorsCache.length && !this.specialitiesCache.length && !this.testsCache.length) {
+      console.warn('[Healthcare Platform] No healthcare datasets could be loaded from either primary or fallback endpoints.');
     }
   }
 
