@@ -1,0 +1,480 @@
+{
+  "status": "ok",
+  "doctors": [
+    {
+      "id": "doc-1",
+      "name": "Dr. Priya Sharma",
+      "specialityId": "oncology",
+      "specialityName": "Medical Oncology & Cancer Immunotherapy",
+      "qualification": "MBBS, MD (Medicine), DM (Medical Oncology), ESMO Certified",
+      "experienceYears": 16,
+      "hospitalId": "tmh-mumbai",
+      "hospitalName": "Tata Memorial Hospital & Cancer Center, Mumbai",
+      "location": "Mumbai",
+      "consultationFee": 0,
+      "feeDisplay": "₹0 (Avinya Supported / Free)",
+      "consultationTypes": [
+        "in-clinic",
+        "online"
+      ],
+      "rating": 4.98,
+      "reviewsCount": 342,
+      "badge": "Senior Medical Oncologist & Lead Volunteer",
+      "avatar": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80",
+      "about": "Dr. Priya Sharma is a distinguished Medical Oncologist with 16+ years of clinical and research excellence in breast, lung, and gastrointestinal cancers. A passionate advocate for early screening, she heads Avinya Care's clinical advisory board and conducts volunteer consultation clinics.",
+      "areasOfExpertise": [
+        "Targeted & Immunotherapy Protocols",
+        "Early Breast & Ovarian Cancer Screening",
+        "Precision Genomic Oncology",
+        "Palliative & Survivorship Navigation"
+      ],
+      "languages": [
+        "English",
+        "Hindi",
+        "Marathi"
+      ],
+      "schedule": {
+        "workingDays": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "startTime": "09:00",
+        "endTime": "17:00",
+        "slotDurationMins": 30,
+        "breakStart": "13:00",
+        "breakEnd": "14:00"
+      }
+    },
+    {
+      "id": "doc-2",
+      "name": "Dr. Rajesh K. Varma",
+      "specialityId": "cardiology",
+      "specialityName": "Interventional Cardiology & Preventive Heart Care",
+      "qualification": "MBBS, MD (Medicine), DM (Cardiology), FACC (USA)",
+      "experienceYears": 20,
+      "hospitalId": "apollo-delhi",
+      "hospitalName": "Indraprastha Apollo Hospitals, New Delhi",
+      "location": "New Delhi",
+      "consultationFee": 1200,
+      "feeDisplay": "₹1,200 (50% Avinya Care Concession)",
+      "consultationTypes": [
+        "in-clinic",
+        "online"
+      ],
+      "rating": 4.94,
+      "reviewsCount": 280,
+      "badge": "Director of Preventive Cardiology",
+      "avatar": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80",
+      "about": "Dr. Rajesh Varma is a premier Interventional Cardiologist specializing in complex coronary interventions, heart failure management, and preventive cardio-oncology for cancer patients undergoing intensive chemotherapy.",
+      "areasOfExpertise": [
+        "Cardio-Oncology & Heart Protection",
+        "Coronary Angioplasty & Stenting",
+        "Hypertension & Lipid Optimization",
+        "Preventive Cardiac Risk Assessment"
+      ],
+      "languages": [
+        "English",
+        "Hindi",
+        "Punjabi"
+      ],
+      "schedule": {
+        "workingDays": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "startTime": "10:00",
+        "endTime": "18:00",
+        "slotDurationMins": 30,
+        "breakStart": "13:30",
+        "breakEnd": "14:30"
+      }
+    },
+    {
+      "id": "doc-3",
+      "name": "Dr. Ananya Sengupta",
+      "specialityId": "gynecology",
+      "specialityName": "Gynecological Oncology & Women's Health",
+      "qualification": "MBBS, MS (OBG), MCh (Gynec Oncology), Fellow RCOG (London)",
+      "experienceYears": 14,
+      "hospitalId": "max-saket",
+      "hospitalName": "Max Super Speciality Hospital, New Delhi",
+      "location": "New Delhi",
+      "consultationFee": 1000,
+      "feeDisplay": "₹1,000 (Avinya Partner Rate)",
+      "consultationTypes": [
+        "in-clinic",
+        "online"
+      ],
+      "rating": 4.96,
+      "reviewsCount": 215,
+      "badge": "Lead Gynec-Oncologist",
+      "avatar": "https://images.unsplash.com/photo-1594824813589-322137be8078?auto=format&fit=crop&w=400&q=80",
+      "about": "Dr. Ananya Sengupta specializes in robotic and laparoscopic gynecological oncology, cervical cancer prevention, HPV vaccination awareness drives, and ovarian mass evaluations.",
+      "areasOfExpertise": [
+        "Cervical Cancer Screening & Colposcopy",
+        "Ovarian & Uterine Oncology",
+        "Minimally Invasive Pelvic Surgery",
+        "Hereditary Breast & Ovarian Cancer Risk"
+      ],
+      "languages": [
+        "English",
+        "Hindi",
+        "Bengali"
+      ],
+      "schedule": {
+        "workingDays": [
+          1,
+          3,
+          4,
+          5,
+          6
+        ],
+        "startTime": "09:30",
+        "endTime": "16:30",
+        "slotDurationMins": 30,
+        "breakStart": "13:00",
+        "breakEnd": "14:00"
+      }
+    },
+    {
+      "id": "doc-4",
+      "name": "Dr. Vikramaditya Rathore",
+      "specialityId": "oncology",
+      "specialityName": "Surgical Oncology & Thoracic Care",
+      "qualification": "MBBS, MS (Gen Surgery), MCh (Surgical Oncology), FACS",
+      "experienceYears": 18,
+      "hospitalId": "fortis-gurugram",
+      "hospitalName": "Fortis Memorial Research Institute, Gurugram",
+      "location": "Gurugram",
+      "consultationFee": 1500,
+      "feeDisplay": "₹1,500",
+      "consultationTypes": [
+        "in-clinic",
+        "online"
+      ],
+      "rating": 4.91,
+      "reviewsCount": 195,
+      "badge": "Senior Surgical Oncologist",
+      "avatar": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80",
+      "about": "Dr. Vikramaditya Rathore is an internationally recognized Surgical Oncologist known for organ-preserving cancer resections, head & neck oncology, and complex thoracic surgeries.",
+      "areasOfExpertise": [
+        "Organ Preservation Surgical Techniques",
+        "Gastrointestinal & Colorectal Oncology",
+        "Thoracic & Lung Cancer Resection",
+        "Multidisciplinary Tumor Board Consultation"
+      ],
+      "languages": [
+        "English",
+        "Hindi",
+        "Marwari"
+      ],
+      "schedule": {
+        "workingDays": [
+          1,
+          2,
+          3,
+          5,
+          6
+        ],
+        "startTime": "10:00",
+        "endTime": "17:30",
+        "slotDurationMins": 30,
+        "breakStart": "13:30",
+        "breakEnd": "14:30"
+      }
+    },
+    {
+      "id": "doc-5",
+      "name": "Dr. Meera Nambiar",
+      "specialityId": "general-physician",
+      "specialityName": "Internal Medicine & Preventive Health",
+      "qualification": "MBBS, MD (General Medicine), DNB",
+      "experienceYears": 12,
+      "hospitalId": "avinya-clinic-mumbai",
+      "hospitalName": "Avinya Care Community Clinic, Mumbai",
+      "location": "Mumbai",
+      "consultationFee": 0,
+      "feeDisplay": "₹0 (Avinya Community Clinic)",
+      "consultationTypes": [
+        "in-clinic",
+        "online"
+      ],
+      "rating": 4.97,
+      "reviewsCount": 410,
+      "badge": "Chief Medical Officer - Avinya Clinics",
+      "avatar": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80",
+      "about": "Dr. Meera Nambiar serves as the Chief Medical Officer at Avinya Care Foundation. She leads early diagnostic triage, primary healthcare consultations, metabolic health management, and community screening camps.",
+      "areasOfExpertise": [
+        "Comprehensive Symptom & Health Triage",
+        "Diabetes & Metabolic Syndrome Control",
+        "Geriatric & Palliative Care Navigation",
+        "Preventive Health Screenings"
+      ],
+      "languages": [
+        "English",
+        "Hindi",
+        "Malayalam",
+        "Marathi"
+      ],
+      "schedule": {
+        "workingDays": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "startTime": "08:30",
+        "endTime": "16:00",
+        "slotDurationMins": 30,
+        "breakStart": "12:30",
+        "breakEnd": "13:30"
+      }
+    },
+    {
+      "id": "doc-6",
+      "name": "Dr. Siddharth Balakrishnan",
+      "specialityId": "neurology",
+      "specialityName": "Neurology & Neuro-Oncology Care",
+      "qualification": "MBBS, MD (Medicine), DM (Neurology), FINR",
+      "experienceYears": 15,
+      "hospitalId": "manipal-bengaluru",
+      "hospitalName": "Manipal Comprehensive Cancer Center, Bengaluru",
+      "location": "Bengaluru",
+      "consultationFee": 1400,
+      "feeDisplay": "₹1,400 (Avinya Partner Rate)",
+      "consultationTypes": [
+        "in-clinic",
+        "online"
+      ],
+      "rating": 4.93,
+      "reviewsCount": 168,
+      "badge": "Senior Consultant Neurologist",
+      "avatar": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=400&q=80",
+      "about": "Dr. Siddharth Balakrishnan is a renowned Neurologist specializing in neuro-oncology, neurological rehabilitation, stroke care, and cognitive wellness.",
+      "areasOfExpertise": [
+        "Brain Tumor Diagnostic Consultation",
+        "Chemotherapy-Induced Neuropathy Management",
+        "Seizure & Epilepsy Management",
+        "Cognitive & Memory Care"
+      ],
+      "languages": [
+        "English",
+        "Kannada",
+        "Tamil",
+        "Hindi"
+      ],
+      "schedule": {
+        "workingDays": [
+          1,
+          2,
+          4,
+          5,
+          6
+        ],
+        "startTime": "10:00",
+        "endTime": "17:00",
+        "slotDurationMins": 30,
+        "breakStart": "13:00",
+        "breakEnd": "14:00"
+      }
+    },
+    {
+      "id": "doc-7",
+      "name": "Dr. Kavita Joshi",
+      "specialityId": "ophthalmology",
+      "specialityName": "Ophthalmic Oncology & Advanced Vision Care",
+      "qualification": "MBBS, MS (Ophthalmology), DNB, FICO (UK)",
+      "experienceYears": 13,
+      "hospitalId": "apollo-delhi",
+      "hospitalName": "Indraprastha Apollo Hospitals, New Delhi",
+      "location": "New Delhi",
+      "consultationFee": 900,
+      "feeDisplay": "₹900",
+      "consultationTypes": [
+        "in-clinic",
+        "online"
+      ],
+      "rating": 4.92,
+      "reviewsCount": 185,
+      "badge": "Consultant Ophthalmologist",
+      "avatar": "https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&w=400&q=80",
+      "about": "Dr. Kavita Joshi is an expert in ocular oncology, glaucoma, diabetic retinopathy, and preventive ocular screenings for cancer survivors.",
+      "areasOfExpertise": [
+        "Ocular Tumors & Retinal Care",
+        "Diabetic Eye Screening",
+        "Cataract & Refractive Solutions",
+        "Dry Eye & Radiation Protection"
+      ],
+      "languages": [
+        "English",
+        "Hindi",
+        "Gujarati"
+      ],
+      "schedule": {
+        "workingDays": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "startTime": "09:00",
+        "endTime": "15:30",
+        "slotDurationMins": 30,
+        "breakStart": "12:30",
+        "breakEnd": "13:30"
+      }
+    },
+    {
+      "id": "doc-8",
+      "name": "Dr. Arvind Deshmukh",
+      "specialityId": "orthopedics",
+      "specialityName": "Orthopedic Oncology & Joint Reconstruction",
+      "qualification": "MBBS, MS (Ortho), MCh (Ortho, UK), Fellow Musculoskeletal Oncology",
+      "experienceYears": 19,
+      "hospitalId": "tmh-mumbai",
+      "hospitalName": "Tata Memorial Hospital, Mumbai",
+      "location": "Mumbai",
+      "consultationFee": 1200,
+      "feeDisplay": "₹1,200 (Avinya Partner Rate)",
+      "consultationTypes": [
+        "in-clinic",
+        "online"
+      ],
+      "rating": 4.95,
+      "reviewsCount": 220,
+      "badge": "Senior Orthopedic Oncologist",
+      "avatar": "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=400&q=80",
+      "about": "Dr. Arvind Deshmukh is a leading specialist in bone and soft tissue sarcomas, limb salvage surgeries, joint reconstruction, and spine tumors.",
+      "areasOfExpertise": [
+        "Bone & Soft Tissue Sarcoma Care",
+        "Limb-Sparing Prosthetic Surgery",
+        "Metastatic Bone Disease Management",
+        "Joint Arthroscopy & Reconstruction"
+      ],
+      "languages": [
+        "English",
+        "Hindi",
+        "Marathi"
+      ],
+      "schedule": {
+        "workingDays": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "startTime": "09:30",
+        "endTime": "16:30",
+        "slotDurationMins": 30,
+        "breakStart": "13:00",
+        "breakEnd": "14:00"
+      }
+    },
+    {
+      "id": "doc-9",
+      "name": "Dr. Shalini Raman",
+      "specialityId": "pediatrics",
+      "specialityName": "Pediatric Oncology & Child Health",
+      "qualification": "MBBS, MD (Pediatrics), Fellowship in Pediatric Hemat-Oncology",
+      "experienceYears": 11,
+      "hospitalId": "manipal-bengaluru",
+      "hospitalName": "Manipal Hospitals, Bengaluru",
+      "location": "Bengaluru",
+      "consultationFee": 800,
+      "feeDisplay": "₹800",
+      "consultationTypes": [
+        "in-clinic",
+        "online"
+      ],
+      "rating": 4.98,
+      "reviewsCount": 310,
+      "badge": "Pediatric Care Specialist",
+      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
+      "about": "Dr. Shalini Raman specializes in childhood leukemia, solid tumors in children, routine pediatric wellness, and empathetic emotional guidance for families.",
+      "areasOfExpertise": [
+        "Pediatric Leukemia & Lymphoma",
+        "Childhood Immunization & Growth Tracking",
+        "Pediatric Supportive Care",
+        "Family Psychological Guidance"
+      ],
+      "languages": [
+        "English",
+        "Kannada",
+        "Hindi",
+        "Telugu"
+      ],
+      "schedule": {
+        "workingDays": [
+          1,
+          2,
+          3,
+          4,
+          6
+        ],
+        "startTime": "10:00",
+        "endTime": "17:00",
+        "slotDurationMins": 30,
+        "breakStart": "13:00",
+        "breakEnd": "14:00"
+      }
+    },
+    {
+      "id": "doc-10",
+      "name": "Dr. Farooq Qureshi",
+      "specialityId": "dermatology",
+      "specialityName": "Dermatology & Cutaneous Oncology",
+      "qualification": "MBBS, MD (Dermatology, Venereology & Leprosy)",
+      "experienceYears": 14,
+      "hospitalId": "max-saket",
+      "hospitalName": "Max Super Speciality Hospital, New Delhi",
+      "location": "New Delhi",
+      "consultationFee": 950,
+      "feeDisplay": "₹950",
+      "consultationTypes": [
+        "in-clinic",
+        "online"
+      ],
+      "rating": 4.9,
+      "reviewsCount": 170,
+      "badge": "Consultant Dermatologist",
+      "avatar": "https://images.unsplash.com/photo-1622902046580-2b47f47f5471?auto=format&fit=crop&w=400&q=80",
+      "about": "Dr. Farooq Qureshi focuses on dermoscopy for early melanoma and skin lesion screening, radiation dermatitis care, and clinical dermatology.",
+      "areasOfExpertise": [
+        "Melanoma & Non-Melanoma Skin Cancer Screening",
+        "Digital Dermoscopy & Mole Mapping",
+        "Chemotherapy & Radiation Skin Care",
+        "Chronic Inflammatory Skin Disorders"
+      ],
+      "languages": [
+        "English",
+        "Hindi",
+        "Urdu"
+      ],
+      "schedule": {
+        "workingDays": [
+          1,
+          3,
+          4,
+          5,
+          6
+        ],
+        "startTime": "09:00",
+        "endTime": "16:00",
+        "slotDurationMins": 30,
+        "breakStart": "12:30",
+        "breakEnd": "13:30"
+      }
+    }
+  ]
+}

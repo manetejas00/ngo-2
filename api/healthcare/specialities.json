@@ -1,0 +1,75 @@
+{
+  "status": "ok",
+  "specialities": [
+    {
+      "id": "oncology",
+      "name": "Oncology",
+      "icon": "🧬",
+      "count": 4,
+      "desc": "Medical, Surgical & Radiation Cancer Care"
+    },
+    {
+      "id": "cardiology",
+      "name": "Cardiology",
+      "icon": "🫀",
+      "count": 2,
+      "desc": "Heart, Vascular & Preventive Cardiac Health"
+    },
+    {
+      "id": "ophthalmology",
+      "name": "Ophthalmology",
+      "icon": "👁️",
+      "count": 1,
+      "desc": "Cataract, Retina & Vision Diagnostics"
+    },
+    {
+      "id": "general-physician",
+      "name": "General Physician",
+      "icon": "🩺",
+      "count": 2,
+      "desc": "Primary Care, Fever & Chronic Illness"
+    },
+    {
+      "id": "gynecology",
+      "name": "Gynecology",
+      "icon": "🌸",
+      "count": 2,
+      "desc": "Women's Health, Maternity & Preventive Oncology"
+    },
+    {
+      "id": "pediatrics",
+      "name": "Pediatrics",
+      "icon": "👶",
+      "count": 1,
+      "desc": "Child Health, Immunization & Pediatric Care"
+    },
+    {
+      "id": "orthopedics",
+      "name": "Orthopedics",
+      "icon": "🦴",
+      "count": 1,
+      "desc": "Joints, Spine & Musculoskeletal Care"
+    },
+    {
+      "id": "dermatology",
+      "name": "Dermatology",
+      "icon": "✨",
+      "count": 1,
+      "desc": "Skin, Hair & Dermato-Oncology Screening"
+    },
+    {
+      "id": "neurology",
+      "name": "Neurology",
+      "icon": "🧠",
+      "count": 1,
+      "desc": "Brain, Nerves & Neuro-Oncology Support"
+    },
+    {
+      "id": "geriatrics",
+      "name": "Senior Citizen Health",
+      "icon": "🕊️",
+      "count": 1,
+      "desc": "Geriatric Care, Vitality & Long-term Support"
+    }
+  ]
+}
