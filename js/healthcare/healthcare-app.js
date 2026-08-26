@@ -11,6 +11,9 @@ class HealthcarePlatform {
     this.selectedSpeciality = 'all';
     this.selectedLocation = 'all';
     this.searchQuery = '';
+    this.showAllDoctors = false;
+    this.selectedTestCategory = 'all';
+    this.showAllTests = false;
     
     // Booking State
     this.bookingState = {
@@ -306,9 +309,13 @@ class HealthcarePlatform {
     this.renderDoctorDirectory();
   }
 
-  renderDoctorDirectory() {
+  renderDoctorDirectory(keepShowAll = false) {
     const grid = document.getElementById('hc-doctor-grid');
     if (!grid) return;
+
+    if (!keepShowAll) {
+      this.showAllDoctors = false;
+    }
 
     let filtered = [...this.doctorsCache];
 
@@ -329,7 +336,12 @@ class HealthcarePlatform {
       );
     }
 
+    const viewMoreContainer = document.getElementById('hc-doctor-view-more-container');
+
     if (filtered.length === 0) {
+      if (viewMoreContainer) {
+        viewMoreContainer.style.display = 'none';
+      }
       grid.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; background: var(--hc-surface); border-radius: var(--hc-radius-lg); border: 1px dashed var(--hc-border);">
           <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔍</div>
@@ -343,7 +355,14 @@ class HealthcarePlatform {
       return;
     }
 
-    grid.innerHTML = filtered.map(doc => `
+    const hasMore = filtered.length > 6;
+    if (viewMoreContainer) {
+      viewMoreContainer.style.display = (hasMore && !this.showAllDoctors) ? 'block' : 'none';
+    }
+
+    const displayDoctors = this.showAllDoctors ? filtered : filtered.slice(0, 6);
+
+    grid.innerHTML = displayDoctors.map(doc => `
       <div class="hc-doctor-card" id="doc-card-${doc.id}">
         <div class="hc-doctor-card-header">
           <div class="hc-doctor-avatar-wrapper">
@@ -371,11 +390,6 @@ class HealthcarePlatform {
             <span class="hc-meta-icon">🌐</span>
             <span>${doc.consultationTypes.includes('online') ? 'In-Clinic & Video Telehealth' : 'In-Clinic Only'}</span>
           </div>
-          <div style="margin-top: 0.25rem;">
-            <span class="hc-slot-pill">
-              <span>🟢</span> Next Available: <strong>Tomorrow</strong>
-            </span>
-          </div>
         </div>
 
         <div class="hc-doctor-card-footer">
@@ -394,6 +408,11 @@ class HealthcarePlatform {
         </div>
       </div>
     `).join('');
+  }
+
+  showMoreDoctors() {
+    this.showAllDoctors = true;
+    this.renderDoctorDirectory(true);
   }
 
   resetFilters() {
@@ -835,16 +854,39 @@ class HealthcarePlatform {
   // -------------------------------------------------------------
   // Diagnostic Tests Section & Booking Flow
   // -------------------------------------------------------------
-  renderDiagnosticTests(category = 'all') {
+  renderDiagnosticTests(category = 'all', keepShowAll = false) {
     const grid = document.getElementById('hc-test-grid');
     if (!grid) return;
+
+    this.selectedTestCategory = category;
+
+    if (!keepShowAll) {
+      this.showAllTests = false;
+    }
 
     let list = [...this.testsCache];
     if (category !== 'all') {
       list = list.filter(t => t.category.toLowerCase() === category.toLowerCase());
     }
 
-    grid.innerHTML = list.map(test => `
+    const viewMoreContainer = document.getElementById('hc-test-view-more-container');
+
+    if (list.length === 0) {
+      if (viewMoreContainer) {
+        viewMoreContainer.style.display = 'none';
+      }
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; background: var(--hc-surface); border-radius: var(--hc-radius-lg); border: 1px dashed var(--hc-border); color: var(--hc-text-muted);">No tests found in this category.</div>`;
+      return;
+    }
+
+    const hasMore = list.length > 6;
+    if (viewMoreContainer) {
+      viewMoreContainer.style.display = (hasMore && !this.showAllTests) ? 'block' : 'none';
+    }
+
+    const displayTests = this.showAllTests ? list : list.slice(0, 6);
+
+    grid.innerHTML = displayTests.map(test => `
       <div class="hc-test-card ${test.isPriority ? 'priority-card' : ''}">
         ${test.isPriority ? `<div class="hc-test-priority-ribbon">${test.badge || 'Featured'}</div>` : ''}
         
@@ -878,11 +920,16 @@ class HealthcarePlatform {
     `).join('');
   }
 
+  showMoreTests() {
+    this.showAllTests = true;
+    this.renderDiagnosticTests(this.selectedTestCategory, true);
+  }
+
   filterTests(category) {
     document.querySelectorAll('.hc-test-filter-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.category === category);
     });
-    this.renderDiagnosticTests(category);
+    this.renderDiagnosticTests(category, false);
   }
 
   startTestBooking(testId) {
@@ -1071,10 +1118,15 @@ class HealthcarePlatform {
     const patientView = document.getElementById('hc-patient-dashboard-view');
     const doctorView = document.getElementById('hc-doctor-dashboard-view');
     const adminView = document.getElementById('hc-admin-dashboard-view');
+    const container = document.querySelector('.hc-dashboard-container');
 
     if (patientView) patientView.style.display = role === 'patient' ? 'block' : 'none';
     if (doctorView) doctorView.style.display = role === 'doctor' ? 'block' : 'none';
     if (adminView) adminView.style.display = role === 'admin' ? 'block' : 'none';
+
+    if (container) {
+      container.style.display = role === 'patient' ? 'none' : 'block';
+    }
 
     this.loadDashboardData();
   }

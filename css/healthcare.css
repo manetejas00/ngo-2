@@ -54,7 +54,7 @@
 
 .healthcare-page-body {
   margin: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* -------------------------------------------------------------
@@ -67,7 +67,7 @@
   position: relative;
   min-height: 100vh;
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   isolation: isolate;
   transition: opacity 0.3s ease;
 }
@@ -140,25 +140,26 @@
 .hc-nav-links {
   display: flex !important;
   align-items: center !important;
-  gap: 0.35rem !important;
+  gap: 1.5rem !important;
   list-style: none !important;
-  margin: 0 !important;
+  margin: 0 0 0 auto !important;
   padding: 0 !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
 }
 
 .hc-nav-links .nav-link {
-  font-size: 0.88rem !important;
+  font-size: 0.9rem !important;
   font-weight: 600 !important;
-  padding: 0.45rem 0.75rem !important;
+  padding: 0.5rem 1rem !important;
   color: #94A3B8 !important;
   transition: all 0.2s ease !important;
-  border-radius: 8px !important;
+  border-radius: 30px !important;
   white-space: nowrap !important;
   display: inline-flex !important;
   align-items: center !important;
   line-height: 1 !important;
+  border: 1px solid transparent !important;
 }
 
 .hc-nav-links .nav-link:hover {
@@ -168,8 +169,8 @@
 
 .hc-nav-links .nav-link.active {
   color: #FFFFFF !important;
-  background: rgba(8, 127, 115, 0.28) !important;
-  border: 1px solid rgba(8, 127, 115, 0.4) !important;
+  background: rgba(8, 127, 115, 0.22) !important;
+  border: 1px solid rgba(8, 127, 115, 0.45) !important;
   font-weight: 700 !important;
 }
 
@@ -179,6 +180,7 @@
   gap: 0.75rem !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
+  margin-left: 2rem !important;
 }
 
 .hc-role-pill-group {
@@ -220,15 +222,16 @@
 .hc-book-cta {
   background: var(--hc-primary) !important;
   box-shadow: 0 4px 16px rgba(8, 127, 115, 0.4) !important;
-  padding: 0.55rem 1.15rem !important;
-  font-size: 0.86rem !important;
-  border-radius: 8px !important;
+  padding: 0.6rem 1.4rem !important;
+  font-size: 0.88rem !important;
+  border-radius: 30px !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 0.4rem !important;
+  gap: 0.45rem !important;
   line-height: 1 !important;
+  font-weight: 700 !important;
 }
 
 .hc-book-cta:hover {
@@ -1544,6 +1547,7 @@
     padding: 0.45rem 0.85rem !important;
     font-size: 0.8rem !important;
     display: inline-flex !important;
+    border-radius: 30px !important;
   }
 
   .hc-navbar .mobile-toggle {

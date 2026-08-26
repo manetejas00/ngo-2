@@ -49,17 +49,10 @@
         <li><a href="#hc-doctors-anchor" class="nav-link active" onclick="document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">Specialists</a></li>
         <li><a href="#hc-tests-anchor" class="nav-link" onclick="document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">Diagnostic Tests</a></li>
         <li><a href="#hc-cancer-priority-anchor" class="nav-link" onclick="document.getElementById('hc-cancer-priority-anchor').scrollIntoView({behavior: 'smooth'})">🎗️ Cancer Care</a></li>
-        <li><a href="#hc-dashboard-anchor" class="nav-link" onclick="document.getElementById('hc-dashboard-anchor').scrollIntoView({behavior: 'smooth'})">My Hub</a></li>
       </ul>
 
-      <!-- Right Actions: Role Switcher Pill + Book CTA -->
+      <!-- Right Actions: Book CTA -->
       <div class="nav-actions hc-nav-actions">
-        <div class="hc-role-pill-group" title="Switch Portal View">
-          <button class="hc-role-btn active" data-role="patient" onclick="window.HealthcareApp.switchRole('patient')">Patient</button>
-          <button class="hc-role-btn" data-role="doctor" onclick="window.HealthcareApp.switchRole('doctor')">Doctor</button>
-          <button class="hc-role-btn" data-role="admin" onclick="window.HealthcareApp.switchRole('admin')">Admin</button>
-        </div>
-
         <button class="btn-primary hc-book-cta" onclick="document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">
           <span>Book Slot</span>
           <span class="arrow">→</span>
@@ -89,14 +82,8 @@
       <li><a href="#hc-doctors-anchor" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'});">Specialists</a></li>
       <li><a href="#hc-tests-anchor" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'});">Diagnostic Tests</a></li>
       <li><a href="#hc-cancer-priority-anchor" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-cancer-priority-anchor').scrollIntoView({behavior: 'smooth'});">🎗️ Cancer Care</a></li>
-      <li><a href="#hc-dashboard-anchor" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-dashboard-anchor').scrollIntoView({behavior: 'smooth'});">My Hub</a></li>
     </ul>
     <div style="margin-top: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1.25rem;">
-      <div class="hc-role-pill-group" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);">
-        <button class="hc-role-btn active" data-role="patient" onclick="window.HealthcareApp.switchRole('patient')">Patient</button>
-        <button class="hc-role-btn" data-role="doctor" onclick="window.HealthcareApp.switchRole('doctor')">Doctor</button>
-        <button class="hc-role-btn" data-role="admin" onclick="window.HealthcareApp.switchRole('admin')">Admin</button>
-      </div>
       <button class="btn-primary" style="padding: 0.95rem 2.5rem; font-size: 1.05rem;" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'});">
         <span>Book Appointment Now →</span>
       </button>
@@ -318,6 +305,11 @@
     <div id="hc-doctor-grid" class="hc-doctor-grid">
       <!-- Dynamically rendered via JS -->
     </div>
+    <div id="hc-doctor-view-more-container" style="text-align: center; margin-top: 2.5rem; display: none;">
+      <button class="hc-btn-primary" onclick="window.HealthcareApp.showMoreDoctors()">
+        <span>View More Doctors</span>
+      </button>
+    </div>
   </section>
 
   <!-- 5. CANCER SCREENING PRIORITY HIGHLIGHT BANNER -->
@@ -368,38 +360,15 @@
     <div id="hc-test-grid" class="hc-test-grid" style="max-width: 1320px; margin: 0 auto;">
       <!-- Dynamically rendered via JS -->
     </div>
+    <div id="hc-test-view-more-container" style="text-align: center; margin-top: 2.5rem; display: none;">
+      <button class="hc-btn-primary" onclick="window.HealthcareApp.showMoreTests()">
+        <span>View More Tests</span>
+      </button>
+    </div>
   </section>
 
   <!-- 7. ROLE-BASED DASHBOARDS (PATIENT, DOCTOR, ADMIN) -->
   <section class="hc-dashboard-container" id="hc-dashboard-anchor">
-    <!-- 7A. Patient Dashboard -->
-    <div id="hc-patient-dashboard-view">
-      <div class="hc-dash-header">
-        <div>
-          <h3 class="hc-dash-title">My Health Hub & Appointments</h3>
-          <p class="hc-dash-subtitle">Track your upcoming doctor consultations, test bookings, and medical calendar invites.</p>
-        </div>
-        <button class="hc-btn-primary" onclick="document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">
-          <span>+ Book New Appointment</span>
-        </button>
-      </div>
-
-      <div class="hc-patient-panels" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-        <div>
-          <h4 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 1rem 0;">📅 Doctor Appointments</h4>
-          <div id="hc-patient-appointments-list">
-            <!-- Dynamically loaded -->
-          </div>
-        </div>
-        <div>
-          <h4 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 1rem 0;">🔬 Diagnostic Test Bookings</h4>
-          <div id="hc-patient-tests-list">
-            <!-- Dynamically loaded -->
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- 7B. Doctor Dashboard -->
     <div id="hc-doctor-dashboard-view" style="display: none;">
       <div class="hc-dash-header">
@@ -565,7 +534,6 @@
           <li><a href="doctors.html#hc-doctors-anchor" class="footer-link">Find Doctors</a></li>
           <li><a href="doctors.html#hc-tests-anchor" class="footer-link">Diagnostic Tests</a></li>
           <li><a href="doctors.html#hc-cancer-priority-anchor" class="footer-link">Cancer Screening</a></li>
-          <li><a href="doctors.html#hc-dashboard-anchor" class="footer-link">My Appointments</a></li>
         </ul>
       </div>
 
@@ -613,7 +581,7 @@
   <!-- Healthcare Application Scripts -->
   </div>
 
-  <script src="js/healthcare/healthcare-app.js?v=1.1"></script>
+  <script src="js/healthcare/healthcare-app.js?v=1.2"></script>
   <script>
     // Robust mobile drawer controller for doctors.html
     (function() {
