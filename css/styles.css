@@ -431,8 +431,8 @@ button {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100dvh;
   background: rgba(10, 10, 10, 0.96);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
@@ -516,7 +516,7 @@ button {
   position: sticky;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   overflow: hidden;
   display: flex;
@@ -663,7 +663,7 @@ button {
   position: sticky;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   overflow: hidden;
   display: flex;
@@ -1112,8 +1112,9 @@ button {
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* Mobile Responsive Adjustments */
-@media (max-width: 1024px) {
+/* The full seven-card deck needs a contained horizontal track until there is
+   enough room for its expanded active-card transforms. */
+@media (max-width: 1600px) {
   .nestjs-stack-container {
     overflow-x: auto;
     overflow-y: visible;
@@ -2461,8 +2462,8 @@ button {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100dvh;
   background: rgba(10, 10, 10, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
@@ -2648,6 +2649,52 @@ textarea:focus {
 }
 
 @media (max-width: 768px) {
+  .navbar-wrapper {
+    top: 0.65rem;
+    padding-inline: 0.65rem;
+  }
+
+  .navbar {
+    height: 58px;
+    padding: 0 0.75rem 0 0.9rem;
+  }
+
+  .nav-brand {
+    min-width: 0;
+  }
+
+  .brand-logo-img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .brand-name {
+    font-size: 1rem;
+  }
+
+  .mobile-nav-overlay {
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding: max(4.5rem, env(safe-area-inset-top)) 1rem max(2rem, env(safe-area-inset-bottom));
+  }
+
+  .mobile-nav-brand-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .mobile-nav-logo {
+    width: 68px;
+    height: 68px;
+  }
+
+  .mobile-nav-menu {
+    gap: 1rem;
+  }
+
+  .mobile-nav-link {
+    font-size: clamp(1.25rem, 5vw, 1.6rem);
+  }
+
   /* Section 3: Scroll Typography Mobile */
   .section-scroll-typography {
     height: 420vh;
@@ -2781,5 +2828,60 @@ textarea:focus {
     max-height: 90vh;
     padding: 1.8rem 1.4rem;
     border-radius: 20px;
+  }
+
+  #donate-modal form > div[style*="grid-template-columns"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .news-tag-group,
+  .news-featured-footer,
+  .news-card-meta,
+  .story-meta {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-actions > .btn-primary {
+    display: none;
+  }
+
+  .navbar .mobile-toggle {
+    display: flex;
+    flex: 0 0 42px;
+  }
+
+  .stories-grid,
+  .news-grid,
+  .testimonials-grid,
+  .action-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .story-card,
+  .news-card,
+  .testimonial-card,
+  .action-card {
+    min-width: 0;
+  }
+
+  .story-content,
+  .news-content,
+  .testimonial-card,
+  .action-card {
+    padding-inline: 1.25rem;
+  }
+
+  .whatsapp-float-btn:hover {
+    width: 56px;
+    padding: 0 16px;
+    transform: none;
+  }
+
+  .whatsapp-float-btn:hover span {
+    max-width: 0;
+    opacity: 0;
+    margin-left: 0;
   }
 }

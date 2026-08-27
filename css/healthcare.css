@@ -1383,15 +1383,6 @@
   transition: all 0.2s ease;
   box-sizing: border-box;
 }
-  border-radius: var(--hc-radius-sm);
-  background: var(--hc-surface);
-  color: var(--hc-text-main);
-  font-size: 0.86rem;
-  font-weight: 700;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.2s ease;
-}
 
 .hc-time-slot-btn:hover:not(:disabled) {
   border-color: var(--hc-primary);
@@ -1928,6 +1919,18 @@
 }
 
 @media (max-width: 480px) {
+  .hc-navbar .hc-book-cta {
+    display: none !important;
+  }
+
+  .hc-navbar .nav-brand {
+    min-width: 0;
+  }
+
+  .hc-navbar .mobile-toggle {
+    flex: 0 0 36px;
+  }
+
   .hc-kpi-grid {
     grid-template-columns: 1fr;
   }
