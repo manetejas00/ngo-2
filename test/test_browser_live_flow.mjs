@@ -12,9 +12,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 async function runBrowserTest() {
+  const targetUrl = `https://test.avinyacarefoundation.org/doctors.html?nocache=${Date.now()}`;
   console.log('====================================================');
   console.log('STARTING COMPLETE MULTI-STEP BROWSER AUTOMATION TEST');
-  console.log('Target: https://test.avinyacarefoundation.org/doctors.html');
+  console.log(`Target: ${targetUrl}`);
   console.log('====================================================\n');
 
   const browser = await chromium.launch({
@@ -29,8 +30,8 @@ async function runBrowserTest() {
   const screenshotDir = join(__dirname, 'screenshots');
   await mkdir(screenshotDir, { recursive: true });
 
-  console.log('1. Navigating to https://test.avinyacarefoundation.org/doctors.html...');
-  await page.goto('https://test.avinyacarefoundation.org/doctors.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  console.log(`1. Navigating to ${targetUrl}...`);
+  await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
   const title = await page.title();
   console.log('   ✓ Page loaded successfully. Title:', title);
 

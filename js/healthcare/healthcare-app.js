@@ -773,16 +773,17 @@ class HealthcarePlatform {
     slotsContainer.innerHTML = `<div style="grid-column: 1 / -1; color: var(--hc-text-muted); font-size: 0.9rem;">Loading available slots...</div>`;
 
     try {
-      const params = new URLSearchParams({
-        action: 'slots',
-        doctorId: this.bookingState.doctor.id,
-        date: this.bookingState.selectedDate
-      });
-      const data = await this.fetchJsonEndpoint(`${this.bookingApiEndpoint}?${params}`);
+      const docId = this.bookingState.doctor?.id || 'doc-1';
+      const date = this.bookingState.selectedDate || this.getInitialBookingDate();
+
+      const primaryUrl = `${this.bookingApiEndpoint || '/api/booking/index.php'}?action=slots&doctorId=${encodeURIComponent(docId)}&date=${encodeURIComponent(date)}`;
+      const fallbackUrl = `/api/healthcare/doctors/${encodeURIComponent(docId)}/slots?date=${encodeURIComponent(date)}`;
+
+      const data = await this.fetchJsonWithFallback(primaryUrl, fallbackUrl, 'Slots');
 
       if (loadingElem) loadingElem.style.display = 'none';
 
-      if ((data.success || data.status === 'ok') && Array.isArray(data.slots) && data.slots.length > 0) {
+      if (data && (data.success || data.status === 'ok') && Array.isArray(data.slots) && data.slots.length > 0) {
         slotsContainer.innerHTML = data.slots.map(slot => `
           <button type="button" class="hc-time-slot-btn ${this.bookingState.selectedSlot === slot.time ? 'selected' : ''}" 
                   ${slot.available ? '' : 'disabled'}
@@ -790,16 +791,16 @@ class HealthcarePlatform {
             ${slot.time}
           </button>
         `).join('');
-      } else if ((data.success || data.status === 'ok') && Array.isArray(data.slots)) {
+      } else if (data && (data.success || data.status === 'ok') && Array.isArray(data.slots)) {
         slotsContainer.innerHTML = `<div style="grid-column: 1 / -1; color: var(--hc-text-muted); font-size: 0.9rem;">No slots are available for this date.</div>`;
       } else {
-        throw new Error(data.message || 'Unexpected slot response.');
+        throw new Error((data && data.message) || 'Unexpected slot response.');
       }
     } catch (err) {
       if (loadingElem) loadingElem.style.display = 'none';
       slotsContainer.innerHTML = `
         <div style="grid-column: 1 / -1; color: var(--hc-danger);">
-          Unable to load available slots. Please retry.
+          Failed to load slots. Please retry.
           <button type="button" class="hc-btn-view-profile" style="margin-left: 0.5rem;" onclick="window.HealthcareApp.fetchAndRenderSlots()">Retry</button>
         </div>`;
     }
