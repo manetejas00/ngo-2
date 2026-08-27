@@ -413,7 +413,10 @@
           <h3 class="hc-dash-title">Platform Operations & Admin Console</h3>
           <p class="hc-dash-subtitle">Real-time KPI metrics, booking status management, and notification delivery audit logs.</p>
         </div>
-        <button class="hc-btn-view-profile" onclick="window.HealthcareApp.loadAdminDashboard()">🔄 Refresh Realtime Stats</button>
+        <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+          <button class="hc-btn-view-profile" onclick="window.HealthcareApp.loadAdminDashboard()">🔄 Refresh Records</button>
+          <button class="hc-btn-primary" onclick="window.HealthcareApp.exportAllBookings()">⬇ Download All Excel</button>
+        </div>
       </div>
 
       <!-- KPI Metrics Grid -->
@@ -421,16 +424,68 @@
         <!-- Dynamically loaded -->
       </div>
 
-      <h4 style="font-size: 1.15rem; font-weight: 800; margin: 2rem 0 1rem 0;">All Scheduled Consultations</h4>
+      <h4 style="font-size: 1.15rem; font-weight: 800; margin: 2rem 0 1rem 0;">Complete Booking History</h4>
+      <div class="hc-filter-card hc-admin-booking-filters">
+        <div class="hc-filter-top-row">
+          <div class="hc-input-group">
+            <label class="hc-input-label" for="hc-admin-booking-search">Search records</label>
+            <input id="hc-admin-booking-search" class="hc-search-input" type="search" placeholder="ID, name, email, phone or doctor" oninput="window.HealthcareApp.applyAdminBookingFilters()">
+          </div>
+          <div class="hc-input-group">
+            <label class="hc-input-label" for="hc-admin-booking-status">Status</label>
+            <select id="hc-admin-booking-status" class="hc-select-input" onchange="window.HealthcareApp.applyAdminBookingFilters()">
+              <option value="all">All statuses</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="pending">Pending</option>
+              <option value="rescheduled">Rescheduled</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="completed">Completed</option>
+              <option value="no_show">No-show</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+          <div class="hc-input-group">
+            <label class="hc-input-label" for="hc-admin-booking-from">Booking from</label>
+            <input id="hc-admin-booking-from" class="hc-search-input" type="date" onchange="window.HealthcareApp.applyAdminBookingFilters()">
+          </div>
+          <div class="hc-input-group">
+            <label class="hc-input-label" for="hc-admin-booking-to">Booking to</label>
+            <input id="hc-admin-booking-to" class="hc-search-input" type="date" onchange="window.HealthcareApp.applyAdminBookingFilters()">
+          </div>
+          <div class="hc-input-group">
+            <label class="hc-input-label" for="hc-admin-created-from">Created from</label>
+            <input id="hc-admin-created-from" class="hc-search-input" type="date" onchange="window.HealthcareApp.applyAdminBookingFilters()">
+          </div>
+          <div class="hc-input-group">
+            <label class="hc-input-label" for="hc-admin-created-to">Created to</label>
+            <input id="hc-admin-created-to" class="hc-search-input" type="date" onchange="window.HealthcareApp.applyAdminBookingFilters()">
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: end; flex-wrap: wrap; margin-top: 0.85rem;">
+          <div class="hc-input-group" style="min-width: 190px;">
+            <label class="hc-input-label" for="hc-admin-booking-sort">Sort</label>
+            <select id="hc-admin-booking-sort" class="hc-select-input" onchange="window.HealthcareApp.applyAdminBookingFilters()">
+              <option value="newest">Newest created first</option>
+              <option value="oldest">Oldest created first</option>
+              <option value="booking_date">Booking date</option>
+              <option value="status">Status</option>
+            </select>
+          </div>
+          <button class="hc-btn-view-profile" onclick="window.HealthcareApp.resetAdminBookingFilters()">Clear filters</button>
+          <button class="hc-btn-view-profile" onclick="window.HealthcareApp.exportFilteredBookings()">Export Current Filter</button>
+        </div>
+      </div>
       <div class="hc-table-wrapper" style="margin-bottom: 2.5rem;">
         <table class="hc-table">
           <thead>
             <tr>
               <th>ID</th>
               <th>Patient</th>
+              <th>Email</th>
               <th>Doctor</th>
               <th>Schedule</th>
               <th>Status</th>
+              <th>Created / Updated</th>
               <th>Change Status</th>
             </tr>
           </thead>
@@ -534,6 +589,7 @@
           <li><a href="doctors.html#hc-doctors-anchor" class="footer-link">Find Doctors</a></li>
           <li><a href="doctors.html#hc-tests-anchor" class="footer-link">Diagnostic Tests</a></li>
           <li><a href="doctors.html#hc-cancer-priority-anchor" class="footer-link">Cancer Screening</a></li>
+          <li><a href="doctors.html#admin-portal" class="footer-link">Booking Administration</a></li>
         </ul>
       </div>
 

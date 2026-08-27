@@ -58,6 +58,8 @@ class HealthcarePlatform {
     this.specialitiesCache = [];
     this.testsCache = [];
     this.selectedDoctorForPortal = 'doc-1';
+    this.bookingApiEndpoint = '/api/booking/index.php';
+    this.adminBookingsCache = [];
     this.staticEndpoints = {
       doctors: '/api/healthcare/doctors.json',
       specialities: '/api/healthcare/specialities.json',
@@ -70,7 +72,14 @@ class HealthcarePlatform {
   getInitialBookingDate() {
     const d = new Date();
     d.setDate(d.getDate() + 1); // Tomorrow
-    return d.toISOString().split('T')[0];
+    return this.formatLocalDate(d);
+  }
+
+  formatLocalDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   async init() {
@@ -111,7 +120,7 @@ class HealthcarePlatform {
 
   handleInitialRoute() {
     const hash = window.location.hash;
-    if (hash.startsWith('#doctors-tests') || hash.startsWith('#doctors') || hash.startsWith('#tests') || hash.startsWith('#dashboard')) {
+    if (hash.startsWith('#doctors-tests') || hash.startsWith('#doctors') || hash.startsWith('#tests') || hash.startsWith('#dashboard') || hash.startsWith('#doctor-portal') || hash.startsWith('#admin-portal')) {
       const subSection = hash.replace('#', '').replace('doctors-tests-', '');
       this.openHealthcarePlatform(subSection);
     }
@@ -532,7 +541,7 @@ class HealthcarePlatform {
       for (let i = 1; i <= 7; i++) {
         const d = new Date(today);
         d.setDate(today.getDate() + i);
-        const iso = d.toISOString().split('T')[0];
+        const iso = this.formatLocalDate(d);
         const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
         const dayNum = d.getDate();
         const isActive = this.bookingState.selectedDate === iso ? 'active' : '';
@@ -751,15 +760,23 @@ class HealthcarePlatform {
     const loadingElem = document.getElementById('hc-slots-loading');
     if (!slotsContainer) return;
 
-    if (loadingElem) loadingElem.style.display = 'inline';
+    if (loadingElem) {
+      loadingElem.innerText = 'Loading available slots...';
+      loadingElem.style.display = 'inline';
+    }
+    slotsContainer.innerHTML = `<div style="grid-column: 1 / -1; color: var(--hc-text-muted); font-size: 0.9rem;">Loading available slots...</div>`;
 
     try {
-      const res = await fetch(`/api/healthcare/doctors/${this.bookingState.doctor.id}/slots?date=${this.bookingState.selectedDate}`);
-      const data = await res.json();
+      const params = new URLSearchParams({
+        action: 'slots',
+        doctorId: this.bookingState.doctor.id,
+        date: this.bookingState.selectedDate
+      });
+      const data = await this.fetchJsonEndpoint(`${this.bookingApiEndpoint}?${params}`);
 
       if (loadingElem) loadingElem.style.display = 'none';
 
-      if (data.status === 'ok' && data.slots && data.slots.length > 0) {
+      if ((data.success || data.status === 'ok') && Array.isArray(data.slots) && data.slots.length > 0) {
         slotsContainer.innerHTML = data.slots.map(slot => `
           <button type="button" class="hc-time-slot-btn ${this.bookingState.selectedSlot === slot.time ? 'selected' : ''}" 
                   ${slot.available ? '' : 'disabled'}
@@ -767,12 +784,18 @@ class HealthcarePlatform {
             ${slot.time}
           </button>
         `).join('');
+      } else if ((data.success || data.status === 'ok') && Array.isArray(data.slots)) {
+        slotsContainer.innerHTML = `<div style="grid-column: 1 / -1; color: var(--hc-text-muted); font-size: 0.9rem;">No slots are available for this date.</div>`;
       } else {
-        slotsContainer.innerHTML = `<div style="grid-column: 1 / -1; color: var(--hc-text-muted); font-size: 0.9rem;">No slots available on this date. Please pick another date.</div>`;
+        throw new Error(data.message || 'Unexpected slot response.');
       }
     } catch (err) {
       if (loadingElem) loadingElem.style.display = 'none';
-      slotsContainer.innerHTML = `<div style="grid-column: 1 / -1; color: var(--hc-danger);">Failed to load slots. Please retry.</div>`;
+      slotsContainer.innerHTML = `
+        <div style="grid-column: 1 / -1; color: var(--hc-danger);">
+          Unable to load available slots. Please retry.
+          <button type="button" class="hc-btn-view-profile" style="margin-left: 0.5rem;" onclick="window.HealthcareApp.fetchAndRenderSlots()">Retry</button>
+        </div>`;
     }
   }
 
@@ -824,19 +847,23 @@ class HealthcarePlatform {
         notes: this.bookingState.patient.notes
       };
 
-      const res = await fetch('/api/healthcare/appointments', {
+      const res = await fetch(`${this.bookingApiEndpoint}?action=create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
       const data = await res.json();
-      if (res.ok && data.status === 'ok') {
-        this.bookingState.confirmedAppointment = data.appointment;
+      if (res.ok && (data.success || data.status === 'ok')) {
+        this.bookingState.confirmedAppointment = data.appointment || data.booking;
         this.renderBookingStep(4);
         // Refresh dashboards
         this.loadDashboardData();
       } else {
+        if (res.status === 409) {
+          this.bookingState.selectedSlot = null;
+          this.renderBookingStep(1);
+        }
         throw new Error(data.message || 'Booking collision. Please select another slot.');
       }
     } catch (err) {
@@ -1146,19 +1173,19 @@ class HealthcarePlatform {
     const testsContainer = document.getElementById('hc-patient-tests-list');
 
     try {
-      const [aptRes, testRes] = await Promise.all([
-        fetch('/api/healthcare/appointments'),
+      const [aptData, testRes] = await Promise.all([
+        this.fetchJsonEndpoint(`${this.bookingApiEndpoint}?action=list&sort=newest`),
         fetch('/api/healthcare/test-bookings')
       ]);
 
-      const aptData = await aptRes.json();
       const testData = await testRes.json();
 
-      if (listContainer && aptData.status === 'ok') {
-        if (aptData.appointments.length === 0) {
+      if (listContainer && (aptData.success || aptData.status === 'ok')) {
+        const appointments = aptData.bookings || aptData.appointments || [];
+        if (appointments.length === 0) {
           listContainer.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--hc-text-muted);">No appointments booked yet.</div>`;
         } else {
-          listContainer.innerHTML = aptData.appointments.map(apt => `
+          listContainer.innerHTML = appointments.map(apt => `
             <div style="background: var(--hc-surface); border: 1px solid var(--hc-border); border-radius: var(--hc-radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
               <div>
                 <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
@@ -1215,11 +1242,10 @@ class HealthcarePlatform {
     const docId = docSelect ? docSelect.value : this.selectedDoctorForPortal;
 
     try {
-      const res = await fetch(`/api/healthcare/appointments?doctorId=${docId}`);
-      const data = await res.json();
+      const data = await this.fetchJsonEndpoint(`${this.bookingApiEndpoint}?action=list&doctorId=${encodeURIComponent(docId)}&sort=booking_date`);
 
-      if (listContainer && data.status === 'ok') {
-        listContainer.innerHTML = data.appointments.map(apt => `
+      if (listContainer && (data.success || data.status === 'ok')) {
+        listContainer.innerHTML = (data.bookings || data.appointments || []).map(apt => `
           <tr>
             <td><strong style="font-family: monospace; color: var(--hc-primary);">${apt.id}</strong></td>
             <td>
@@ -1233,7 +1259,7 @@ class HealthcarePlatform {
               <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
                 ${apt.status === 'confirmed' ? `
                   <button class="hc-btn-book" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="window.HealthcareApp.updateStatus('${apt.id}', 'completed')">✓ Complete</button>
-                  <button class="hc-btn-view-profile" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="window.HealthcareApp.updateStatus('${apt.id}', 'no-show')">No-Show</button>
+                  <button class="hc-btn-view-profile" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;" onclick="window.HealthcareApp.updateStatus('${apt.id}', 'no_show')">No-Show</button>
                 ` : `<span style="font-size: 0.8rem; color: var(--hc-text-muted);">Updated</span>`}
               </div>
             </td>
@@ -1251,18 +1277,19 @@ class HealthcarePlatform {
     const logsContainer = document.getElementById('hc-admin-notification-logs');
 
     try {
-      const [statsRes, aptRes, logsRes] = await Promise.all([
-        fetch('/api/healthcare/stats'),
-        fetch('/api/healthcare/appointments'),
-        fetch('/api/healthcare/logs')
-      ]);
+      const aptData = await this.fetchJsonEndpoint(`${this.bookingApiEndpoint}?action=list&sort=newest`);
+      const appointments = Array.isArray(aptData.bookings) ? aptData.bookings : [];
+      this.adminBookingsCache = appointments;
+      const today = this.formatLocalDate(new Date());
+      const s = {
+        totalAppointments: appointments.length,
+        todayAppointments: appointments.filter(apt => apt.date === today).length,
+        upcomingAppointments: appointments.filter(apt => apt.date >= today && ['confirmed', 'rescheduled', 'pending'].includes(apt.status)).length,
+        completedAppointments: appointments.filter(apt => apt.status === 'completed').length,
+        cancelledAppointments: appointments.filter(apt => apt.status === 'cancelled').length
+      };
 
-      const statsData = await statsRes.json();
-      const aptData = await aptRes.json();
-      const logsData = await logsRes.json();
-
-      if (kpiGrid && statsData.status === 'ok') {
-        const s = statsData.stats;
+      if (kpiGrid) {
         kpiGrid.innerHTML = `
           <div class="hc-kpi-card">
             <div class="hc-kpi-label">Total Appointments</div>
@@ -1285,62 +1312,116 @@ class HealthcarePlatform {
             <div class="hc-kpi-subtext">Successfully concluded</div>
           </div>
           <div class="hc-kpi-card">
-            <div class="hc-kpi-label">Diagnostic Tests</div>
-            <div class="hc-kpi-number" style="color: var(--hc-accent);">${s.totalTests}</div>
-            <div class="hc-kpi-subtext">Bookings processed</div>
+            <div class="hc-kpi-label">Cancelled (retained)</div>
+            <div class="hc-kpi-number" style="color: var(--hc-accent);">${s.cancelledAppointments}</div>
+            <div class="hc-kpi-subtext">Preserved in full history</div>
           </div>
         `;
       }
 
-      if (tableBody && aptData.status === 'ok') {
-        tableBody.innerHTML = aptData.appointments.map(apt => `
+      this.renderAdminBookingRows(appointments);
+
+      if (logsContainer) {
+        logsContainer.innerHTML = `<div style="font-size: 0.84rem; color: var(--hc-text-muted);">Booking changes are retained inside each record's audit history and included in every Excel export.</div>`;
+      }
+    } catch (err) {
+      console.warn('Admin dash error:', err);
+      if (tableBody) tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--hc-danger);">Unable to load booking history.</td></tr>`;
+    }
+  }
+
+  renderAdminBookingRows(appointments) {
+    const tableBody = document.getElementById('hc-admin-appointments-table');
+    if (!tableBody) return;
+    if (!appointments.length) {
+      tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--hc-text-muted);">No booking records match these filters.</td></tr>`;
+      return;
+    }
+    tableBody.innerHTML = appointments.map(apt => `
           <tr>
             <td><strong style="font-family: monospace; color: var(--hc-primary);">${apt.id}</strong></td>
             <td>${apt.patientName}<br><span style="font-size: 0.75rem; color: var(--hc-text-muted);">${apt.patientPhone}</span></td>
+            <td>${apt.patientEmail}</td>
             <td><strong>${apt.doctorName}</strong></td>
             <td>${apt.date} • ${apt.time}</td>
-            <td><span class="hc-status-badge hc-status-${apt.status}">${apt.status}</span></td>
+            <td><span class="hc-status-badge hc-status-${String(apt.status).replace('_', '-')}">${String(apt.status).replace('_', ' ')}</span></td>
+            <td><span style="white-space: nowrap;">${apt.createdAt || '—'}</span><br><span style="font-size: 0.75rem; color: var(--hc-text-muted); white-space: nowrap;">${apt.updatedAt || apt.createdAt || '—'}</span></td>
             <td>
               <select onchange="window.HealthcareApp.updateStatus('${apt.id}', this.value)" style="padding: 0.3rem 0.5rem; font-size: 0.78rem; border-radius: 4px; border: 1px solid var(--hc-border);">
                 <option value="confirmed" ${apt.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
                 <option value="completed" ${apt.status === 'completed' ? 'selected' : ''}>Completed</option>
-                <option value="rescheduled" ${apt.status === 'rescheduled' ? 'selected' : ''}>Rescheduled</option>
+                <option value="rescheduled" ${apt.status === 'rescheduled' ? 'selected' : ''}>Reschedule…</option>
                 <option value="cancelled" ${apt.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                <option value="no-show" ${apt.status === 'no-show' ? 'selected' : ''}>No-Show</option>
+                <option value="no_show" ${apt.status === 'no_show' ? 'selected' : ''}>No-Show</option>
+                <option value="archived" ${apt.status === 'archived' ? 'selected' : ''}>Archived</option>
               </select>
             </td>
           </tr>
         `).join('');
-      }
+  }
 
-      if (logsContainer && logsData.status === 'ok') {
-        logsContainer.innerHTML = logsData.logs.slice(0, 10).map(log => `
-          <div style="font-size: 0.82rem; padding: 0.6rem 0; border-bottom: 1px solid var(--hc-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-            <div>
-              <strong>${log.subject}</strong><br>
-              <span style="color: var(--hc-text-muted);">${log.recipient} • ${log.timestamp}</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span class="hc-status-badge ${log.status === 'sent' ? 'hc-status-confirmed' : 'hc-status-cancelled'}">${log.status}</span>
-              ${log.status === 'failed' ? `<button class="hc-btn-view-profile" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;" onclick="window.HealthcareApp.retryNotification('${log.id}')">Retry</button>` : ''}
-            </div>
-          </div>
-        `).join('');
-      }
+  getAdminFilterParams() {
+    return new URLSearchParams({
+      search: document.getElementById('hc-admin-booking-search')?.value.trim() || '',
+      status: document.getElementById('hc-admin-booking-status')?.value || 'all',
+      fromDate: document.getElementById('hc-admin-booking-from')?.value || '',
+      toDate: document.getElementById('hc-admin-booking-to')?.value || '',
+      createdFrom: document.getElementById('hc-admin-created-from')?.value || '',
+      createdTo: document.getElementById('hc-admin-created-to')?.value || '',
+      sort: document.getElementById('hc-admin-booking-sort')?.value || 'newest'
+    });
+  }
+
+  async applyAdminBookingFilters() {
+    try {
+      const data = await this.fetchJsonEndpoint(`${this.bookingApiEndpoint}?action=list&${this.getAdminFilterParams()}`);
+      this.renderAdminBookingRows(Array.isArray(data.bookings) ? data.bookings : []);
     } catch (err) {
-      console.warn('Admin dash error:', err);
+      console.warn('Booking filter error:', err);
     }
+  }
+
+  resetAdminBookingFilters() {
+    ['hc-admin-booking-search', 'hc-admin-booking-from', 'hc-admin-booking-to', 'hc-admin-created-from', 'hc-admin-created-to'].forEach(id => {
+      const input = document.getElementById(id);
+      if (input) input.value = '';
+    });
+    const status = document.getElementById('hc-admin-booking-status');
+    const sort = document.getElementById('hc-admin-booking-sort');
+    if (status) status.value = 'all';
+    if (sort) sort.value = 'newest';
+    this.applyAdminBookingFilters();
+  }
+
+  exportAllBookings() {
+    window.location.href = `${this.bookingApiEndpoint}?action=export`;
+  }
+
+  exportFilteredBookings() {
+    window.location.href = `${this.bookingApiEndpoint}?action=export_filtered&${this.getAdminFilterParams()}`;
   }
 
   async updateStatus(aptId, newStatus) {
     try {
-      const res = await fetch(`/api/healthcare/appointments/${aptId}/status`, {
-        method: 'PATCH',
+      const payload = { status: newStatus, actor: this.currentRole === 'doctor' ? 'Doctor' : 'Admin' };
+      if (newStatus === 'rescheduled') {
+        const newDate = window.prompt('Enter the new booking date (YYYY-MM-DD):');
+        if (!newDate) return;
+        const newTime = window.prompt('Enter the new slot exactly as displayed (for example 10:30 AM):');
+        if (!newTime) return;
+        payload.date = newDate.trim();
+        payload.time = newTime.trim();
+      }
+      const res = await fetch(`${this.bookingApiEndpoint}?action=status&id=${encodeURIComponent(aptId)}`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus, actor: this.currentRole === 'doctor' ? 'Doctor' : 'Admin' })
+        body: JSON.stringify(payload)
       });
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && (data.success || data.status === 'ok')) {
         this.loadDashboardData();
+      } else {
+        throw new Error(data.message || 'Unable to update booking status.');
       }
     } catch (err) {
       alert('Status update error: ' + err.message);

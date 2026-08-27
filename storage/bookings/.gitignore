@@ -1,0 +1,6 @@
+bookings.json
+bookings.lock
+bookings-*
+backups/*.json
+!backups/.gitkeep
+

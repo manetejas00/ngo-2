@@ -7,6 +7,12 @@ DirectoryIndex index.html index.php
   # Route /api/submit-form to submit-form.php on Apache/PHP hosts
   RewriteRule ^api/submit-form/?$ api/submit-form.php [L,NC]
 
+  # Persistent file-ledger booking API
+  RewriteRule ^api/booking/slots/?$ api/booking/index.php?action=slots [QSA,L,NC]
+  RewriteRule ^api/bookings/export/?$ api/booking/index.php?action=export [QSA,L,NC]
+  RewriteRule ^api/bookings/?$ api/booking/index.php?action=list [QSA,L,NC]
+  RewriteRule ^api/booking/?$ api/booking/index.php [QSA,L,NC]
+
   # Route /api/news endpoints
   RewriteRule ^api/news/?$ api/news.json [L,NC]
   RewriteRule ^api/news/refresh/?$ api/news.json [L,NC]
