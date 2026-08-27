@@ -653,6 +653,10 @@ class HealthcarePlatform {
             <textarea id="hc-pat-notes" class="hc-search-input" rows="2" placeholder="Any specific symptoms, previous treatments, or medications...">${this.bookingState.patient.notes}</textarea>
           </div>
 
+          <p style="font-size: 0.78rem; color: var(--hc-text-muted); margin: -0.35rem 0 1.1rem;">
+            By providing your mobile number, you agree to receive appointment-related WhatsApp messages. No marketing messages will be sent.
+          </p>
+
           <div class="hc-modal-actions">
             <button type="button" class="hc-btn-secondary" onclick="window.HealthcareApp.renderBookingStep(1)" style="color: var(--hc-text-main); border-color: var(--hc-border);">← Back to Slot</button>
             <button type="submit" class="hc-btn-primary">
@@ -694,7 +698,7 @@ class HealthcarePlatform {
         </div>
 
         <div style="background: #FFF7ED; border-left: 4px solid var(--hc-accent); padding: 0.75rem 0.9rem; border-radius: 4px; font-size: 0.82rem; color: #9A3412; margin-bottom: 1.25rem;">
-          🔒 Automated confirmation email will be dispatched to <strong>${this.bookingState.patient.email}</strong>.
+          🔒 Appointment confirmation will be sent to <strong>${this.bookingState.patient.email}</strong> and, when configured, to WhatsApp at <strong>${this.bookingState.patient.phone}</strong>.
         </div>
 
         <div id="hc-booking-error-box" style="display: none; background: var(--hc-danger-bg); color: var(--hc-danger); padding: 0.85rem 1rem; border-radius: var(--hc-radius-sm); margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;"></div>
@@ -718,7 +722,9 @@ class HealthcarePlatform {
           </div>
           <h3 style="font-family: var(--hc-font-heading); font-size: 1.7rem; font-weight: 800; margin: 0 0 0.5rem 0;">Appointment Confirmed!</h3>
           <p style="color: var(--hc-text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
-            A confirmation receipt has been sent to <strong>${apt.patientEmail}</strong>.
+            ${apt.whatsapp?.confirmationSent
+              ? `A WhatsApp confirmation was sent to <strong>${apt.patientPhone}</strong>.`
+              : `Your booking is safely recorded. WhatsApp confirmation is currently ${apt.whatsapp?.status || 'unavailable'}.`}
           </p>
 
           <div style="background: var(--hc-surface-alt); border: 2px dashed var(--hc-primary); border-radius: var(--hc-radius-md); padding: 1.25rem; margin-bottom: 2rem; display: inline-block; width: 100%;">
@@ -1345,6 +1351,10 @@ class HealthcarePlatform {
             <td><strong>${apt.doctorName}</strong></td>
             <td>${apt.date} • ${apt.time}</td>
             <td><span class="hc-status-badge hc-status-${String(apt.status).replace('_', '-')}">${String(apt.status).replace('_', ' ')}</span></td>
+            <td>
+              <span class="hc-status-badge hc-status-${apt.whatsapp?.confirmationSent ? 'confirmed' : 'pending'}">${apt.whatsapp?.status || 'not attempted'}</span>
+              ${!apt.whatsapp?.confirmationSent ? `<button type="button" class="hc-btn-view-profile" style="display:block; margin-top:0.4rem; padding:0.28rem 0.5rem; font-size:0.72rem;" onclick="window.HealthcareApp.resendWhatsApp('${apt.id}')">Resend WhatsApp</button>` : ''}
+            </td>
             <td><span style="white-space: nowrap;">${apt.createdAt || '—'}</span><br><span style="font-size: 0.75rem; color: var(--hc-text-muted); white-space: nowrap;">${apt.updatedAt || apt.createdAt || '—'}</span></td>
             <td>
               <select onchange="window.HealthcareApp.updateStatus('${apt.id}', this.value)" style="padding: 0.3rem 0.5rem; font-size: 0.78rem; border-radius: 4px; border: 1px solid var(--hc-border);">
@@ -1425,6 +1435,23 @@ class HealthcarePlatform {
       }
     } catch (err) {
       alert('Status update error: ' + err.message);
+    }
+  }
+
+  async resendWhatsApp(aptId) {
+    try {
+      const res = await fetch(`${this.bookingApiEndpoint}?action=whatsapp_resend&id=${encodeURIComponent(aptId)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: aptId })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.whatsappSent) throw new Error(data.message || 'WhatsApp confirmation could not be sent.');
+      alert('WhatsApp confirmation sent.');
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      this.loadAdminDashboard();
     }
   }
 

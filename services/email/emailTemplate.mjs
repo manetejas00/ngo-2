@@ -67,7 +67,7 @@ export function renderUserEmail(emailContent, formData, formType) {
                 <tr>
                   <td align="center">
                     <div style="display: inline-block; background-color: #FFFFFF; border-radius: 50%; padding: 6px; box-shadow: 0 4px 12px rgba(245, 130, 32, 0.3);">
-                      <img src="https://avinyacare.org/assets/logo.png" alt="Avinya Care Foundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0;" />
+                      <img src="${process.env.LOGO_URL || 'https://test.avinyacarefoundation.org/assets/logo.png'}" alt="Avinya Care Foundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;" />
                     </div>
                   </td>
                 </tr>
@@ -175,7 +175,7 @@ export function renderAdminEmail(emailContent, formData, formType, submissionId,
                 <tr>
                   <td valign="middle" style="width: 44px;">
                     <div style="background-color: #FFFFFF; border-radius: 50%; padding: 4px; display: inline-block;">
-                      <img src="https://avinyacare.org/assets/logo.png" alt="Avinya Care" width="36" height="36" style="display: block; width: 36px; height: 36px; border: 0;" />
+                      <img src="${process.env.LOGO_URL || 'https://test.avinyacarefoundation.org/assets/logo.png'}" alt="Avinya Care" width="36" height="36" style="display: block; width: 36px; height: 36px; border: 0; border-radius: 50%; object-fit: contain;" />
                     </div>
                   </td>
                   <td valign="middle" style="padding-left: 12px;">

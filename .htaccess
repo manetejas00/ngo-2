@@ -8,6 +8,7 @@ DirectoryIndex index.html index.php
   RewriteRule ^api/submit-form/?$ api/submit-form.php [L,NC]
 
   # Persistent file-ledger booking API
+  RewriteRule ^api/booking/whatsapp-webhook/?$ api/booking/index.php?action=whatsapp_webhook [QSA,L,NC]
   RewriteRule ^api/booking/slots/?$ api/booking/index.php?action=slots [QSA,L,NC]
   RewriteRule ^api/bookings/export/?$ api/booking/index.php?action=export [QSA,L,NC]
   RewriteRule ^api/bookings/?$ api/booking/index.php?action=list [QSA,L,NC]

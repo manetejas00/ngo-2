@@ -1,0 +1,12 @@
+Booking Records API Links
+=========================
+
+Verified Excel download:
+https://test.avinyacarefoundation.org/api/bookings/export
+
+Direct PHP fallback:
+https://test.avinyacarefoundation.org/api/booking/index.php?action=export
+
+Local development note:
+The PHP export API does not run through the Node server at localhost:3000.
+Use the Hostinger URL above to download the complete booking history.

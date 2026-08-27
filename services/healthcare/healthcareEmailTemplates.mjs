@@ -6,6 +6,7 @@
 import { escapeHTML } from '../email/emailTemplate.mjs';
 
 function renderEmailLayout(title, preheader, contentHtml) {
+  const logoUrl = process.env.LOGO_URL || 'https://test.avinyacarefoundation.org/assets/logo.png';
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,7 +27,7 @@ function renderEmailLayout(title, preheader, contentHtml) {
                 <tr>
                   <td align="center">
                     <div style="display: inline-block; background-color: #FFFFFF; border-radius: 50%; padding: 6px; box-shadow: 0 4px 12px rgba(244, 117, 40, 0.3);">
-                      <img src="https://avinyacare.org/assets/logo.png" alt="Avinya Care Foundation" width="52" height="52" style="display: block; width: 52px; height: 52px; border: 0;" />
+                      <img src="${logoUrl}" alt="Avinya Care Foundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;" />
                     </div>
                   </td>
                 </tr>

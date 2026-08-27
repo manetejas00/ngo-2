@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/WhatsAppService.php';
+require_once __DIR__ . '/EmailService.php';
+
 date_default_timezone_set('Asia/Kolkata');
 
 const ACTIVE_STATUSES = ['confirmed', 'rescheduled', 'pending'];
@@ -218,6 +221,8 @@ function createBooking(array $data): array {
         }
         if (!validDate((string) $data['date'])) throw new InvalidArgumentException('Date must use YYYY-MM-DD format.');
         if (!filter_var($data['patientEmail'], FILTER_VALIDATE_EMAIL)) throw new InvalidArgumentException('A valid email address is required.');
+        $whatsappPhone = normalizeWhatsAppPhone((string) $data['patientPhone']);
+        if ($whatsappPhone === null) throw new InvalidArgumentException('A valid mobile number with country code is required.');
 
         $bookings = readLedger();
         $slot = normalizeTime((string) $data['time']);
@@ -240,6 +245,7 @@ function createBooking(array $data): array {
             'patientName' => trim((string) $data['patientName']),
             'patientEmail' => strtolower(trim((string) $data['patientEmail'])),
             'patientPhone' => trim((string) $data['patientPhone']),
+            'patientWhatsAppPhone' => $whatsappPhone,
             'patientAge' => (int) ($data['patientAge'] ?? 0),
             'patientGender' => (string) ($data['patientGender'] ?? 'Unspecified'),
             'consultationType' => (string) ($data['consultationType'] ?? 'in-clinic'),
@@ -308,6 +314,91 @@ function updateBooking(string $id, array $data): array {
     });
 }
 
+function findBooking(string $id): ?array {
+    foreach (readLedger() as $booking) {
+        if (($booking['id'] ?? '') === $id) return $booking;
+    }
+    return null;
+}
+
+function recordWhatsAppEvent(string $bookingId, array $event): array {
+    return withLedgerLock(function () use ($bookingId, $event) {
+        $bookings = readLedger();
+        foreach ($bookings as $index => $booking) {
+            if (($booking['id'] ?? '') !== $bookingId) continue;
+            $booking['whatsappHistory'] = is_array($booking['whatsappHistory'] ?? null) ? $booking['whatsappHistory'] : [];
+            $booking['whatsappHistory'][] = $event;
+            $sent = ($event['status'] ?? '') === 'sent' || !empty($booking['whatsapp']['confirmationSent']);
+            $booking['whatsapp'] = [
+                'confirmationSent' => $sent,
+                'status' => (string) ($event['status'] ?? 'unknown'),
+                'provider' => (string) ($event['provider'] ?? 'meta'),
+                'messageId' => (string) ($event['messageId'] ?? ($booking['whatsapp']['messageId'] ?? '')),
+                'sentAt' => $event['sentAt'] ?? ($booking['whatsapp']['sentAt'] ?? null),
+                'lastAttemptAt' => $event['attemptedAt'] ?? nowIso(),
+                'lastError' => (string) ($event['error'] ?? '')
+            ];
+            $booking['history'] = is_array($booking['history'] ?? null) ? $booking['history'] : [];
+            $booking['history'][] = [
+                'action' => 'whatsapp_' . ($event['status'] ?? 'unknown'), 'at' => nowIso(),
+                'provider' => $event['provider'] ?? 'meta', 'messageId' => $event['messageId'] ?? ''
+            ];
+            $bookings[$index] = $booking;
+            atomicSave($bookings);
+            return $booking;
+        }
+        throw new InvalidArgumentException('Booking not found.');
+    });
+}
+
+function sendWhatsAppConfirmation(string $bookingId, bool $manual = false): array {
+    $booking = findBooking($bookingId);
+    if ($booking === null) throw new InvalidArgumentException('Booking not found.');
+    if (!empty($booking['whatsapp']['confirmationSent'])) {
+        return ['booking' => $booking, 'event' => ['status' => 'already_sent', 'messageId' => $booking['whatsapp']['messageId'] ?? '']];
+    }
+    error_log('[Booking API] WhatsApp ' . ($manual ? 'resend' : 'confirmation') . ' requested for ' . $bookingId . ' to ' . maskedWhatsAppPhone((string) ($booking['patientPhone'] ?? '')));
+    $event = (new WhatsAppService())->sendAppointmentConfirmation($booking);
+    $event['manual'] = $manual;
+    $updated = recordWhatsAppEvent($bookingId, $event);
+    error_log('[Booking API] WhatsApp ' . ($event['status'] ?? 'unknown') . ' for ' . $bookingId);
+    return ['booking' => $updated, 'event' => $event];
+}
+
+function applyWhatsAppWebhook(array $payload): int {
+    $updates = 0;
+    foreach (($payload['entry'] ?? []) as $entry) {
+        foreach (($entry['changes'] ?? []) as $change) {
+            foreach (($change['value']['statuses'] ?? []) as $status) {
+                $messageId = (string) ($status['id'] ?? '');
+                if ($messageId === '') continue;
+                $bookings = readLedger();
+                foreach ($bookings as $booking) {
+                    $knownId = (string) ($booking['whatsapp']['messageId'] ?? '');
+                    if ($knownId !== $messageId) continue;
+                    $errors = $status['errors'] ?? [];
+                    $event = [
+                        'type' => 'delivery_status', 'status' => (string) ($status['status'] ?? 'unknown'),
+                        'provider' => 'meta', 'messageId' => $messageId, 'attemptedAt' => nowIso(),
+                        'sentAt' => null, 'error' => (string) ($errors[0]['title'] ?? $errors[0]['message'] ?? '')
+                    ];
+                    recordWhatsAppEvent((string) $booking['id'], $event);
+                    $updates++;
+                    break;
+                }
+            }
+        }
+    }
+    return $updates;
+}
+
+function verifyWhatsAppWebhookSignature(string $raw): bool {
+    $secret = whatsappEnv('WHATSAPP_APP_SECRET');
+    $signature = (string) ($_SERVER['HTTP_X_HUB_SIGNATURE_256'] ?? '');
+    if ($secret === '' || !str_starts_with($signature, 'sha256=')) return false;
+    return hash_equals('sha256=' . hash_hmac('sha256', $raw, $secret), $signature);
+}
+
 function filteredBookings(array $bookings, array $query): array {
     $search = strtolower(trim((string) ($query['search'] ?? '')));
     $status = strtolower(trim((string) ($query['status'] ?? 'all')));
@@ -353,14 +444,17 @@ function excelColumn(int $number): string {
 }
 
 function worksheetXml(array $bookings): string {
-    $headers = ['Booking ID','Customer Name','Email','Phone','Doctor','Original Booking Date','Original Slot','Current Booking Date','Current Slot','Status','Created At','Updated At','Cancelled At','Completed At','Rescheduled At','Notes','Reschedule History','Audit History'];
+    $headers = ['Booking ID','Customer Name','Email','Phone','Doctor','Original Booking Date','Original Slot','Current Booking Date','Current Slot','Status','Created At','Updated At','Cancelled At','Completed At','Rescheduled At','Notes','WhatsApp Confirmation','WhatsApp Status','WhatsApp Sent At','WhatsApp Provider','WhatsApp Message ID','WhatsApp Last Error','WhatsApp History','Reschedule History','Audit History'];
     $rows = [$headers];
     foreach ($bookings as $b) {
         $rows[] = [
             $b['id'] ?? '', $b['patientName'] ?? '', $b['patientEmail'] ?? '', $b['patientPhone'] ?? '', $b['doctorName'] ?? '',
             $b['originalDate'] ?? $b['date'] ?? '', $b['originalSlot'] ?? $b['time'] ?? '', $b['date'] ?? '', $b['time'] ?? $b['slot'] ?? '',
             $b['status'] ?? '', $b['createdAt'] ?? '', $b['updatedAt'] ?? '', $b['cancelledAt'] ?? '', $b['completedAt'] ?? '', $b['rescheduledAt'] ?? '',
-            $b['notes'] ?? '', json_encode($b['rescheduleHistory'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), json_encode($b['history'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            $b['notes'] ?? '', !empty($b['whatsapp']['confirmationSent']) ? 'Yes' : 'No', $b['whatsapp']['status'] ?? 'not_attempted',
+            $b['whatsapp']['sentAt'] ?? '', $b['whatsapp']['provider'] ?? '', $b['whatsapp']['messageId'] ?? '', $b['whatsapp']['lastError'] ?? '',
+            json_encode($b['whatsappHistory'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            json_encode($b['rescheduleHistory'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), json_encode($b['history'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         ];
     }
     $sheetRows = '';
@@ -376,7 +470,7 @@ function worksheetXml(array $bookings): string {
     $lastColumn = excelColumn(count($headers));
     return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         . '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
-        . '<cols><col min="1" max="1" width="23" customWidth="1"/><col min="2" max="5" width="24" customWidth="1"/><col min="6" max="15" width="20" customWidth="1"/><col min="16" max="18" width="42" customWidth="1"/></cols>'
+        . '<cols><col min="1" max="1" width="23" customWidth="1"/><col min="2" max="5" width="24" customWidth="1"/><col min="6" max="22" width="20" customWidth="1"/><col min="23" max="25" width="42" customWidth="1"/></cols>'
         . '<sheetData>' . $sheetRows . '</sheetData><autoFilter ref="A1:' . $lastColumn . count($rows) . '"/></worksheet>';
 }
 
@@ -406,6 +500,27 @@ try {
     $method = $_SERVER['REQUEST_METHOD'];
     $action = strtolower((string) ($_GET['action'] ?? ($method === 'POST' ? 'create' : 'slots')));
 
+    if ($action === 'whatsapp_webhook' && $method === 'GET') {
+        $verifyToken = whatsappEnv('WHATSAPP_WEBHOOK_VERIFY_TOKEN');
+        $mode = (string) ($_GET['hub_mode'] ?? $_GET['hub.mode'] ?? '');
+        $token = (string) ($_GET['hub_verify_token'] ?? $_GET['hub.verify_token'] ?? '');
+        $challenge = (string) ($_GET['hub_challenge'] ?? $_GET['hub.challenge'] ?? '');
+        if ($verifyToken !== '' && $mode === 'subscribe' && hash_equals($verifyToken, $token)) {
+            http_response_code(200);
+            header('Content-Type: text/plain; charset=UTF-8');
+            echo $challenge;
+            exit;
+        }
+        respondJson(403, ['success' => false, 'message' => 'Webhook verification failed.']);
+    }
+    if ($action === 'whatsapp_webhook' && $method === 'POST') {
+        $raw = (string) file_get_contents('php://input');
+        if (!verifyWhatsAppWebhookSignature($raw)) respondJson(401, ['success' => false, 'message' => 'Invalid webhook signature.']);
+        $payload = json_decode($raw, true);
+        if (!is_array($payload)) throw new InvalidArgumentException('Invalid webhook payload.');
+        respondJson(200, ['success' => true, 'updated' => applyWhatsAppWebhook($payload)]);
+    }
+
     if ($method === 'GET' && $action === 'slots') {
         $doctorId = trim((string) ($_GET['doctorId'] ?? ''));
         $date = trim((string) ($_GET['date'] ?? ''));
@@ -414,7 +529,33 @@ try {
     }
     if ($method === 'POST' && $action === 'create') {
         $booking = createBooking(requestBody());
-        respondJson(201, ['success' => true, 'status' => 'ok', 'booking' => $booking, 'appointment' => $booking, 'message' => 'Appointment confirmed.']);
+        error_log('[Booking API] Booking ' . $booking['id'] . ' created');
+        $event = ['status' => 'failed', 'error' => 'Notification result could not be recorded.'];
+        try {
+            $notification = sendWhatsAppConfirmation((string) $booking['id']);
+            $booking = $notification['booking'];
+            $event = $notification['event'];
+        } catch (Throwable $notificationError) {
+            error_log('[Booking API] WhatsApp processing failed for ' . $booking['id'] . ': ' . $notificationError->getMessage());
+        }
+        $whatsappSent = ($event['status'] ?? '') === 'sent' || ($event['status'] ?? '') === 'already_sent';
+        $message = $whatsappSent ? 'Appointment confirmed and WhatsApp confirmation sent.' : 'Appointment confirmed, but WhatsApp notification was not sent.';
+        respondJson(201, [
+            'success' => true, 'status' => 'ok', 'bookingConfirmed' => true, 'whatsappSent' => $whatsappSent,
+            'whatsappStatus' => $event['status'] ?? 'failed', 'booking' => $booking, 'appointment' => $booking, 'message' => $message
+        ]);
+    }
+    if ($method === 'POST' && $action === 'whatsapp_resend') {
+        $data = requestBody();
+        $id = trim((string) ($_GET['id'] ?? $data['id'] ?? ''));
+        $notification = sendWhatsAppConfirmation($id, true);
+        $notificationStatus = (string) ($notification['event']['status'] ?? 'failed');
+        $sent = $notificationStatus === 'sent' || $notificationStatus === 'already_sent';
+        respondJson($sent ? 200 : 502, [
+            'success' => $sent, 'bookingConfirmed' => true, 'whatsappSent' => $sent,
+            'whatsappStatus' => $notification['event']['status'] ?? 'failed', 'booking' => $notification['booking'],
+            'message' => $notificationStatus === 'already_sent' ? 'WhatsApp confirmation was already sent; no duplicate was created.' : ($sent ? 'WhatsApp confirmation resent.' : 'Booking remains confirmed, but WhatsApp could not be sent.')
+        ]);
     }
     if (($method === 'PATCH' || $method === 'POST') && $action === 'status') {
         $data = requestBody();
