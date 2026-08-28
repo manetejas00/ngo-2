@@ -168,7 +168,8 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
   const smtpSecure = process.env.SMTP_SECURE === 'true' || smtpPort === 465;
 
   let userEmailSent = !recipientUser;
-  let adminEmailSent = false;
+  const skipAdmin = metadata.skipAdmin === true;
+  let adminEmailSent = skipAdmin;
 
   // 1. Attempt delivery via Nodemailer pooled transporter
   try {
@@ -194,7 +195,7 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
         }
       }
 
-      if (!adminEmailSent) {
+      if (!adminEmailSent && !skipAdmin) {
         try {
           const adminRes = await transporter.sendMail({
             from: `"Avinya Care Operations" <${senderEmail}>`,
@@ -253,7 +254,7 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
         }
       }
 
-      if (!adminEmailSent) {
+      if (!adminEmailSent && !skipAdmin) {
         try {
           await sendSmtpSocket({
             host: smtpHost,
@@ -289,7 +290,7 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
     }
   }
 
-  if (!userEmailSent || !adminEmailSent) {
+  if (!userEmailSent || (!skipAdmin && !adminEmailSent)) {
     deliveryError = userEmailError || adminEmailError || deliveryError || 'Failed to dispatch one or more emails.';
 
     // Automatically send error alert email to admin (info@test.avinyacarefoundation.org)
@@ -354,7 +355,7 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
       sent: adminEmailSent,
       recipient: adminEmail,
       subject: adminEmailPayload.subject,
-      statusMessage: adminEmailSent ? `Operational alert dispatched to ${adminEmail}` : `Delivery failed for admin alert`,
+      statusMessage: skipAdmin ? 'Admin delivery skipped for single-recipient dispatch' : (adminEmailSent ? `Operational alert dispatched to ${adminEmail}` : `Delivery failed for admin alert`),
       error: adminEmailError
     },
     successMessage,

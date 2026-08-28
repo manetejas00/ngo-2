@@ -68,9 +68,20 @@ export async function dispatchAppointmentCreatedEmails(appointment) {
       const patientSuccess = result.userEmail?.sent ?? true;
       const adminSuccess = result.adminEmail?.sent ?? true;
 
+      // Doctor notification is a separate recipient and must not be inferred
+      // from the patient delivery result.
+      const doctorResult = await sendFormEmails(doctorEmailPayload, doctorEmailPayload, {
+        submissionId: appointment.id,
+        formType: 'appointment_doctor',
+        userEmail: doctorRecipient,
+        skipAdmin: true,
+        timestampIST: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST'
+      });
+      const doctorSuccess = doctorResult.userEmail?.sent ?? false;
+
       await updateNotificationLogStatus(patientLog.id, patientSuccess ? 'sent' : 'failed', result.userEmail?.error);
       await updateNotificationLogStatus(adminLog.id, adminSuccess ? 'sent' : 'failed', result.adminEmail?.error);
-      await updateNotificationLogStatus(doctorLog.id, patientSuccess ? 'sent' : 'failed');
+      await updateNotificationLogStatus(doctorLog.id, doctorSuccess ? 'sent' : 'failed', doctorResult.userEmail?.error);
     } catch (err) {
       console.warn('[Healthcare Email Warning] Async dispatch issue:', err.message);
       await updateNotificationLogStatus(patientLog.id, 'failed', err.message);
