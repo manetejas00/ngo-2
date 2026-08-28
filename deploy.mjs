@@ -45,6 +45,7 @@ conn.on('ready', () => {
         cp -rf * .htaccess .env ~/${prodDir}/ &&
         mkdir -p ~/${prodDir}/api && cp -rf api/* ~/${prodDir}/api/ &&
         mkdir -p ~/${prodDir}/services && cp -rf services/* ~/${prodDir}/services/ 2>/dev/null || true &&
+        curl -s http://127.0.0.1/api/migrate.php || true &&
         echo "DEPLOYMENT_SYNC_SUCCESS"
       `;
 

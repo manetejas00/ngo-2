@@ -9,6 +9,9 @@ header('Access-Control-Allow-Headers: Content-Type');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo json_encode(['status' => 'error', 'message' => 'Method not allowed']); exit; }
 
+require_once __DIR__ . '/db.php';
+
+
 function diagnosticEnv(string $name, string $default = ''): string {
     $envFile = dirname(__DIR__) . '/.env';
     static $loaded = false;
@@ -113,6 +116,47 @@ try {
     $ledgerPath = $dataDir . '/test-bookings.json'; $ledger = is_readable($ledgerPath) ? json_decode((string) file_get_contents($ledgerPath), true) : []; if (!is_array($ledger)) $ledger = [];
     $ledger[] = $booking; file_put_contents($ledgerPath, json_encode($ledger, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
     $emailSent = sendDiagnosticEmail($booking);
+    
+    try {
+        $pdo = getDatabaseConnection();
+        if ($pdo !== null) {
+            $stmt = $pdo->prepare("INSERT INTO `diagnostic_bookings`
+                (`booking_id`, `test_id`, `test_name`, `price`, `collection_method`, `patient_name`, `patient_email`, `patient_phone`, `patient_age`, `patient_gender`, `home_address`, `pincode`, `city`, `booking_date`, `time_slot`, `status`, `email_sent`)
+                VALUES (:b_id, :t_id, :t_name, :price, :coll, :p_name, :p_email, :p_phone, :p_age, :p_gender, :addr, :pin, :city, :b_date, :slot, :status, :e_sent)");
+            
+            $stmt->execute([
+                ':b_id' => $booking['id'],
+                ':t_id' => $booking['testId'],
+                ':t_name' => $booking['testName'],
+                ':price' => $booking['price'],
+                ':coll' => $booking['collectionMethod'],
+                ':p_name' => $booking['patientName'],
+                ':p_email' => $booking['patientEmail'],
+                ':p_phone' => $booking['patientPhone'],
+                ':p_age' => $booking['patientAge'],
+                ':p_gender' => $booking['patientGender'],
+                ':addr' => $booking['homeAddress'],
+                ':pin' => $booking['pincode'],
+                ':city' => $booking['city'],
+                ':b_date' => $booking['date'],
+                ':slot' => $booking['timeSlot'],
+                ':status' => $booking['status'],
+                ':e_sent' => $emailSent ? 1 : 0
+            ]);
+
+            if ($emailSent) {
+                $logStmt = $pdo->prepare("INSERT INTO `email_logs` (`reference_id`, `form_or_booking_type`, `recipient_role`, `recipient_email`, `subject`, `smtp_status`, `delivery_method`) VALUES (:ref, 'diagnostic_booking', 'patient', :to, :subj, 'SENT', 'HOSTINGER_SSL_SMTP_465')");
+                $logStmt->execute([
+                    ':ref' => $booking['id'],
+                    ':to' => $booking['patientEmail'],
+                    ':subj' => 'Diagnostic Booking Confirmed — ' . $booking['id']
+                ]);
+            }
+        }
+    } catch (Throwable $dbErr) {
+        error_log('Database Insert Warning (diagnostic_bookings): ' . $dbErr->getMessage());
+    }
+
     http_response_code(201); echo json_encode(['status' => 'ok', 'booking' => $booking, 'emailSent' => $emailSent]);
 } catch (InvalidArgumentException $exception) { http_response_code(400); echo json_encode(['status' => 'error', 'message' => $exception->getMessage()]); }
 catch (Throwable $exception) { http_response_code(500); echo json_encode(['status' => 'error', 'message' => 'Diagnostic booking service is temporarily unavailable.']); }

@@ -14,6 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
+require_once __DIR__ . '/db.php';
+
+
 $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true) ?: $_POST;
 
@@ -385,6 +388,59 @@ if (!$userEmailSent) {
 $deliveryStatus = ($userEmailSent && $adminEmailSent) ? 'SENT' : (($userEmailSent || $adminEmailSent) ? 'PARTIAL' : 'FAILED');
 $successMessage = ($userEmailSent && $adminEmailSent) ? "All emails dispatched successfully via Hostinger SSL SMTP (Port 465)." : (($userEmailSent || $adminEmailSent) ? "Partial email delivery completed. Error alert sent to admin." : "Email delivery failed. Error alert sent to admin.");
 $errorMessage = (!$userEmailSent && !$adminEmailSent) ? "Email dispatch failed on both recipient channels." : ($userEmailError ?: $adminEmailError);
+
+// Save form submission and audit email logs to Hostinger MySQL Database
+try {
+    $pdo = getDatabaseConnection();
+    if ($pdo !== null) {
+        $stmt = $pdo->prepare("INSERT INTO `form_submissions` 
+            (`submission_id`, `form_type`, `name`, `email`, `phone`, `amount`, `frequency`, `pan`, `transaction_id`, `organization`, `interest`, `message`, `user_email_sent`, `admin_email_sent`, `delivery_status`, `raw_payload`) 
+            VALUES (:sub_id, :ftype, :name, :email, :phone, :amount, :freq, :pan, :tx_id, :org, :interest, :msg, :u_sent, :a_sent, :status, :payload)");
+        
+        $stmt->execute([
+            ':sub_id' => $submissionId,
+            ':ftype' => $formType,
+            ':name' => $name,
+            ':email' => $email,
+            ':phone' => $phone,
+            ':amount' => $amount,
+            ':freq' => $frequency,
+            ':pan' => $pan,
+            ':tx_id' => $transactionId,
+            ':org' => $organization,
+            ':interest' => $interest,
+            ':msg' => $message,
+            ':u_sent' => $userEmailSent ? 1 : 0,
+            ':a_sent' => $adminEmailSent ? 1 : 0,
+            ':status' => $deliveryStatus,
+            ':payload' => json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        ]);
+
+        $logStmt = $pdo->prepare("INSERT INTO `email_logs` (`reference_id`, `form_or_booking_type`, `recipient_role`, `recipient_email`, `subject`, `smtp_status`, `delivery_method`, `error_message`) VALUES (:ref, :type, :role, :to, :subj, :status, 'HOSTINGER_SSL_SMTP_465', :err)");
+        
+        $logStmt->execute([
+            ':ref' => $submissionId,
+            ':type' => $formType,
+            ':role' => 'user',
+            ':to' => $email,
+            ':subj' => $userSubject,
+            ':status' => $userEmailSent ? 'SENT' : 'FAILED',
+            ':err' => $userEmailError
+        ]);
+
+        $logStmt->execute([
+            ':ref' => $submissionId,
+            ':type' => $formType,
+            ':role' => 'admin',
+            ':to' => $adminTo,
+            ':subj' => $adminSubject,
+            ':status' => $adminEmailSent ? 'SENT' : 'FAILED',
+            ':err' => $adminEmailError
+        ]);
+    }
+} catch (Throwable $dbErr) {
+    error_log('Database Insert Warning (form_submissions): ' . $dbErr->getMessage());
+}
 
 echo json_encode([
     'status' => 'ok',

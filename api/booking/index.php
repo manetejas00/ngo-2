@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/WhatsAppService.php';
 require_once __DIR__ . '/EmailService.php';
+require_once dirname(__DIR__) . '/db.php';
+
 
 date_default_timezone_set('Asia/Kolkata');
 
@@ -267,9 +269,59 @@ function createBooking(array $data): array {
         ];
         $bookings[] = $booking;
         atomicSave($bookings);
+        syncDoctorBookingToDatabase($booking);
         return $booking;
     });
 }
+
+function syncDoctorBookingToDatabase(array $booking): void {
+    try {
+        $pdo = getDatabaseConnection();
+        if ($pdo === null) return;
+        $stmt = $pdo->prepare("INSERT INTO `doctor_bookings`
+            (`booking_id`, `doctor_id`, `doctor_name`, `doctor_speciality`, `doctor_hospital`, `patient_name`, `patient_email`, `patient_phone`, `patient_age`, `patient_gender`, `consultation_type`, `booking_date`, `booking_time`, `reason`, `notes`, `status`, `email_sent`, `whatsapp_sent`, `raw_payload`)
+            VALUES (:b_id, :doc_id, :doc_name, :doc_spec, :doc_hosp, :p_name, :p_email, :p_phone, :p_age, :p_gender, :consult_type, :b_date, :b_time, :reason, :notes, :status, :e_sent, :w_sent, :payload)
+            ON DUPLICATE KEY UPDATE
+            `status` = VALUES(`status`), `booking_date` = VALUES(`booking_date`), `booking_time` = VALUES(`booking_time`), `email_sent` = VALUES(`email_sent`), `whatsapp_sent` = VALUES(`whatsapp_sent`), `raw_payload` = VALUES(`raw_payload`)");
+        
+        $emailSent = !empty($booking['emailNotification']['confirmationSent']) || !empty($booking['emailSent']);
+        $whatsappSent = !empty($booking['whatsapp']['confirmationSent']) || !empty($booking['whatsappSent']);
+        
+        $stmt->execute([
+            ':b_id' => $booking['id'],
+            ':doc_id' => $booking['doctorId'],
+            ':doc_name' => $booking['doctorName'] ?? '',
+            ':doc_spec' => $booking['doctorSpeciality'] ?? '',
+            ':doc_hosp' => $booking['doctorHospital'] ?? '',
+            ':p_name' => $booking['patientName'],
+            ':p_email' => $booking['patientEmail'],
+            ':p_phone' => $booking['patientPhone'],
+            ':p_age' => (int) ($booking['patientAge'] ?? 0),
+            ':p_gender' => $booking['patientGender'] ?? 'Unspecified',
+            ':consult_type' => $booking['consultationType'] ?? 'in-clinic',
+            ':b_date' => $booking['date'],
+            ':b_time' => $booking['time'] ?? $booking['slot'] ?? '',
+            ':reason' => $booking['reason'] ?? '',
+            ':notes' => $booking['notes'] ?? '',
+            ':status' => $booking['status'] ?? 'pending',
+            ':e_sent' => $emailSent ? 1 : 0,
+            ':w_sent' => $whatsappSent ? 1 : 0,
+            ':payload' => json_encode($booking, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        ]);
+
+        if ($emailSent) {
+            $logStmt = $pdo->prepare("INSERT INTO `email_logs` (`reference_id`, `form_or_booking_type`, `recipient_role`, `recipient_email`, `subject`, `smtp_status`, `delivery_method`) VALUES (:ref, 'doctor_booking', 'patient', :to, :subj, 'SENT', 'HOSTINGER_SSL_SMTP_465')");
+            $logStmt->execute([
+                ':ref' => $booking['id'],
+                ':to' => $booking['patientEmail'],
+                ':subj' => 'Appointment Confirmed — ' . $booking['id']
+            ]);
+        }
+    } catch (Throwable $e) {
+        error_log('Database Sync Exception (doctor_bookings): ' . $e->getMessage());
+    }
+}
+
 
 function updateBooking(string $id, array $data): array {
     return withLedgerLock(function () use ($id, $data) {
@@ -370,6 +422,7 @@ function recordEmailEvent(string $bookingId, array $event): array {
             $booking['history'][] = ['action' => 'email_' . ($event['status'] ?? 'unknown'), 'at' => nowIso(), 'provider' => $event['provider'] ?? 'smtp'];
             $bookings[$index] = $booking;
             atomicSave($bookings);
+            syncDoctorBookingToDatabase($booking);
             return $booking;
         }
         throw new InvalidArgumentException('Booking not found.');
