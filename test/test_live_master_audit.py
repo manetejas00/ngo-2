@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+"""
+Master Live Website Audit & Integration Test Suite
+Target: https://test.avinyacarefoundation.org
+"""
+
+import json
+import urllib.request
+import urllib.parse
+import urllib.error
+import sys
+import time
+
+TARGET_HOST = "https://test.avinyacarefoundation.org"
+
+def post_json(endpoint, payload, headers_extra=None):
+    url = f"{TARGET_HOST}{endpoint}"
+    data = json.dumps(payload).encode('utf-8')
+    headers = {'Content-Type': 'application/json'}
+    if headers_extra:
+        headers.update(headers_extra)
+    req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+    try:
+        with urllib.request.urlopen(req, timeout=15) as response:
+            return response.getcode(), json.loads(response.read().decode('utf-8'))
+    except urllib.error.HTTPError as e:
+        return e.code, json.loads(e.read().decode('utf-8'))
+    except Exception as e:
+        return 0, {"error": str(e)}
+
+def get_json(endpoint):
+    url = f"{TARGET_HOST}{endpoint}"
+    req = urllib.request.Request(url, method='GET')
+    try:
+        with urllib.request.urlopen(req, timeout=15) as response:
+            return response.getcode(), json.loads(response.read().decode('utf-8'))
+    except urllib.error.HTTPError as e:
+        return e.code, json.loads(e.read().decode('utf-8'))
+    except Exception as e:
+        return 0, {"error": str(e)}
+
+def run_master_audit():
+    print("==================================================================")
+    print("🚀 MASTER LIVE WEBSITE AUDIT & E2E INTEGRATION TEST")
+    print(f"Target Environment: {TARGET_HOST}")
+    print("==================================================================\n")
+
+    results = []
+
+    # -------------------------------------------------------------
+    # TEST 1: Public Healthcare Endpoints (Doctors & Tests API)
+    # -------------------------------------------------------------
+    print("1️⃣ Testing Public Healthcare APIs...")
+    code, docs_res = get_json("/api/healthcare/doctors.php")
+    doc_count = len(docs_res.get("data", [])) if isinstance(docs_res, dict) and "data" in docs_res else 0
+    print(f"   - GET /api/healthcare/doctors.php -> HTTP {code} | Doctors Count: {doc_count}")
+    results.append(("Public Doctors API", code == 200 and doc_count > 0))
+
+    code, tests_res = get_json("/api/healthcare/tests.php")
+    test_count = len(tests_res.get("data", [])) if isinstance(tests_res, dict) and "data" in tests_res else 0
+    print(f"   - GET /api/healthcare/tests.php -> HTTP {code} | Diagnostic Packages Count: {test_count}")
+    results.append(("Public Diagnostic Tests API", code == 200 and test_count > 0))
+
+    # -------------------------------------------------------------
+    # TEST 2: All 7 Form Submissions with Hostinger SMTP Email Dispatch
+    # -------------------------------------------------------------
+    print("\n2️⃣ Testing All 7 Form Submissions & SMTP Dispatch...")
+    form_tests = [
+        ("Contact Us Form", "/api/contact.php", {"form_type": "contact", "name": "Audit Tester", "email": "audit.contact@avinyacarefoundation.org", "phone": "9876543210", "message": "Master E2E audit test message"}),
+        ("Newsletter Form", "/api/newsletter.php", {"form_type": "newsletter", "name": "Subscriber Audit", "email": "audit.news@avinyacarefoundation.org"}),
+        ("Volunteer Form", "/api/volunteer.php", {"form_type": "volunteer", "name": "Volunteer Audit", "email": "audit.vol@avinyacarefoundation.org", "phone": "9876543211", "skills": "Healthcare & Admin Support"}),
+        ("Support Inquiry Form", "/api/patient-support.php", {"form_type": "support", "name": "Patient Audit", "email": "audit.support@avinyacarefoundation.org", "phone": "9876543212", "message": "Patient support inquiry audit"}),
+        ("Donation Form (80G)", "/api/donation.php", {"form_type": "donation", "name": "Donor Audit", "email": "audit.donor@avinyacarefoundation.org", "phone": "9876543213", "amount": 2500, "pan": "ABCDE1234F"}),
+        ("CSR Partnership Form", "/api/csr-partnership.php", {"form_type": "partnership", "name": "CSR Partner Audit", "email": "audit.csr@avinyacarefoundation.org", "phone": "9876543214", "organization": "Audit Tech Corp", "message": "CSR partnership audit"}),
+        ("Feedback Form", "/api/feedback.php", {"form_type": "feedback", "name": "Feedback Audit", "email": "audit.feedback@avinyacarefoundation.org", "message": "Excellent platform interface!"})
+    ]
+
+    for name, endpoint, payload in form_tests:
+        code, resp = post_json(endpoint, payload)
+        success = (code == 200 and resp.get("status") in ["ok", "success"])
+        delivery = resp.get("delivery_status") or resp.get("emailStatus") or "OK"
+        print(f"   - [{name}] {endpoint} -> HTTP {code} | Status: {resp.get('status')} | Email Delivery: {delivery}")
+        results.append((f"Form: {name}", success))
+
+    # -------------------------------------------------------------
+    # TEST 3: Doctor Appointment & Diagnostic Package Booking APIs
+    # -------------------------------------------------------------
+    print("\n3️⃣ Testing Healthcare Appointment & Sample Booking APIs...")
+    doc_booking_payload = {
+        "doctorId": "doc-1",
+        "doctorName": "Dr. Suresh Advani",
+        "patientName": "Master Audit Patient",
+        "patientAge": 45,
+        "patientPhone": "9876543220",
+        "patientEmail": "audit.doctorbooking@avinyacarefoundation.org",
+        "bookingDate": "2026-09-10",
+        "bookingTime": "10:30 AM"
+    }
+    code, resp = post_json("/api/booking/index.php", doc_booking_payload)
+    print(f"   - Doctor Booking -> HTTP {code} | Response: {resp.get('message') or resp.get('status')}")
+    results.append(("Doctor Booking API", code == 200 and resp.get("status") == "ok"))
+
+    diag_booking_payload = {
+        "testId": "test-1",
+        "testName": "Comprehensive Cancer Biomarker Panel",
+        "price": 3499,
+        "patientName": "Master Diagnostic Patient",
+        "patientPhone": "9876543221",
+        "patientEmail": "audit.diagbooking@avinyacarefoundation.org",
+        "city": "Mumbai",
+        "pincode": "400012",
+        "bookingDate": "2026-09-12",
+        "timeSlot": "08:00 AM - 10:00 AM"
+    }
+    code, resp = post_json("/api/diagnostic-booking.php", diag_booking_payload)
+    print(f"   - Diagnostic Package Booking -> HTTP {code} | Response: {resp.get('message') or resp.get('status')}")
+    results.append(("Diagnostic Booking API", code == 200 and resp.get("status") == "ok"))
+
+    # -------------------------------------------------------------
+    # TEST 4: Admin Authentication & Management Data APIs
+    # -------------------------------------------------------------
+    print("\n4️⃣ Testing Admin Authentication & Dashboard Payload...")
+    code, auth_res = post_json("/api/admin-auth.php", {"action": "login", "email": "admin@gmail.com", "password": "Admin@1230"})
+    token = auth_res.get("token")
+    print(f"   - Admin Auth Login -> HTTP {code} | Token Issued: {token[:15] if token else 'None'}...")
+    results.append(("Admin Authentication", code == 200 and token is not None))
+
+    auth_headers = {"Authorization": f"Bearer {token}"}
+    code, data_res = post_json("/api/admin-data.php", {"action": "all"}, auth_headers)
+    analytics = data_res.get("analytics", {})
+    print(f"   - Admin All Data Payload -> HTTP {code} | Total Submissions: {analytics.get('totalFormSubmissions')} | Doctors: {analytics.get('totalDoctors')} | Users: {analytics.get('totalUsers')}")
+    results.append(("Admin Data Fetch", code == 200 and analytics.get("totalFormSubmissions", 0) > 0))
+
+    # -------------------------------------------------------------
+    # TEST 5: System User Management CRUD API
+    # -------------------------------------------------------------
+    print("\n5️⃣ Testing User Account CRUD Integration...")
+    test_user_id = "usr-audit-999"
+    code, save_usr = post_json("/api/admin-data.php", {"action": "save_user", "user": {
+        "id": test_user_id, "name": "Audit Coordinator", "email": "auditcoord@avinyacarefoundation.org", "password": "AuditPassword@123", "role": "manager", "status": "active"
+    }}, auth_headers)
+    print(f"   - Save User -> HTTP {code} | Message: {save_usr.get('message')}")
+    
+    code, del_usr = post_json("/api/admin-data.php", {"action": "delete_user", "id": test_user_id}, auth_headers)
+    print(f"   - Delete User -> HTTP {code} | Message: {del_usr.get('message')}")
+    results.append(("System User Account CRUD", save_usr.get("status") == "ok" and del_usr.get("status") == "ok"))
+
+    # -------------------------------------------------------------
+    # AUDIT SUMMARY REPORT
+    # -------------------------------------------------------------
+    print("\n==================================================================")
+    print("📊 MASTER AUDIT SUMMARY REPORT")
+    print("==================================================================")
+    all_passed = True
+    for name, ok in results:
+        status_str = "✅ PASS" if ok else "❌ FAIL"
+        if not ok: all_passed = False
+        print(f"   {status_str} — {name}")
+
+    print("================================================ failure" if not all_passed else "================================================ success")
+    if all_passed:
+        print("🎉 LIVE STAGING WEBSITE IS 100% HEALTHY, OPERATIONAL & VERIFIED!")
+    else:
+        print("⚠️ SOME LIVE AUDIT CHECKS FAILED. REVIEW LOGS ABOVE.")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    run_master_audit()
