@@ -184,6 +184,61 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             INDEX `idx_event_type` (`event_type`),
             INDEX `idx_actor_type` (`actor_type`),
             INDEX `idx_created_at` (`created_at`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
+        // 6. Doctors Catalog Table
+        "CREATE TABLE IF NOT EXISTS `doctors` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `doctor_id` VARCHAR(100) UNIQUE NOT NULL,
+            `name` VARCHAR(255) NOT NULL,
+            `speciality_id` VARCHAR(100) DEFAULT NULL,
+            `speciality_name` VARCHAR(255) DEFAULT NULL,
+            `qualification` VARCHAR(255) DEFAULT NULL,
+            `experience_years` INT DEFAULT 0,
+            `hospital_id` VARCHAR(100) DEFAULT NULL,
+            `hospital_name` VARCHAR(255) DEFAULT NULL,
+            `location` VARCHAR(100) DEFAULT 'Mumbai',
+            `consultation_fee` DECIMAL(10,2) DEFAULT 0.00,
+            `fee_display` VARCHAR(255) DEFAULT NULL,
+            `consultation_types` TEXT DEFAULT NULL,
+            `rating` DECIMAL(3,2) DEFAULT 4.90,
+            `reviews_count` INT DEFAULT 0,
+            `badge` VARCHAR(255) DEFAULT NULL,
+            `avatar` TEXT DEFAULT NULL,
+            `about` TEXT DEFAULT NULL,
+            `areas_of_expertise` TEXT DEFAULT NULL,
+            `languages` TEXT DEFAULT NULL,
+            `schedule` TEXT DEFAULT NULL,
+            `is_active` TINYINT(1) DEFAULT 1,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX `idx_doc_id` (`doctor_id`),
+            INDEX `idx_spec` (`speciality_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
+        // 7. Diagnostic Test Packages Catalog Table
+        "CREATE TABLE IF NOT EXISTS `diagnostic_tests` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `test_id` VARCHAR(100) UNIQUE NOT NULL,
+            `name` VARCHAR(255) NOT NULL,
+            `category` VARCHAR(100) DEFAULT 'Cancer Screening',
+            `tagline` VARCHAR(255) DEFAULT NULL,
+            `description` TEXT DEFAULT NULL,
+            `price` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            `original_price` DECIMAL(10,2) DEFAULT 0.00,
+            `avinya_subsidy` VARCHAR(255) DEFAULT NULL,
+            `tests_included` TEXT DEFAULT NULL,
+            `preparation` TEXT DEFAULT NULL,
+            `report_turnaround` VARCHAR(100) DEFAULT NULL,
+            `home_collection` TINYINT(1) DEFAULT 1,
+            `centre_visit` TINYINT(1) DEFAULT 1,
+            `is_priority` TINYINT(1) DEFAULT 0,
+            `badge` VARCHAR(255) DEFAULT NULL,
+            `is_active` TINYINT(1) DEFAULT 1,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX `idx_t_id` (`test_id`),
+            INDEX `idx_cat` (`category`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
     ];
 
@@ -191,6 +246,93 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
         $pdo->exec($sql);
     }
 
+    seedCatalogFromJSON($pdo);
+
     $migrated = true;
     return true;
+}
+
+function seedCatalogFromJSON(PDO $pdo, bool $force = false): array {
+    $results = ['doctors_seeded' => 0, 'tests_seeded' => 0];
+    try {
+        // Seed Doctors if empty or forced
+        $docCount = (int) $pdo->query("SELECT COUNT(*) FROM `doctors`")->fetchColumn();
+        if ($docCount === 0 || $force) {
+            $doctorsFile = __DIR__ . '/healthcare/doctors.json';
+            if (file_exists($doctorsFile)) {
+                $docData = json_decode((string) file_get_contents($doctorsFile), true);
+                $docList = $docData['doctors'] ?? $docData ?? [];
+                $stmt = $pdo->prepare("INSERT INTO `doctors`
+                    (`doctor_id`, `name`, `speciality_id`, `speciality_name`, `qualification`, `experience_years`, `hospital_id`, `hospital_name`, `location`, `consultation_fee`, `fee_display`, `consultation_types`, `rating`, `reviews_count`, `badge`, `avatar`, `about`, `areas_of_expertise`, `languages`, `schedule`, `is_active`)
+                    VALUES (:d_id, :name, :spec_id, :spec_name, :qual, :exp, :h_id, :h_name, :loc, :fee, :fee_disp, :types, :rating, :revs, :badge, :avatar, :about, :expert, :langs, :sched, 1)
+                    ON DUPLICATE KEY UPDATE
+                    `name` = VALUES(`name`), `speciality_name` = VALUES(`speciality_name`), `qualification` = VALUES(`qualification`), `consultation_fee` = VALUES(`consultation_fee`), `schedule` = VALUES(`schedule`)");
+                
+                foreach ($docList as $d) {
+                    $stmt->execute([
+                        ':d_id' => $d['id'] ?? ('doc-' . uniqid()),
+                        ':name' => $d['name'] ?? 'Doctor Name',
+                        ':spec_id' => $d['specialityId'] ?? 'general',
+                        ':spec_name' => $d['specialityName'] ?? 'General Consultation',
+                        ':qual' => $d['qualification'] ?? 'MBBS',
+                        ':exp' => (int) ($d['experienceYears'] ?? 10),
+                        ':h_id' => $d['hospitalId'] ?? 'hospital-1',
+                        ':h_name' => $d['hospitalName'] ?? 'Avinya Partner Hospital',
+                        ':loc' => $d['location'] ?? 'Mumbai',
+                        ':fee' => (float) ($d['consultationFee'] ?? 0),
+                        ':fee_disp' => $d['feeDisplay'] ?? 'Free / Avinya Supported',
+                        ':types' => json_encode($d['consultationTypes'] ?? ['in-clinic', 'online']),
+                        ':rating' => (float) ($d['rating'] ?? 4.90),
+                        ':revs' => (int) ($d['reviewsCount'] ?? 100),
+                        ':badge' => $d['badge'] ?? 'Medical Specialist',
+                        ':avatar' => $d['avatar'] ?? '',
+                        ':about' => $d['about'] ?? '',
+                        ':expert' => json_encode($d['areasOfExpertise'] ?? []),
+                        ':langs' => json_encode($d['languages'] ?? ['English', 'Hindi']),
+                        ':sched' => json_encode($d['schedule'] ?? [])
+                    ]);
+                    $results['doctors_seeded']++;
+                }
+            }
+        }
+
+        // Seed Tests if empty or forced
+        $testCount = (int) $pdo->query("SELECT COUNT(*) FROM `diagnostic_tests`")->fetchColumn();
+        if ($testCount === 0 || $force) {
+            $testsFile = __DIR__ . '/healthcare/tests.json';
+            if (file_exists($testsFile)) {
+                $testData = json_decode((string) file_get_contents($testsFile), true);
+                $testList = $testData['tests'] ?? $testData ?? [];
+                $stmt = $pdo->prepare("INSERT INTO `diagnostic_tests`
+                    (`test_id`, `name`, `category`, `tagline`, `description`, `price`, `original_price`, `avinya_subsidy`, `tests_included`, `preparation`, `report_turnaround`, `home_collection`, `centre_visit`, `is_priority`, `badge`, `is_active`)
+                    VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :subsidy, :inc, :prep, :turnaround, :home, :centre, :prio, :badge, 1)
+                    ON DUPLICATE KEY UPDATE
+                    `name` = VALUES(`name`), `category` = VALUES(`category`), `price` = VALUES(`price`), `description` = VALUES(`description`)");
+                
+                foreach ($testList as $t) {
+                    $stmt->execute([
+                        ':t_id' => $t['id'] ?? ('test-' . uniqid()),
+                        ':name' => $t['name'] ?? 'Diagnostic Test',
+                        ':cat' => $t['category'] ?? 'Cancer Screening',
+                        ':tagline' => $t['tagline'] ?? '',
+                        ':descr' => $t['description'] ?? '',
+                        ':price' => (float) ($t['price'] ?? 0),
+                        ':orig_price' => (float) ($t['originalPrice'] ?? 0),
+                        ':subsidy' => $t['avinyaSubsidy'] ?? '',
+                        ':inc' => json_encode($t['testsIncluded'] ?? []),
+                        ':prep' => $t['preparation'] ?? '',
+                        ':turnaround' => $t['reportTurnaround'] ?? '24 Hours',
+                        ':home' => !empty($t['homeCollection']) ? 1 : 0,
+                        ':centre' => !empty($t['centreVisit']) ? 1 : 0,
+                        ':prio' => !empty($t['isPriority']) ? 1 : 0,
+                        ':badge' => $t['badge'] ?? ''
+                    ]);
+                    $results['tests_seeded']++;
+                }
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('Error seeding catalog tables: ' . $e->getMessage());
+    }
+    return $results;
 }

@@ -734,6 +734,8 @@
       <button class="tab-btn" onclick="switchTab('diagnostic')">🧪 Diagnostic Test Bookings (<span id="tabDiagCount">0</span>)</button>
       <button class="tab-btn" onclick="switchTab('email')">📧 Email Audit Logs (<span id="tabEmailCount">0</span>)</button>
       <button class="tab-btn" onclick="switchTab('activity')">📜 Activity Logs (<span id="tabActivityCount">0</span>)</button>
+      <button class="tab-btn" onclick="switchTab('doctorsCatalog')">👨‍⚕️ Doctors Catalog (<span id="tabDoctorsCatalogCount">0</span>)</button>
+      <button class="tab-btn" onclick="switchTab('testsCatalog')">🧪 Tests Catalog (<span id="tabTestsCatalogCount">0</span>)</button>
     </div>
 
     <!-- Data Table Container -->
@@ -752,6 +754,10 @@
           <button class="btn btn-outline" id="advFilterToggleBtn" onclick="toggleAdvFilter()">
             ⚡ Advanced Filters <span id="advFilterCountBadge"></span>
           </button>
+
+          <button class="btn btn-outline" id="addDoctorBtn" style="display:none;background:var(--teal);color:#000;font-weight:600" onclick="openDoctorModal()">➕ Add Doctor</button>
+          <button class="btn btn-outline" id="addTestBtn" style="display:none;background:var(--teal);color:#000;font-weight:600" onclick="openTestModal()">➕ Add Test Package</button>
+          <button class="btn btn-outline" id="reseedCatalogBtn" style="display:none;" onclick="reseedCatalog()">🔄 Re-Seed Catalog</button>
 
           <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
         </div>
@@ -849,7 +855,9 @@
       doctorBookings: [],
       diagnosticBookings: [],
       emailLogs: [],
-      activityLogs: []
+      activityLogs: [],
+      doctorsCatalog: [],
+      diagnosticTestsCatalog: []
     };
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -963,6 +971,8 @@
       document.getElementById('tabDiagCount').innerText = analytics.totalDiagnosticBookings || 0;
       document.getElementById('tabEmailCount').innerText = analytics.totalEmailLogs || 0;
       document.getElementById('tabActivityCount').innerText = analytics.totalActivityLogs || 0;
+      document.getElementById('tabDoctorsCatalogCount').innerText = analytics.totalDoctors || (rawData.doctorsCatalog ? rawData.doctorsCatalog.length : 0);
+      document.getElementById('tabTestsCatalogCount').innerText = analytics.totalDiagnosticTests || (rawData.diagnosticTestsCatalog ? rawData.diagnosticTestsCatalog.length : 0);
     }
 
     function switchTab(tab) {
@@ -1048,6 +1058,8 @@
       else if (currentTab === 'diagnostic') items = [...rawData.diagnosticBookings];
       else if (currentTab === 'email') items = [...rawData.emailLogs];
       else if (currentTab === 'activity') items = [...rawData.activityLogs];
+      else if (currentTab === 'doctorsCatalog') items = [...rawData.doctorsCatalog];
+      else if (currentTab === 'testsCatalog') items = [...rawData.diagnosticTestsCatalog];
 
       // 1. Text Search Filter
       if (q) {
@@ -1060,7 +1072,7 @@
       // 2. Category / Event Filter
       if (typeFilter !== 'all') {
         items = items.filter(i => {
-          const val = (i.form_type || i.status || i.event_type || '').toLowerCase();
+          const val = (i.form_type || i.status || i.event_type || i.category || i.speciality_id || '').toLowerCase();
           return val === typeFilter;
         });
       }
@@ -1095,7 +1107,7 @@
       } else if (sort === 'NAME_ASC') {
         items.sort((a, b) => (a.name || a.patient_name || a.actor_identifier || '').localeCompare(b.name || b.patient_name || b.actor_identifier || ''));
       } else if (sort === 'AMOUNT_DESC') {
-        items.sort((a, b) => (floatval(b.amount || 0)) - (floatval(a.amount || 0)));
+        items.sort((a, b) => (floatval(b.amount || b.price || 0)) - (floatval(a.amount || a.price || 0)));
       }
 
       // Update active filters bar
@@ -1107,6 +1119,8 @@
       else if (currentTab === 'diagnostic') renderDiagnosticBookings(items);
       else if (currentTab === 'email') renderEmailLogs(items);
       else if (currentTab === 'activity') renderActivityLogs(items);
+      else if (currentTab === 'doctorsCatalog') renderDoctorsCatalog(items);
+      else if (currentTab === 'testsCatalog') renderDiagnosticTestsCatalog(items);
     }
 
     function updateActiveFilterPills(typeFilter, startDate, endDate, delivery, sort) {
@@ -1129,6 +1143,13 @@
 
     function renderCurrentTab() {
       const thead = document.getElementById('tableHeader');
+      const addDocBtn = document.getElementById('addDoctorBtn');
+      const addTestBtn = document.getElementById('addTestBtn');
+      const reseedBtn = document.getElementById('reseedCatalogBtn');
+
+      if (addDocBtn) addDocBtn.style.display = (currentTab === 'doctorsCatalog') ? 'inline-flex' : 'none';
+      if (addTestBtn) addTestBtn.style.display = (currentTab === 'testsCatalog') ? 'inline-flex' : 'none';
+      if (reseedBtn) reseedBtn.style.display = (currentTab === 'doctorsCatalog' || currentTab === 'testsCatalog') ? 'inline-flex' : 'none';
 
       if (currentTab === 'forms') {
         thead.innerHTML = `
@@ -1182,6 +1203,25 @@
           <th>IP Address</th>
           <th>Timestamp</th>
           <th>Payload</th>
+        `;
+      } else if (currentTab === 'doctorsCatalog') {
+        thead.innerHTML = `
+          <th>Doctor ID</th>
+          <th>Doctor Profile</th>
+          <th>Speciality & Hospital</th>
+          <th>Exp & Location</th>
+          <th>Fee & Rating</th>
+          <th>Badge</th>
+          <th>Actions</th>
+        `;
+      } else if (currentTab === 'testsCatalog') {
+        thead.innerHTML = `
+          <th>Test ID</th>
+          <th>Package Name & Category</th>
+          <th>Price & Subsidy</th>
+          <th>Turnaround</th>
+          <th>Badge</th>
+          <th>Actions</th>
         `;
       }
       filterTable();
@@ -1307,6 +1347,271 @@
       }).join('');
     }
 
+    function renderDoctorsCatalog(items) {
+      const tbody = document.getElementById('tableBody');
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No doctor profiles found. Click "➕ Add Doctor" or "🔄 Re-Seed Catalog".</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = items.map(item => `
+        <tr>
+          <td><code style="color:#5EEAD4">${item.doctor_id || item.id}</code></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <img src="${item.avatar || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80'}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.2)">
+              <div>
+                <strong>${escapeHtml(item.name)}</strong><br>
+                <small style="color:var(--text-muted)">${escapeHtml(item.qualification || '')}</small>
+              </div>
+            </div>
+          </td>
+          <td><strong>${escapeHtml(item.speciality_name || item.specialityName || 'Specialist')}</strong><br><small style="color:var(--text-muted)">${escapeHtml(item.hospital_name || item.hospitalName || '')}</small></td>
+          <td>${item.experience_years || item.experienceYears || 0} yrs exp<br><small style="color:var(--text-muted)">${escapeHtml(item.location || 'Mumbai')}</small></td>
+          <td><strong>₹${item.consultation_fee ?? item.consultationFee ?? 0}</strong><br><small style="color:#34D399">${escapeHtml(item.fee_display || item.feeDisplay || 'Free')}</small></td>
+          <td><span class="badge badge-info">${escapeHtml(item.badge || 'Doctor')}</span></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px" onclick="openDoctorModal('${item.doctor_id || item.id}')">✏️ Edit</button>
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;color:#F87171;border-color:#F87171" onclick="deleteDoctor('${item.doctor_id || item.id}')">🗑️ Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderDiagnosticTestsCatalog(items) {
+      const tbody = document.getElementById('tableBody');
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No diagnostic test packages found. Click "➕ Add Test Package" or "🔄 Re-Seed Catalog".</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = items.map(item => `
+        <tr>
+          <td><code style="color:#5EEAD4">${item.test_id || item.id}</code></td>
+          <td><strong>${escapeHtml(item.name)}</strong><br><small style="color:var(--text-muted)">${escapeHtml(item.category || 'Cancer Screening')}</small></td>
+          <td><strong>₹${item.price || 0}</strong> <small style="text-decoration:line-through;color:var(--text-muted)">₹${item.original_price || item.originalPrice || 0}</small><br><small style="color:#34D399">${escapeHtml(item.avinya_subsidy || item.avinyaSubsidy || '')}</small></td>
+          <td>${escapeHtml(item.report_turnaround || item.reportTurnaround || '24 Hours')}</td>
+          <td><span class="badge badge-warning">${escapeHtml(item.badge || 'Package')}</span></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px" onclick="openTestModal('${item.test_id || item.id}')">✏️ Edit</button>
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;color:#F87171;border-color:#F87171" onclick="deleteTest('${item.test_id || item.id}')">🗑️ Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openDoctorModal(docId = null) {
+      document.getElementById('doctorForm').reset();
+      const modal = document.getElementById('doctorEditModal');
+      const title = document.getElementById('doctorModalTitle');
+      
+      if (docId) {
+        title.innerText = 'Edit Doctor Profile (' + docId + ')';
+        const doc = (rawData.doctorsCatalog || []).find(d => (d.doctor_id || d.id) === docId);
+        if (doc) {
+          document.getElementById('docId').value = doc.doctor_id || doc.id || '';
+          document.getElementById('docIdDisplay').value = doc.doctor_id || doc.id || '';
+          document.getElementById('docIdDisplay').readOnly = true;
+          document.getElementById('docName').value = doc.name || '';
+          document.getElementById('docSpeciality').value = doc.speciality_name || doc.specialityName || '';
+          document.getElementById('docQual').value = doc.qualification || '';
+          document.getElementById('docExp').value = doc.experience_years || doc.experienceYears || '';
+          document.getElementById('docHospital').value = doc.hospital_name || doc.hospitalName || '';
+          document.getElementById('docLocation').value = doc.location || '';
+          document.getElementById('docFee').value = doc.consultation_fee ?? doc.consultationFee ?? 0;
+          document.getElementById('docFeeDisplay').value = doc.fee_display || doc.feeDisplay || '';
+          document.getElementById('docBadge').value = doc.badge || '';
+          document.getElementById('docAvatar').value = doc.avatar || '';
+          document.getElementById('docAbout').value = doc.about || '';
+        }
+      } else {
+        title.innerText = 'Add New Doctor Profile';
+        document.getElementById('docId').value = '';
+        document.getElementById('docIdDisplay').value = '';
+        document.getElementById('docIdDisplay').readOnly = false;
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeDoctorModal() {
+      document.getElementById('doctorEditModal').style.display = 'none';
+    }
+
+    async function saveDoctorForm(event) {
+      event.preventDefault();
+      const docId = document.getElementById('docId').value || document.getElementById('docIdDisplay').value.trim();
+      const doctorData = {
+        id: docId,
+        name: document.getElementById('docName').value.trim(),
+        specialityName: document.getElementById('docSpeciality').value.trim(),
+        qualification: document.getElementById('docQual').value.trim(),
+        experienceYears: parseInt(document.getElementById('docExp').value) || 0,
+        hospitalName: document.getElementById('docHospital').value.trim(),
+        location: document.getElementById('docLocation').value.trim(),
+        consultationFee: parseFloat(document.getElementById('docFee').value) || 0,
+        feeDisplay: document.getElementById('docFeeDisplay').value.trim(),
+        badge: document.getElementById('docBadge').value.trim(),
+        avatar: document.getElementById('docAvatar').value.trim(),
+        about: document.getElementById('docAbout').value.trim()
+      };
+
+      try {
+        const res = await fetch('/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'save_doctor', doctor: doctorData })
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'ok') {
+          alert('Doctor profile saved successfully!');
+          closeDoctorModal();
+          fetchAdminData();
+        } else {
+          alert('Failed to save doctor: ' + (data.message || 'Error'));
+        }
+      } catch (err) {
+        alert('Network error saving doctor profile.');
+      }
+    }
+
+    async function deleteDoctor(docId) {
+      if (!confirm(`Are you sure you want to delete doctor profile '${docId}'?`)) return;
+      try {
+        const res = await fetch('/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'delete_doctor', id: docId })
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'ok') {
+          alert(`Doctor profile '${docId}' deleted successfully.`);
+          fetchAdminData();
+        } else {
+          alert('Failed to delete doctor: ' + (data.message || 'Error'));
+        }
+      } catch (err) {
+        alert('Network error deleting doctor profile.');
+      }
+    }
+
+    function openTestModal(testId = null) {
+      document.getElementById('testForm').reset();
+      const modal = document.getElementById('testEditModal');
+      const title = document.getElementById('testModalTitle');
+
+      if (testId) {
+        title.innerText = 'Edit Diagnostic Test Package (' + testId + ')';
+        const t = (rawData.diagnosticTestsCatalog || []).find(item => (item.test_id || item.id) === testId);
+        if (t) {
+          document.getElementById('testId').value = t.test_id || t.id || '';
+          document.getElementById('testIdDisplay').value = t.test_id || t.id || '';
+          document.getElementById('testIdDisplay').readOnly = true;
+          document.getElementById('testName').value = t.name || '';
+          document.getElementById('testCategory').value = t.category || '';
+          document.getElementById('testBadge').value = t.badge || '';
+          document.getElementById('testPrice').value = t.price || 0;
+          document.getElementById('testOrigPrice').value = t.original_price || t.originalPrice || 0;
+          document.getElementById('testSubsidy').value = t.avinya_subsidy || t.avinyaSubsidy || '';
+          document.getElementById('testTagline').value = t.tagline || '';
+          document.getElementById('testTurnaround').value = t.report_turnaround || t.reportTurnaround || '';
+          document.getElementById('testDescription').value = t.description || '';
+          const inc = Array.isArray(t.tests_included) ? t.tests_included : (Array.isArray(t.testsIncluded) ? t.testsIncluded : []);
+          document.getElementById('testIncluded').value = inc.join(', ');
+        }
+      } else {
+        title.innerText = 'Add New Diagnostic Test Package';
+        document.getElementById('testId').value = '';
+        document.getElementById('testIdDisplay').value = '';
+        document.getElementById('testIdDisplay').readOnly = false;
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeTestModal() {
+      document.getElementById('testEditModal').style.display = 'none';
+    }
+
+    async function saveTestForm(event) {
+      event.preventDefault();
+      const testId = document.getElementById('testId').value || document.getElementById('testIdDisplay').value.trim();
+      const includedRaw = document.getElementById('testIncluded').value.trim();
+      const testsIncluded = includedRaw ? includedRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      const testData = {
+        id: testId,
+        name: document.getElementById('testName').value.trim(),
+        category: document.getElementById('testCategory').value.trim(),
+        badge: document.getElementById('testBadge').value.trim(),
+        price: parseFloat(document.getElementById('testPrice').value) || 0,
+        originalPrice: parseFloat(document.getElementById('testOrigPrice').value) || 0,
+        avinyaSubsidy: document.getElementById('testSubsidy').value.trim(),
+        tagline: document.getElementById('testTagline').value.trim(),
+        reportTurnaround: document.getElementById('testTurnaround').value.trim(),
+        description: document.getElementById('testDescription').value.trim(),
+        testsIncluded: testsIncluded
+      };
+
+      try {
+        const res = await fetch('/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'save_test', test: testData })
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'ok') {
+          alert('Diagnostic test package saved successfully!');
+          closeTestModal();
+          fetchAdminData();
+        } else {
+          alert('Failed to save test package: ' + (data.message || 'Error'));
+        }
+      } catch (err) {
+        alert('Network error saving test package.');
+      }
+    }
+
+    async function deleteTest(testId) {
+      if (!confirm(`Are you sure you want to delete test package '${testId}'?`)) return;
+      try {
+        const res = await fetch('/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'delete_test', id: testId })
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'ok') {
+          alert(`Test package '${testId}' deleted successfully.`);
+          fetchAdminData();
+        } else {
+          alert('Failed to delete test package: ' + (data.message || 'Error'));
+        }
+      } catch (err) {
+        alert('Network error deleting test package.');
+      }
+    }
+
+    async function reseedCatalog() {
+      if (!confirm('Re-seed doctors and diagnostic tests catalog from pre-recorded default data? Existing catalog records will be refreshed.')) return;
+      try {
+        const res = await fetch('/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'seed_catalog' })
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'ok') {
+          alert(data.message);
+          fetchAdminData();
+        } else {
+          alert('Catalog re-seed failed: ' + (data.message || 'Error'));
+        }
+      } catch (err) {
+        alert('Network error re-seeding catalog.');
+      }
+    }
+
     async function updateBookingStatus(type, id, status) {
       try {
         const res = await fetch('/api/admin-data.php', {
@@ -1365,6 +1670,8 @@
       else if (currentTab === 'diagnostic') data = rawData.diagnosticBookings;
       else if (currentTab === 'email') data = rawData.emailLogs;
       else if (currentTab === 'activity') data = rawData.activityLogs;
+      else if (currentTab === 'doctorsCatalog') data = rawData.doctorsCatalog;
+      else if (currentTab === 'testsCatalog') data = rawData.diagnosticTestsCatalog;
 
       if (!data || data.length === 0) {
         alert('No data available to export.');
@@ -1393,5 +1700,158 @@
       return isNaN(f) ? 0 : f;
     }
   </script>
+
+  <!-- Doctor Add/Edit Modal -->
+  <div id="doctorEditModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <div class="modal-title" id="doctorModalTitle">Add / Edit Doctor Profile</div>
+        <button class="close-btn" onclick="closeDoctorModal()">✕</button>
+      </div>
+      <form id="doctorForm" onsubmit="saveDoctorForm(event)" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+        <input type="hidden" id="docId">
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Doctor ID (e.g. doc-1)</label>
+            <input type="text" id="docIdDisplay" class="search-input" placeholder="Auto-generated if empty">
+          </div>
+          <div style="flex: 2;">
+            <label style="font-size: 12px; color: var(--text-muted);">Doctor Full Name *</label>
+            <input type="text" id="docName" class="search-input" required placeholder="Dr. Full Name">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Speciality Name</label>
+            <input type="text" id="docSpeciality" class="search-input" placeholder="Medical Oncology">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Qualification</label>
+            <input type="text" id="docQual" class="search-input" placeholder="MBBS, MD, DM">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Experience (Years)</label>
+            <input type="number" id="docExp" class="search-input" placeholder="15">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Hospital Name</label>
+            <input type="text" id="docHospital" class="search-input" placeholder="Tata Memorial Hospital">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">City / Location</label>
+            <input type="text" id="docLocation" class="search-input" placeholder="Mumbai">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Consultation Fee (₹)</label>
+            <input type="number" id="docFee" class="search-input" placeholder="0">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Fee Display Label</label>
+            <input type="text" id="docFeeDisplay" class="search-input" placeholder="₹0 (Avinya Supported)">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Badge</label>
+            <input type="text" id="docBadge" class="search-input" placeholder="Senior Oncologist">
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Avatar Image URL</label>
+          <input type="text" id="docAvatar" class="search-input" placeholder="https://images.unsplash.com/...">
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">About & Clinical Profile</label>
+          <textarea id="docAbout" class="search-input" style="height: 60px; resize: vertical;" placeholder="Doctor bio & clinical background..."></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button type="button" class="btn btn-outline" onclick="closeDoctorModal()">Cancel</button>
+          <button type="submit" class="btn btn-outline" style="background: var(--teal); color: #000; font-weight: 600;">Save Doctor Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Diagnostic Test Add/Edit Modal -->
+  <div id="testEditModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <div class="modal-title" id="testModalTitle">Add / Edit Diagnostic Test Package</div>
+        <button class="close-btn" onclick="closeTestModal()">✕</button>
+      </div>
+      <form id="testForm" onsubmit="saveTestForm(event)" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+        <input type="hidden" id="testId">
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Test ID (e.g. test-1)</label>
+            <input type="text" id="testIdDisplay" class="search-input" placeholder="Auto-generated if empty">
+          </div>
+          <div style="flex: 2;">
+            <label style="font-size: 12px; color: var(--text-muted);">Test Package Name *</label>
+            <input type="text" id="testName" class="search-input" required placeholder="Package Name">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Category</label>
+            <input type="text" id="testCategory" class="search-input" placeholder="Cancer Screening">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Badge</label>
+            <input type="text" id="testBadge" class="search-input" placeholder="⭐ Recommended">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Price (₹) *</label>
+            <input type="number" id="testPrice" class="search-input" required placeholder="3499">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Original Price (₹)</label>
+            <input type="number" id="testOrigPrice" class="search-input" placeholder="6500">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Subsidy Tag</label>
+            <input type="text" id="testSubsidy" class="search-input" placeholder="46% Off">
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Tagline</label>
+          <input type="text" id="testTagline" class="search-input" placeholder="Multi-tumor biomarker screening">
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Report Turnaround</label>
+          <input type="text" id="testTurnaround" class="search-input" placeholder="24 to 36 Hours">
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Description</label>
+          <textarea id="testDescription" class="search-input" style="height: 60px; resize: vertical;" placeholder="Detailed clinical description of the test package..."></textarea>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Tests Included (Comma separated)</label>
+          <input type="text" id="testIncluded" class="search-input" placeholder="CEA, CA-125, PSA, AFP, CBC">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button type="button" class="btn btn-outline" onclick="closeTestModal()">Cancel</button>
+          <button type="submit" class="btn btn-outline" style="background: var(--teal); color: #000; font-weight: 600;">Save Test Package</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </body>
 </html>

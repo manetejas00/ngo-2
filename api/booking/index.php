@@ -162,6 +162,42 @@ function normalizeTime(string $time): string {
 
 function doctorSchedules(): array {
     global $doctorsFile;
+    try {
+        $pdo = getDatabaseConnection();
+        if ($pdo !== null) {
+            $rows = $pdo->query("SELECT * FROM `doctors` WHERE `is_active` = 1")->fetchAll();
+            if (!empty($rows)) {
+                $result = [];
+                foreach ($rows as $r) {
+                    $docId = $r['doctor_id'] ?? $r['id'];
+                    $result[$docId] = [
+                        'id' => $docId,
+                        'name' => $r['name'],
+                        'specialityId' => $r['speciality_id'],
+                        'specialityName' => $r['speciality_name'],
+                        'qualification' => $r['qualification'],
+                        'experienceYears' => (int) $r['experience_years'],
+                        'hospitalId' => $r['hospital_id'],
+                        'hospitalName' => $r['hospital_name'],
+                        'location' => $r['location'],
+                        'consultationFee' => (float) $r['consultation_fee'],
+                        'feeDisplay' => $r['fee_display'],
+                        'consultationTypes' => json_decode($r['consultation_types'] ?? '[]', true) ?: ['in-clinic', 'online'],
+                        'rating' => (float) $r['rating'],
+                        'reviewsCount' => (int) $r['reviews_count'],
+                        'badge' => $r['badge'],
+                        'avatar' => $r['avatar'],
+                        'about' => $r['about'],
+                        'areasOfExpertise' => json_decode($r['areas_of_expertise'] ?? '[]', true) ?: [],
+                        'languages' => json_decode($r['languages'] ?? '[]', true) ?: ['English', 'Hindi'],
+                        'schedule' => json_decode($r['schedule'] ?? '{}', true) ?: []
+                    ];
+                }
+                return $result;
+            }
+        }
+    } catch (Throwable $e) {}
+
     $raw = @file_get_contents($doctorsFile);
     $data = $raw === false ? null : json_decode($raw, true);
     $doctors = is_array($data) ? ($data['doctors'] ?? []) : [];

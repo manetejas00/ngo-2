@@ -108,9 +108,28 @@ try {
     if (!is_array($data)) throw new InvalidArgumentException('Invalid JSON payload.');
     foreach (['testId','date','timeSlot','patientName','patientEmail','patientPhone'] as $field) if (trim((string) ($data[$field] ?? '')) === '') throw new InvalidArgumentException('Missing required field: ' . $field);
     if (!filter_var($data['patientEmail'], FILTER_VALIDATE_EMAIL)) throw new InvalidArgumentException('A valid email address is required.');
-    $tests = json_decode((string) file_get_contents(__DIR__ . '/healthcare/tests.json'), true);
-    $catalog = isset($tests['tests']) ? $tests['tests'] : $tests;
-    $test = null; foreach ($catalog as $candidate) if (($candidate['id'] ?? '') === $data['testId']) { $test = $candidate; break; }
+    $test = null;
+    try {
+        $pdo = getDatabaseConnection();
+        if ($pdo !== null) {
+            $stmt = $pdo->prepare("SELECT * FROM `diagnostic_tests` WHERE `test_id` = :id AND `is_active` = 1 LIMIT 1");
+            $stmt->execute([':id' => $data['testId']]);
+            $row = $stmt->fetch();
+            if ($row) {
+                $test = [
+                    'id' => $row['test_id'],
+                    'name' => $row['name'],
+                    'price' => (float) $row['price']
+                ];
+            }
+        }
+    } catch (Throwable $e) {}
+
+    if (!$test) {
+        $tests = json_decode((string) file_get_contents(__DIR__ . '/healthcare/tests.json'), true);
+        $catalog = isset($tests['tests']) ? $tests['tests'] : $tests;
+        foreach ($catalog as $candidate) if (($candidate['id'] ?? '') === $data['testId']) { $test = $candidate; break; }
+    }
     if (!$test) throw new InvalidArgumentException('Selected diagnostic test package not found.');
     $booking = ['id' => 'AVC-TST-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4))), 'testId' => $data['testId'], 'testName' => $test['name'], 'price' => $test['price'], 'collectionMethod' => $data['collectionMethod'] ?? 'home_collection', 'homeAddress' => trim((string) ($data['homeAddress'] ?? '')), 'pincode' => trim((string) ($data['pincode'] ?? '')), 'city' => trim((string) ($data['city'] ?? 'Mumbai')), 'date' => $data['date'], 'timeSlot' => $data['timeSlot'], 'patientName' => trim($data['patientName']), 'patientEmail' => strtolower(trim($data['patientEmail'])), 'patientPhone' => trim($data['patientPhone']), 'patientAge' => (int) ($data['patientAge'] ?? 0), 'patientGender' => $data['patientGender'] ?? 'Unspecified', 'status' => 'pending', 'createdAt' => date(DATE_ATOM)];
     $dataDir = __DIR__ . '/diagnostic/data'; if (!is_dir($dataDir)) mkdir($dataDir, 0775, true);

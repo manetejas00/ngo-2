@@ -127,12 +127,205 @@ if ($action === 'update_status') {
     }
 }
 
+// Action: Save Doctor (Create or Update)
+if ($action === 'save_doctor') {
+    $doc = $payload['doctor'] ?? $payload;
+    $docId = trim((string) ($doc['id'] ?? $doc['doctor_id'] ?? ('doc-' . date('Ymd') . '-' . bin2hex(random_bytes(2)))));
+    $name = trim((string) ($doc['name'] ?? ''));
+    if ($name === '') {
+        http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'Doctor name is required.']); exit(0);
+    }
+    $specId = $doc['speciality_id'] ?? $doc['specialityId'] ?? 'oncology';
+    $specName = $doc['speciality_name'] ?? $doc['specialityName'] ?? 'Medical Oncology & Cancer Immunotherapy';
+    $qual = $doc['qualification'] ?? 'MBBS, MD';
+    $exp = (int) ($doc['experience_years'] ?? $doc['experienceYears'] ?? 10);
+    $hId = $doc['hospital_id'] ?? $doc['hospitalId'] ?? 'tmh-mumbai';
+    $hName = $doc['hospital_name'] ?? $doc['hospitalName'] ?? 'Avinya Partner Hospital';
+    $loc = $doc['location'] ?? 'Mumbai';
+    $fee = (float) ($doc['consultation_fee'] ?? $doc['consultationFee'] ?? 0);
+    $feeDisp = $doc['fee_display'] ?? $doc['feeDisplay'] ?? ($fee > 0 ? "₹{$fee}" : "₹0 (Avinya Supported / Free)");
+    $types = is_array($doc['consultationTypes'] ?? null) ? $doc['consultationTypes'] : (is_string($doc['consultation_types'] ?? null) ? json_decode($doc['consultation_types'], true) : ['in-clinic', 'online']);
+    $rating = (float) ($doc['rating'] ?? 4.95);
+    $revs = (int) ($doc['reviews_count'] ?? $doc['reviewsCount'] ?? 100);
+    $badge = $doc['badge'] ?? 'Medical Specialist';
+    $avatar = $doc['avatar'] ?? 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80';
+    $about = $doc['about'] ?? '';
+    $expert = is_array($doc['areasOfExpertise'] ?? null) ? $doc['areasOfExpertise'] : (is_string($doc['areas_of_expertise'] ?? null) ? json_decode($doc['areas_of_expertise'], true) : []);
+    $langs = is_array($doc['languages'] ?? null) ? $doc['languages'] : (is_string($doc['languages'] ?? null) ? json_decode($doc['languages'], true) : ['English', 'Hindi']);
+    $sched = is_array($doc['schedule'] ?? null) ? $doc['schedule'] : (is_string($doc['schedule'] ?? null) ? json_decode($doc['schedule'], true) : [
+        'workingDays' => [1,2,3,4,5,6], 'startTime' => '09:00', 'endTime' => '17:00', 'slotDurationMins' => 30, 'breakStart' => '13:00', 'breakEnd' => '14:00'
+    ]);
+
+    if ($pdo !== null) {
+        $stmt = $pdo->prepare("INSERT INTO `doctors`
+            (`doctor_id`, `name`, `speciality_id`, `speciality_name`, `qualification`, `experience_years`, `hospital_id`, `hospital_name`, `location`, `consultation_fee`, `fee_display`, `consultation_types`, `rating`, `reviews_count`, `badge`, `avatar`, `about`, `areas_of_expertise`, `languages`, `schedule`, `is_active`)
+            VALUES (:d_id, :name, :spec_id, :spec_name, :qual, :exp, :h_id, :h_name, :loc, :fee, :fee_disp, :types, :rating, :revs, :badge, :avatar, :about, :expert, :langs, :sched, 1)
+            ON DUPLICATE KEY UPDATE
+            `name` = VALUES(`name`), `speciality_id` = VALUES(`speciality_id`), `speciality_name` = VALUES(`speciality_name`), `qualification` = VALUES(`qualification`), `experience_years` = VALUES(`experience_years`), `hospital_name` = VALUES(`hospital_name`), `location` = VALUES(`location`), `consultation_fee` = VALUES(`consultation_fee`), `fee_display` = VALUES(`fee_display`), `consultation_types` = VALUES(`consultation_types`), `rating` = VALUES(`rating`), `reviews_count` = VALUES(`reviews_count`), `badge` = VALUES(`badge`), `avatar` = VALUES(`avatar`), `about` = VALUES(`about`), `areas_of_expertise` = VALUES(`areas_of_expertise`), `languages` = VALUES(`languages`), `schedule` = VALUES(`schedule`), `is_active` = 1");
+        
+        $stmt->execute([
+            ':d_id' => $docId, ':name' => $name, ':spec_id' => $specId, ':spec_name' => $specName, ':qual' => $qual, ':exp' => $exp,
+            ':h_id' => $hId, ':h_name' => $hName, ':loc' => $loc, ':fee' => $fee, ':fee_disp' => $feeDisp,
+            ':types' => json_encode($types), ':rating' => $rating, ':revs' => $revs, ':badge' => $badge,
+            ':avatar' => $avatar, ':about' => $about, ':expert' => json_encode($expert), ':langs' => json_encode($langs), ':sched' => json_encode($sched)
+        ]);
+    }
+
+    // Sync to JSON file
+    $docFile = __DIR__ . '/healthcare/doctors.json';
+    $docData = is_file($docFile) ? json_decode((string) file_get_contents($docFile), true) : ['status' => 'ok', 'doctors' => []];
+    if (!isset($docData['doctors']) || !is_array($docData['doctors'])) $docData['doctors'] = [];
+    $found = false;
+    $newEntry = [
+        'id' => $docId, 'name' => $name, 'specialityId' => $specId, 'specialityName' => $specName, 'qualification' => $qual,
+        'experienceYears' => $exp, 'hospitalId' => $hId, 'hospitalName' => $hName, 'location' => $loc, 'consultationFee' => $fee,
+        'feeDisplay' => $feeDisp, 'consultationTypes' => $types, 'rating' => $rating, 'reviewsCount' => $revs, 'badge' => $badge,
+        'avatar' => $avatar, 'about' => $about, 'areasOfExpertise' => $expert, 'languages' => $langs, 'schedule' => $sched
+    ];
+    foreach ($docData['doctors'] as &$item) {
+        if (($item['id'] ?? '') === $docId) {
+            $item = array_merge($item, $newEntry);
+            $found = true; break;
+        }
+    }
+    if (!$found) $docData['doctors'][] = $newEntry;
+    @file_put_contents($docFile, json_encode($docData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
+
+    logActivity('DOCTOR_SAVED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Saved doctor profile for {$name} ({$docId})", ['doctorId' => $docId, 'name' => $name]);
+    echo json_encode(['status' => 'ok', 'message' => "Doctor profile for {$name} saved successfully.", 'doctorId' => $docId]);
+    exit(0);
+}
+
+// Action: Delete Doctor
+if ($action === 'delete_doctor') {
+    $docId = trim((string) ($payload['id'] ?? $payload['doctorId'] ?? ''));
+    if ($docId === '') {
+        http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'Doctor ID is required.']); exit(0);
+    }
+    if ($pdo !== null) {
+        $stmt = $pdo->prepare("DELETE FROM `doctors` WHERE `doctor_id` = :id");
+        $stmt->execute([':id' => $docId]);
+    }
+    $docFile = __DIR__ . '/healthcare/doctors.json';
+    if (is_file($docFile)) {
+        $docData = json_decode((string) file_get_contents($docFile), true);
+        if (isset($docData['doctors']) && is_array($docData['doctors'])) {
+            $docData['doctors'] = array_values(array_filter($docData['doctors'], function($d) use ($docId) {
+                return ($d['id'] ?? '') !== $docId;
+            }));
+            @file_put_contents($docFile, json_encode($docData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        }
+    }
+    logActivity('DOCTOR_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Deleted doctor profile {$docId}", ['doctorId' => $docId]);
+    echo json_encode(['status' => 'ok', 'message' => "Doctor {$docId} deleted successfully."]);
+    exit(0);
+}
+
+// Action: Save Diagnostic Test Package
+if ($action === 'save_test') {
+    $t = $payload['test'] ?? $payload;
+    $tId = trim((string) ($t['id'] ?? $t['test_id'] ?? ('test-' . date('Ymd') . '-' . bin2hex(random_bytes(2)))));
+    $name = trim((string) ($t['name'] ?? ''));
+    if ($name === '') {
+        http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'Test package name is required.']); exit(0);
+    }
+    $cat = $t['category'] ?? 'Cancer Screening';
+    $tagline = $t['tagline'] ?? '';
+    $descr = $t['description'] ?? '';
+    $price = (float) ($t['price'] ?? 0);
+    $origPrice = (float) ($t['original_price'] ?? $t['originalPrice'] ?? 0);
+    $subsidy = $t['avinya_subsidy'] ?? $t['avinyaSubsidy'] ?? '';
+    $included = is_array($t['testsIncluded'] ?? null) ? $t['testsIncluded'] : (is_string($t['tests_included'] ?? null) ? json_decode($t['tests_included'], true) : []);
+    $prep = $t['preparation'] ?? '';
+    $turnaround = $t['report_turnaround'] ?? $t['reportTurnaround'] ?? '24 Hours';
+    $home = !empty($t['home_collection']) || !empty($t['homeCollection']) ? 1 : 0;
+    $centre = !empty($t['centre_visit']) || !empty($t['centreVisit']) ? 1 : 0;
+    $prio = !empty($t['is_priority']) || !empty($t['isPriority']) ? 1 : 0;
+    $badge = $t['badge'] ?? '';
+
+    if ($pdo !== null) {
+        $stmt = $pdo->prepare("INSERT INTO `diagnostic_tests`
+            (`test_id`, `name`, `category`, `tagline`, `description`, `price`, `original_price`, `avinya_subsidy`, `tests_included`, `preparation`, `report_turnaround`, `home_collection`, `centre_visit`, `is_priority`, `badge`, `is_active`)
+            VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :subsidy, :inc, :prep, :turnaround, :home, :centre, :prio, :badge, 1)
+            ON DUPLICATE KEY UPDATE
+            `name` = VALUES(`name`), `category` = VALUES(`category`), `tagline` = VALUES(`tagline`), `description` = VALUES(`description`), `price` = VALUES(`price`), `original_price` = VALUES(`original_price`), `avinya_subsidy` = VALUES(`avinya_subsidy`), `tests_included` = VALUES(`tests_included`), `preparation` = VALUES(`preparation`), `report_turnaround` = VALUES(`report_turnaround`), `home_collection` = VALUES(`home_collection`), `centre_visit` = VALUES(`centre_visit`), `is_priority` = VALUES(`is_priority`), `badge` = VALUES(`badge`), `is_active` = 1");
+        
+        $stmt->execute([
+            ':t_id' => $tId, ':name' => $name, ':cat' => $cat, ':tagline' => $tagline, ':descr' => $descr,
+            ':price' => $price, ':orig_price' => $origPrice, ':subsidy' => $subsidy, ':inc' => json_encode($included),
+            ':prep' => $prep, ':turnaround' => $turnaround, ':home' => $home, ':centre' => $centre, ':prio' => $prio, ':badge' => $badge
+        ]);
+    }
+
+    $testsFile = __DIR__ . '/healthcare/tests.json';
+    $testsData = is_file($testsFile) ? json_decode((string) file_get_contents($testsFile), true) : ['status' => 'ok', 'tests' => []];
+    if (!isset($testsData['tests']) || !is_array($testsData['tests'])) $testsData['tests'] = [];
+    $found = false;
+    $newEntry = [
+        'id' => $tId, 'name' => $name, 'category' => $cat, 'tagline' => $tagline, 'description' => $descr,
+        'price' => $price, 'originalPrice' => $origPrice, 'avinyaSubsidy' => $subsidy, 'testsIncluded' => $included,
+        'preparation' => $prep, 'reportTurnaround' => $turnaround, 'homeCollection' => (bool)$home,
+        'centreVisit' => (bool)$centre, 'isPriority' => (bool)$prio, 'badge' => $badge
+    ];
+    foreach ($testsData['tests'] as &$item) {
+        if (($item['id'] ?? '') === $tId) {
+            $item = array_merge($item, $newEntry);
+            $found = true; break;
+        }
+    }
+    if (!$found) $testsData['tests'][] = $newEntry;
+    @file_put_contents($testsFile, json_encode($testsData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
+
+    logActivity('TEST_PACKAGE_SAVED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Saved diagnostic test package {$name} ({$tId})", ['testId' => $tId, 'name' => $name]);
+    echo json_encode(['status' => 'ok', 'message' => "Diagnostic test package {$name} saved successfully.", 'testId' => $tId]);
+    exit(0);
+}
+
+// Action: Delete Diagnostic Test Package
+if ($action === 'delete_test') {
+    $tId = trim((string) ($payload['id'] ?? $payload['testId'] ?? ''));
+    if ($tId === '') {
+        http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'Test ID is required.']); exit(0);
+    }
+    if ($pdo !== null) {
+        $stmt = $pdo->prepare("DELETE FROM `diagnostic_tests` WHERE `test_id` = :id");
+        $stmt->execute([':id' => $tId]);
+    }
+    $testsFile = __DIR__ . '/healthcare/tests.json';
+    if (is_file($testsFile)) {
+        $testsData = json_decode((string) file_get_contents($testsFile), true);
+        if (isset($testsData['tests']) && is_array($testsData['tests'])) {
+            $testsData['tests'] = array_values(array_filter($testsData['tests'], function($t) use ($tId) {
+                return ($t['id'] ?? '') !== $tId;
+            }));
+            @file_put_contents($testsFile, json_encode($testsData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        }
+    }
+    logActivity('TEST_PACKAGE_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Deleted diagnostic test package {$tId}", ['testId' => $tId]);
+    echo json_encode(['status' => 'ok', 'message' => "Diagnostic test package {$tId} deleted successfully."]);
+    exit(0);
+}
+
+// Action: Seed Catalog from Pre-Recorded JSON Data
+if ($action === 'seed_catalog') {
+    if ($pdo !== null) {
+        $res = seedCatalogFromJSON($pdo, true);
+        logActivity('CATALOG_SEEDED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Seeded doctors & diagnostic tests catalog tables", $res);
+        echo json_encode(['status' => 'ok', 'message' => "Catalog seeded successfully: {$res['doctors_seeded']} doctors, {$res['tests_seeded']} diagnostic tests.", 'details' => $res]);
+    } else {
+        echo json_encode(['status' => 'ok', 'message' => "Database offline. Pre-recorded JSON catalog active."]);
+    }
+    exit(0);
+}
+
 // Action: Fetch All Records & Overview Analytics
 $formSubmissions = [];
 $doctorBookings = [];
 $diagnosticBookings = [];
 $emailLogs = [];
 $activityLogs = [];
+$doctorsCatalog = [];
+$diagnosticTestsCatalog = [];
 
 if ($pdo !== null) {
     try {
@@ -141,6 +334,8 @@ if ($pdo !== null) {
         $diagnosticBookings = $pdo->query("SELECT * FROM `diagnostic_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
         $emailLogs = $pdo->query("SELECT * FROM `email_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
         $activityLogs = $pdo->query("SELECT * FROM `activity_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
+        $doctorsCatalog = $pdo->query("SELECT * FROM `doctors` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
+        $diagnosticTestsCatalog = $pdo->query("SELECT * FROM `diagnostic_tests` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
     } catch (Throwable $e) {
         error_log('Admin Data Fetch Warning: ' . $e->getMessage());
     }
@@ -171,6 +366,24 @@ if (empty($activityLogs)) {
     }
 }
 
+if (empty($doctorsCatalog)) {
+    $docFile = __DIR__ . '/healthcare/doctors.json';
+    if (is_file($docFile)) {
+        $raw = @file_get_contents($docFile);
+        $dData = json_decode((string) $raw, true);
+        $doctorsCatalog = $dData['doctors'] ?? $dData ?? [];
+    }
+}
+
+if (empty($diagnosticTestsCatalog)) {
+    $testsFile = __DIR__ . '/healthcare/tests.json';
+    if (is_file($testsFile)) {
+        $raw = @file_get_contents($testsFile);
+        $tData = json_decode((string) $raw, true);
+        $diagnosticTestsCatalog = $tData['tests'] ?? $tData ?? [];
+    }
+}
+
 // Calculate Analytics Summaries
 $totalDonationsAmount = 0.0;
 $totalDonationsCount = 0;
@@ -193,7 +406,7 @@ foreach ($doctorBookings as $db) {
 
 $diagStatusCounts = [];
 foreach ($diagnosticBookings as $db) {
-    $st = strtolower((string) ($db['status'] ?? 'confirmed'));
+    $st = strtolower((string) ($db['status'] ?? 'pending'));
     $diagStatusCounts[$st] = ($diagStatusCounts[$st] ?? 0) + 1;
 }
 
@@ -206,6 +419,8 @@ echo json_encode([
         'totalDiagnosticBookings' => count($diagnosticBookings),
         'totalEmailLogs' => count($emailLogs),
         'totalActivityLogs' => count($activityLogs),
+        'totalDoctors' => count($doctorsCatalog),
+        'totalDiagnosticTests' => count($diagnosticTestsCatalog),
         'totalDonationsAmount' => $totalDonationsAmount,
         'totalDonationsCount' => $totalDonationsCount,
         'formCountsByType' => $formCountsByType,
@@ -217,6 +432,8 @@ echo json_encode([
         'doctorBookings' => array_values($doctorBookings),
         'diagnosticBookings' => array_values($diagnosticBookings),
         'emailLogs' => array_values($emailLogs),
-        'activityLogs' => array_values($activityLogs)
+        'activityLogs' => array_values($activityLogs),
+        'doctorsCatalog' => array_values($doctorsCatalog),
+        'diagnosticTestsCatalog' => array_values($diagnosticTestsCatalog)
     ]
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
