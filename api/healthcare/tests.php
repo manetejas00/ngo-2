@@ -44,7 +44,11 @@ try {
             ];
         }
 
-        echo json_encode(['status' => 'ok', 'tests' => $tests], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        echo json_encode([
+            'status' => 'ok',
+            'tests' => $tests,
+            'data' => $tests
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         exit(0);
     }
 } catch (Throwable $e) {

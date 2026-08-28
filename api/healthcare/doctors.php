@@ -49,7 +49,11 @@ try {
             ];
         }
 
-        echo json_encode(['status' => 'ok', 'doctors' => $doctors], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        echo json_encode([
+            'status' => 'ok',
+            'doctors' => $doctors,
+            'data' => $doctors
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         exit(0);
     }
 } catch (Throwable $e) {

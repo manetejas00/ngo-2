@@ -21,8 +21,8 @@ DirectoryIndex index.html index.php
   RewriteRule ^api/healthcare/tests(\.json)?/?$ api/healthcare/tests.php [L,NC]
 
   # Route /api/news endpoints
-  RewriteRule ^api/news/?$ api/news.json [L,NC]
-  RewriteRule ^api/news/refresh/?$ api/news.json [L,NC]
+  RewriteRule ^api/news/?$ api/news.php [L,NC]
+  RewriteRule ^api/news/refresh/?$ api/news.php [L,NC]
   RewriteRule ^api/news/generate/?$ api/news_generate.json [L,NC]
 </IfModule>
 
