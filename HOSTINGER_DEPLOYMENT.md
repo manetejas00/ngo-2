@@ -1,30 +1,55 @@
-# 🚀 Hostinger Automated Deployment Checklist — Avinya Care Foundation
+# Avinya Care Foundation — Hostinger Production & Staging Deployment Guide
 
-This document contains your Hostinger server details and credentials for automated deployment of `test.avinyacarefoundation.org`.
-
----
-
-## 📋 Server Details & Credentials
-
-| Setting | Value |
-| :--- | :--- |
-| **Website Domain** | `test.avinyacarefoundation.org` |
-| **SSH Host / IP** | `82.112.239.95` |
-| **SSH Port** | `65002` |
-| **SSH Username** | `u382139760` |
-| **SSH Password** | `@qLVTyL|J5` |
-| **SSH Status** | `ACTIVE` |
-| **Remote Web Directory** | `~/domains/test.avinyacarefoundation.org/public_html` |
-| **Local Zip Bundle** | `avinya-care-hostinger-deployment.zip` |
+This guide details the complete deployment process and server configuration for **Avinya Care Foundation** on Hostinger.
 
 ---
 
-## ⚡ Deployment Commands
+## 📌 Environment & Branch Deployment Table
+
+| Environment | Live Domain | Git Branch | Hostinger MySQL Database | MySQL User | Hostinger Root Dir |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Staging / Test** | `https://test.avinyacarefoundation.org` | **`staging`** | `u382139760_ngo_staging` | `u382139760_ngo_staging` | `public_html` (Staging Subdomain) |
+| **Production** | `https://avinyacarefoundation.org` | **`main`** | `u382139760_ngo` | `u382139760_ngo` | `public_html` (Main Domain) |
+
+---
+
+## ⚙️ Hostinger hPanel App Hosting / Web Configuration
+
+When setting up or updating deployments in Hostinger hPanel under `Websites > Deployments > Settings`:
+
+- **Framework Preset**: `Other`
+- **Branch**: `main` (for Production) / `staging` (for Staging)
+- **Node Version**: `18.x`
+- **Root Directory**: `./`
+- **Build Command**: `npm run build`
+- **Package Manager**: `npm`
+- **Output Directory**: (Leave default / empty)
+- **Entry File**: `server.mjs`
+
+---
+
+## 🚀 One-Command Automated SSH Deployment
+
+To deploy from your local environment to the live Hostinger Staging server:
 
 ```bash
-# 1. Upload zip package via SCP
-scp -P 65002 avinya-care-hostinger-deployment.zip u382139760@82.112.239.95:~/domains/test.avinyacarefoundation.org/public_html/
+# 1. Switch to staging branch
+git checkout staging
+git add .
+git commit -m "Deployment update"
+git push origin staging
 
-# 2. Unzip directly in public_html
-ssh -p 65002 u382139760@82.112.239.95 "cd ~/domains/test.avinyacarefoundation.org/public_html && unzip -o avinya-care-hostinger-deployment.zip && rm avinya-care-hostinger-deployment.zip"
+# 2. Build deployment package & trigger SSH upload script
+zip -r avinya-care-hostinger-deployment.zip . -x "node_modules/*" ".git/*" ".DS_Store"
+./deploy.exp
+```
+
+---
+
+## 🧪 Master Live Integration Audit
+
+Run the master audit script against `https://test.avinyacarefoundation.org`:
+
+```bash
+python3 test/test_live_master_audit.py
 ```
