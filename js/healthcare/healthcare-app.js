@@ -1130,7 +1130,7 @@ class HealthcarePlatform {
     };
 
     try {
-      const res = await fetch('/api/healthcare/test-bookings', {
+      const res = await fetch('/api/diagnostic-booking.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
