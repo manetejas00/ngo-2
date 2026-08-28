@@ -25,20 +25,35 @@ def post_json(endpoint, payload, headers_extra=None):
     except Exception as e:
         return 0, {"error": str(e)}
 
+def get_json(endpoint):
+    url = f"{TARGET_HOST}{endpoint}"
+    req = urllib.request.Request(url, method='GET')
+    try:
+        with urllib.request.urlopen(req, timeout=15) as response:
+            return response.getcode(), json.loads(response.read().decode('utf-8'))
+    except urllib.error.HTTPError as e:
+        return e.code, json.loads(e.read().decode('utf-8'))
+    except Exception as e:
+        return 0, {"error": str(e)}
+
 def main():
     print("==========================================================")
     print("TEST INITIAL BOOKING STATUS ('pending') VERIFICATION")
     print("==========================================================\n")
 
     # 1. Book a new Doctor Appointment
-    print("1. Booking a new Doctor Appointment...")
+    print("1. Fetching available slots and booking a new Doctor Appointment...")
+    slot_code, slot_res = get_json('/api/booking/index.php?action=slots&doctorId=doc-1&date=2026-11-20')
+    slots = slot_res.get('slots', [])
+    test_slot = slots[0]['time'] if slots else '02:00 PM'
+
     code1, res1 = post_json('/api/booking/index.php?action=create', {
         'doctorId': 'doc-1',
         'patientName': 'Pending Status Test Patient',
         'patientEmail': 'pending.test@avinyacarefoundation.org',
         'patientPhone': '+91 98765 43210',
         'date': '2026-11-20',
-        'slot': '10:00 AM'
+        'time': test_slot
     })
     print(f"   HTTP Status: {code1}")
     booking1 = res1.get('booking') or res1.get('appointment') or {}
