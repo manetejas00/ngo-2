@@ -29,12 +29,12 @@ if (!function_exists('loadEnvDatabaseVars')) {
             if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) continue;
             [$name, $value] = array_map('trim', explode('=', $line, 2));
             if (!str_starts_with($name, 'DB_') && !str_starts_with($name, 'NEWS_') && !str_starts_with($name, 'SMTP_')) continue;
-            if (getenv($name) !== false) continue;
             if (strlen($value) >= 2 && (($value[0] === '"' && substr($value, -1) === '"') || ($value[0] === "'" && substr($value, -1) === "'"))) {
                 $value = substr($value, 1, -1);
             }
             putenv($name . '=' . $value);
             $_ENV[$name] = $value;
+            $_SERVER[$name] = $value;
         }
     }
 }
@@ -42,10 +42,8 @@ if (!function_exists('loadEnvDatabaseVars')) {
 loadEnvDatabaseVars();
 
 function getDbEnv(string $key, string $default = ''): string {
-    $val = getenv($key);
-    if ($val === false && isset($_ENV[$key])) $val = $_ENV[$key];
-    if ($val === false && isset($_SERVER[$key])) $val = $_SERVER[$key];
-    return trim((string) ($val === false ? $default : $val));
+    $val = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+    return trim((string) ($val === false || $val === null ? $default : $val));
 }
 
 function getDatabaseConnection(): ?PDO {
