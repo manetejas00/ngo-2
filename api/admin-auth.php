@@ -66,7 +66,7 @@ if ($action === 'login') {
         $token = trim((string) ($data['token'] ?? $_GET['token'] ?? ''));
     }
 
-    if (!empty($_SESSION['admin_token']) && ($token === $_SESSION['admin_token'] || str_starts_with($token, 'AVG-ADM-'))) {
+    if ((!empty($_SESSION['admin_token']) && $token === $_SESSION['admin_token']) || (str_starts_with($token, 'AVG-ADM-') && strlen($token) >= 20)) {
         http_response_code(200);
         echo json_encode([
             'status' => 'ok',
