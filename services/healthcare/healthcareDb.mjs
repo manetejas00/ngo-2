@@ -163,7 +163,7 @@ const DEFAULT_DOCTORS = [
     rating: 4.96,
     reviewsCount: 215,
     badge: 'Lead Gynec-Oncologist',
-    avatar: 'https://images.unsplash.com/photo-1594824813589-322137be8078?auto=format&fit=crop&w=400&q=80',
+    avatar: 'https://images.unsplash.com/photo-1651008376811-b90baee60c1f?auto=format&fit=crop&w=400&q=80',
     about: 'Dr. Ananya Sengupta specializes in robotic and laparoscopic gynecological oncology, cervical cancer prevention, HPV vaccination awareness drives, and ovarian mass evaluations.',
     areasOfExpertise: [
       'Cervical Cancer Screening & Colposcopy',
