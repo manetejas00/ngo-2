@@ -1141,7 +1141,7 @@
 
             <div class="filter-group">
               <select id="typeFilter" class="select-control" onchange="filterTable()">
-                <option value="ALL">All Categories</option>
+                <option value="all">All Categories</option>
               </select>
 
               <button class="btn btn-outline" id="advFilterToggleBtn" onclick="toggleAdvFilter()">
@@ -1580,10 +1580,11 @@
 
       // Dedicated Form Menu Badge Counts
       const formCounts = analytics.formCountsByType || {};
-      let totalForms = 0;
       (rawData.formSubmissions || []).forEach(f => {
         const type = (f.form_type || 'contact').toLowerCase();
-        formCounts[type] = (formCounts[type] || 0);
+        if (formCounts[type] === undefined) {
+          formCounts[type] = 0;
+        }
       });
 
       setVal('sideFormContactCount', formCounts['contact'] || 0);
@@ -1740,6 +1741,10 @@
         }
       });
 
+      // Clear search query on tab change
+      const searchEl = document.getElementById('searchInput');
+      if (searchEl) searchEl.value = '';
+
       // Page Title Update
       const pageTitles = {
         'dashboard': 'Dashboard Overview',
@@ -1774,29 +1779,40 @@
         if (tableCard) tableCard.style.display = 'block';
       }
 
+      // Configure category / filter dropdown options for current tab
       const filterSelect = document.getElementById('typeFilter');
       if (filterSelect) {
-        filterSelect.innerHTML = '<option value="ALL">All Categories</option>';
-
         if (tab.startsWith('forms')) {
+          filterSelect.innerHTML = '<option value="all">All Form Types</option>';
           ['contact', 'newsletter', 'volunteer', 'support', 'donation', 'partnership', 'feedback'].forEach(f => {
             filterSelect.innerHTML += `<option value="${f}">${f.toUpperCase()}</option>`;
           });
           if (tab !== 'forms_all') {
-            filterSelect.value = tab.replace('forms_', '').toUpperCase();
+            filterSelect.value = tab.replace('forms_', '');
+          } else {
+            filterSelect.value = 'all';
           }
         } else if (tab === 'doctor' || tab === 'diagnostic') {
+          filterSelect.innerHTML = '<option value="all">All Statuses</option>';
           ['pending', 'confirmed', 'completed', 'cancelled', 'rescheduled'].forEach(s => {
             filterSelect.innerHTML += `<option value="${s}">${s.toUpperCase()}</option>`;
           });
+          filterSelect.value = 'all';
         } else if (tab === 'activity') {
+          filterSelect.innerHTML = '<option value="all">All Event Types</option>';
           ['FORM_SUBMIT', 'DOCTOR_BOOKING', 'DIAGNOSTIC_BOOKING', 'EMAIL_SENT', 'EMAIL_FAILED', 'ADMIN_LOGIN_SUCCESS', 'ADMIN_LOGIN_FAILED', 'ADMIN_STATUS_UPDATE', 'ADMIN_LOGOUT'].forEach(e => {
-            filterSelect.innerHTML += `<option value="${e}">${e}</option>`;
+            filterSelect.innerHTML += `<option value="${e.toLowerCase()}">${e}</option>`;
           });
+          filterSelect.value = 'all';
         } else if (tab === 'usersCatalog') {
+          filterSelect.innerHTML = '<option value="all">All Roles</option>';
           ['admin', 'manager', 'staff'].forEach(r => {
             filterSelect.innerHTML += `<option value="${r}">${r.toUpperCase()}</option>`;
           });
+          filterSelect.value = 'all';
+        } else {
+          filterSelect.innerHTML = '<option value="all">All Categories</option>';
+          filterSelect.value = 'all';
         }
       }
 
@@ -1836,7 +1852,7 @@
 
     function resetAdvFilters() {
       document.getElementById('searchInput').value = '';
-      document.getElementById('typeFilter').value = 'ALL';
+      document.getElementById('typeFilter').value = 'all';
       document.getElementById('startDateFilter').value = '';
       document.getElementById('endDateFilter').value = '';
       document.getElementById('deliveryFilter').value = 'ALL';
@@ -1847,8 +1863,8 @@
     function filterTable() {
       if (currentTab === 'dashboard') return;
 
-      const q = document.getElementById('searchInput').value.toLowerCase();
-      const typeFilter = document.getElementById('typeFilter').value.toLowerCase();
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const typeFilter = (document.getElementById('typeFilter').value || 'all').toLowerCase().trim();
       const startDate = document.getElementById('startDateFilter').value;
       const endDate = document.getElementById('endDateFilter').value;
       const delivery = document.getElementById('deliveryFilter').value;
@@ -1856,18 +1872,18 @@
 
       let items = [];
       if (currentTab.startsWith('forms')) {
-        items = [...rawData.formSubmissions];
+        items = [...(rawData.formSubmissions || [])];
         if (currentTab !== 'forms_all') {
-          const targetType = currentTab.replace('forms_', '');
+          const targetType = currentTab.replace('forms_', '').toLowerCase();
           items = items.filter(i => (i.form_type || 'contact').toLowerCase() === targetType);
         }
-      } else if (currentTab === 'doctor') items = [...rawData.doctorBookings];
-      else if (currentTab === 'diagnostic') items = [...rawData.diagnosticBookings];
-      else if (currentTab === 'email') items = [...rawData.emailLogs];
-      else if (currentTab === 'activity') items = [...rawData.activityLogs];
-      else if (currentTab === 'doctorsCatalog') items = [...rawData.doctorsCatalog];
-      else if (currentTab === 'testsCatalog') items = [...rawData.diagnosticTestsCatalog];
-      else if (currentTab === 'usersCatalog') items = [...rawData.usersCatalog];
+      } else if (currentTab === 'doctor') items = [...(rawData.doctorBookings || [])];
+      else if (currentTab === 'diagnostic') items = [...(rawData.diagnosticBookings || [])];
+      else if (currentTab === 'email') items = [...(rawData.emailLogs || [])];
+      else if (currentTab === 'activity') items = [...(rawData.activityLogs || [])];
+      else if (currentTab === 'doctorsCatalog') items = [...(rawData.doctorsCatalog || [])];
+      else if (currentTab === 'testsCatalog') items = [...(rawData.diagnosticTestsCatalog || [])];
+      else if (currentTab === 'usersCatalog') items = [...(rawData.usersCatalog || [])];
 
       // 1. Text Search Filter
       if (q) {
@@ -1877,25 +1893,32 @@
         });
       }
 
-      // 2. Category / Event Filter
+      // 2. Tab-Scoped Category / Event / Status Filter
       if (typeFilter !== 'all') {
-        items = items.filter(i => {
-          const val = (i.form_type || i.status || i.event_type || i.category || i.speciality_id || i.role || '').toLowerCase();
-          return val === typeFilter;
-        });
+        if (currentTab === 'forms_all') {
+          items = items.filter(i => (i.form_type || 'contact').toLowerCase() === typeFilter);
+        } else if (currentTab === 'doctor' || currentTab === 'diagnostic') {
+          items = items.filter(i => (i.status || 'pending').toLowerCase() === typeFilter);
+        } else if (currentTab === 'activity') {
+          items = items.filter(i => (i.event_type || '').toLowerCase() === typeFilter);
+        } else if (currentTab === 'usersCatalog') {
+          items = items.filter(i => (i.role || '').toLowerCase() === typeFilter);
+        }
       }
 
-      // 3. Date Range Filter
+      // 3. Date Range Filter (Safe for catalog items without dates)
       if (startDate) {
         items = items.filter(i => {
-          const d = (i.created_at || i.createdAt || i.dispatched_at || i.date || '').substring(0, 10);
-          return d >= startDate;
+          const rawDate = i.created_at || i.createdAt || i.dispatched_at || i.date || '';
+          if (!rawDate) return true; // keep items if no date field
+          return rawDate.substring(0, 10) >= startDate;
         });
       }
       if (endDate) {
         items = items.filter(i => {
-          const d = (i.created_at || i.createdAt || i.dispatched_at || i.date || '').substring(0, 10);
-          return d <= endDate;
+          const rawDate = i.created_at || i.createdAt || i.dispatched_at || i.date || '';
+          if (!rawDate) return true; // keep items if no date field
+          return rawDate.substring(0, 10) <= endDate;
         });
       }
 
@@ -1937,7 +1960,7 @@
       const container = document.getElementById('activeFilterPills');
       let pills = [];
 
-      if (typeFilter !== 'all') pills.push(`Category: ${typeFilter.toUpperCase()}`);
+      if (typeFilter !== 'all') pills.push(`Filter: ${typeFilter.toUpperCase()}`);
       if (startDate || endDate) pills.push(`Date: ${startDate || 'Start'} to ${endDate || 'Today'}`);
       if (delivery !== 'ALL') pills.push(`Delivery: ${delivery}`);
       if (sort !== 'NEWEST') pills.push(`Sort: ${sort}`);
@@ -2053,7 +2076,7 @@
     function renderForms(items) {
       const tbody = document.getElementById('tableBody');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No matching form submissions found for this menu view.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No matching form submissions found for this view.</td></tr>`;
         return;
       }
       tbody.innerHTML = items.map(item => `
