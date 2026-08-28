@@ -4,6 +4,10 @@ DirectoryIndex index.html index.php
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # Serve existing static files directly from LiteSpeed/Apache disk
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule \.(html|css|js|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot)$ - [L]
+
   # Route /api/submit-form to submit-form.php on Apache/PHP hosts
   RewriteRule ^api/submit-form/?$ api/submit-form.php [L,NC]
 

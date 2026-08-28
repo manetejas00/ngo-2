@@ -18,15 +18,17 @@ This guide details the complete deployment process, server configuration, enviro
 ### Cause
 Hostinger standard Web Hosting serves static HTML, CSS, JavaScript, and PHP scripts via **LiteSpeed / Apache**. If Hostinger Node.js App Hosting reverse proxy is enabled for `avinyacarefoundation.org`, LiteSpeed attempts to forward requests to a long-running Node process (`server.mjs`) on port 3000. If the Node process is inactive or port binding times out, LiteSpeed returns **`503 Service Unavailable`**.
 
-### Solution & Deployment Automation
-The automated deployment script (`./deploy.exp`) addresses this by directly syncing the static assets and PHP APIs to both production and staging target web roots:
+### Solution & .htaccess Static Pass-Through
+1. **LiteSpeed Direct Pass-Through Rule (`.htaccess`)**:
+   Added static file condition ensuring `.html`, `.css`, `.js`, and image assets bypass reverse proxy rules and are served directly from disk by LiteSpeed:
+   ```apache
+   RewriteCond %{REQUEST_FILENAME} -f
+   RewriteRule \.(html|css|js|png|jpg|jpeg|gif|ico|svg|webp)$ - [L]
+   ```
 
-1. **Staging Web Root**: `domains/test.avinyacarefoundation.org/public_html/`
-   - Unpacks build archive.
-   - Copies `.env.staging` to `.env` (connects to database `u382139760_ngo_staging`).
-2. **Production Web Root**: `domains/avinyacarefoundation.org/public_html/`
-   - Unpacks build archive.
-   - Copies `.env.production` to `.env` (connects to database `u382139760_ngo`).
+2. **Automated SSH Deployment Sync (`./deploy.exp`)**:
+   - **Staging Web Root**: `domains/test.avinyacarefoundation.org/public_html/` (loads `.env.staging` -> `u382139760_ngo_staging`)
+   - **Production Web Root**: `domains/avinyacarefoundation.org/public_html/` (loads `.env.production` -> `u382139760_ngo`)
 
 ---
 
