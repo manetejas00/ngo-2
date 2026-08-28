@@ -282,7 +282,7 @@
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
       padding: 24px;
-      transition: all 0.25 ease;
+      transition: all 0.25s ease;
       position: relative;
       overflow: hidden;
     }
@@ -387,6 +387,7 @@
     .search-box {
       position: relative;
       min-width: 280px;
+      flex: 1;
     }
 
     .search-input {
@@ -411,7 +412,8 @@
     .filter-group {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .select-control {
@@ -422,6 +424,66 @@
       color: #FFFFFF;
       font-size: 13px;
       outline: none;
+    }
+
+    /* Advanced Filter Panel Drawer */
+    .advanced-filter-panel {
+      background: rgba(12, 22, 21, 0.95);
+      border-bottom: 1px solid var(--border-color);
+      padding: 20px 24px;
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .advanced-filter-panel.open {
+      display: grid;
+    }
+
+    .filter-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-item label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .date-input {
+      padding: 9px 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: #FFFFFF;
+      font-size: 13px;
+      font-family: var(--font-body);
+    }
+
+    .preset-btn-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .preset-btn {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .preset-btn:hover, .preset-btn.active {
+      background: rgba(8, 127, 115, 0.25);
+      color: #5EEAD4;
+      border-color: var(--primary);
     }
 
     .table-wrapper {
@@ -545,7 +607,34 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Empty state */
+    /* Active Filters Display */
+    .active-filters-bar {
+      padding: 10px 24px;
+      background: rgba(8, 127, 115, 0.1);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #5EEAD4;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill {
+      background: rgba(8, 127, 115, 0.3);
+      border: 1px solid rgba(8, 127, 115, 0.5);
+      padding: 2px 10px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-pill span {
+      cursor: pointer;
+      font-weight: bold;
+    }
+
     .empty-state {
       padding: 48px;
       text-align: center;
@@ -663,8 +752,65 @@
           <select id="typeFilter" class="select-control" onchange="filterTable()">
             <option value="ALL">All Categories</option>
           </select>
+
+          <button class="btn btn-outline" id="advFilterToggleBtn" onclick="toggleAdvFilter()">
+            ⚡ Advanced Filters <span id="advFilterCountBadge"></span>
+          </button>
+
           <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
         </div>
+      </div>
+
+      <!-- Advanced Filter Panel Drawer -->
+      <div id="advFilterPanel" class="advanced-filter-panel">
+        <div class="filter-item">
+          <label>Start Date</label>
+          <input type="date" id="startDateFilter" class="date-input" onchange="filterTable()">
+        </div>
+
+        <div class="filter-item">
+          <label>End Date</label>
+          <input type="date" id="endDateFilter" class="date-input" onchange="filterTable()">
+        </div>
+
+        <div class="filter-item">
+          <label>Quick Date Range</label>
+          <div class="preset-btn-group">
+            <button class="preset-btn" onclick="setPresetDate('today')">Today</button>
+            <button class="preset-btn" onclick="setPresetDate('7days')">7 Days</button>
+            <button class="preset-btn" onclick="setPresetDate('30days')">30 Days</button>
+            <button class="preset-btn" onclick="setPresetDate('all')">All</button>
+          </div>
+        </div>
+
+        <div class="filter-item">
+          <label>Delivery / SMTP Status</label>
+          <select id="deliveryFilter" class="select-control" onchange="filterTable()">
+            <option value="ALL">All Statuses</option>
+            <option value="SENT">SENT (Success)</option>
+            <option value="FAILED">FAILED (Error)</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label>Sort Records By</label>
+          <select id="sortFilter" class="select-control" onchange="filterTable()">
+            <option value="NEWEST">Date (Newest First)</option>
+            <option value="OLDEST">Date (Oldest First)</option>
+            <option value="NAME_ASC">Name (A to Z)</option>
+            <option value="AMOUNT_DESC">Donation Amount (High to Low)</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <button class="btn btn-outline" style="width:100%" onclick="resetAdvFilters()">✕ Reset All Filters</button>
+        </div>
+      </div>
+
+      <!-- Active Filters Bar -->
+      <div id="activeFiltersBar" class="active-filters-bar" style="display:none">
+        <strong>Active Filters:</strong>
+        <div id="activeFilterPills" style="display:flex;gap:6px;flex-wrap:wrap"></div>
       </div>
 
       <div class="table-wrapper">
@@ -676,7 +822,7 @@
           </thead>
           <tbody id="tableBody">
             <tr>
-              <td colspan="7" class="empty-state">
+              <td colspan="9" class="empty-state">
                 <div class="spinner"></div>
                 <p style="margin-top: 12px;">Loading Hostinger MySQL Management Records...</p>
               </td>
@@ -833,13 +979,143 @@
           filterSelect.innerHTML += `<option value="${s}">${s.toUpperCase()}</option>`;
         });
       }
+      filterTable();
+    }
+
+    function toggleAdvFilter() {
+      const panel = document.getElementById('advFilterPanel');
+      panel.classList.toggle('open');
+    }
+
+    function setPresetDate(preset) {
+      const startDateInput = document.getElementById('startDateFilter');
+      const endDateInput = document.getElementById('endDateFilter');
+      const today = new Date();
+
+      if (preset === 'today') {
+        const iso = today.toISOString().split('T')[0];
+        startDateInput.value = iso;
+        endDateInput.value = iso;
+      } else if (preset === '7days') {
+        const past = new Date(today);
+        past.setDate(today.getDate() - 7);
+        startDateInput.value = past.toISOString().split('T')[0];
+        endDateInput.value = today.toISOString().split('T')[0];
+      } else if (preset === '30days') {
+        const past = new Date(today);
+        past.setDate(today.getDate() - 30);
+        startDateInput.value = past.toISOString().split('T')[0];
+        endDateInput.value = today.toISOString().split('T')[0];
+      } else if (preset === 'all') {
+        startDateInput.value = '';
+        endDateInput.value = '';
+      }
+      filterTable();
+    }
+
+    function resetAdvFilters() {
       document.getElementById('searchInput').value = '';
-      renderCurrentTab();
+      document.getElementById('typeFilter').value = 'ALL';
+      document.getElementById('startDateFilter').value = '';
+      document.getElementById('endDateFilter').value = '';
+      document.getElementById('deliveryFilter').value = 'ALL';
+      document.getElementById('sortFilter').value = 'NEWEST';
+      filterTable();
+    }
+
+    function filterTable() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const typeFilter = document.getElementById('typeFilter').value.toLowerCase();
+      const startDate = document.getElementById('startDateFilter').value;
+      const endDate = document.getElementById('endDateFilter').value;
+      const delivery = document.getElementById('deliveryFilter').value;
+      const sort = document.getElementById('sortFilter').value;
+
+      let items = [];
+      if (currentTab === 'forms') items = [...rawData.formSubmissions];
+      else if (currentTab === 'doctor') items = [...rawData.doctorBookings];
+      else if (currentTab === 'diagnostic') items = [...rawData.diagnosticBookings];
+      else if (currentTab === 'email') items = [...rawData.emailLogs];
+
+      // 1. Text Search Filter
+      if (q) {
+        items = items.filter(i => {
+          const str = JSON.stringify(i).toLowerCase();
+          return str.includes(q);
+        });
+      }
+
+      // 2. Category / Status Filter
+      if (typeFilter !== 'all') {
+        items = items.filter(i => {
+          const val = (i.form_type || i.status || '').toLowerCase();
+          return val === typeFilter;
+        });
+      }
+
+      // 3. Date Range Filter
+      if (startDate) {
+        items = items.filter(i => {
+          const d = (i.created_at || i.createdAt || i.dispatched_at || i.date || '').substring(0, 10);
+          return d >= startDate;
+        });
+      }
+      if (endDate) {
+        items = items.filter(i => {
+          const d = (i.created_at || i.createdAt || i.dispatched_at || i.date || '').substring(0, 10);
+          return d <= endDate;
+        });
+      }
+
+      // 4. Delivery Status Filter
+      if (delivery !== 'ALL') {
+        items = items.filter(i => {
+          const st = (i.delivery_status || i.smtp_status || i.emailStatus || '').toUpperCase();
+          return st === delivery;
+        });
+      }
+
+      // 5. Sorting
+      if (sort === 'NEWEST') {
+        items.sort((a, b) => (b.id || 0) - (a.id || 0));
+      } else if (sort === 'OLDEST') {
+        items.sort((a, b) => (a.id || 0) - (b.id || 0));
+      } else if (sort === 'NAME_ASC') {
+        items.sort((a, b) => (a.name || a.patient_name || '').localeCompare(b.name || b.patient_name || ''));
+      } else if (sort === 'AMOUNT_DESC') {
+        items.sort((a, b) => (floatval(b.amount || 0)) - (floatval(a.amount || 0)));
+      }
+
+      // Update active filters bar
+      updateActiveFilterPills(typeFilter, startDate, endDate, delivery, sort);
+
+      // Render tab
+      if (currentTab === 'forms') renderForms(items);
+      else if (currentTab === 'doctor') renderDoctorBookings(items);
+      else if (currentTab === 'diagnostic') renderDiagnosticBookings(items);
+      else if (currentTab === 'email') renderEmailLogs(items);
+    }
+
+    function updateActiveFilterPills(typeFilter, startDate, endDate, delivery, sort) {
+      const bar = document.getElementById('activeFiltersBar');
+      const container = document.getElementById('activeFilterPills');
+      let pills = [];
+
+      if (typeFilter !== 'all') pills.push(`Category: ${typeFilter.toUpperCase()}`);
+      if (startDate || endDate) pills.push(`Date: ${startDate || 'Start'} to ${endDate || 'Today'}`);
+      if (delivery !== 'ALL') pills.push(`Delivery: ${delivery}`);
+      if (sort !== 'NEWEST') pills.push(`Sort: ${sort}`);
+
+      if (pills.length > 0) {
+        bar.style.display = 'flex';
+        container.innerHTML = pills.map(p => `<div class="filter-pill">${p}</div>`).join('');
+      } else {
+        bar.style.display = 'none';
+      }
     }
 
     function renderCurrentTab() {
       const thead = document.getElementById('tableHeader');
-      const tbody = document.getElementById('tableBody');
 
       if (currentTab === 'forms') {
         thead.innerHTML = `
@@ -853,7 +1129,6 @@
           <th>Timestamp</th>
           <th>Action</th>
         `;
-        renderForms(rawData.formSubmissions);
       } else if (currentTab === 'doctor') {
         thead.innerHTML = `
           <th>Booking ID</th>
@@ -865,7 +1140,6 @@
           <th>Created At</th>
           <th>Action</th>
         `;
-        renderDoctorBookings(rawData.doctorBookings);
       } else if (currentTab === 'diagnostic') {
         thead.innerHTML = `
           <th>Booking ID</th>
@@ -876,7 +1150,6 @@
           <th>Status</th>
           <th>Action</th>
         `;
-        renderDiagnosticBookings(rawData.diagnosticBookings);
       } else if (currentTab === 'email') {
         thead.innerHTML = `
           <th>Ref ID</th>
@@ -887,14 +1160,14 @@
           <th>SMTP Status</th>
           <th>Dispatched At</th>
         `;
-        renderEmailLogs(rawData.emailLogs);
       }
+      filterTable();
     }
 
     function renderForms(items) {
       const tbody = document.getElementById('tableBody');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No form submissions recorded yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No matching form submissions found.</td></tr>`;
         return;
       }
       tbody.innerHTML = items.map(item => `
@@ -915,7 +1188,7 @@
     function renderDoctorBookings(items) {
       const tbody = document.getElementById('tableBody');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No doctor appointments booked yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No matching doctor appointments found.</td></tr>`;
         return;
       }
       tbody.innerHTML = items.map(item => `
@@ -942,7 +1215,7 @@
     function renderDiagnosticBookings(items) {
       const tbody = document.getElementById('tableBody');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No diagnostic packages booked yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No matching diagnostic package bookings found.</td></tr>`;
         return;
       }
       tbody.innerHTML = items.map(item => `
@@ -1031,34 +1304,6 @@
       document.getElementById('detailModal').style.display = 'none';
     }
 
-    function filterTable() {
-      const q = document.getElementById('searchInput').value.toLowerCase();
-      const filter = document.getElementById('typeFilter').value.toLowerCase();
-
-      if (currentTab === 'forms') {
-        const filtered = rawData.formSubmissions.filter(i => {
-          const matchQ = (i.name || '').toLowerCase().includes(q) || (i.email || '').toLowerCase().includes(q) || (i.submission_id || '').toLowerCase().includes(q);
-          const matchType = filter === 'all' || (i.form_type || '').toLowerCase() === filter;
-          return matchQ && matchType;
-        });
-        renderForms(filtered);
-      } else if (currentTab === 'doctor') {
-        const filtered = rawData.doctorBookings.filter(i => {
-          const matchQ = (i.patient_name || i.patientName || '').toLowerCase().includes(q) || (i.patient_email || i.patientEmail || '').toLowerCase().includes(q) || (i.booking_id || i.id || '').toLowerCase().includes(q);
-          const matchType = filter === 'all' || (i.status || '').toLowerCase() === filter;
-          return matchQ && matchType;
-        });
-        renderDoctorBookings(filtered);
-      } else if (currentTab === 'diagnostic') {
-        const filtered = rawData.diagnosticBookings.filter(i => {
-          const matchQ = (i.patient_name || i.patientName || '').toLowerCase().includes(q) || (i.test_name || i.testName || '').toLowerCase().includes(q) || (i.booking_id || i.id || '').toLowerCase().includes(q);
-          const matchType = filter === 'all' || (i.status || '').toLowerCase() === filter;
-          return matchQ && matchType;
-        });
-        renderDiagnosticBookings(filtered);
-      }
-    }
-
     function exportCSV() {
       let data = [];
       let filename = `AvinyaCare_${currentTab}_export.csv`;
@@ -1088,6 +1333,11 @@
 
     function escapeHtml(str) {
       return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function floatval(v) {
+      const f = parseFloat(v);
+      return isNaN(f) ? 0 : f;
     }
   </script>
 </body>
