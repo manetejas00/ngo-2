@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js CDN for Interactive Graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
       --primary: #087F73;
@@ -306,6 +308,13 @@
       border-radius: 50%;
       background: #34D399;
       box-shadow: 0 0 10px #34D399;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0.4; transform: scale(0.9); }
     }
 
     .workspace-body {
@@ -435,6 +444,49 @@
       color: #34D399;
       margin-top: 6px;
       font-weight: 600;
+    }
+
+    /* Interactive Charts Grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .chart-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .chart-title {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 260px;
+      width: 100%;
     }
 
     /* Data Table Section */
@@ -897,8 +949,13 @@
       </div>
 
       <div class="sidebar-menu">
+        <div class="menu-group-label">OVERVIEW</div>
+        <button class="sidebar-nav-link active" data-tab="dashboard" onclick="switchTab('dashboard')">
+          <span class="nav-icon">📊</span> Dashboard Overview
+        </button>
+
         <div class="menu-group-label">HEALTHCARE PLATFORM</div>
-        <button class="sidebar-nav-link active" data-tab="doctor" onclick="switchTab('doctor')">
+        <button class="sidebar-nav-link" data-tab="doctor" onclick="switchTab('doctor')">
           <span class="nav-icon">🩺</span> Doctor Appointments
           <span class="nav-badge" id="sideDoctorCount">0</span>
         </button>
@@ -940,8 +997,7 @@
           </div>
         </div>
         <div class="sidebar-actions">
-          <button class="btn btn-outline btn-sm" onclick="fetchAdminData()" title="Refresh">🔄 Refresh</button>
-          <button class="btn btn-danger btn-sm" onclick="handleLogout()" title="Logout">Logout</button>
+          <button class="btn btn-danger btn-sm" style="width:100%" onclick="handleLogout()" title="Logout">Logout</button>
         </div>
       </div>
     </aside>
@@ -953,13 +1009,12 @@
       <header class="top-header">
         <div class="header-left">
           <button class="mobile-toggle-btn" onclick="toggleMobileSidebar()">☰</button>
-          <h1 class="page-title" id="pageTitle">Doctor Appointment Bookings</h1>
+          <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
         </div>
         <div class="header-right">
           <div class="admin-status-pill">
-            <span class="status-dot"></span> Hostinger MySQL Live
+            <span class="status-dot"></span> Live Auto-Sync (5m)
           </div>
-          <button class="btn btn-outline" onclick="fetchAdminData()">🔄 Refresh</button>
         </div>
       </header>
 
@@ -1004,8 +1059,44 @@
           </div>
         </div>
 
-        <!-- Data Table Container -->
-        <div class="table-card">
+        <!-- Dashboard Overview Visual Graphs Panel (Visible on Dashboard Tab) -->
+        <div id="dashboardOverviewPanel" class="charts-grid">
+          <!-- Chart 1: Submissions & Inquiries Pie/Donut Chart -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-title">🥧 Submissions & Inquiries Breakdown</div>
+              <span class="badge badge-info">Forms & Bookings</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="categoryPieChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Booking Status Pie Chart -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-title">🎯 Healthcare Booking Statuses</div>
+              <span class="badge badge-success">Appointments & Tests</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="statusPieChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 3: Platform Analytics Bar Chart -->
+          <div class="chart-card" style="grid-column: 1 / -1;">
+            <div class="chart-card-header">
+              <div class="chart-title">📊 Platform Record Volume & Activity</div>
+              <span class="badge badge-neutral">MySQL Live Tables</span>
+            </div>
+            <div class="chart-container" style="height: 280px;">
+              <canvas id="trendBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Table Container (Visible on Specific Record Tabs) -->
+        <div class="table-card" id="tableCard" style="display:none;">
           <div class="table-toolbar">
             <div class="search-box">
               <span class="search-icon">🔍</span>
@@ -1272,7 +1363,12 @@
 
   <script>
     let adminToken = localStorage.getItem('avinya_admin_token') || '';
-    let currentTab = 'doctor';
+    let currentTab = 'dashboard';
+    let autoPollTimer = null;
+    let categoryChartInstance = null;
+    let statusChartInstance = null;
+    let trendChartInstance = null;
+
     let rawData = {
       formSubmissions: [],
       doctorBookings: [],
@@ -1287,10 +1383,20 @@
       if (adminToken) {
         document.getElementById('loginOverlay').style.display = 'none';
         fetchAdminData();
+        startAutoPolling();
       } else {
         document.getElementById('loginOverlay').style.display = 'flex';
       }
     });
+
+    function startAutoPolling() {
+      if (autoPollTimer) clearInterval(autoPollTimer);
+      // Auto-poll every 5 minutes (300,000 ms)
+      autoPollTimer = setInterval(() => {
+        console.log('[Auto-Sync] 5-minute background refresh triggered...');
+        fetchAdminData(true);
+      }, 5 * 60 * 1000);
+    }
 
     function toggleMobileSidebar() {
       const sidebar = document.getElementById('sidebar');
@@ -1321,6 +1427,7 @@
           localStorage.setItem('avinya_admin_token', adminToken);
           document.getElementById('loginOverlay').style.display = 'none';
           fetchAdminData();
+          startAutoPolling();
         } else {
           errorDiv.innerText = data.message || 'Invalid admin credentials.';
           errorDiv.style.display = 'block';
@@ -1335,12 +1442,13 @@
     }
 
     function handleLogout() {
+      if (autoPollTimer) clearInterval(autoPollTimer);
       localStorage.removeItem('avinya_admin_token');
       adminToken = '';
       document.getElementById('loginOverlay').style.display = 'flex';
     }
 
-    async function fetchAdminData() {
+    async function fetchAdminData(isSilent = false) {
       if (!adminToken) return;
 
       try {
@@ -1362,10 +1470,11 @@
         if (json.status === 'ok' && json.data) {
           rawData = json.data;
           updateStats(json.analytics || {});
+          renderDashboardCharts();
           switchTab(currentTab);
         }
       } catch (err) {
-        console.error('Error fetching admin data:', err);
+        if (!isSilent) console.error('Error fetching admin data:', err);
       }
     }
 
@@ -1389,6 +1498,125 @@
       setVal('sideTestsCatalogCount', analytics.totalDiagnosticTests || (rawData.diagnosticTestsCatalog ? rawData.diagnosticTestsCatalog.length : 0));
     }
 
+    function renderDashboardCharts() {
+      if (typeof Chart === 'undefined') return;
+
+      // 1. Form Types & Inquiries Breakdown (Doughnut Chart)
+      const categoryCounts = {};
+      (rawData.formSubmissions || []).forEach(f => {
+        const type = (f.form_type || 'contact').toUpperCase();
+        categoryCounts[type] = (categoryCounts[type] || 0) + 1;
+      });
+      categoryCounts['DOCTOR BOOKINGS'] = (rawData.doctorBookings || []).length;
+      categoryCounts['DIAGNOSTIC TESTS'] = (rawData.diagnosticBookings || []).length;
+
+      const catCtx = document.getElementById('categoryPieChart');
+      if (catCtx) {
+        if (categoryChartInstance) categoryChartInstance.destroy();
+        categoryChartInstance = new Chart(catCtx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(categoryCounts),
+            datasets: [{
+              data: Object.values(categoryCounts),
+              backgroundColor: [
+                '#087F73', '#F47528', '#10B981', '#3B82F6', 
+                '#8B5CF6', '#EC4899', '#F59E0B', '#14B8A6'
+              ],
+              borderColor: '#0E1615',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { color: '#CBD5E1', font: { family: 'Inter', size: 11 } }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. Healthcare Booking Statuses (Pie Chart)
+      const statusCounts = { Confirmed: 0, Pending: 0, Completed: 0, Cancelled: 0 };
+      [...(rawData.doctorBookings || []), ...(rawData.diagnosticBookings || [])].forEach(b => {
+        const st = (b.status || 'pending').toLowerCase();
+        if (st.includes('confirm')) statusCounts.Confirmed++;
+        else if (st.includes('complete')) statusCounts.Completed++;
+        else if (st.includes('cancel')) statusCounts.Cancelled++;
+        else statusCounts.Pending++;
+      });
+
+      const statusCtx = document.getElementById('statusPieChart');
+      if (statusCtx) {
+        if (statusChartInstance) statusChartInstance.destroy();
+        statusChartInstance = new Chart(statusCtx, {
+          type: 'pie',
+          data: {
+            labels: Object.keys(statusCounts),
+            datasets: [{
+              data: Object.values(statusCounts),
+              backgroundColor: ['#10B981', '#F59E0B', '#3B82F6', '#EF4444'],
+              borderColor: '#0E1615',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { color: '#CBD5E1', font: { family: 'Inter', size: 11 } }
+              }
+            }
+          }
+        });
+      }
+
+      // 3. Platform Analytics Volume (Bar Chart)
+      const trendCtx = document.getElementById('trendBarChart');
+      if (trendCtx) {
+        if (trendChartInstance) trendChartInstance.destroy();
+        trendChartInstance = new Chart(trendCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Form Submissions', 'Doctor Appts', 'Diagnostic Tests', 'Email Audit Logs', 'System Activity', 'Doctors Catalog', 'Tests Catalog'],
+            datasets: [{
+              label: 'Total MySQL Records',
+              data: [
+                (rawData.formSubmissions || []).length,
+                (rawData.doctorBookings || []).length,
+                (rawData.diagnosticBookings || []).length,
+                (rawData.emailLogs || []).length,
+                (rawData.activityLogs || []).length,
+                (rawData.doctorsCatalog || []).length,
+                (rawData.diagnosticTestsCatalog || []).length
+              ],
+              backgroundColor: 'rgba(8, 127, 115, 0.7)',
+              borderColor: '#14B8A6',
+              borderWidth: 1.5,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: '#CBD5E1' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+              y: { ticks: { color: '#CBD5E1' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+            },
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      }
+    }
+
     function switchTab(tab) {
       currentTab = tab;
 
@@ -1396,7 +1624,7 @@
       const sidebar = document.getElementById('sidebar');
       if (sidebar) sidebar.classList.remove('open');
 
-      // Highlight active nav item
+      // Highlight active sidebar nav item
       document.querySelectorAll('.sidebar-nav-link').forEach(btn => {
         if (btn.getAttribute('data-tab') === tab) {
           btn.classList.add('active');
@@ -1407,6 +1635,7 @@
 
       // Page Title Update
       const pageTitles = {
+        'dashboard': 'Dashboard Overview',
         'forms': 'Form Submissions & Inquiries',
         'doctor': 'Doctor Appointment Bookings',
         'diagnostic': 'Diagnostic Test Package Bookings',
@@ -1417,6 +1646,18 @@
       };
       const pageTitleEl = document.getElementById('pageTitle');
       if (pageTitleEl) pageTitleEl.innerText = pageTitles[tab] || 'Admin Dashboard';
+
+      // Toggle views
+      const dashboardPanel = document.getElementById('dashboardOverviewPanel');
+      const tableCard = document.getElementById('tableCard');
+
+      if (tab === 'dashboard') {
+        if (dashboardPanel) dashboardPanel.style.display = 'grid';
+        if (tableCard) tableCard.style.display = 'none';
+      } else {
+        if (dashboardPanel) dashboardPanel.style.display = 'none';
+        if (tableCard) tableCard.style.display = 'block';
+      }
 
       const filterSelect = document.getElementById('typeFilter');
       if (filterSelect) {
@@ -1482,6 +1723,8 @@
     }
 
     function filterTable() {
+      if (currentTab === 'dashboard') return;
+
       const q = document.getElementById('searchInput').value.toLowerCase();
       const typeFilter = document.getElementById('typeFilter').value.toLowerCase();
       const startDate = document.getElementById('startDateFilter').value;
@@ -1579,6 +1822,8 @@
     }
 
     function renderCurrentTab() {
+      if (currentTab === 'dashboard') return;
+
       const thead = document.getElementById('tableHeader');
       const addDocBtn = document.getElementById('addDoctorBtn');
       const addTestBtn = document.getElementById('addTestBtn');
