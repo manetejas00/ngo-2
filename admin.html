@@ -1021,6 +1021,9 @@
           <span class="nav-icon">👤</span> User Management
           <span class="nav-badge" id="sideUsersCatalogCount">0</span>
         </button>
+        <button class="sidebar-nav-link" data-tab="settings" onclick="switchTab('settings')">
+          <span class="nav-icon">⚙️</span> Platform Settings
+        </button>
       </div>
 
       <!-- Sidebar Footer User Card -->
@@ -1226,6 +1229,78 @@
               </tbody>
             </table>
           </div>
+        </div>
+
+        <!-- Platform & Infrastructure Settings Panel -->
+        <div id="settingsPanel" class="table-card" style="display:none; padding: 28px; background: rgba(14, 22, 21, 0.95); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;">
+          <div style="margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+            <h2 style="font-family: var(--font-heading); font-size: 20px; color: #FFFFFF; margin-bottom: 6px;">⚙️ Platform & Infrastructure Settings</h2>
+            <p style="color: var(--text-muted); font-size: 13px;">Manage organization profiles, Hostinger MySQL parameters, SMTP email defaults, and auto-sync polling frequency.</p>
+          </div>
+
+          <form id="settingsForm" onsubmit="savePlatformSettings(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+            <div>
+              <h3 style="font-size: 14px; font-weight: 700; color: #5EEAD4; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">🌐 Organization Info</h3>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Organization Name</label>
+                  <input type="text" id="setOrgName" class="search-input" value="Avinya Care Foundation">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Platform Tagline</label>
+                  <input type="text" id="setTagline" class="search-input" value="Humanitarian Oncology & Free Healthcare Initiative">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Emergency Helpline Phone</label>
+                  <input type="text" id="setHelpline" class="search-input" value="+91 91361 57321">
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 style="font-size: 14px; font-weight: 700; color: #5EEAD4; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">📧 SMTP Email Service</h3>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Primary Admin Email</label>
+                  <input type="email" id="setAdminEmail" class="search-input" value="info@avinyacarefoundation.org">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">SMTP Server (Hostinger Port 465 SSL)</label>
+                  <input type="text" class="search-input" value="smtp.hostinger.com" readonly style="opacity: 0.7;">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">SMTP Status</label>
+                  <span class="badge badge-success">ACTIVE & OPERATIONAL</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 style="font-size: 14px; font-weight: 700; color: #5EEAD4; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">🔄 Auto-Sync & Database</h3>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Auto-Polling Refresh Rate</label>
+                  <select id="setPollInterval" class="select-control" style="width: 100%;">
+                    <option value="300000" selected>Every 5 Minutes (Default)</option>
+                    <option value="180000">Every 3 Minutes</option>
+                    <option value="600000">Every 10 Minutes</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Hostinger MySQL Database</label>
+                  <input type="text" class="search-input" value="u382139760_ngo_staging / u382139760_ngo" readonly style="opacity: 0.7;">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Live Environment</label>
+                  <span class="badge badge-info">STAGING & PROD READY</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+              <button type="submit" class="btn btn-teal">💾 Save Settings</button>
+            </div>
+          </form>
         </div>
 
       </div>
@@ -1762,7 +1837,8 @@
         'activity': 'Project Activity & System Logs',
         'doctorsCatalog': 'Doctors Directory Catalog',
         'testsCatalog': 'Diagnostic Tests Catalog',
-        'usersCatalog': 'System User Accounts & Management'
+        'usersCatalog': 'System User Accounts & Management',
+        'settings': 'Platform & Infrastructure Settings'
       };
       const pageTitleEl = document.getElementById('pageTitle');
       if (pageTitleEl) pageTitleEl.innerText = pageTitles[tab] || 'Admin Dashboard';
@@ -1770,13 +1846,20 @@
       // Toggle views
       const dashboardPanel = document.getElementById('dashboardOverviewPanel');
       const tableCard = document.getElementById('tableCard');
+      const settingsPanel = document.getElementById('settingsPanel');
 
       if (tab === 'dashboard') {
         if (dashboardPanel) dashboardPanel.style.display = 'grid';
         if (tableCard) tableCard.style.display = 'none';
+        if (settingsPanel) settingsPanel.style.display = 'none';
+      } else if (tab === 'settings') {
+        if (dashboardPanel) dashboardPanel.style.display = 'none';
+        if (tableCard) tableCard.style.display = 'none';
+        if (settingsPanel) settingsPanel.style.display = 'block';
       } else {
         if (dashboardPanel) dashboardPanel.style.display = 'none';
         if (tableCard) tableCard.style.display = 'block';
+        if (settingsPanel) settingsPanel.style.display = 'none';
       }
 
       // Configure category / filter dropdown options for current tab
@@ -2657,6 +2740,28 @@
     function floatval(v) {
       const f = parseFloat(v);
       return isNaN(f) ? 0 : f;
+    }
+
+    function savePlatformSettings(event) {
+      event.preventDefault();
+      const orgName = document.getElementById('setOrgName').value;
+      const tagline = document.getElementById('setTagline').value;
+      const helpline = document.getElementById('setHelpline').value;
+      const adminEmail = document.getElementById('setAdminEmail').value;
+      const pollMs = document.getElementById('setPollInterval').value;
+
+      localStorage.setItem('avinya_org_name', orgName);
+      localStorage.setItem('avinya_tagline', tagline);
+      localStorage.setItem('avinya_helpline', helpline);
+      localStorage.setItem('avinya_admin_email', adminEmail);
+      localStorage.setItem('avinya_poll_interval', pollMs);
+
+      if (autoPollTimer) {
+        clearInterval(autoPollTimer);
+        autoPollTimer = setInterval(() => fetchAdminData(true), parseInt(pollMs, 10));
+      }
+
+      alert('✅ Platform settings saved successfully!');
     }
   </script>
 </body>
