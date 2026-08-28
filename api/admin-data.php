@@ -255,7 +255,6 @@ if ($pdo !== null) {
         error_log('Admin Data Fetch Warning: ' . $e->getMessage());
     }
 }
-}
 
 // Calculate Analytics Summaries
 $totalDonationsAmount = 0.0;
