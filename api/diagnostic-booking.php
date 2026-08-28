@@ -88,7 +88,7 @@ function sendDiagnosticEmail(array $booking, bool $sendAdminRecord = true): bool
         fwrite($socket, "QUIT\r\n"); fclose($socket);
         if ($sendAdminRecord) {
             $adminRecord = diagnosticEnv('ADMIN_RECORD_EMAIL');
-            if (filter_var($adminRecord, FILTER_VALIDATE_EMAIL) && strcasecmp($adminRecord, $booking['patientEmail']) !== 0) {
+            if (filter_var($adminRecord, FILTER_VALIDATE_EMAIL)) {
                 $adminBooking = $booking;
                 $adminBooking['patientEmail'] = $adminRecord;
                 $adminBooking['_adminRecord'] = true;

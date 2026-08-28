@@ -75,7 +75,7 @@ final class AppointmentEmailService {
             fclose($socket);
             if ($sendAdminRecord) {
                 $adminRecord = bookingEmailEnv('ADMIN_RECORD_EMAIL');
-                if (filter_var($adminRecord, FILTER_VALIDATE_EMAIL) && strcasecmp($adminRecord, $to) !== 0) {
+                if (filter_var($adminRecord, FILTER_VALIDATE_EMAIL)) {
                     $adminBooking = $booking;
                     $adminBooking['patientEmail'] = $adminRecord;
                     $adminBooking['_adminRecord'] = true;
