@@ -1250,6 +1250,7 @@
           <td><strong>${item.booking_date || item.date}</strong><br><small style="color:#5EEAD4">${item.time_slot || item.timeSlot}</small></td>
           <td>
             <select class="select-control" style="padding:4px 8px;font-size:12px" onchange="updateBookingStatus('diagnostic', '${item.booking_id || item.id}', this.value)">
+              <option value="pending" ${(item.status || '') === 'pending' ? 'selected' : ''}>Pending</option>
               <option value="confirmed" ${(item.status || '') === 'confirmed' ? 'selected' : ''}>Confirmed</option>
               <option value="completed" ${(item.status || '') === 'completed' ? 'selected' : ''}>Completed</option>
               <option value="cancelled" ${(item.status || '') === 'cancelled' ? 'selected' : ''}>Cancelled</option>

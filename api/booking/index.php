@@ -259,14 +259,14 @@ function createBooking(array $data): array {
             'slot' => $slot,
             'reason' => trim((string) ($data['reason'] ?? 'General consultation')),
             'notes' => trim((string) ($data['notes'] ?? '')),
-            'status' => 'confirmed',
+            'status' => 'pending',
             'createdAt' => $timestamp,
             'updatedAt' => $timestamp,
             'cancelledAt' => null,
             'completedAt' => null,
             'rescheduledAt' => null,
             'rescheduleHistory' => [],
-            'history' => [['action' => 'created', 'status' => 'confirmed', 'at' => $timestamp, 'updatedBy' => 'Patient / Web Booking']]
+            'history' => [['action' => 'created', 'status' => 'pending', 'at' => $timestamp, 'updatedBy' => 'Patient / Web Booking']]
         ];
         $bookings[] = $booking;
         atomicSave($bookings);

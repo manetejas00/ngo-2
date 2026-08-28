@@ -146,7 +146,7 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             `city` VARCHAR(100) DEFAULT 'Mumbai',
             `booking_date` DATE NOT NULL,
             `time_slot` VARCHAR(100) NOT NULL,
-            `status` VARCHAR(50) DEFAULT 'confirmed',
+            `status` VARCHAR(50) DEFAULT 'pending',
             `email_sent` TINYINT(1) DEFAULT 0,
             `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
             INDEX `idx_test_id` (`test_id`),
