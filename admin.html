@@ -982,7 +982,7 @@
           filterSelect.innerHTML += `<option value="${s}">${s.toUpperCase()}</option>`;
         });
       } else if (tab === 'activity') {
-        ['FORM_SUBMIT', 'DOCTOR_BOOKING', 'DIAGNOSTIC_BOOKING', 'ADMIN_LOGIN_SUCCESS', 'ADMIN_LOGIN_FAILED', 'ADMIN_STATUS_UPDATE', 'ADMIN_LOGOUT'].forEach(e => {
+        ['FORM_SUBMIT', 'DOCTOR_BOOKING', 'DIAGNOSTIC_BOOKING', 'EMAIL_SENT', 'EMAIL_FAILED', 'ADMIN_LOGIN_SUCCESS', 'ADMIN_LOGIN_FAILED', 'ADMIN_STATUS_UPDATE', 'ADMIN_LOGOUT'].forEach(e => {
           filterSelect.innerHTML += `<option value="${e}">${e}</option>`;
         });
       }

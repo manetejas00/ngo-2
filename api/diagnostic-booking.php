@@ -177,6 +177,18 @@ try {
         ]
     );
 
+    logActivity(
+        $emailSent ? 'EMAIL_SENT' : 'EMAIL_FAILED',
+        'system',
+        $booking['patientEmail'],
+        $emailSent ? "Diagnostic booking confirmation delivered to {$booking['patientEmail']}" : "Diagnostic booking email delivery failed to {$booking['patientEmail']}",
+        [
+            'bookingId' => $booking['id'],
+            'patientEmail' => $booking['patientEmail'],
+            'smtpStatus' => $emailSent ? 'SENT' : 'FAILED'
+        ]
+    );
+
     http_response_code(201); echo json_encode(['status' => 'ok', 'booking' => $booking, 'emailSent' => $emailSent]);
 } catch (InvalidArgumentException $exception) { http_response_code(400); echo json_encode(['status' => 'error', 'message' => $exception->getMessage()]); }
 catch (Throwable $exception) { http_response_code(500); echo json_encode(['status' => 'error', 'message' => 'Diagnostic booking service is temporarily unavailable.']); }

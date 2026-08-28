@@ -459,6 +459,34 @@ logActivity(
     ]
 );
 
+logActivity(
+    $userEmailSent ? 'EMAIL_SENT' : 'EMAIL_FAILED',
+    'system',
+    $email,
+    $userEmailSent ? "User confirmation email delivered to {$email}" : "User email delivery failed to {$email}",
+    [
+        'submissionId' => $submissionId,
+        'subject' => $userSubject,
+        'role' => 'user',
+        'smtpStatus' => $userEmailSent ? 'SENT' : 'FAILED',
+        'error' => $userEmailError
+    ]
+);
+
+logActivity(
+    $adminEmailSent ? 'EMAIL_SENT' : 'EMAIL_FAILED',
+    'system',
+    $adminTo,
+    $adminEmailSent ? "Admin notification email delivered to {$adminTo}" : "Admin email delivery failed to {$adminTo}",
+    [
+        'submissionId' => $submissionId,
+        'subject' => $adminSubject,
+        'role' => 'admin',
+        'smtpStatus' => $adminEmailSent ? 'SENT' : 'FAILED',
+        'error' => $adminEmailError
+    ]
+);
+
 echo json_encode([
     'status' => 'ok',
     'submissionId' => $submissionId,

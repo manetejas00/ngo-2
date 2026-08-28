@@ -665,6 +665,19 @@ try {
             ]
         );
 
+        logActivity(
+            $emailSent ? 'EMAIL_SENT' : 'EMAIL_FAILED',
+            'system',
+            $booking['patientEmail'] ?? '',
+            $emailSent ? "Appointment confirmation email delivered to {$booking['patientEmail']}" : "Appointment email delivery failed to {$booking['patientEmail']}",
+            [
+                'bookingId' => $booking['id'] ?? '',
+                'patientEmail' => $booking['patientEmail'] ?? '',
+                'smtpStatus' => $emailSent ? 'SENT' : 'FAILED',
+                'error' => $booking['emailNotification']['lastError'] ?? ($emailEvent['error'] ?? 'SMTP Error')
+            ]
+        );
+
         respondJson(201, [
             'success' => true, 'status' => 'ok', 'bookingConfirmed' => true, 'whatsappSent' => $whatsappSent,
             'whatsappStatus' => $event['status'] ?? 'failed', 'emailSent' => $emailSent,
