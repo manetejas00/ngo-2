@@ -140,10 +140,10 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 11px 14px;
+      padding: 10px 14px;
       border-radius: 10px;
       color: #CBD5E1;
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 600;
       background: transparent;
       border: 1px solid transparent;
@@ -166,7 +166,7 @@
     }
 
     .nav-icon {
-      font-size: 16px;
+      font-size: 15px;
     }
 
     .nav-badge {
@@ -972,11 +972,41 @@
           <span class="nav-badge" id="sideTestsCatalogCount">0</span>
         </button>
 
-        <div class="menu-group-label">AUDIT & INQUIRIES</div>
-        <button class="sidebar-nav-link" data-tab="forms" onclick="switchTab('forms')">
-          <span class="nav-icon">📥</span> Form Submissions
+        <div class="menu-group-label">FORM SUBMISSIONS</div>
+        <button class="sidebar-nav-link" data-tab="forms_contact" onclick="switchTab('forms_contact')">
+          <span class="nav-icon">📞</span> Contact Us Inquiries
+          <span class="nav-badge" id="sideFormContactCount">0</span>
+        </button>
+        <button class="sidebar-nav-link" data-tab="forms_newsletter" onclick="switchTab('forms_newsletter')">
+          <span class="nav-icon">📰</span> Newsletter Subscribers
+          <span class="nav-badge" id="sideFormNewsletterCount">0</span>
+        </button>
+        <button class="sidebar-nav-link" data-tab="forms_volunteer" onclick="switchTab('forms_volunteer')">
+          <span class="nav-icon">🙋‍♂️</span> Volunteer Applications
+          <span class="nav-badge" id="sideFormVolunteerCount">0</span>
+        </button>
+        <button class="sidebar-nav-link" data-tab="forms_support" onclick="switchTab('forms_support')">
+          <span class="nav-icon">🩺</span> Patient Support Inquiries
+          <span class="nav-badge" id="sideFormSupportCount">0</span>
+        </button>
+        <button class="sidebar-nav-link" data-tab="forms_donation" onclick="switchTab('forms_donation')">
+          <span class="nav-icon">💰</span> Donations & 80G Claims
+          <span class="nav-badge" id="sideFormDonationCount">0</span>
+        </button>
+        <button class="sidebar-nav-link" data-tab="forms_partnership" onclick="switchTab('forms_partnership')">
+          <span class="nav-icon">🏢</span> CSR Partnerships
+          <span class="nav-badge" id="sideFormPartnershipCount">0</span>
+        </button>
+        <button class="sidebar-nav-link" data-tab="forms_feedback" onclick="switchTab('forms_feedback')">
+          <span class="nav-icon">💬</span> Website Feedbacks
+          <span class="nav-badge" id="sideFormFeedbackCount">0</span>
+        </button>
+        <button class="sidebar-nav-link" data-tab="forms_all" onclick="switchTab('forms_all')">
+          <span class="nav-icon">📥</span> All Form Submissions
           <span class="nav-badge" id="sideFormsCount">0</span>
         </button>
+
+        <div class="menu-group-label">SYSTEM AUDIT & LOGS</div>
         <button class="sidebar-nav-link" data-tab="email" onclick="switchTab('email')">
           <span class="nav-icon">📧</span> Email Audit Logs
           <span class="nav-badge" id="sideEmailCount">0</span>
@@ -1548,7 +1578,23 @@
       setVal('statDoctorBookings', analytics.totalDoctorBookings || 0);
       setVal('statDiagnosticBookings', analytics.totalDiagnosticBookings || 0);
 
+      // Dedicated Form Menu Badge Counts
+      const formCounts = analytics.formCountsByType || {};
+      let totalForms = 0;
+      (rawData.formSubmissions || []).forEach(f => {
+        const type = (f.form_type || 'contact').toLowerCase();
+        formCounts[type] = (formCounts[type] || 0);
+      });
+
+      setVal('sideFormContactCount', formCounts['contact'] || 0);
+      setVal('sideFormNewsletterCount', formCounts['newsletter'] || 0);
+      setVal('sideFormVolunteerCount', formCounts['volunteer'] || 0);
+      setVal('sideFormSupportCount', formCounts['support'] || 0);
+      setVal('sideFormDonationCount', formCounts['donation'] || 0);
+      setVal('sideFormPartnershipCount', formCounts['partnership'] || 0);
+      setVal('sideFormFeedbackCount', formCounts['feedback'] || 0);
       setVal('sideFormsCount', analytics.totalFormSubmissions || 0);
+
       setVal('sideDoctorCount', analytics.totalDoctorBookings || 0);
       setVal('sideDiagCount', analytics.totalDiagnosticBookings || 0);
       setVal('sideEmailCount', analytics.totalEmailLogs || 0);
@@ -1697,7 +1743,14 @@
       // Page Title Update
       const pageTitles = {
         'dashboard': 'Dashboard Overview',
-        'forms': 'Form Submissions & Inquiries',
+        'forms_all': 'All Form Submissions & Inquiries',
+        'forms_contact': 'Contact Us Inquiries',
+        'forms_newsletter': 'Newsletter Subscriptions',
+        'forms_volunteer': 'Volunteer Applications',
+        'forms_support': 'Patient Support Inquiries',
+        'forms_donation': 'Donations & 80G Tax Receipts',
+        'forms_partnership': 'CSR & Corporate Partnerships',
+        'forms_feedback': 'Website Feedbacks & Testimonials',
         'doctor': 'Doctor Appointment Bookings',
         'diagnostic': 'Diagnostic Test Package Bookings',
         'email': 'Email Dispatch & Audit Logs',
@@ -1725,10 +1778,13 @@
       if (filterSelect) {
         filterSelect.innerHTML = '<option value="ALL">All Categories</option>';
 
-        if (tab === 'forms') {
+        if (tab.startsWith('forms')) {
           ['contact', 'newsletter', 'volunteer', 'support', 'donation', 'partnership', 'feedback'].forEach(f => {
             filterSelect.innerHTML += `<option value="${f}">${f.toUpperCase()}</option>`;
           });
+          if (tab !== 'forms_all') {
+            filterSelect.value = tab.replace('forms_', '').toUpperCase();
+          }
         } else if (tab === 'doctor' || tab === 'diagnostic') {
           ['pending', 'confirmed', 'completed', 'cancelled', 'rescheduled'].forEach(s => {
             filterSelect.innerHTML += `<option value="${s}">${s.toUpperCase()}</option>`;
@@ -1799,8 +1855,13 @@
       const sort = document.getElementById('sortFilter').value;
 
       let items = [];
-      if (currentTab === 'forms') items = [...rawData.formSubmissions];
-      else if (currentTab === 'doctor') items = [...rawData.doctorBookings];
+      if (currentTab.startsWith('forms')) {
+        items = [...rawData.formSubmissions];
+        if (currentTab !== 'forms_all') {
+          const targetType = currentTab.replace('forms_', '');
+          items = items.filter(i => (i.form_type || 'contact').toLowerCase() === targetType);
+        }
+      } else if (currentTab === 'doctor') items = [...rawData.doctorBookings];
       else if (currentTab === 'diagnostic') items = [...rawData.diagnosticBookings];
       else if (currentTab === 'email') items = [...rawData.emailLogs];
       else if (currentTab === 'activity') items = [...rawData.activityLogs];
@@ -1861,7 +1922,7 @@
       updateActiveFilterPills(typeFilter, startDate, endDate, delivery, sort);
 
       // Render tab
-      if (currentTab === 'forms') renderForms(items);
+      if (currentTab.startsWith('forms')) renderForms(items);
       else if (currentTab === 'doctor') renderDoctorBookings(items);
       else if (currentTab === 'diagnostic') renderDiagnosticBookings(items);
       else if (currentTab === 'email') renderEmailLogs(items);
@@ -1903,7 +1964,7 @@
       if (addUserBtn) addUserBtn.style.display = (currentTab === 'usersCatalog') ? 'inline-flex' : 'none';
       if (reseedBtn) reseedBtn.style.display = (currentTab === 'doctorsCatalog' || currentTab === 'testsCatalog' || currentTab === 'usersCatalog') ? 'inline-flex' : 'none';
 
-      if (currentTab === 'forms') {
+      if (currentTab.startsWith('forms')) {
         thead.innerHTML = `
           <th>ID</th>
           <th>Type</th>
@@ -1992,7 +2053,7 @@
     function renderForms(items) {
       const tbody = document.getElementById('tableBody');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No matching form submissions found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No matching form submissions found for this menu view.</td></tr>`;
         return;
       }
       tbody.innerHTML = items.map(item => `
@@ -2534,8 +2595,13 @@
       let data = [];
       let filename = `AvinyaCare_${currentTab}_export.csv`;
 
-      if (currentTab === 'forms') data = rawData.formSubmissions;
-      else if (currentTab === 'doctor') data = rawData.doctorBookings;
+      if (currentTab.startsWith('forms')) {
+        data = rawData.formSubmissions;
+        if (currentTab !== 'forms_all') {
+          const targetType = currentTab.replace('forms_', '');
+          data = data.filter(i => (i.form_type || 'contact').toLowerCase() === targetType);
+        }
+      } else if (currentTab === 'doctor') data = rawData.doctorBookings;
       else if (currentTab === 'diagnostic') data = rawData.diagnosticBookings;
       else if (currentTab === 'email') data = rawData.emailLogs;
       else if (currentTab === 'activity') data = rawData.activityLogs;
