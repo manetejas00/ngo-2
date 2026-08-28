@@ -131,7 +131,8 @@ async function sendDeliveryErrorAlertToAdmin(details) {
       subject: errorSubject,
       htmlContent: errorHtml,
       textContent: errorText,
-      replyTo: senderEmail
+      replyTo: senderEmail,
+      attachments: [EMAIL_LOGO_ATTACHMENT]
     });
 
     console.log(`[Diagnostic Alert Sent] Dispatched delivery failure alert to ${adminEmail} for submission ${metadata.submissionId}`);

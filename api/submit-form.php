@@ -207,10 +207,10 @@ $userHtmlContent = '<!DOCTYPE html>
           
           <!-- Header Banner -->
           <tr>
-            <td style="background-color: #087F73; padding: 36px 36px 30px 36px; text-align: center;">
+            <td style="background-color: #0A0A0A; padding: 28px 32px; text-align: center; border-bottom: 3px solid #F47528;">
               <div style="display: inline-block; background: #FFFFFF; border-radius: 50%; padding: 6px; margin-bottom: 12px;"><img src="cid:avinya-logo" alt="Avinya Care Foundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;"></div>
-              <div style="color: #62B59F; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">Avinya Care Foundation</div>
-              <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">Healthcare Dignity & Cancer Awareness</h1>
+              <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">Avinya Care Healthcare Platform</div>
+              <h1 style="color: #FFFFFF; font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">Healthcare Dignity & Cancer Awareness</h1>
             </td>
           </tr>
 
@@ -243,15 +243,15 @@ $userHtmlContent = '<!DOCTYPE html>
 
           <!-- Footer Section -->
           <tr>
-            <td style="background-color: #F6F4EF; padding: 28px 36px; text-align: center; border-top: 1px solid #E2E8F0; color: #5F6865; font-size: 12px; line-height: 1.6;">
-              <p style="margin: 0 0 8px 0; font-weight: 700; color: #087F73; text-transform: uppercase; letter-spacing: 1px; font-size: 11px;">
+            <td style="background-color: #0A0A0A; padding: 24px 32px; text-align: center; border-top: 1px solid #262626; color: #A3A3A3; font-size: 11px; line-height: 1.6;">
+              <p style="margin: 0 0 8px 0; font-weight: 700; color: #F58220; text-transform: uppercase; letter-spacing: 1px; font-size: 11px;">
                 Cancer Awareness • Support • Care • Community
               </p>
               <p style="margin: 0 0 12px 0;">
                 Avinya Care Foundation • Reg. NGO 80G / 12A Tax Exempted<br>
-                Email: <a href="mailto:info@test.avinyacarefoundation.org" style="color: #087F73; text-decoration: none; font-weight: 600;">info@test.avinyacarefoundation.org</a> | Helpline: <a href="tel:+919876543210" style="color: #087F73; text-decoration: none; font-weight: 600;">+91 98765 43210</a>
+                Email: <a href="mailto:info@test.avinyacarefoundation.org" style="color: #F58220; text-decoration: none; font-weight: 600;">info@test.avinyacarefoundation.org</a> | Helpline: <a href="tel:+919876543210" style="color: #F58220; text-decoration: none; font-weight: 600;">+91 98765 43210</a>
               </p>
-              <p style="margin: 0; font-size: 11px; color: #717D7A; border-top: 1px dashed #CBD5E1; padding-top: 12px;">
+              <p style="margin: 0; font-size: 11px; color: #737373; border-top: 1px dashed #404040; padding-top: 12px;">
                 <strong>Medical & Legal Disclaimer:</strong> Avinya Care Foundation communications provide general health awareness and screening navigation. We do not provide medical prescriptions, diagnoses, or direct clinical medical advice.
               </p>
             </td>
@@ -283,9 +283,9 @@ $adminHtmlContent = '<!DOCTYPE html>
           
           <!-- Header Banner -->
           <tr>
-            <td style="background-color: #111817; padding: 24px 32px;">
+            <td style="background-color: #0A0A0A; padding: 24px 32px; border-bottom: 3px solid #F47528;">
               <div style="display: inline-block; background: #FFFFFF; border-radius: 50%; padding: 5px; margin: 0 12px 8px 0; vertical-align: middle;"><img src="cid:avinya-logo" alt="Avinya Care Foundation" width="40" height="40" style="display: block; width: 40px; height: 40px; border: 0; border-radius: 50%; object-fit: contain;"></div>
-              <div style="color: #62B59F; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Avinya Care Internal Desk</div>
+              <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Avinya Care Internal Desk</div>
               <h2 style="color: #FFFFFF; font-size: 20px; font-weight: 700; margin: 0;">Operational Alert: ' . strtoupper(htmlspecialchars($formType)) . '</h2>
             </td>
           </tr>

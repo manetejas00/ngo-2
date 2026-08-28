@@ -6,7 +6,9 @@
 import { escapeHTML } from '../email/emailTemplate.mjs';
 
 function renderEmailLayout(title, preheader, contentHtml) {
-  const logoUrl = process.env.LOGO_URL || 'cid:avinya-logo';
+  // Always use the embedded image. Remote logo URLs are commonly blocked by
+  // mail clients and a stale LOGO_URL caused the broken image seen in Gmail.
+  const logoUrl = 'cid:avinya-logo';
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

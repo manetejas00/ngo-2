@@ -67,7 +67,7 @@ export function renderUserEmail(emailContent, formData, formType) {
                 <tr>
                   <td align="center">
                     <div style="display: inline-block; background-color: #FFFFFF; border-radius: 50%; padding: 6px; box-shadow: 0 4px 12px rgba(245, 130, 32, 0.3);">
-                      <img src="${process.env.LOGO_URL || 'cid:avinya-logo'}" alt="Avinya Care Foundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;" />
+                      <img src="cid:avinya-logo" alt="Avinya Care Foundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;" />
                     </div>
                   </td>
                 </tr>
@@ -94,15 +94,15 @@ export function renderUserEmail(emailContent, formData, formType) {
 
           <!-- Footer & Disclaimers -->
           <tr>
-            <td style="background-color: #F6F4EF; padding: 24px 32px; text-align: center; border-top: 1px solid #E2E8F0; color: #5F6865; font-size: 12px; line-height: 1.6;">
-              <p style="margin: 0 0 8px 0; font-weight: 600; color: #087F73; text-transform: uppercase; letter-spacing: 1px; font-size: 11px;">
+            <td style="background-color: #0A0A0A; padding: 24px 32px; text-align: center; border-top: 1px solid #262626; color: #A3A3A3; font-size: 11px; line-height: 1.6;">
+              <p style="margin: 0 0 8px 0; font-weight: 600; color: #F58220; text-transform: uppercase; letter-spacing: 1px; font-size: 11px;">
                 Cancer Awareness • Support • Care • Community
               </p>
               <p style="margin: 0 0 12px 0;">
                 Avinya Care Foundation • Reg. NGO 80G / 12A Tax Exempted<br>
-                Email: <a href="mailto:care@avinyacare.org" style="color: #087F73; text-decoration: none; font-weight: 500;">care@avinyacare.org</a> | Helpline: <a href="tel:+919876543210" style="color: #087F73; text-decoration: none; font-weight: 500;">+91 98765 43210</a>
+                Email: <a href="mailto:care@avinyacare.org" style="color: #F58220; text-decoration: none; font-weight: 500;">care@avinyacare.org</a> | Helpline: <a href="tel:+919876543210" style="color: #F58220; text-decoration: none; font-weight: 500;">+91 98765 43210</a>
               </p>
-              <p style="margin: 0; font-size: 11px; color: #5F6865; border-top: 1px dashed #CBD5E1; padding-top: 10px;">
+              <p style="margin: 0; font-size: 11px; color: #737373; border-top: 1px dashed #404040; padding-top: 10px;">
                 <strong>Medical & Legal Disclaimer:</strong> Avinya Care Foundation communications provide general cancer awareness and support navigation. We do not provide medical diagnoses, treatment prescriptions, or clinical medical advice. Please consult a registered medical oncologist for health concerns.
               </p>
             </td>
@@ -175,7 +175,7 @@ export function renderAdminEmail(emailContent, formData, formType, submissionId,
                 <tr>
                   <td valign="middle" style="width: 44px;">
                     <div style="background-color: #FFFFFF; border-radius: 50%; padding: 4px; display: inline-block;">
-                      <img src="${process.env.LOGO_URL || 'cid:avinya-logo'}" alt="Avinya Care" width="36" height="36" style="display: block; width: 36px; height: 36px; border: 0; border-radius: 50%; object-fit: contain;" />
+                      <img src="cid:avinya-logo" alt="Avinya Care" width="36" height="36" style="display: block; width: 36px; height: 36px; border: 0; border-radius: 50%; object-fit: contain;" />
                     </div>
                   </td>
                   <td valign="middle" style="padding-left: 12px;">
@@ -220,7 +220,7 @@ export function renderAdminEmail(emailContent, formData, formType, submissionId,
 
           <!-- Footer -->
           <tr>
-            <td style="background-color: #F6F4EF; padding: 16px 32px; text-align: center; color: #5F6865; font-size: 12px; border-top: 1px solid #E2E8F0;">
+            <td style="background-color: #0A0A0A; padding: 20px 32px; text-align: center; color: #A3A3A3; font-size: 11px; border-top: 1px solid #262626;">
               Avinya Care Automated Dispatch System • Confidential Internal Operations Notice
             </td>
           </tr>
