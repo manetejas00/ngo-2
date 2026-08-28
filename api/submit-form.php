@@ -52,14 +52,39 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
     $pass = '@qLVTyL|J5';
     $from = 'info@test.avinyacarefoundation.org';
     $fromName = 'Avinya Care Foundation';
+    $boundary = '=_AvinyaLogo_' . bin2hex(random_bytes(8));
+    $logoPath = dirname(__DIR__) . '/assets/logo.png';
+    $mimeParts = [
+        '--' . $boundary,
+        'Content-Type: text/html; charset=UTF-8',
+        'Content-Transfer-Encoding: 8bit',
+        '',
+        $htmlBody
+    ];
+    if (is_file($logoPath) && is_readable($logoPath)) {
+        $logo = file_get_contents($logoPath);
+        if ($logo !== false) {
+            $mimeParts = array_merge($mimeParts, [
+                '--' . $boundary,
+                'Content-Type: image/png; name="avinya-care-logo.png"',
+                'Content-Transfer-Encoding: base64',
+                'Content-ID: <avinya-logo>',
+                'Content-Disposition: inline; filename="avinya-care-logo.png"',
+                '',
+                rtrim(chunk_split(base64_encode($logo), 76, "\r\n"))
+            ]);
+        }
+    }
+    $mimeParts[] = '--' . $boundary . '--';
+    $mimeBody = implode("\r\n", $mimeParts);
 
     $socket = @fsockopen($host, $port, $errno, $errstr, 12);
     if (!$socket) {
         $headers  = "From: {$fromName} <{$from}>\r\n";
         $headers .= "Reply-To: " . ($replyTo ?: $from) . "\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
-        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-        return @mail($to, $subject, $htmlBody, $headers);
+        $headers .= "Content-Type: multipart/related; boundary=\"{$boundary}\"\r\n";
+        return @mail($to, $subject, $mimeBody, $headers);
     }
 
     fgets($socket, 512);
@@ -94,11 +119,11 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
         "Subject: {$encodedSubject}",
         "Reply-To: " . ($replyTo ?: $from),
         "MIME-Version: 1.0",
-        "Content-Type: text/html; charset=UTF-8",
+        "Content-Type: multipart/related; boundary=\"{$boundary}\"",
         "X-Mailer: AvinyaCare-PHP-SMTP/2.0"
     ];
 
-    fputs($socket, implode("\r\n", $headers) . "\r\n\r\n" . $htmlBody . "\r\n.\r\n");
+    fputs($socket, implode("\r\n", $headers) . "\r\n\r\n" . $mimeBody . "\r\n.\r\n");
     $dataRes = fgets($socket, 512);
 
     fputs($socket, "QUIT\r\n");
@@ -183,6 +208,7 @@ $userHtmlContent = '<!DOCTYPE html>
           <!-- Header Banner -->
           <tr>
             <td style="background-color: #087F73; padding: 36px 36px 30px 36px; text-align: center;">
+              <div style="display: inline-block; background: #FFFFFF; border-radius: 50%; padding: 6px; margin-bottom: 12px;"><img src="cid:avinya-logo" alt="Avinya Care Foundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;"></div>
               <div style="color: #62B59F; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">Avinya Care Foundation</div>
               <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">Healthcare Dignity & Cancer Awareness</h1>
             </td>
@@ -258,6 +284,7 @@ $adminHtmlContent = '<!DOCTYPE html>
           <!-- Header Banner -->
           <tr>
             <td style="background-color: #111817; padding: 24px 32px;">
+              <div style="display: inline-block; background: #FFFFFF; border-radius: 50%; padding: 5px; margin: 0 12px 8px 0; vertical-align: middle;"><img src="cid:avinya-logo" alt="Avinya Care Foundation" width="40" height="40" style="display: block; width: 40px; height: 40px; border: 0; border-radius: 50%; object-fit: contain;"></div>
               <div style="color: #62B59F; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Avinya Care Internal Desk</div>
               <h2 style="color: #FFFFFF; font-size: 20px; font-weight: 700; margin: 0;">Operational Alert: ' . strtoupper(htmlspecialchars($formType)) . '</h2>
             </td>

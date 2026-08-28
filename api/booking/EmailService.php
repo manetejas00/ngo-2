@@ -60,14 +60,16 @@ final class AppointmentEmailService {
             $this->command($socket, 'DATA', [354]);
 
             $subject = 'Appointment Confirmed — ' . (string) ($booking['id'] ?? 'Avinya Care');
+            $boundary = '=_AvinyaLogo_' . bin2hex(random_bytes(8));
             $headers = [
                 'From: ' . $fromName . ' <' . $from . '>', 'To: <' . $to . '>',
                 'Subject: =?UTF-8?B?' . base64_encode($subject) . '?=', 'MIME-Version: 1.0',
-                'Content-Type: text/html; charset=UTF-8', 'Content-Transfer-Encoding: 8bit',
+                'Content-Type: multipart/related; boundary="' . $boundary . '"',
                 'X-Mailer: AvinyaCare-Booking/1.0'
             ];
             $body = $this->template($booking);
-            $message = implode("\r\n", $headers) . "\r\n\r\n" . preg_replace('/(?m)^\./', '..', $body) . "\r\n.";
+            $mimeBody = $this->inlineLogoMimeBody($body, $boundary);
+            $message = implode("\r\n", $headers) . "\r\n\r\n" . preg_replace('/(?m)^\./', '..', $mimeBody) . "\r\n.";
             $this->command($socket, $message, [250]);
             fwrite($socket, "QUIT\r\n");
             fclose($socket);
@@ -98,6 +100,33 @@ final class AppointmentEmailService {
         return ['type' => 'appointment_confirmation_fallback', 'status' => $status, 'provider' => 'smtp', 'attemptedAt' => $attemptedAt, 'sentAt' => $status === 'sent' ? nowIso() : null, 'error' => $error];
     }
 
+    private function inlineLogoMimeBody(string $html, string $boundary): string {
+        $logoPath = dirname(__DIR__, 2) . '/assets/logo.png';
+        $parts = [
+            '--' . $boundary,
+            'Content-Type: text/html; charset=UTF-8',
+            'Content-Transfer-Encoding: 8bit',
+            '',
+            $html
+        ];
+        if (is_file($logoPath) && is_readable($logoPath)) {
+            $logo = file_get_contents($logoPath);
+            if ($logo !== false) {
+                $parts = array_merge($parts, [
+                    '--' . $boundary,
+                    'Content-Type: image/png; name="avinya-care-logo.png"',
+                    'Content-Transfer-Encoding: base64',
+                    'Content-ID: <avinya-logo>',
+                    'Content-Disposition: inline; filename="avinya-care-logo.png"',
+                    '',
+                    rtrim(chunk_split(base64_encode($logo), 76, "\r\n"))
+                ]);
+            }
+        }
+        $parts[] = '--' . $boundary . '--';
+        return implode("\r\n", $parts);
+    }
+
     private function template(array $booking): string {
         $name = emailHtml((string) ($booking['patientName'] ?? 'Patient'));
         $id = emailHtml((string) ($booking['id'] ?? ''));
@@ -110,7 +139,7 @@ final class AppointmentEmailService {
         return '<!doctype html><html><body style="margin:0;background:#F6F4EF;font-family:Arial,sans-serif;color:#111817">'
             . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:28px 14px;background:#F6F4EF"><tr><td align="center">'
             . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#fff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">'
-            . '<tr><td style="background:#087F73;padding:32px;text-align:center;color:#fff"><div style="color:#A7F3D0;font-size:12px;font-weight:700;letter-spacing:2px">AVINYA CARE FOUNDATION</div><h1 style="margin:8px 0 0;font-size:25px">Appointment Confirmed</h1></td></tr>'
+            . '<tr><td style="background:#087F73;padding:32px;text-align:center;color:#fff"><div style="display:inline-block;background:#fff;border-radius:50%;padding:6px;margin-bottom:12px"><img src="cid:avinya-logo" alt="Avinya Care Foundation" width="56" height="56" style="display:block;width:56px;height:56px;border:0;border-radius:50%;object-fit:contain"></div><div style="color:#A7F3D0;font-size:12px;font-weight:700;letter-spacing:2px">AVINYA CARE FOUNDATION</div><h1 style="margin:8px 0 0;font-size:25px">Appointment Confirmed</h1></td></tr>'
             . '<tr><td style="padding:34px"><p style="font-size:18px;font-weight:700;color:#087F73">Hi ' . $name . ',</p><p style="line-height:1.7">Your appointment has been successfully confirmed. Please keep the booking ID below for future reference.</p>'
             . '<div style="background:#F0FDFA;border-left:4px solid #087F73;border-radius:9px;padding:20px;margin:24px 0;line-height:1.9"><strong>Booking ID:</strong> ' . $id . '<br><strong>Doctor:</strong> ' . $doctor . '<br><strong>Service:</strong> ' . $speciality . '<br><strong>Date:</strong> ' . $date . '<br><strong>Time:</strong> ' . $time . '<br><strong>Mode:</strong> ' . $mode . '<br><strong>Location:</strong> ' . $hospital . '</div>'
             . '<p style="line-height:1.7">If you need assistance, reply to this email or contact the Avinya Care team.</p><p style="margin-top:28px;color:#5F6865">With care,<br><strong style="color:#087F73">Avinya Care Foundation Team</strong></p></td></tr>'
