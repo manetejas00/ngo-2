@@ -36,6 +36,17 @@ def post_json(endpoint, payload, headers_extra=None, retries=1):
                 continue
             return 0, {"error": str(e)}
 
+def get_html(endpoint):
+    url = f"{TARGET_HOST}{endpoint}"
+    req = urllib.request.Request(url, method='GET')
+    try:
+        with urllib.request.urlopen(req, timeout=25) as response:
+            return response.getcode(), response.read().decode('utf-8')
+    except urllib.error.HTTPError as e:
+        return e.code, ""
+    except Exception as e:
+        return 0, str(e)
+
 def get_json(endpoint):
     url = f"{TARGET_HOST}{endpoint}"
     req = urllib.request.Request(url, method='GET')
@@ -65,9 +76,9 @@ def run_production_audit():
     # TEST 1: Public Web Pages & Healthcare & News Endpoints
     # -------------------------------------------------------------
     print("1️⃣ Testing Public Healthcare Pages & APIs...")
-    code, _ = get_json("/doctors.html")
-    print(f"   - GET /doctors.html -> HTTP {code}")
-    results.append(("Public Doctors HTML Page", code == 200))
+    code, html_content = get_html("/doctors.html")
+    print(f"   - GET /doctors.html -> HTTP {code} | Length: {len(html_content)} bytes")
+    results.append(("Public Doctors HTML Page", code == 200 and len(html_content) > 1000))
 
     code, docs_res = get_json("/api/healthcare/doctors.php")
     doc_count = len(docs_res.get("doctors", [])) if isinstance(docs_res, dict) and "doctors" in docs_res else 0

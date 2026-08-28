@@ -1,7 +1,7 @@
 #!/usr/bin/expect -f
-set timeout 30
+set timeout 60
 set pass "@qLVTyL|J5"
-spawn ssh -p 65002 -o StrictHostKeyChecking=no u382139760@82.112.239.95 "ls -la domains/avinyacarefoundation.org/public_html/ && ls -la domains/avinyacarefoundation.org/hbuilds/"
+spawn ssh -p 65002 -o StrictHostKeyChecking=no u382139760@82.112.239.95 "cp -rf domains/test.avinyacarefoundation.org/public_html/* domains/avinyacarefoundation.org/public_html/ 2>/dev/null || true && mkdir -p domains/avinyacarefoundation.org/public_html/api && cp -rf domains/test.avinyacarefoundation.org/public_html/api/* domains/avinyacarefoundation.org/public_html/api/ 2>/dev/null || true && cd domains/avinyacarefoundation.org/public_html && cp -f .env.production .env && ls -la && ls -la api/"
 expect {
     "password:" {
         send "$pass\r"
