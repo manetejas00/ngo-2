@@ -14,11 +14,11 @@ DirectoryIndex index.html index.php
   RewriteRule ^api/bookings/?$ api/booking/index.php?action=list [QSA,L,NC]
   RewriteRule ^api/booking/?$ api/booking/index.php [QSA,L,NC]
 
-  # Route /api/healthcare endpoints for seamless PHP/Hostinger compatibility
+  # Route /api/healthcare endpoints to dynamic MySQL PHP handlers
   RewriteRule ^api/healthcare/doctors/([^/]+)/slots/?$ api/booking/index.php?action=slots&doctorId=$1 [QSA,L,NC]
-  RewriteRule ^api/healthcare/doctors/?$ api/healthcare/doctors.json [L,NC]
-  RewriteRule ^api/healthcare/specialities/?$ api/healthcare/specialities.json [L,NC]
-  RewriteRule ^api/healthcare/tests/?$ api/healthcare/tests.json [L,NC]
+  RewriteRule ^api/healthcare/doctors(\.json)?/?$ api/healthcare/doctors.php [L,NC]
+  RewriteRule ^api/healthcare/specialities(\.json)?/?$ api/healthcare/specialities.php [L,NC]
+  RewriteRule ^api/healthcare/tests(\.json)?/?$ api/healthcare/tests.php [L,NC]
 
   # Route /api/news endpoints
   RewriteRule ^api/news/?$ api/news.json [L,NC]

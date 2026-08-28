@@ -125,16 +125,21 @@ try {
         }
     } catch (Throwable $e) {}
 
-    if (!$test) {
-        $tests = json_decode((string) file_get_contents(__DIR__ . '/healthcare/tests.json'), true);
-        $catalog = isset($tests['tests']) ? $tests['tests'] : $tests;
-        foreach ($catalog as $candidate) if (($candidate['id'] ?? '') === $data['testId']) { $test = $candidate; break; }
+    if (!$test && $pdo !== null) {
+        seedCatalogFromJSON($pdo, false);
+        $stmt = $pdo->prepare("SELECT * FROM `diagnostic_tests` WHERE `test_id` = :id AND `is_active` = 1 LIMIT 1");
+        $stmt->execute([':id' => $data['testId']]);
+        $row = $stmt->fetch();
+        if ($row) {
+            $test = [
+                'id' => $row['test_id'],
+                'name' => $row['name'],
+                'price' => (float) $row['price']
+            ];
+        }
     }
     if (!$test) throw new InvalidArgumentException('Selected diagnostic test package not found.');
     $booking = ['id' => 'AVC-TST-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4))), 'testId' => $data['testId'], 'testName' => $test['name'], 'price' => $test['price'], 'collectionMethod' => $data['collectionMethod'] ?? 'home_collection', 'homeAddress' => trim((string) ($data['homeAddress'] ?? '')), 'pincode' => trim((string) ($data['pincode'] ?? '')), 'city' => trim((string) ($data['city'] ?? 'Mumbai')), 'date' => $data['date'], 'timeSlot' => $data['timeSlot'], 'patientName' => trim($data['patientName']), 'patientEmail' => strtolower(trim($data['patientEmail'])), 'patientPhone' => trim($data['patientPhone']), 'patientAge' => (int) ($data['patientAge'] ?? 0), 'patientGender' => $data['patientGender'] ?? 'Unspecified', 'status' => 'pending', 'createdAt' => date(DATE_ATOM)];
-    $dataDir = __DIR__ . '/diagnostic/data'; if (!is_dir($dataDir)) mkdir($dataDir, 0775, true);
-    $ledgerPath = $dataDir . '/test-bookings.json'; $ledger = is_readable($ledgerPath) ? json_decode((string) file_get_contents($ledgerPath), true) : []; if (!is_array($ledger)) $ledger = [];
-    $ledger[] = $booking; file_put_contents($ledgerPath, json_encode($ledger, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
     $emailSent = sendDiagnosticEmail($booking);
     
     try {

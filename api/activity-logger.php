@@ -52,42 +52,6 @@ function logActivity(
             error_log('Activity Logger DB Exception: ' . $e->getMessage());
         }
     }
-
-    // Fallback JSON ledger
-    try {
-        $cacheDir = dirname(__DIR__) . '/cache';
-        if (!is_dir($cacheDir)) {
-            @mkdir($cacheDir, 0755, true);
-        }
-        $logFile = $cacheDir . '/activity_logs.json';
-        $existing = [];
-        if (is_file($logFile)) {
-            $raw = @file_get_contents($logFile);
-            $existing = json_decode((string) $raw, true) ?: [];
-        }
-
-        array_unshift($existing, [
-            'id' => $logId,
-            'log_id' => $logId,
-            'event_type' => strtoupper($eventType),
-            'actor_type' => strtolower($actorType),
-            'actor_identifier' => $actorIdentifier,
-            'action' => $action,
-            'details' => $details,
-            'ip_address' => $ipAddress,
-            'user_agent' => $userAgent,
-            'created_at' => $createdAt
-        ]);
-
-        if (count($existing) > 500) {
-            $existing = array_slice($existing, 0, 500);
-        }
-
-        @file_put_contents($logFile, json_encode($existing, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
-    } catch (Throwable $e) {
-        error_log('Activity Logger File Exception: ' . $e->getMessage());
-    }
-
     return $dbSuccess;
 }
 

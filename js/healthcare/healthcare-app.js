@@ -61,9 +61,9 @@ class HealthcarePlatform {
     this.bookingApiEndpoint = '/api/booking/index.php';
     this.adminBookingsCache = [];
     this.staticEndpoints = {
-      doctors: '/api/healthcare/doctors.json',
-      specialities: '/api/healthcare/specialities.json',
-      tests: '/api/healthcare/tests.json'
+      doctors: '/api/healthcare/doctors.php',
+      specialities: '/api/healthcare/specialities.php',
+      tests: '/api/healthcare/tests.php'
     };
 
     this.init();

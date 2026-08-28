@@ -88,19 +88,52 @@ function latestValidBackup(): ?array {
 }
 
 function readLedger(): array {
-    global $bookingFile, $backupDir;
-    requireStorage();
-    $raw = @file_get_contents($bookingFile);
-    if ($raw === false) throw new RuntimeException('Unable to read booking storage.');
     try {
-        return decodeLedger($raw, $bookingFile);
-    } catch (Throwable $error) {
-        $corruptCopy = $backupDir . '/corrupt-' . date('Ymd-His') . '-' . bin2hex(random_bytes(3)) . '.json';
-        @file_put_contents($corruptCopy, $raw, LOCK_EX);
-        $recovered = latestValidBackup();
-        if ($recovered !== null) return $recovered;
-        throw new RuntimeException('Booking storage is invalid and no valid backup is available. The original file was preserved.');
-    }
+        $pdo = getDatabaseConnection();
+        if ($pdo !== null) {
+            $stmt = $pdo->query("SELECT * FROM `doctor_bookings` ORDER BY `id` DESC");
+            $rows = $stmt->fetchAll();
+            $bookings = [];
+            foreach ($rows as $r) {
+                $b = !empty($r['raw_payload']) ? json_decode($r['raw_payload'], true) : null;
+                if (!is_array($b)) {
+                    $b = [
+                        'id' => $r['booking_id'],
+                        'doctorId' => $r['doctor_id'],
+                        'doctorName' => $r['doctor_name'],
+                        'doctorSpeciality' => $r['doctor_speciality'],
+                        'doctorHospital' => $r['doctor_hospital'],
+                        'patientName' => $r['patient_name'],
+                        'patientEmail' => $r['patient_email'],
+                        'patientPhone' => $r['patient_phone'],
+                        'patientAge' => (int) $r['patient_age'],
+                        'patientGender' => $r['patient_gender'],
+                        'consultationType' => $r['consultation_type'],
+                        'date' => $r['booking_date'],
+                        'time' => $r['booking_time'],
+                        'slot' => $r['booking_time'],
+                        'reason' => $r['reason'],
+                        'notes' => $r['notes'],
+                        'status' => $r['status'],
+                        'createdAt' => $r['created_at'],
+                        'updatedAt' => $r['updated_at']
+                    ];
+                } else {
+                    $b['status'] = $r['status'];
+                    $b['date'] = $r['booking_date'];
+                    $b['time'] = $r['booking_time'];
+                    $b['slot'] = $r['booking_time'];
+                }
+                $bookings[] = $b;
+            }
+            return $bookings;
+        }
+    } catch (Throwable $e) {}
+
+    global $bookingFile;
+    if (!file_exists($bookingFile)) return [];
+    $raw = @file_get_contents($bookingFile);
+    return $raw ? (json_decode($raw, true) ?: []) : [];
 }
 
 function withLedgerLock(callable $operation) {

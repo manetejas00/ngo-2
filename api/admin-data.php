@@ -66,22 +66,6 @@ if ($action === 'update_status') {
             $stmt = $pdo->prepare("UPDATE `doctor_bookings` SET `status` = :st WHERE `booking_id` = :id");
             $stmt->execute([':st' => $newStatus, ':id' => $id]);
         }
-        // Also update JSON ledger if present
-        $bookingFile = dirname(__DIR__) . '/storage/bookings/bookings.json';
-        if (is_file($bookingFile)) {
-            $raw = @file_get_contents($bookingFile);
-            $bookings = json_decode((string) $raw, true);
-            if (is_array($bookings)) {
-                foreach ($bookings as &$b) {
-                    if (($b['id'] ?? '') === $id) {
-                        $b['status'] = $newStatus;
-                        $b['updatedAt'] = date(DATE_ATOM);
-                        break;
-                    }
-                }
-                @file_put_contents($bookingFile, json_encode($bookings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
-            }
-        }
         logActivity(
             'ADMIN_STATUS_UPDATE',
             'admin',
@@ -95,20 +79,6 @@ if ($action === 'update_status') {
         if ($pdo !== null) {
             $stmt = $pdo->prepare("UPDATE `diagnostic_bookings` SET `status` = :st WHERE `booking_id` = :id");
             $stmt->execute([':st' => $newStatus, ':id' => $id]);
-        }
-        $diagFile = __DIR__ . '/diagnostic/data/test-bookings.json';
-        if (is_file($diagFile)) {
-            $raw = @file_get_contents($diagFile);
-            $bookings = json_decode((string) $raw, true);
-            if (is_array($bookings)) {
-                foreach ($bookings as &$b) {
-                    if (($b['id'] ?? '') === $id) {
-                        $b['status'] = $newStatus;
-                        break;
-                    }
-                }
-                @file_put_contents($diagFile, json_encode($bookings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
-            }
         }
 
         logActivity(
@@ -171,26 +141,6 @@ if ($action === 'save_doctor') {
         ]);
     }
 
-    // Sync to JSON file
-    $docFile = __DIR__ . '/healthcare/doctors.json';
-    $docData = is_file($docFile) ? json_decode((string) file_get_contents($docFile), true) : ['status' => 'ok', 'doctors' => []];
-    if (!isset($docData['doctors']) || !is_array($docData['doctors'])) $docData['doctors'] = [];
-    $found = false;
-    $newEntry = [
-        'id' => $docId, 'name' => $name, 'specialityId' => $specId, 'specialityName' => $specName, 'qualification' => $qual,
-        'experienceYears' => $exp, 'hospitalId' => $hId, 'hospitalName' => $hName, 'location' => $loc, 'consultationFee' => $fee,
-        'feeDisplay' => $feeDisp, 'consultationTypes' => $types, 'rating' => $rating, 'reviewsCount' => $revs, 'badge' => $badge,
-        'avatar' => $avatar, 'about' => $about, 'areasOfExpertise' => $expert, 'languages' => $langs, 'schedule' => $sched
-    ];
-    foreach ($docData['doctors'] as &$item) {
-        if (($item['id'] ?? '') === $docId) {
-            $item = array_merge($item, $newEntry);
-            $found = true; break;
-        }
-    }
-    if (!$found) $docData['doctors'][] = $newEntry;
-    @file_put_contents($docFile, json_encode($docData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
-
     logActivity('DOCTOR_SAVED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Saved doctor profile for {$name} ({$docId})", ['doctorId' => $docId, 'name' => $name]);
     echo json_encode(['status' => 'ok', 'message' => "Doctor profile for {$name} saved successfully.", 'doctorId' => $docId]);
     exit(0);
@@ -205,16 +155,6 @@ if ($action === 'delete_doctor') {
     if ($pdo !== null) {
         $stmt = $pdo->prepare("DELETE FROM `doctors` WHERE `doctor_id` = :id");
         $stmt->execute([':id' => $docId]);
-    }
-    $docFile = __DIR__ . '/healthcare/doctors.json';
-    if (is_file($docFile)) {
-        $docData = json_decode((string) file_get_contents($docFile), true);
-        if (isset($docData['doctors']) && is_array($docData['doctors'])) {
-            $docData['doctors'] = array_values(array_filter($docData['doctors'], function($d) use ($docId) {
-                return ($d['id'] ?? '') !== $docId;
-            }));
-            @file_put_contents($docFile, json_encode($docData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
-        }
     }
     logActivity('DOCTOR_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Deleted doctor profile {$docId}", ['doctorId' => $docId]);
     echo json_encode(['status' => 'ok', 'message' => "Doctor {$docId} deleted successfully."]);
@@ -257,25 +197,6 @@ if ($action === 'save_test') {
         ]);
     }
 
-    $testsFile = __DIR__ . '/healthcare/tests.json';
-    $testsData = is_file($testsFile) ? json_decode((string) file_get_contents($testsFile), true) : ['status' => 'ok', 'tests' => []];
-    if (!isset($testsData['tests']) || !is_array($testsData['tests'])) $testsData['tests'] = [];
-    $found = false;
-    $newEntry = [
-        'id' => $tId, 'name' => $name, 'category' => $cat, 'tagline' => $tagline, 'description' => $descr,
-        'price' => $price, 'originalPrice' => $origPrice, 'avinyaSubsidy' => $subsidy, 'testsIncluded' => $included,
-        'preparation' => $prep, 'reportTurnaround' => $turnaround, 'homeCollection' => (bool)$home,
-        'centreVisit' => (bool)$centre, 'isPriority' => (bool)$prio, 'badge' => $badge
-    ];
-    foreach ($testsData['tests'] as &$item) {
-        if (($item['id'] ?? '') === $tId) {
-            $item = array_merge($item, $newEntry);
-            $found = true; break;
-        }
-    }
-    if (!$found) $testsData['tests'][] = $newEntry;
-    @file_put_contents($testsFile, json_encode($testsData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
-
     logActivity('TEST_PACKAGE_SAVED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Saved diagnostic test package {$name} ({$tId})", ['testId' => $tId, 'name' => $name]);
     echo json_encode(['status' => 'ok', 'message' => "Diagnostic test package {$name} saved successfully.", 'testId' => $tId]);
     exit(0);
@@ -291,16 +212,6 @@ if ($action === 'delete_test') {
         $stmt = $pdo->prepare("DELETE FROM `diagnostic_tests` WHERE `test_id` = :id");
         $stmt->execute([':id' => $tId]);
     }
-    $testsFile = __DIR__ . '/healthcare/tests.json';
-    if (is_file($testsFile)) {
-        $testsData = json_decode((string) file_get_contents($testsFile), true);
-        if (isset($testsData['tests']) && is_array($testsData['tests'])) {
-            $testsData['tests'] = array_values(array_filter($testsData['tests'], function($t) use ($tId) {
-                return ($t['id'] ?? '') !== $tId;
-            }));
-            @file_put_contents($testsFile, json_encode($testsData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
-        }
-    }
     logActivity('TEST_PACKAGE_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Deleted diagnostic test package {$tId}", ['testId' => $tId]);
     echo json_encode(['status' => 'ok', 'message' => "Diagnostic test package {$tId} deleted successfully."]);
     exit(0);
@@ -313,7 +224,7 @@ if ($action === 'seed_catalog') {
         logActivity('CATALOG_SEEDED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Seeded doctors & diagnostic tests catalog tables", $res);
         echo json_encode(['status' => 'ok', 'message' => "Catalog seeded successfully: {$res['doctors_seeded']} doctors, {$res['tests_seeded']} diagnostic tests.", 'details' => $res]);
     } else {
-        echo json_encode(['status' => 'ok', 'message' => "Database offline. Pre-recorded JSON catalog active."]);
+        echo json_encode(['status' => 'error', 'message' => "Database connection unavailable."]);
     }
     exit(0);
 }
@@ -334,54 +245,16 @@ if ($pdo !== null) {
         $diagnosticBookings = $pdo->query("SELECT * FROM `diagnostic_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
         $emailLogs = $pdo->query("SELECT * FROM `email_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
         $activityLogs = $pdo->query("SELECT * FROM `activity_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
+        
+        // Auto-seed if doctors or tests tables are empty
+        seedCatalogFromJSON($pdo, false);
+
         $doctorsCatalog = $pdo->query("SELECT * FROM `doctors` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
         $diagnosticTestsCatalog = $pdo->query("SELECT * FROM `diagnostic_tests` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
     } catch (Throwable $e) {
         error_log('Admin Data Fetch Warning: ' . $e->getMessage());
     }
 }
-
-// Fallback to JSON files if DB returns empty
-if (empty($doctorBookings)) {
-    $bookingFile = dirname(__DIR__) . '/storage/bookings/bookings.json';
-    if (is_file($bookingFile)) {
-        $raw = @file_get_contents($bookingFile);
-        $doctorBookings = json_decode((string) $raw, true) ?: [];
-    }
-}
-
-if (empty($diagnosticBookings)) {
-    $diagFile = __DIR__ . '/diagnostic/data/test-bookings.json';
-    if (is_file($diagFile)) {
-        $raw = @file_get_contents($diagFile);
-        $diagnosticBookings = json_decode((string) $raw, true) ?: [];
-    }
-}
-
-if (empty($activityLogs)) {
-    $actFile = dirname(__DIR__) . '/cache/activity_logs.json';
-    if (is_file($actFile)) {
-        $raw = @file_get_contents($actFile);
-        $activityLogs = json_decode((string) $raw, true) ?: [];
-    }
-}
-
-if (empty($doctorsCatalog)) {
-    $docFile = __DIR__ . '/healthcare/doctors.json';
-    if (is_file($docFile)) {
-        $raw = @file_get_contents($docFile);
-        $dData = json_decode((string) $raw, true);
-        $doctorsCatalog = $dData['doctors'] ?? $dData ?? [];
-    }
-}
-
-if (empty($diagnosticTestsCatalog)) {
-    $testsFile = __DIR__ . '/healthcare/tests.json';
-    if (is_file($testsFile)) {
-        $raw = @file_get_contents($testsFile);
-        $tData = json_decode((string) $raw, true);
-        $diagnosticTestsCatalog = $tData['tests'] ?? $tData ?? [];
-    }
 }
 
 // Calculate Analytics Summaries
