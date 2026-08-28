@@ -332,6 +332,12 @@ $adminTo = "info@test.avinyacarefoundation.org";
 $adminSentResult = sendPHPSMTP($adminTo, $adminSubject, $adminHtmlContent, $email);
 $adminEmailSent = ($adminSentResult === true || $adminSentResult === 1);
 $adminEmailError = !$adminEmailSent ? "Admin operational alert delivery failed via Hostinger SSL SMTP." : null;
+$adminRecordTo = getenv('ADMIN_RECORD_EMAIL') ?: 'manetejas00@gmail.com';
+$adminRecordEmailSent = true;
+if (filter_var($adminRecordTo, FILTER_VALIDATE_EMAIL) && strcasecmp($adminRecordTo, $adminTo) !== 0) {
+    $adminRecordResult = sendPHPSMTP($adminRecordTo, '[Admin Record] ' . $adminSubject, $adminHtmlContent, $email);
+    $adminRecordEmailSent = ($adminRecordResult === true || $adminRecordResult === 1);
+}
 
 // 3. If any email delivery failed, automatically dispatch error diagnostic alert to admin
 if (!$userEmailSent) {
@@ -391,6 +397,7 @@ echo json_encode([
         'deliveryMethod' => 'HOSTINGER_SSL_SMTP_465',
         'userEmailSent' => $userEmailSent,
         'adminEmailSent' => $adminEmailSent,
+        'adminRecordEmailSent' => $adminRecordEmailSent,
         'userEmailRecipient' => $email,
         'adminEmailRecipient' => $adminTo,
         'successMessage' => $successMessage,

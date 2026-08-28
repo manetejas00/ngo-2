@@ -56,7 +56,7 @@ function diagnosticTemplate(array $booking): string {
         . '</table></td></tr></table></body></html>';
 }
 
-function sendDiagnosticEmail(array $booking): bool {
+function sendDiagnosticEmail(array $booking, bool $sendAdminRecord = true): bool {
     $host = diagnosticEnv('SMTP_HOST', 'smtp.hostinger.com');
     $port = (int) diagnosticEnv('SMTP_PORT', '465');
     $user = diagnosticEnv('SMTP_USER');
@@ -75,7 +75,8 @@ function sendDiagnosticEmail(array $booking): bool {
         smtpCommand($socket, 'RCPT TO:<' . $booking['patientEmail'] . '>', [250, 251]);
         smtpCommand($socket, 'DATA', [354]);
         $boundary = '=_AvinyaDiagnostic_' . bin2hex(random_bytes(8));
-        $headers = ['From: Avinya Care Foundation <' . $from . '>', 'To: <' . $booking['patientEmail'] . '>', 'Subject: =?UTF-8?B?' . base64_encode('Diagnostic Test Booking Confirmation – Avinyacare [' . $booking['id'] . ']') . '?=', 'MIME-Version: 1.0', 'Content-Type: multipart/related; boundary="' . $boundary . '"', 'X-Mailer: AvinyaCare-Diagnostic/1.0'];
+        $subjectPrefix = !empty($booking['_adminRecord']) ? '[Admin Record] ' : '';
+        $headers = ['From: Avinya Care Foundation <' . $from . '>', 'To: <' . $booking['patientEmail'] . '>', 'Subject: =?UTF-8?B?' . base64_encode($subjectPrefix . 'Diagnostic Test Booking Confirmation – Avinyacare [' . $booking['id'] . ']') . '?=', 'MIME-Version: 1.0', 'Content-Type: multipart/related; boundary="' . $boundary . '"', 'X-Mailer: AvinyaCare-Diagnostic/1.0'];
         $parts = ['--' . $boundary, 'Content-Type: text/html; charset=UTF-8', 'Content-Transfer-Encoding: 8bit', '', diagnosticTemplate($booking)];
         $logoPath = dirname(__DIR__) . '/assets/logo.png';
         if (is_readable($logoPath)) {
@@ -84,7 +85,17 @@ function sendDiagnosticEmail(array $booking): bool {
         $parts[] = '--' . $boundary . '--';
         $message = implode("\r\n", $headers) . "\r\n\r\n" . preg_replace('/(?m)^\./', '..', implode("\r\n", $parts)) . "\r\n.";
         smtpCommand($socket, $message, [250]);
-        fwrite($socket, "QUIT\r\n"); fclose($socket); return true;
+        fwrite($socket, "QUIT\r\n"); fclose($socket);
+        if ($sendAdminRecord) {
+            $adminRecord = diagnosticEnv('ADMIN_RECORD_EMAIL');
+            if (filter_var($adminRecord, FILTER_VALIDATE_EMAIL) && strcasecmp($adminRecord, $booking['patientEmail']) !== 0) {
+                $adminBooking = $booking;
+                $adminBooking['patientEmail'] = $adminRecord;
+                $adminBooking['_adminRecord'] = true;
+                sendDiagnosticEmail($adminBooking, false);
+            }
+        }
+        return true;
     } catch (Throwable $exception) { fclose($socket); return false; }
 }
 

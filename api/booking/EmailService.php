@@ -9,7 +9,7 @@ function loadBookingEmailEnv(string $path): void {
         $line = trim($line);
         if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) continue;
         [$name, $value] = array_map('trim', explode('=', $line, 2));
-        if (!str_starts_with($name, 'SMTP_') && $name !== 'ADMIN_EMAIL') continue;
+        if (!str_starts_with($name, 'SMTP_') && !in_array($name, ['ADMIN_EMAIL', 'ADMIN_RECORD_EMAIL'], true)) continue;
         if (getenv($name) !== false) continue;
         if (strlen($value) >= 2 && (($value[0] === '"' && substr($value, -1) === '"') || ($value[0] === "'" && substr($value, -1) === "'"))) $value = substr($value, 1, -1);
         putenv($name . '=' . $value);
@@ -31,7 +31,7 @@ function emailHtml(string $value): string {
 }
 
 final class AppointmentEmailService {
-    public function sendConfirmation(array $booking): array {
+    public function sendConfirmation(array $booking, bool $sendAdminRecord = true): array {
         $attemptedAt = nowIso();
         $to = trim((string) ($booking['patientEmail'] ?? ''));
         if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return $this->event('failed', $attemptedAt, 'Invalid patient email address.');
@@ -59,7 +59,7 @@ final class AppointmentEmailService {
             $this->command($socket, 'RCPT TO:<' . $to . '>', [250, 251]);
             $this->command($socket, 'DATA', [354]);
 
-            $subject = 'Appointment Confirmed — ' . (string) ($booking['id'] ?? 'Avinya Care');
+            $subject = (!empty($booking['_adminRecord']) ? '[Admin Record] ' : '') . 'Appointment Confirmed — ' . (string) ($booking['id'] ?? 'Avinya Care');
             $boundary = '=_AvinyaLogo_' . bin2hex(random_bytes(8));
             $headers = [
                 'From: ' . $fromName . ' <' . $from . '>', 'To: <' . $to . '>',
@@ -73,6 +73,15 @@ final class AppointmentEmailService {
             $this->command($socket, $message, [250]);
             fwrite($socket, "QUIT\r\n");
             fclose($socket);
+            if ($sendAdminRecord) {
+                $adminRecord = bookingEmailEnv('ADMIN_RECORD_EMAIL');
+                if (filter_var($adminRecord, FILTER_VALIDATE_EMAIL) && strcasecmp($adminRecord, $to) !== 0) {
+                    $adminBooking = $booking;
+                    $adminBooking['patientEmail'] = $adminRecord;
+                    $adminBooking['_adminRecord'] = true;
+                    $this->sendConfirmation($adminBooking, false);
+                }
+            }
             return $this->event('sent', $attemptedAt, '');
         } catch (Throwable $error) {
             fclose($socket);
