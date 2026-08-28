@@ -129,7 +129,7 @@ if ($action === 'update_status') {
 
 // Action: Save Doctor (Create or Update)
 if ($action === 'save_doctor') {
-    $doc = $payload['doctor'] ?? $payload;
+    $doc = $data['doctor'] ?? $data;
     $docId = trim((string) ($doc['id'] ?? $doc['doctor_id'] ?? ('doc-' . date('Ymd') . '-' . bin2hex(random_bytes(2)))));
     $name = trim((string) ($doc['name'] ?? ''));
     if ($name === '') {
@@ -198,7 +198,7 @@ if ($action === 'save_doctor') {
 
 // Action: Delete Doctor
 if ($action === 'delete_doctor') {
-    $docId = trim((string) ($payload['id'] ?? $payload['doctorId'] ?? ''));
+    $docId = trim((string) ($data['id'] ?? $data['doctorId'] ?? ''));
     if ($docId === '') {
         http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'Doctor ID is required.']); exit(0);
     }
@@ -223,7 +223,7 @@ if ($action === 'delete_doctor') {
 
 // Action: Save Diagnostic Test Package
 if ($action === 'save_test') {
-    $t = $payload['test'] ?? $payload;
+    $t = $data['test'] ?? $data;
     $tId = trim((string) ($t['id'] ?? $t['test_id'] ?? ('test-' . date('Ymd') . '-' . bin2hex(random_bytes(2)))));
     $name = trim((string) ($t['name'] ?? ''));
     if ($name === '') {
@@ -283,7 +283,7 @@ if ($action === 'save_test') {
 
 // Action: Delete Diagnostic Test Package
 if ($action === 'delete_test') {
-    $tId = trim((string) ($payload['id'] ?? $payload['testId'] ?? ''));
+    $tId = trim((string) ($data['id'] ?? $data['testId'] ?? ''));
     if ($tId === '') {
         http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'Test ID is required.']); exit(0);
     }
