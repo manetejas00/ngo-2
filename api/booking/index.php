@@ -351,6 +351,44 @@ function recordWhatsAppEvent(string $bookingId, array $event): array {
     });
 }
 
+function recordEmailEvent(string $bookingId, array $event): array {
+    return withLedgerLock(function () use ($bookingId, $event) {
+        $bookings = readLedger();
+        foreach ($bookings as $index => $booking) {
+            if (($booking['id'] ?? '') !== $bookingId) continue;
+            $booking['emailHistory'] = is_array($booking['emailHistory'] ?? null) ? $booking['emailHistory'] : [];
+            $booking['emailHistory'][] = $event;
+            $booking['emailNotification'] = [
+                'confirmationSent' => ($event['status'] ?? '') === 'sent' || !empty($booking['emailNotification']['confirmationSent']),
+                'status' => (string) ($event['status'] ?? 'unknown'),
+                'provider' => (string) ($event['provider'] ?? 'smtp'),
+                'sentAt' => $event['sentAt'] ?? ($booking['emailNotification']['sentAt'] ?? null),
+                'lastAttemptAt' => $event['attemptedAt'] ?? nowIso(),
+                'lastError' => (string) ($event['error'] ?? '')
+            ];
+            $booking['history'] = is_array($booking['history'] ?? null) ? $booking['history'] : [];
+            $booking['history'][] = ['action' => 'email_' . ($event['status'] ?? 'unknown'), 'at' => nowIso(), 'provider' => $event['provider'] ?? 'smtp'];
+            $bookings[$index] = $booking;
+            atomicSave($bookings);
+            return $booking;
+        }
+        throw new InvalidArgumentException('Booking not found.');
+    });
+}
+
+function sendEmailConfirmationFallback(string $bookingId): array {
+    $booking = findBooking($bookingId);
+    if ($booking === null) throw new InvalidArgumentException('Booking not found.');
+    if (!empty($booking['emailNotification']['confirmationSent'])) {
+        return ['booking' => $booking, 'event' => ['status' => 'already_sent']];
+    }
+    error_log('[Booking API] Email fallback requested for ' . $bookingId);
+    $event = (new AppointmentEmailService())->sendConfirmation($booking);
+    $updated = recordEmailEvent($bookingId, $event);
+    error_log('[Booking API] Email fallback ' . ($event['status'] ?? 'unknown') . ' for ' . $bookingId);
+    return ['booking' => $updated, 'event' => $event];
+}
+
 function sendWhatsAppConfirmation(string $bookingId, bool $manual = false): array {
     $booking = findBooking($bookingId);
     if ($booking === null) throw new InvalidArgumentException('Booking not found.');
@@ -444,7 +482,7 @@ function excelColumn(int $number): string {
 }
 
 function worksheetXml(array $bookings): string {
-    $headers = ['Booking ID','Customer Name','Email','Phone','Doctor','Original Booking Date','Original Slot','Current Booking Date','Current Slot','Status','Created At','Updated At','Cancelled At','Completed At','Rescheduled At','Notes','WhatsApp Confirmation','WhatsApp Status','WhatsApp Sent At','WhatsApp Provider','WhatsApp Message ID','WhatsApp Last Error','WhatsApp History','Reschedule History','Audit History'];
+    $headers = ['Booking ID','Customer Name','Email','Phone','Doctor','Original Booking Date','Original Slot','Current Booking Date','Current Slot','Status','Created At','Updated At','Cancelled At','Completed At','Rescheduled At','Notes','WhatsApp Confirmation','WhatsApp Status','WhatsApp Sent At','WhatsApp Provider','WhatsApp Message ID','WhatsApp Last Error','WhatsApp History','Email Fallback','Email Status','Email Sent At','Email Last Error','Email History','Reschedule History','Audit History'];
     $rows = [$headers];
     foreach ($bookings as $b) {
         $rows[] = [
@@ -454,6 +492,8 @@ function worksheetXml(array $bookings): string {
             $b['notes'] ?? '', !empty($b['whatsapp']['confirmationSent']) ? 'Yes' : 'No', $b['whatsapp']['status'] ?? 'not_attempted',
             $b['whatsapp']['sentAt'] ?? '', $b['whatsapp']['provider'] ?? '', $b['whatsapp']['messageId'] ?? '', $b['whatsapp']['lastError'] ?? '',
             json_encode($b['whatsappHistory'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            !empty($b['emailNotification']['confirmationSent']) ? 'Yes' : 'No', $b['emailNotification']['status'] ?? 'not_attempted',
+            $b['emailNotification']['sentAt'] ?? '', $b['emailNotification']['lastError'] ?? '', json_encode($b['emailHistory'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             json_encode($b['rescheduleHistory'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), json_encode($b['history'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         ];
     }
@@ -470,7 +510,7 @@ function worksheetXml(array $bookings): string {
     $lastColumn = excelColumn(count($headers));
     return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         . '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
-        . '<cols><col min="1" max="1" width="23" customWidth="1"/><col min="2" max="5" width="24" customWidth="1"/><col min="6" max="22" width="20" customWidth="1"/><col min="23" max="25" width="42" customWidth="1"/></cols>'
+        . '<cols><col min="1" max="1" width="23" customWidth="1"/><col min="2" max="5" width="24" customWidth="1"/><col min="6" max="27" width="20" customWidth="1"/><col min="28" max="30" width="42" customWidth="1"/></cols>'
         . '<sheetData>' . $sheetRows . '</sheetData><autoFilter ref="A1:' . $lastColumn . count($rows) . '"/></worksheet>';
 }
 
@@ -539,10 +579,24 @@ try {
             error_log('[Booking API] WhatsApp processing failed for ' . $booking['id'] . ': ' . $notificationError->getMessage());
         }
         $whatsappSent = ($event['status'] ?? '') === 'sent' || ($event['status'] ?? '') === 'already_sent';
-        $message = $whatsappSent ? 'Appointment confirmed and WhatsApp confirmation sent.' : 'Appointment confirmed, but WhatsApp notification was not sent.';
+        $emailEvent = ['status' => 'failed'];
+        $emailSent = false;
+        try {
+            $emailNotification = sendEmailConfirmationFallback((string) $booking['id']);
+            $booking = $emailNotification['booking'];
+            $emailEvent = $emailNotification['event'];
+            $emailSent = ($emailEvent['status'] ?? '') === 'sent' || ($emailEvent['status'] ?? '') === 'already_sent';
+        } catch (Throwable $emailError) {
+            error_log('[Booking API] Appointment email processing failed for ' . $booking['id'] . ': ' . $emailError->getMessage());
+        }
+        if ($whatsappSent && $emailSent) $message = 'Appointment confirmed. Confirmations were sent by WhatsApp and email.';
+        elseif ($whatsappSent) $message = 'Appointment confirmed and WhatsApp confirmation sent.';
+        elseif ($emailSent) $message = 'Appointment confirmed and email confirmation sent.';
+        else $message = 'Appointment confirmed, but the notification could not be delivered. Your booking remains saved.';
         respondJson(201, [
             'success' => true, 'status' => 'ok', 'bookingConfirmed' => true, 'whatsappSent' => $whatsappSent,
-            'whatsappStatus' => $event['status'] ?? 'failed', 'booking' => $booking, 'appointment' => $booking, 'message' => $message
+            'whatsappStatus' => $event['status'] ?? 'failed', 'emailSent' => $emailSent,
+            'emailStatus' => $emailEvent['status'] ?? 'failed', 'booking' => $booking, 'appointment' => $booking, 'message' => $message
         ]);
     }
     if ($method === 'POST' && $action === 'whatsapp_resend') {

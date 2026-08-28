@@ -6,7 +6,7 @@
 import { escapeHTML } from '../email/emailTemplate.mjs';
 
 function renderEmailLayout(title, preheader, contentHtml) {
-  const logoUrl = process.env.LOGO_URL || 'https://test.avinyacarefoundation.org/assets/logo.png';
+  const logoUrl = process.env.LOGO_URL || 'cid:avinya-logo';
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

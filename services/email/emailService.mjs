@@ -14,6 +14,13 @@ const __dirname = dirname(__filename);
 
 const LOG_DIR = join(__dirname, '../../cache');
 const LOG_FILE = join(LOG_DIR, 'email_logs.json');
+const EMAIL_LOGO_PATH = join(__dirname, '../../assets/logo.png');
+const EMAIL_LOGO_ATTACHMENT = {
+  filename: 'avinya-care-logo.png',
+  path: EMAIL_LOGO_PATH,
+  cid: 'avinya-logo',
+  contentType: 'image/png'
+};
 
 // Reusable Transporter instance
 let cachedTransporter = null;
@@ -175,7 +182,8 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
             subject: userEmailPayload.subject,
             text: userEmailPayload.text,
             html: userEmailPayload.html,
-            replyTo: senderEmail
+            replyTo: senderEmail,
+            attachments: [EMAIL_LOGO_ATTACHMENT]
           });
           userEmailSent = true;
           console.log(`[SMTP Sent via Nodemailer] User email sent to ${recipientUser} | ID: ${userRes.messageId || 'ok'}`);
@@ -193,7 +201,8 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
             subject: adminEmailPayload.subject,
             text: adminEmailPayload.text,
             html: adminEmailPayload.html,
-            replyTo: recipientUser || senderEmail
+            replyTo: recipientUser || senderEmail,
+            attachments: [EMAIL_LOGO_ATTACHMENT]
           });
           adminEmailSent = true;
           console.log(`[SMTP Sent via Nodemailer] Admin alert sent to ${adminEmail} | ID: ${adminRes.messageId || 'ok'}`);
@@ -231,7 +240,8 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
             subject: userEmailPayload.subject,
             htmlContent: userEmailPayload.html,
             textContent: userEmailPayload.text,
-            replyTo: senderEmail
+            replyTo: senderEmail,
+            attachments: [EMAIL_LOGO_ATTACHMENT]
           });
           userEmailSent = true;
           userEmailError = null;
@@ -256,7 +266,8 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
             subject: adminEmailPayload.subject,
             htmlContent: adminEmailPayload.html,
             textContent: adminEmailPayload.text,
-            replyTo: recipientUser || senderEmail
+            replyTo: recipientUser || senderEmail,
+            attachments: [EMAIL_LOGO_ATTACHMENT]
           });
           adminEmailSent = true;
           adminEmailError = null;

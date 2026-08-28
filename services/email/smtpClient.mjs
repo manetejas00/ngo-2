@@ -1,5 +1,6 @@
 import net from 'node:net';
 import tls from 'node:tls';
+import { readFileSync } from 'node:fs';
 
 /**
  * Avinya Care Foundation - Native Zero-Dependency SMTP/TLS Client
@@ -7,7 +8,7 @@ import tls from 'node:tls';
  * Supports direct SSL/TLS (port 465), plain text (port 1025/25/587), and AUTH LOGIN authentication.
  */
 export function sendSmtpSocket(options, ...legacyArgs) {
-  let host, port, secure, user, pass, from, fromName, to, subject, htmlContent, textContent, replyTo;
+  let host, port, secure, user, pass, from, fromName, to, subject, htmlContent, textContent, replyTo, attachments;
 
   if (typeof options === 'object' && options !== null && !Array.isArray(options)) {
     ({
@@ -22,7 +23,8 @@ export function sendSmtpSocket(options, ...legacyArgs) {
       subject = 'Avinya Care Notification',
       htmlContent = '',
       textContent = '',
-      replyTo
+      replyTo,
+      attachments = []
     } = options);
   } else {
     // Legacy positional arguments support: (host, port, from, to, subject, htmlContent)
@@ -34,6 +36,7 @@ export function sendSmtpSocket(options, ...legacyArgs) {
     htmlContent = legacyArgs[4] || '';
     secure = port === 465;
     fromName = 'Avinya Care Foundation';
+    attachments = [];
   }
 
   if (!to) {
@@ -87,6 +90,8 @@ export function sendSmtpSocket(options, ...legacyArgs) {
 
     // Format RFC 2822 Message
     const boundary = `----=_Part_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const relatedBoundary = `----=_Related_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const hasAttachments = Array.isArray(attachments) && attachments.length > 0;
     const msgId = `<${Date.now()}.${Math.random().toString(36).substring(2, 9)}@${host}>`;
     const dateStr = new Date().toUTCString();
 
@@ -99,11 +104,11 @@ export function sendSmtpSocket(options, ...legacyArgs) {
       replyTo ? `Reply-To: <${replyTo}>` : `Reply-To: <${from}>`,
       `MIME-Version: 1.0`,
       `X-Mailer: AvinyaCare-Native-SMTP/2.0`,
-      `Content-Type: multipart/alternative; boundary="${boundary}"`,
+      `Content-Type: ${hasAttachments ? `multipart/related; boundary="${relatedBoundary}"` : `multipart/alternative; boundary="${boundary}"`}`,
       ``
     ];
 
-    const bodyParts = [
+    const alternativeParts = [
       `--${boundary}`,
       `Content-Type: text/plain; charset=UTF-8`,
       `Content-Transfer-Encoding: 8bit`,
@@ -119,6 +124,31 @@ export function sendSmtpSocket(options, ...legacyArgs) {
       `--${boundary}--`,
       ``
     ];
+
+    const bodyParts = hasAttachments ? [
+      `--${relatedBoundary}`,
+      `Content-Type: multipart/alternative; boundary="${boundary}"`,
+      ``,
+      ...alternativeParts,
+      ...attachments.flatMap(attachment => {
+        const content = attachment.content
+          ? Buffer.from(attachment.content)
+          : readFileSync(attachment.path);
+        const encoded = content.toString('base64').match(/.{1,76}/g)?.join('\r\n') || '';
+        return [
+          `--${relatedBoundary}`,
+          `Content-Type: ${attachment.contentType || 'application/octet-stream'}; name="${attachment.filename || 'attachment'}"`,
+          `Content-Transfer-Encoding: base64`,
+          `Content-ID: <${attachment.cid || attachment.filename || 'attachment'}>`,
+          `Content-Disposition: inline; filename="${attachment.filename || 'attachment'}"`,
+          ``,
+          encoded,
+          ``
+        ];
+      }),
+      `--${relatedBoundary}--`,
+      ``
+    ] : alternativeParts;
 
     // Dot stuffing: any line starting with a dot must be escaped with an extra dot
     const rawBody = bodyParts.join('\r\n').split('\r\n').map(l => l.startsWith('.') ? '.' + l : l).join('\r\n');

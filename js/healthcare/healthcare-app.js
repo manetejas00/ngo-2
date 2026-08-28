@@ -698,7 +698,7 @@ class HealthcarePlatform {
         </div>
 
         <div style="background: #FFF7ED; border-left: 4px solid var(--hc-accent); padding: 0.75rem 0.9rem; border-radius: 4px; font-size: 0.82rem; color: #9A3412; margin-bottom: 1.25rem;">
-          🔒 Appointment confirmation will be sent to <strong>${this.bookingState.patient.email}</strong> and, when configured, to WhatsApp at <strong>${this.bookingState.patient.phone}</strong>.
+          🔒 Email confirmation will be sent to <strong>${this.bookingState.patient.email}</strong>. We will also try WhatsApp at <strong>${this.bookingState.patient.phone}</strong> when available.
         </div>
 
         <div id="hc-booking-error-box" style="display: none; background: var(--hc-danger-bg); color: var(--hc-danger); padding: 0.85rem 1rem; border-radius: var(--hc-radius-sm); margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;"></div>
@@ -722,9 +722,11 @@ class HealthcarePlatform {
           </div>
           <h3 style="font-family: var(--hc-font-heading); font-size: 1.7rem; font-weight: 800; margin: 0 0 0.5rem 0;">Appointment Confirmed!</h3>
           <p style="color: var(--hc-text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
-            ${apt.whatsapp?.confirmationSent
-              ? `A WhatsApp confirmation was sent to <strong>${apt.patientPhone}</strong>.`
-              : `Your booking is safely recorded. WhatsApp confirmation is currently ${apt.whatsapp?.status || 'unavailable'}.`}
+            ${apt.emailNotification?.confirmationSent
+              ? `An email confirmation was sent to <strong>${apt.patientEmail}</strong>${apt.whatsapp?.confirmationSent ? ` and WhatsApp confirmation to <strong>${apt.patientPhone}</strong>` : ''}.`
+              : apt.whatsapp?.confirmationSent
+                ? `A WhatsApp confirmation was sent to <strong>${apt.patientPhone}</strong>, but email delivery was unsuccessful.`
+                : `Your booking is safely recorded, but electronic confirmation delivery was unsuccessful.`}
           </p>
 
           <div style="background: var(--hc-surface-alt); border: 2px dashed var(--hc-primary); border-radius: var(--hc-radius-md); padding: 1.25rem; margin-bottom: 2rem; display: inline-block; width: 100%;">
