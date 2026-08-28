@@ -1,0 +1,10 @@
+#!/usr/bin/expect -f
+set timeout 30
+set pass "@qLVTyL|J5"
+spawn ssh -p 65002 -o StrictHostKeyChecking=no u382139760@82.112.239.95 "ls -la domains/avinyacarefoundation.org/public_html/ && ls -la domains/avinyacarefoundation.org/hbuilds/"
+expect {
+    "password:" {
+        send "$pass\r"
+    }
+}
+expect eof

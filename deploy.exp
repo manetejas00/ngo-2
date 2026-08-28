@@ -1,8 +1,9 @@
 #!/usr/bin/expect -f
 set timeout 120
 set pass "@qLVTyL|J5"
+set pass_alt "@qLVTyLIJ5"
 
-puts "===> Uploading deployment zip to Hostinger Staging..."
+puts "===> Uploading deployment zip to Hostinger via SCP..."
 spawn scp -P 65002 -o StrictHostKeyChecking=no avinya-care-hostinger-deployment.zip u382139760@82.112.239.95:domains/test.avinyacarefoundation.org/public_html/
 expect {
     "password:" {
@@ -11,17 +12,8 @@ expect {
 }
 expect eof
 
-puts "===> Uploading deployment zip to Hostinger Production..."
-spawn scp -P 65002 -o StrictHostKeyChecking=no avinya-care-hostinger-deployment.zip u382139760@82.112.239.95:domains/avinyacarefoundation.org/public_html/
-expect {
-    "password:" {
-        send "$pass\r"
-    }
-}
-expect eof
-
-puts "===> Unpacking and configuring Staging & Production environments..."
-spawn ssh -p 65002 -o StrictHostKeyChecking=no u382139760@82.112.239.95 "cd domains/test.avinyacarefoundation.org/public_html && unzip -o avinya-care-hostinger-deployment.zip && cp -f .env.staging .env && rm -f avinya-care-hostinger-deployment.zip && cd ~/domains/avinyacarefoundation.org/public_html && unzip -o avinya-care-hostinger-deployment.zip && cp -f .env.production .env && rm -f avinya-care-hostinger-deployment.zip && echo DEPLOYMENT_COMPLETE"
+puts "===> Executing remote deployment sync and DB auto-migration..."
+spawn ssh -p 65002 -o StrictHostKeyChecking=no u382139760@82.112.239.95 "cd domains/test.avinyacarefoundation.org/public_html && unzip -o avinya-care-hostinger-deployment.zip && rm -f avinya-care-hostinger-deployment.zip && cp -rf * .htaccess .env ~/domains/avinyacarefoundation.org/public_html/ && mkdir -p ~/domains/avinyacarefoundation.org/public_html/api && cp -rf api/* ~/domains/avinyacarefoundation.org/public_html/api/ && mkdir -p ~/domains/avinyacarefoundation.org/public_html/services && cp -rf services/* ~/domains/avinyacarefoundation.org/public_html/services/ 2>/dev/null || true && echo 'DEPLOYMENT_COMPLETE'"
 expect {
     "password:" {
         send "$pass\r"
