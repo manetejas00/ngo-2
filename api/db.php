@@ -266,7 +266,7 @@ function seedCatalogFromJSON(PDO $pdo, bool $force = false): array {
                     (`doctor_id`, `name`, `speciality_id`, `speciality_name`, `qualification`, `experience_years`, `hospital_id`, `hospital_name`, `location`, `consultation_fee`, `fee_display`, `consultation_types`, `rating`, `reviews_count`, `badge`, `avatar`, `about`, `areas_of_expertise`, `languages`, `schedule`, `is_active`)
                     VALUES (:d_id, :name, :spec_id, :spec_name, :qual, :exp, :h_id, :h_name, :loc, :fee, :fee_disp, :types, :rating, :revs, :badge, :avatar, :about, :expert, :langs, :sched, 1)
                     ON DUPLICATE KEY UPDATE
-                    `name` = VALUES(`name`), `speciality_name` = VALUES(`speciality_name`), `qualification` = VALUES(`qualification`), `consultation_fee` = VALUES(`consultation_fee`), `schedule` = VALUES(`schedule`)");
+                    `name` = VALUES(`name`), `speciality_name` = VALUES(`speciality_name`), `qualification` = VALUES(`qualification`), `consultation_fee` = VALUES(`consultation_fee`), `avatar` = VALUES(`avatar`), `about` = VALUES(`about`), `schedule` = VALUES(`schedule`)");
                 
                 foreach ($docList as $d) {
                     $stmt->execute([
