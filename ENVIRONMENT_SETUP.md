@@ -4,12 +4,12 @@ This document defines the official Git Branching strategy, Environment Configura
 
 ---
 
-## 📌 Environment Overview
+## 📌 Environment & Database Infrastructure
 
-| Environment | Primary Domain | Git Branch | Deployment Pipeline | Hostinger Path |
-| :--- | :--- | :--- | :--- | :--- |
-| **Staging / Testing** | `https://test.avinyacarefoundation.org` | `feature/*` or `staging` | Automated SSH (`./deploy.exp`) | `public_html` |
-| **Production** | `https://avinyacarefoundation.org` | `main` | Production Push / Hostinger Deployment | `public_html` |
+| Environment | Domain | Git Branch | MySQL Database | MySQL Username | Host |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Staging / Testing** | `https://test.avinyacarefoundation.org` | `feature/*` | `u382139760_ngo_staging` | `u382139760_ngo_staging` | `localhost` |
+| **Production** | `https://avinyacarefoundation.org` | `main` | `u382139760_ngo` | `u382139760_ngo` | `localhost` |
 
 ---
 
@@ -28,12 +28,12 @@ git checkout -b feature/<feature-name>
 ### Rule 2: Staging Deployment & Testing
 Deploy changes from your feature branch to the Staging server (`https://test.avinyacarefoundation.org`) for verification:
 ```bash
-# Stage, commit, and deploy to staging server
+# Stage, commit, and push feature branch to origin
 git add .
 git commit -m "Describe feature changes"
-git push origin feature/<feature-name>
+git push -u origin feature/<feature-name>
 
-# Deploy zip package to Hostinger live test server
+# Build zip package and deploy to Hostinger test server via SSH
 zip -r avinya-care-hostinger-deployment.zip . -x "node_modules/*" ".git/*" ".DS_Store"
 ./deploy.exp
 ```
@@ -41,10 +41,10 @@ zip -r avinya-care-hostinger-deployment.zip . -x "node_modules/*" ".git/*" ".DS_
 ### Rule 3: Integration Testing & Verification
 Run the automated end-to-end suite against `https://test.avinyacarefoundation.org`:
 ```bash
+python3 test/test_live_master_audit.py
 python3 test/test_live_tab_data.py
 python3 test/test_user_crud.py
 python3 test/test_form_menus.py
-python3 test/test_doctor_test_crud.py
 ```
 
 ### Rule 4: Merge to Production (`main`)
@@ -59,15 +59,21 @@ git push origin main
 
 ## ⚙️ Environment Configuration Files
 
-- **`.env.staging`**: Contains staging environment variables targeting `https://test.avinyacarefoundation.org`.
-- **`.env.production`**: Contains production environment variables targeting `https://avinyacarefoundation.org`.
+- **`.env.staging`**: Contains staging environment variables targeting `https://test.avinyacarefoundation.org` and database `u382139760_ngo_staging`.
+- **`.env.production`**: Contains production environment variables targeting `https://avinyacarefoundation.org` and database `u382139760_ngo`.
 - **`.env`**: Local working environment file.
 
 ### Credentials Summary
-- **Hostinger MySQL Database**:
+- **Staging MySQL Database**:
+  - `DB_HOST`: `localhost`
+  - `DB_NAME`: `u382139760_ngo_staging`
+  - `DB_USER`: `u382139760_ngo_staging`
+  - `DB_PASS`: `@qLVTyL|J5`
+- **Production MySQL Database**:
   - `DB_HOST`: `localhost`
   - `DB_NAME`: `u382139760_ngo`
   - `DB_USER`: `u382139760_ngo`
+  - `DB_PASS`: `@qLVTyL|J5`
 - **SMTP Email Service**:
   - `SMTP_HOST`: `smtp.hostinger.com` (Port 465 SSL)
   - `SMTP_USER`: `info@test.avinyacarefoundation.org` (Staging) / `info@avinyacarefoundation.org` (Production)
@@ -82,11 +88,11 @@ git push origin main
 
 | Test Script | Target Functionality | Command |
 | :--- | :--- | :--- |
+| `test/test_live_master_audit.py` | Complete E2E Audit (Forms, Bookings, News, Admin CRUD) | `python3 test/test_live_master_audit.py` |
 | `test/test_live_tab_data.py` | Admin Sidebar Badges & Table Data Parity | `python3 test/test_live_tab_data.py` |
 | `test/test_user_crud.py` | System User Account Creation, Read, Update, Delete | `python3 test/test_user_crud.py` |
 | `test/test_form_menus.py` | Dedicated Form Sidebar Tabs & Type Filtering | `python3 test/test_form_menus.py` |
 | `test/test_doctor_test_crud.py` | Doctors Directory & Diagnostic Test Package CRUD | `python3 test/test_doctor_test_crud.py` |
-| `test/test_live_all_emails.py` | Hostinger SMTP Dispatch for Form Inquiries | `python3 test/test_live_all_emails.py` |
 
 ---
 

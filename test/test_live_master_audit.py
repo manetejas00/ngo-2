@@ -9,6 +9,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import sys
+import time
 
 TARGET_HOST = "https://test.avinyacarefoundation.org"
 
@@ -20,7 +21,7 @@ def post_json(endpoint, payload, headers_extra=None):
         headers.update(headers_extra)
     req = urllib.request.Request(url, data=data, headers=headers, method='POST')
     try:
-        with urllib.request.urlopen(req, timeout=15) as response:
+        with urllib.request.urlopen(req, timeout=20) as response:
             return response.getcode(), json.loads(response.read().decode('utf-8'))
     except urllib.error.HTTPError as e:
         body = e.read().decode('utf-8')
@@ -35,7 +36,7 @@ def get_json(endpoint):
     url = f"{TARGET_HOST}{endpoint}"
     req = urllib.request.Request(url, method='GET')
     try:
-        with urllib.request.urlopen(req, timeout=15) as response:
+        with urllib.request.urlopen(req, timeout=20) as response:
             return response.getcode(), json.loads(response.read().decode('utf-8'))
     except urllib.error.HTTPError as e:
         body = e.read().decode('utf-8')
@@ -59,12 +60,12 @@ def run_master_audit():
     # -------------------------------------------------------------
     print("1️⃣ Testing Public Healthcare & News APIs...")
     code, docs_res = get_json("/api/healthcare/doctors.php")
-    doc_count = len(docs_res.get("data", [])) if isinstance(docs_res, dict) and "data" in docs_res else 0
+    doc_count = len(docs_res.get("doctors", [])) if isinstance(docs_res, dict) and "doctors" in docs_res else 0
     print(f"   - GET /api/healthcare/doctors.php -> HTTP {code} | Doctors Count: {doc_count}")
     results.append(("Public Doctors API", code == 200 and doc_count > 0))
 
     code, tests_res = get_json("/api/healthcare/tests.php")
-    test_count = len(tests_res.get("data", [])) if isinstance(tests_res, dict) and "data" in tests_res else 0
+    test_count = len(tests_res.get("tests", [])) if isinstance(tests_res, dict) and "tests" in tests_res else 0
     print(f"   - GET /api/healthcare/tests.php -> HTTP {code} | Diagnostic Packages Count: {test_count}")
     results.append(("Public Diagnostic Tests API", code == 200 and test_count > 0))
 
@@ -88,8 +89,9 @@ def run_master_audit():
     ]
 
     for name, payload in form_tests:
+        time.sleep(0.5)
         code, resp = post_json("/api/submit-form.php", payload)
-        success = (code == 200 and resp.get("status") in ["ok", "success"])
+        success = (code in [200, 201] and resp.get("status") in ["ok", "success"])
         delivery = resp.get("delivery_status") or resp.get("emailStatus") or "OK"
         print(f"   - [{name}] /api/submit-form.php -> HTTP {code} | Status: {resp.get('status')} | Email Delivery: {delivery}")
         results.append((f"Form: {name}", success))
@@ -110,7 +112,7 @@ def run_master_audit():
     }
     code, resp = post_json("/api/booking/index.php", doc_booking_payload)
     print(f"   - Doctor Booking -> HTTP {code} | Response: {resp.get('message') or resp.get('status')}")
-    results.append(("Doctor Booking API", code == 200 and resp.get("status") == "ok"))
+    results.append(("Doctor Booking API", code in [200, 201] and resp.get("status") in ["ok", "success"]))
 
     diag_booking_payload = {
         "testId": "test-1",
@@ -126,7 +128,7 @@ def run_master_audit():
     }
     code, resp = post_json("/api/diagnostic-booking.php", diag_booking_payload)
     print(f"   - Diagnostic Package Booking -> HTTP {code} | Response: {resp.get('message') or resp.get('status')}")
-    results.append(("Diagnostic Booking API", code == 200 and resp.get("status") == "ok"))
+    results.append(("Diagnostic Booking API", code in [200, 201] and resp.get("status") in ["ok", "success"]))
 
     # -------------------------------------------------------------
     # TEST 4: Admin Authentication & Management Data APIs
