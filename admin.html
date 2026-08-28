@@ -1521,12 +1521,27 @@
           <button type="submit" class="btn btn-teal">Save System User</button>
         </div>
       </form>
-    </div>
   </div>
 
   <script>
     let adminToken = localStorage.getItem('avinya_admin_token') || '';
-    let currentTab = 'dashboard';
+
+    function getInitialTab() {
+      const hash = window.location.hash ? window.location.hash.replace('#', '').trim() : '';
+      const savedTab = localStorage.getItem('avinya_active_tab') || '';
+      const validTabs = [
+        'dashboard', 'forms_all', 'forms_contact', 'forms_newsletter', 
+        'forms_volunteer', 'forms_support', 'forms_donation', 'forms_partnership', 
+        'forms_feedback', 'doctor', 'diagnostic', 'email', 'activity', 
+        'doctorsCatalog', 'testsCatalog', 'usersCatalog', 'settings'
+      ];
+
+      if (hash && validTabs.includes(hash)) return hash;
+      if (savedTab && validTabs.includes(savedTab)) return savedTab;
+      return 'dashboard';
+    }
+
+    let currentTab = getInitialTab();
     let autoPollTimer = null;
     let categoryChartInstance = null;
     let statusChartInstance = null;
@@ -1802,6 +1817,14 @@
 
     function switchTab(tab) {
       currentTab = tab;
+      try {
+        localStorage.setItem('avinya_active_tab', tab);
+        if (history.replaceState) {
+          history.replaceState(null, '', '#' + tab);
+        } else {
+          window.location.hash = tab;
+        }
+      } catch (e) {}
 
       // Close mobile sidebar if open
       const sidebar = document.getElementById('sidebar');

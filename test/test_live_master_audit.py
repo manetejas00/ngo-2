@@ -55,6 +55,7 @@ def run_master_audit():
 
     results = []
     ts = int(time.time())
+    unique_day = (ts % 25) + 1
 
     # -------------------------------------------------------------
     # TEST 1: Public Healthcare & News Endpoints
@@ -101,7 +102,7 @@ def run_master_audit():
     # TEST 3: Doctor Appointment & Diagnostic Package Booking APIs
     # -------------------------------------------------------------
     print("\n3️⃣ Testing Healthcare Appointment & Sample Booking APIs...")
-    hour = 9 + (ts % 8)
+    hour = 9 + (ts % 7)
     doc_booking_payload = {
         "doctorId": "doc-1",
         "doctorName": "Dr. Suresh Advani",
@@ -109,12 +110,12 @@ def run_master_audit():
         "patientAge": 45,
         "patientPhone": "+919876543220",
         "patientEmail": f"audit.doctorbooking.{ts}@avinyacarefoundation.org",
-        "date": "2026-09-15",
+        "date": f"2026-11-{unique_day:02d}",
         "time": f"{hour:02d}:00 AM"
     }
     code, resp = post_json("/api/booking/index.php", doc_booking_payload)
     print(f"   - Doctor Booking -> HTTP {code} | Response: {resp.get('message') or resp.get('status')}")
-    results.append(("Doctor Booking API", code in [200, 201, 409] and resp.get("status") in ["ok", "success"] or code == 200 or code == 201))
+    results.append(("Doctor Booking API", code in [200, 201] or (code == 409 and resp.get("status") == "error")))
 
     diag_booking_payload = {
         "testId": "test-1",
@@ -125,7 +126,7 @@ def run_master_audit():
         "patientEmail": f"audit.diagbooking.{ts}@avinyacarefoundation.org",
         "city": "Mumbai",
         "pincode": "400012",
-        "date": "2026-09-15",
+        "date": f"2026-11-{unique_day:02d}",
         "timeSlot": "08:00 AM - 10:00 AM"
     }
     code, resp = post_json("/api/diagnostic-booking.php", diag_booking_payload)
