@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/WhatsAppService.php';
 require_once __DIR__ . '/EmailService.php';
 require_once dirname(__DIR__) . '/db.php';
+require_once dirname(__DIR__) . '/activity-logger.php';
 
 
 date_default_timezone_set('Asia/Kolkata');
@@ -646,6 +647,24 @@ try {
         elseif ($whatsappSent) $message = 'Appointment confirmed and WhatsApp confirmation sent.';
         elseif ($emailSent) $message = 'Appointment confirmed and email confirmation sent.';
         else $message = 'Appointment confirmed, but the notification could not be delivered. Your booking remains saved.';
+
+        logActivity(
+            'DOCTOR_BOOKING',
+            'user',
+            $booking['patientEmail'] ?? '',
+            "Booked doctor appointment with {$booking['doctorName']} for {$booking['date']} at {$booking['time']}",
+            [
+                'bookingId' => $booking['id'] ?? '',
+                'doctorId' => $booking['doctorId'] ?? '',
+                'doctorName' => $booking['doctorName'] ?? '',
+                'patientName' => $booking['patientName'] ?? '',
+                'patientEmail' => $booking['patientEmail'] ?? '',
+                'patientPhone' => $booking['patientPhone'] ?? '',
+                'date' => $booking['date'] ?? '',
+                'time' => $booking['time'] ?? ''
+            ]
+        );
+
         respondJson(201, [
             'success' => true, 'status' => 'ok', 'bookingConfirmed' => true, 'whatsappSent' => $whatsappSent,
             'whatsappStatus' => $event['status'] ?? 'failed', 'emailSent' => $emailSent,

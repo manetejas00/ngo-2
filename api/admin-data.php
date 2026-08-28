@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 session_start();
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/activity-logger.php';
 
 // Verify Admin Token
 $headers = getallheaders();
@@ -81,6 +82,13 @@ if ($action === 'update_status') {
                 @file_put_contents($bookingFile, json_encode($bookings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
             }
         }
+        logActivity(
+            'ADMIN_STATUS_UPDATE',
+            'admin',
+            $_SESSION['admin_email'] ?? 'admin@gmail.com',
+            "Updated doctor booking {$id} status to {$newStatus}",
+            ['type' => 'doctor', 'id' => $id, 'newStatus' => $newStatus]
+        );
         echo json_encode(['status' => 'ok', 'message' => "Doctor booking {$id} updated to {$newStatus}."]);
         exit(0);
     } elseif ($type === 'diagnostic') {
@@ -102,6 +110,14 @@ if ($action === 'update_status') {
                 @file_put_contents($diagFile, json_encode($bookings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
             }
         }
+
+        logActivity(
+            'ADMIN_STATUS_UPDATE',
+            'admin',
+            $_SESSION['admin_email'] ?? 'admin@gmail.com',
+            "Updated diagnostic booking {$id} status to {$newStatus}",
+            ['type' => 'diagnostic', 'id' => $id, 'newStatus' => $newStatus]
+        );
         echo json_encode(['status' => 'ok', 'message' => "Diagnostic booking {$id} updated to {$newStatus}."]);
         exit(0);
     } else {
@@ -116,6 +132,7 @@ $formSubmissions = [];
 $doctorBookings = [];
 $diagnosticBookings = [];
 $emailLogs = [];
+$activityLogs = [];
 
 if ($pdo !== null) {
     try {
@@ -123,6 +140,7 @@ if ($pdo !== null) {
         $doctorBookings = $pdo->query("SELECT * FROM `doctor_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
         $diagnosticBookings = $pdo->query("SELECT * FROM `diagnostic_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
         $emailLogs = $pdo->query("SELECT * FROM `email_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
+        $activityLogs = $pdo->query("SELECT * FROM `activity_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
     } catch (Throwable $e) {
         error_log('Admin Data Fetch Warning: ' . $e->getMessage());
     }
@@ -142,6 +160,14 @@ if (empty($diagnosticBookings)) {
     if (is_file($diagFile)) {
         $raw = @file_get_contents($diagFile);
         $diagnosticBookings = json_decode((string) $raw, true) ?: [];
+    }
+}
+
+if (empty($activityLogs)) {
+    $actFile = dirname(__DIR__) . '/cache/activity_logs.json';
+    if (is_file($actFile)) {
+        $raw = @file_get_contents($actFile);
+        $activityLogs = json_decode((string) $raw, true) ?: [];
     }
 }
 
@@ -179,6 +205,7 @@ echo json_encode([
         'totalDoctorBookings' => count($doctorBookings),
         'totalDiagnosticBookings' => count($diagnosticBookings),
         'totalEmailLogs' => count($emailLogs),
+        'totalActivityLogs' => count($activityLogs),
         'totalDonationsAmount' => $totalDonationsAmount,
         'totalDonationsCount' => $totalDonationsCount,
         'formCountsByType' => $formCountsByType,
@@ -189,6 +216,7 @@ echo json_encode([
         'formSubmissions' => array_values($formSubmissions),
         'doctorBookings' => array_values($doctorBookings),
         'diagnosticBookings' => array_values($diagnosticBookings),
-        'emailLogs' => array_values($emailLogs)
+        'emailLogs' => array_values($emailLogs),
+        'activityLogs' => array_values($activityLogs)
     ]
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);

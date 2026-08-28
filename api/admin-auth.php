@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 session_start();
+require_once __DIR__ . '/activity-logger.php';
 
 $validEmails = ['admin@gmail.com', 'admin@gamil.com'];
 $validPassword = 'Admin@1230';
@@ -35,6 +36,14 @@ if ($action === 'login') {
         $_SESSION['admin_email'] = $email;
         $_SESSION['admin_logged_in_at'] = date(DATE_ATOM);
 
+        logActivity(
+            'ADMIN_LOGIN_SUCCESS',
+            'admin',
+            $email,
+            "Admin authentication successful for {$email}",
+            ['role' => 'Super Admin']
+        );
+
         http_response_code(200);
         echo json_encode([
             'status' => 'ok',
@@ -48,6 +57,14 @@ if ($action === 'login') {
         ]);
         exit(0);
     } else {
+        logActivity(
+            'ADMIN_LOGIN_FAILED',
+            'admin',
+            $email ?: 'unknown',
+            "Failed login attempt for email '{$email}'",
+            ['reason' => 'Invalid credentials']
+        );
+
         http_response_code(401);
         echo json_encode([
             'status' => 'error',
@@ -87,6 +104,8 @@ if ($action === 'login') {
         exit(0);
     }
 } elseif ($action === 'logout') {
+    $email = $_SESSION['admin_email'] ?? 'admin@gmail.com';
+    logActivity('ADMIN_LOGOUT', 'admin', $email, "Admin session logged out ({$email})");
     unset($_SESSION['admin_token']);
     unset($_SESSION['admin_email']);
     session_destroy();

@@ -167,6 +167,23 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             `dispatched_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
             INDEX `idx_ref_id` (`reference_id`),
             INDEX `idx_recip_email` (`recipient_email`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
+        // 5. Project-Wide Activity Audit Logs Table
+        "CREATE TABLE IF NOT EXISTS `activity_logs` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `log_id` VARCHAR(100) UNIQUE NOT NULL,
+            `event_type` VARCHAR(100) NOT NULL,
+            `actor_type` VARCHAR(50) NOT NULL DEFAULT 'user',
+            `actor_identifier` VARCHAR(255) DEFAULT NULL,
+            `action` VARCHAR(255) NOT NULL,
+            `details` TEXT DEFAULT NULL,
+            `ip_address` VARCHAR(100) DEFAULT NULL,
+            `user_agent` VARCHAR(255) DEFAULT NULL,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_event_type` (`event_type`),
+            INDEX `idx_actor_type` (`actor_type`),
+            INDEX `idx_created_at` (`created_at`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
     ];
 

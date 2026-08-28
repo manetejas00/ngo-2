@@ -15,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/activity-logger.php';
 
 
 $rawInput = file_get_contents('php://input');
@@ -441,6 +442,22 @@ try {
 } catch (Throwable $dbErr) {
     error_log('Database Insert Warning (form_submissions): ' . $dbErr->getMessage());
 }
+
+logActivity(
+    'FORM_SUBMIT',
+    'user',
+    $email,
+    "Submitted {$formType} form ({$name})",
+    [
+        'submissionId' => $submissionId,
+        'formType' => $formType,
+        'name' => $name,
+        'email' => $email,
+        'phone' => $phone,
+        'amount' => $amount,
+        'deliveryStatus' => $deliveryStatus
+    ]
+);
 
 echo json_encode([
     'status' => 'ok',

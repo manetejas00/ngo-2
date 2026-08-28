@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo json_encode(['status' => 'error', 'message' => 'Method not allowed']); exit; }
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/activity-logger.php';
 
 
 function diagnosticEnv(string $name, string $default = ''): string {
@@ -156,6 +157,25 @@ try {
     } catch (Throwable $dbErr) {
         error_log('Database Insert Warning (diagnostic_bookings): ' . $dbErr->getMessage());
     }
+
+    logActivity(
+        'DIAGNOSTIC_BOOKING',
+        'user',
+        $booking['patientEmail'],
+        "Booked diagnostic package '{$booking['testName']}' for {$booking['date']}",
+        [
+            'bookingId' => $booking['id'],
+            'testId' => $booking['testId'],
+            'testName' => $booking['testName'],
+            'price' => $booking['price'],
+            'patientName' => $booking['patientName'],
+            'patientEmail' => $booking['patientEmail'],
+            'patientPhone' => $booking['patientPhone'],
+            'date' => $booking['date'],
+            'timeSlot' => $booking['timeSlot'],
+            'city' => $booking['city']
+        ]
+    );
 
     http_response_code(201); echo json_encode(['status' => 'ok', 'booking' => $booking, 'emailSent' => $emailSent]);
 } catch (InvalidArgumentException $exception) { http_response_code(400); echo json_encode(['status' => 'error', 'message' => $exception->getMessage()]); }
