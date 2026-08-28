@@ -239,6 +239,22 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX `idx_t_id` (`test_id`),
             INDEX `idx_cat` (`category`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
+        // 8. System Admin Users Table
+        "CREATE TABLE IF NOT EXISTS `users` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `user_id` VARCHAR(100) UNIQUE NOT NULL,
+            `name` VARCHAR(255) NOT NULL,
+            `email` VARCHAR(255) UNIQUE NOT NULL,
+            `password_hash` VARCHAR(255) DEFAULT NULL,
+            `role` VARCHAR(50) NOT NULL DEFAULT 'admin',
+            `status` VARCHAR(50) NOT NULL DEFAULT 'active',
+            `last_login` DATETIME DEFAULT NULL,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX `idx_user_email` (`email`),
+            INDEX `idx_user_role` (`role`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
     ];
 
@@ -247,6 +263,7 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
     }
 
     seedCatalogFromJSON($pdo);
+    seedDefaultUsers($pdo);
 
     $migrated = true;
     return true;
@@ -336,3 +353,53 @@ function seedCatalogFromJSON(PDO $pdo, bool $force = false): array {
     }
     return $results;
 }
+
+function seedDefaultUsers(PDO $pdo, bool $force = false): int {
+    $seeded = 0;
+    try {
+        $count = (int) $pdo->query("SELECT COUNT(*) FROM `users`")->fetchColumn();
+        if ($count === 0 || $force) {
+            $defaultUsers = [
+                [
+                    'id' => 'usr-1',
+                    'name' => 'System Administrator',
+                    'email' => 'admin@gmail.com',
+                    'password' => 'Admin@1230',
+                    'role' => 'admin',
+                    'status' => 'active'
+                ],
+                [
+                    'id' => 'usr-2',
+                    'name' => 'Healthcare Coordinator',
+                    'email' => 'health@avinyacarefoundation.org',
+                    'password' => 'HealthCare@2026',
+                    'role' => 'manager',
+                    'status' => 'active'
+                ]
+            ];
+
+            $stmt = $pdo->prepare("INSERT INTO `users`
+                (`user_id`, `name`, `email`, `password_hash`, `role`, `status`, `last_login`)
+                VALUES (:u_id, :name, :email, :pass_hash, :role, :status, NOW())
+                ON DUPLICATE KEY UPDATE
+                `name` = VALUES(`name`), `role` = VALUES(`role`), `status` = VALUES(`status`)");
+
+            foreach ($defaultUsers as $u) {
+                $hash = password_hash($u['password'], PASSWORD_DEFAULT);
+                $stmt->execute([
+                    ':u_id' => $u['id'],
+                    ':name' => $u['name'],
+                    ':email' => $u['email'],
+                    ':pass_hash' => $hash,
+                    ':role' => $u['role'],
+                    ':status' => $u['status']
+                ]);
+                $seeded++;
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('Error seeding default users: ' . $e->getMessage());
+    }
+    return $seeded;
+}
+

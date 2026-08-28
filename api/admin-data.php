@@ -217,11 +217,77 @@ if ($action === 'delete_test') {
     exit(0);
 }
 
+// Action: Save System User (Create or Update)
+if ($action === 'save_user') {
+    $usr = $data['user'] ?? $data;
+    $uId = trim((string) ($usr['id'] ?? $usr['user_id'] ?? ('usr-' . date('Ymd') . '-' . bin2hex(random_bytes(2)))));
+    $name = trim((string) ($usr['name'] ?? ''));
+    $email = strtolower(trim((string) ($usr['email'] ?? '')));
+    $role = strtolower(trim((string) ($usr['role'] ?? 'admin')));
+    $status = strtolower(trim((string) ($usr['status'] ?? 'active')));
+    $password = trim((string) ($usr['password'] ?? ''));
+
+    if ($name === '' || $email === '') {
+        http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'User name and email are required.']); exit(0);
+    }
+
+    if ($pdo !== null) {
+        if ($password !== '') {
+            $passHash = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("INSERT INTO `users`
+                (`user_id`, `name`, `email`, `password_hash`, `role`, `status`)
+                VALUES (:u_id, :name, :email, :pass_hash, :role, :status)
+                ON DUPLICATE KEY UPDATE
+                `name` = VALUES(`name`), `email` = VALUES(`email`), `password_hash` = VALUES(`password_hash`), `role` = VALUES(`role`), `status` = VALUES(`status`)");
+            $stmt->execute([
+                ':u_id' => $uId,
+                ':name' => $name,
+                ':email' => $email,
+                ':pass_hash' => $passHash,
+                ':role' => $role,
+                ':status' => $status
+            ]);
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO `users`
+                (`user_id`, `name`, `email`, `role`, `status`)
+                VALUES (:u_id, :name, :email, :role, :status)
+                ON DUPLICATE KEY UPDATE
+                `name` = VALUES(`name`), `email` = VALUES(`email`), `role` = VALUES(`role`), `status` = VALUES(`status`)");
+            $stmt->execute([
+                ':u_id' => $uId,
+                ':name' => $name,
+                ':email' => $email,
+                ':role' => $role,
+                ':status' => $status
+            ]);
+        }
+    }
+    logActivity('USER_SAVED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Saved system user {$name} ({$email})", ['userId' => $uId, 'email' => $email, 'role' => $role]);
+    echo json_encode(['status' => 'ok', 'message' => "System user {$name} saved successfully.", 'userId' => $uId]);
+    exit(0);
+}
+
+// Action: Delete System User
+if ($action === 'delete_user') {
+    $uId = trim((string) ($data['id'] ?? $data['userId'] ?? ''));
+    if ($uId === '') {
+        http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'User ID is required.']); exit(0);
+    }
+    if ($pdo !== null) {
+        $stmt = $pdo->prepare("DELETE FROM `users` WHERE `user_id` = :id");
+        $stmt->execute([':id' => $uId]);
+    }
+    logActivity('USER_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Deleted system user {$uId}", ['userId' => $uId]);
+    echo json_encode(['status' => 'ok', 'message' => "System user {$uId} deleted successfully."]);
+    exit(0);
+}
+
 // Action: Seed Catalog from Pre-Recorded JSON Data
 if ($action === 'seed_catalog') {
     if ($pdo !== null) {
         $res = seedCatalogFromJSON($pdo, true);
-        logActivity('CATALOG_SEEDED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Seeded doctors & diagnostic tests catalog tables", $res);
+        seedDefaultUsers($pdo, true);
+        logActivity('CATALOG_SEEDED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Seeded doctors, tests & users catalog tables", $res);
         echo json_encode(['status' => 'ok', 'message' => "Catalog seeded successfully: {$res['doctors_seeded']} doctors, {$res['tests_seeded']} diagnostic tests.", 'details' => $res]);
     } else {
         echo json_encode(['status' => 'error', 'message' => "Database connection unavailable."]);
@@ -237,6 +303,7 @@ $emailLogs = [];
 $activityLogs = [];
 $doctorsCatalog = [];
 $diagnosticTestsCatalog = [];
+$usersCatalog = [];
 
 if ($pdo !== null) {
     try {
@@ -246,11 +313,13 @@ if ($pdo !== null) {
         $emailLogs = $pdo->query("SELECT * FROM `email_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
         $activityLogs = $pdo->query("SELECT * FROM `activity_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
         
-        // Auto-seed if doctors or tests tables are empty
+        // Auto-seed if doctors, tests, or users tables are empty
         seedCatalogFromJSON($pdo, false);
+        seedDefaultUsers($pdo, false);
 
         $doctorsCatalog = $pdo->query("SELECT * FROM `doctors` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
         $diagnosticTestsCatalog = $pdo->query("SELECT * FROM `diagnostic_tests` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
+        $usersCatalog = $pdo->query("SELECT `id`, `user_id`, `name`, `email`, `role`, `status`, `last_login`, `created_at` FROM `users` ORDER BY `id` ASC")->fetchAll();
     } catch (Throwable $e) {
         error_log('Admin Data Fetch Warning: ' . $e->getMessage());
     }
@@ -293,6 +362,7 @@ echo json_encode([
         'totalActivityLogs' => count($activityLogs),
         'totalDoctors' => count($doctorsCatalog),
         'totalDiagnosticTests' => count($diagnosticTestsCatalog),
+        'totalUsers' => count($usersCatalog),
         'totalDonationsAmount' => $totalDonationsAmount,
         'totalDonationsCount' => $totalDonationsCount,
         'formCountsByType' => $formCountsByType,
@@ -306,6 +376,7 @@ echo json_encode([
         'emailLogs' => array_values($emailLogs),
         'activityLogs' => array_values($activityLogs),
         'doctorsCatalog' => array_values($doctorsCatalog),
-        'diagnosticTestsCatalog' => array_values($diagnosticTestsCatalog)
+        'diagnosticTestsCatalog' => array_values($diagnosticTestsCatalog),
+        'usersCatalog' => array_values($usersCatalog)
     ]
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);

@@ -985,6 +985,12 @@
           <span class="nav-icon">📜</span> Activity Logs
           <span class="nav-badge" id="sideActivityCount">0</span>
         </button>
+
+        <div class="menu-group-label">ADMINISTRATION</div>
+        <button class="sidebar-nav-link" data-tab="usersCatalog" onclick="switchTab('usersCatalog')">
+          <span class="nav-icon">👤</span> User Management
+          <span class="nav-badge" id="sideUsersCatalogCount">0</span>
+        </button>
       </div>
 
       <!-- Sidebar Footer User Card -->
@@ -1114,6 +1120,7 @@
 
               <button class="btn btn-teal" id="addDoctorBtn" style="display:none;" onclick="openDoctorModal()">➕ Add Doctor</button>
               <button class="btn btn-teal" id="addTestBtn" style="display:none;" onclick="openTestModal()">➕ Add Test Package</button>
+              <button class="btn btn-teal" id="addUserBtn" style="display:none;" onclick="openUserModal()">➕ Add User</button>
               <button class="btn btn-outline" id="reseedCatalogBtn" style="display:none;" onclick="reseedCatalog()">🔄 Re-Seed Catalog</button>
 
               <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
@@ -1361,6 +1368,57 @@
     </div>
   </div>
 
+  <!-- System User Add/Edit Modal -->
+  <div id="userEditModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <div class="modal-title" id="userModalTitle">Add / Edit System User</div>
+        <button class="close-btn" onclick="closeUserModal()">✕</button>
+      </div>
+      <form id="userForm" onsubmit="saveUserForm(event)" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+        <input type="hidden" id="usrId">
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">User ID (e.g. usr-1)</label>
+          <input type="text" id="usrIdDisplay" class="search-input" placeholder="Auto-generated if empty">
+        </div>
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Full Name *</label>
+          <input type="text" id="usrName" class="search-input" required placeholder="John Doe">
+        </div>
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Email Address *</label>
+          <input type="email" id="usrEmail" class="search-input" required placeholder="user@gmail.com">
+        </div>
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Password (Leave blank to keep existing password)</label>
+          <input type="password" id="usrPassword" class="search-input" placeholder="••••••••">
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Role</label>
+            <select id="usrRole" class="select-control" style="width: 100%;">
+              <option value="admin">Admin</option>
+              <option value="manager">Manager</option>
+              <option value="staff">Staff</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Status</label>
+            <select id="usrStatus" class="select-control" style="width: 100%;">
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button type="button" class="btn btn-outline" onclick="closeUserModal()">Cancel</button>
+          <button type="submit" class="btn btn-teal">Save System User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     let adminToken = localStorage.getItem('avinya_admin_token') || '';
     let currentTab = 'dashboard';
@@ -1376,7 +1434,8 @@
       emailLogs: [],
       activityLogs: [],
       doctorsCatalog: [],
-      diagnosticTestsCatalog: []
+      diagnosticTestsCatalog: [],
+      usersCatalog: []
     };
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -1496,6 +1555,7 @@
       setVal('sideActivityCount', analytics.totalActivityLogs || 0);
       setVal('sideDoctorsCatalogCount', analytics.totalDoctors || (rawData.doctorsCatalog ? rawData.doctorsCatalog.length : 0));
       setVal('sideTestsCatalogCount', analytics.totalDiagnosticTests || (rawData.diagnosticTestsCatalog ? rawData.diagnosticTestsCatalog.length : 0));
+      setVal('sideUsersCatalogCount', analytics.totalUsers || (rawData.usersCatalog ? rawData.usersCatalog.length : 0));
     }
 
     function renderDashboardCharts() {
@@ -1584,7 +1644,7 @@
         trendChartInstance = new Chart(trendCtx, {
           type: 'bar',
           data: {
-            labels: ['Form Submissions', 'Doctor Appts', 'Diagnostic Tests', 'Email Audit Logs', 'System Activity', 'Doctors Catalog', 'Tests Catalog'],
+            labels: ['Form Submissions', 'Doctor Appts', 'Diagnostic Tests', 'Email Audit Logs', 'System Activity', 'Doctors Catalog', 'Tests Catalog', 'User Accounts'],
             datasets: [{
               label: 'Total MySQL Records',
               data: [
@@ -1594,7 +1654,8 @@
                 (rawData.emailLogs || []).length,
                 (rawData.activityLogs || []).length,
                 (rawData.doctorsCatalog || []).length,
-                (rawData.diagnosticTestsCatalog || []).length
+                (rawData.diagnosticTestsCatalog || []).length,
+                (rawData.usersCatalog || []).length
               ],
               backgroundColor: 'rgba(8, 127, 115, 0.7)',
               borderColor: '#14B8A6',
@@ -1642,7 +1703,8 @@
         'email': 'Email Dispatch & Audit Logs',
         'activity': 'Project Activity & System Logs',
         'doctorsCatalog': 'Doctors Directory Catalog',
-        'testsCatalog': 'Diagnostic Tests Catalog'
+        'testsCatalog': 'Diagnostic Tests Catalog',
+        'usersCatalog': 'System User Accounts & Management'
       };
       const pageTitleEl = document.getElementById('pageTitle');
       if (pageTitleEl) pageTitleEl.innerText = pageTitles[tab] || 'Admin Dashboard';
@@ -1674,6 +1736,10 @@
         } else if (tab === 'activity') {
           ['FORM_SUBMIT', 'DOCTOR_BOOKING', 'DIAGNOSTIC_BOOKING', 'EMAIL_SENT', 'EMAIL_FAILED', 'ADMIN_LOGIN_SUCCESS', 'ADMIN_LOGIN_FAILED', 'ADMIN_STATUS_UPDATE', 'ADMIN_LOGOUT'].forEach(e => {
             filterSelect.innerHTML += `<option value="${e}">${e}</option>`;
+          });
+        } else if (tab === 'usersCatalog') {
+          ['admin', 'manager', 'staff'].forEach(r => {
+            filterSelect.innerHTML += `<option value="${r}">${r.toUpperCase()}</option>`;
           });
         }
       }
@@ -1740,6 +1806,7 @@
       else if (currentTab === 'activity') items = [...rawData.activityLogs];
       else if (currentTab === 'doctorsCatalog') items = [...rawData.doctorsCatalog];
       else if (currentTab === 'testsCatalog') items = [...rawData.diagnosticTestsCatalog];
+      else if (currentTab === 'usersCatalog') items = [...rawData.usersCatalog];
 
       // 1. Text Search Filter
       if (q) {
@@ -1752,7 +1819,7 @@
       // 2. Category / Event Filter
       if (typeFilter !== 'all') {
         items = items.filter(i => {
-          const val = (i.form_type || i.status || i.event_type || i.category || i.speciality_id || '').toLowerCase();
+          const val = (i.form_type || i.status || i.event_type || i.category || i.speciality_id || i.role || '').toLowerCase();
           return val === typeFilter;
         });
       }
@@ -1801,6 +1868,7 @@
       else if (currentTab === 'activity') renderActivityLogs(items);
       else if (currentTab === 'doctorsCatalog') renderDoctorsCatalog(items);
       else if (currentTab === 'testsCatalog') renderDiagnosticTestsCatalog(items);
+      else if (currentTab === 'usersCatalog') renderUsersCatalog(items);
     }
 
     function updateActiveFilterPills(typeFilter, startDate, endDate, delivery, sort) {
@@ -1827,11 +1895,13 @@
       const thead = document.getElementById('tableHeader');
       const addDocBtn = document.getElementById('addDoctorBtn');
       const addTestBtn = document.getElementById('addTestBtn');
+      const addUserBtn = document.getElementById('addUserBtn');
       const reseedBtn = document.getElementById('reseedCatalogBtn');
 
       if (addDocBtn) addDocBtn.style.display = (currentTab === 'doctorsCatalog') ? 'inline-flex' : 'none';
       if (addTestBtn) addTestBtn.style.display = (currentTab === 'testsCatalog') ? 'inline-flex' : 'none';
-      if (reseedBtn) reseedBtn.style.display = (currentTab === 'doctorsCatalog' || currentTab === 'testsCatalog') ? 'inline-flex' : 'none';
+      if (addUserBtn) addUserBtn.style.display = (currentTab === 'usersCatalog') ? 'inline-flex' : 'none';
+      if (reseedBtn) reseedBtn.style.display = (currentTab === 'doctorsCatalog' || currentTab === 'testsCatalog' || currentTab === 'usersCatalog') ? 'inline-flex' : 'none';
 
       if (currentTab === 'forms') {
         thead.innerHTML = `
@@ -1903,6 +1973,16 @@
           <th>Price & Subsidy</th>
           <th>Turnaround</th>
           <th>Badge</th>
+          <th>Actions</th>
+        `;
+      } else if (currentTab === 'usersCatalog') {
+        thead.innerHTML = `
+          <th>User ID</th>
+          <th>Full Name</th>
+          <th>Email Address</th>
+          <th>System Role</th>
+          <th>Account Status</th>
+          <th>Last Login</th>
           <th>Actions</th>
         `;
       }
@@ -2082,6 +2162,112 @@
           </td>
         </tr>
       `).join('');
+    }
+
+    function renderUsersCatalog(items) {
+      const tbody = document.getElementById('tableBody');
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No system users found. Click "➕ Add User".</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = items.map(item => `
+        <tr>
+          <td><code style="color:#5EEAD4">${item.user_id || item.id}</code></td>
+          <td><strong>${escapeHtml(item.name)}</strong></td>
+          <td><a href="mailto:${item.email}" style="color:#60A5FA">${escapeHtml(item.email)}</a></td>
+          <td><span class="badge ${(item.role || 'admin') === 'admin' ? 'badge-warning' : 'badge-info'}">${(item.role || 'admin').toUpperCase()}</span></td>
+          <td><span class="badge ${(item.status || 'active') === 'active' ? 'badge-success' : 'badge-danger'}">${(item.status || 'active').toUpperCase()}</span></td>
+          <td style="color:var(--text-muted);font-size:12px">${item.last_login || '-'}</td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px" onclick="openUserModal('${item.user_id || item.id}')">✏️ Edit</button>
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;color:#F87171;border-color:#F87171" onclick="deleteUser('${item.user_id || item.id}')">🗑️ Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openUserModal(userId = null) {
+      document.getElementById('userForm').reset();
+      const modal = document.getElementById('userEditModal');
+      const title = document.getElementById('userModalTitle');
+
+      if (userId) {
+        title.innerText = 'Edit System User (' + userId + ')';
+        const u = (rawData.usersCatalog || []).find(item => (item.user_id || item.id) === userId);
+        if (u) {
+          document.getElementById('usrId').value = u.user_id || u.id || '';
+          document.getElementById('usrIdDisplay').value = u.user_id || u.id || '';
+          document.getElementById('usrIdDisplay').readOnly = true;
+          document.getElementById('usrName').value = u.name || '';
+          document.getElementById('usrEmail').value = u.email || '';
+          document.getElementById('usrPassword').value = '';
+          document.getElementById('usrRole').value = u.role || 'admin';
+          document.getElementById('usrStatus').value = u.status || 'active';
+        }
+      } else {
+        title.innerText = 'Add New System User Account';
+        document.getElementById('usrId').value = '';
+        document.getElementById('usrIdDisplay').value = '';
+        document.getElementById('usrIdDisplay').readOnly = false;
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeUserModal() {
+      document.getElementById('userEditModal').style.display = 'none';
+    }
+
+    async function saveUserForm(event) {
+      event.preventDefault();
+      const uId = document.getElementById('usrId').value || document.getElementById('usrIdDisplay').value.trim();
+      const userData = {
+        id: uId,
+        name: document.getElementById('usrName').value.trim(),
+        email: document.getElementById('usrEmail').value.trim(),
+        password: document.getElementById('usrPassword').value.trim(),
+        role: document.getElementById('usrRole').value,
+        status: document.getElementById('usrStatus').value
+      };
+
+      try {
+        const res = await fetch('/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'save_user', user: userData })
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'ok') {
+          alert('System user account saved successfully!');
+          closeUserModal();
+          fetchAdminData();
+        } else {
+          alert('Failed to save user: ' + (data.message || 'Error'));
+        }
+      } catch (err) {
+        alert('Network error saving user account.');
+      }
+    }
+
+    async function deleteUser(userId) {
+      if (!confirm(`Are you sure you want to delete user account '${userId}'?`)) return;
+      try {
+        const res = await fetch('/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'delete_user', id: userId })
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'ok') {
+          alert(`System user account '${userId}' deleted successfully.`);
+          fetchAdminData();
+        } else {
+          alert('Failed to delete user: ' + (data.message || 'Error'));
+        }
+      } catch (err) {
+        alert('Network error deleting user account.');
+      }
     }
 
     function openDoctorModal(docId = null) {
@@ -2275,7 +2461,7 @@
     }
 
     async function reseedCatalog() {
-      if (!confirm('Re-seed doctors and diagnostic tests catalog from pre-recorded default data? Existing catalog records will be refreshed.')) return;
+      if (!confirm('Re-seed doctors, tests, and users catalog from pre-recorded default data? Existing records will be refreshed.')) return;
       try {
         const res = await fetch('/api/admin-data.php', {
           method: 'POST',
@@ -2325,6 +2511,7 @@
       else if (category === 'doctor') item = rawData.doctorBookings.find(i => (i.booking_id || i.id) === id);
       else if (category === 'diagnostic') item = rawData.diagnosticBookings.find(i => (i.booking_id || i.id) === id);
       else if (category === 'activity') item = rawData.activityLogs.find(i => (i.log_id || i.id) === id);
+      else if (category === 'user') item = rawData.usersCatalog.find(i => (i.user_id || i.id) === id);
 
       if (!item) return;
 
@@ -2354,6 +2541,7 @@
       else if (currentTab === 'activity') data = rawData.activityLogs;
       else if (currentTab === 'doctorsCatalog') data = rawData.doctorsCatalog;
       else if (currentTab === 'testsCatalog') data = rawData.diagnosticTestsCatalog;
+      else if (currentTab === 'usersCatalog') data = rawData.usersCatalog;
 
       if (!data || data.length === 0) {
         alert('No data available to export.');
