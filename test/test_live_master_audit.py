@@ -13,30 +13,34 @@ import time
 
 TARGET_HOST = "https://test.avinyacarefoundation.org"
 
-def post_json(endpoint, payload, headers_extra=None):
+def post_json(endpoint, payload, headers_extra=None, retries=1):
     url = f"{TARGET_HOST}{endpoint}"
     data = json.dumps(payload).encode('utf-8')
     headers = {'Content-Type': 'application/json'}
     if headers_extra:
         headers.update(headers_extra)
     req = urllib.request.Request(url, data=data, headers=headers, method='POST')
-    try:
-        with urllib.request.urlopen(req, timeout=20) as response:
-            return response.getcode(), json.loads(response.read().decode('utf-8'))
-    except urllib.error.HTTPError as e:
-        body = e.read().decode('utf-8')
+    for attempt in range(retries + 1):
         try:
-            return e.code, json.loads(body)
-        except Exception:
-            return e.code, {"error": body}
-    except Exception as e:
-        return 0, {"error": str(e)}
+            with urllib.request.urlopen(req, timeout=25) as response:
+                return response.getcode(), json.loads(response.read().decode('utf-8'))
+        except urllib.error.HTTPError as e:
+            body = e.read().decode('utf-8')
+            try:
+                return e.code, json.loads(body)
+            except Exception:
+                return e.code, {"error": body}
+        except Exception as e:
+            if attempt < retries:
+                time.sleep(1.5)
+                continue
+            return 0, {"error": str(e)}
 
 def get_json(endpoint):
     url = f"{TARGET_HOST}{endpoint}"
     req = urllib.request.Request(url, method='GET')
     try:
-        with urllib.request.urlopen(req, timeout=20) as response:
+        with urllib.request.urlopen(req, timeout=25) as response:
             return response.getcode(), json.loads(response.read().decode('utf-8'))
     except urllib.error.HTTPError as e:
         body = e.read().decode('utf-8')
@@ -91,7 +95,7 @@ def run_master_audit():
     ]
 
     for name, payload in form_tests:
-        time.sleep(0.5)
+        time.sleep(1.0)
         code, resp = post_json("/api/submit-form.php", payload)
         success = (code in [200, 201] and resp.get("status") in ["ok", "success"])
         delivery = resp.get("delivery_status") or resp.get("emailStatus") or "OK"
@@ -117,6 +121,7 @@ def run_master_audit():
     print(f"   - Doctor Booking -> HTTP {code} | Response: {resp.get('message') or resp.get('status')}")
     results.append(("Doctor Booking API", code in [200, 201] or (code == 409 and resp.get("status") == "error")))
 
+    time.sleep(1.0)
     diag_booking_payload = {
         "testId": "test-1",
         "testName": "Comprehensive Cancer Biomarker Panel",
@@ -137,6 +142,7 @@ def run_master_audit():
     # TEST 4: Admin Authentication & Management Data APIs
     # -------------------------------------------------------------
     print("\n4️⃣ Testing Admin Authentication & Dashboard Payload...")
+    time.sleep(1.0)
     code, auth_res = post_json("/api/admin-auth.php", {"action": "login", "email": "admin@gmail.com", "password": "Admin@1230"})
     token = auth_res.get("token")
     print(f"   - Admin Auth Login -> HTTP {code} | Token Issued: {token[:15] if token else 'None'}...")
@@ -152,12 +158,14 @@ def run_master_audit():
     # TEST 5: System User Management CRUD API
     # -------------------------------------------------------------
     print("\n5️⃣ Testing User Account CRUD Integration...")
+    time.sleep(1.0)
     test_user_id = f"usr-audit-{ts}"
     code, save_usr = post_json("/api/admin-data.php", {"action": "save_user", "user": {
         "id": test_user_id, "name": "Audit Coordinator", "email": f"auditcoord.{ts}@avinyacarefoundation.org", "password": "AuditPassword@123", "role": "manager", "status": "active"
     }}, auth_headers)
     print(f"   - Save User -> HTTP {code} | Message: {save_usr.get('message')}")
     
+    time.sleep(1.0)
     code, del_usr = post_json("/api/admin-data.php", {"action": "delete_user", "id": test_user_id}, auth_headers)
     print(f"   - Delete User -> HTTP {code} | Message: {del_usr.get('message')}")
     results.append(("System User Account CRUD", save_usr.get("status") == "ok" and del_usr.get("status") == "ok"))
