@@ -57,7 +57,7 @@ class HealthcarePlatform {
     this.doctorsCache = [];
     this.specialitiesCache = [];
     this.testsCache = [];
-    this.selectedDoctorForPortal = 'doc-1';
+    this.selectedDoctorForPortal = '';
     this.bookingApiEndpoint = '/api/booking/index.php';
     this.adminBookingsCache = [];
     this.staticEndpoints = {
@@ -231,6 +231,9 @@ class HealthcarePlatform {
 
     if (docData?.status === 'ok' && Array.isArray(docData.doctors)) {
       this.doctorsCache = docData.doctors;
+      if (this.doctorsCache.length > 0) {
+        this.selectedDoctorForPortal = this.doctorsCache[0].id;
+      }
     }
 
     if (specData?.status === 'ok' && Array.isArray(specData.specialities)) {
@@ -242,6 +245,10 @@ class HealthcarePlatform {
     }
 
     this.renderSpecialityPills();
+    this.renderHeroDoctorPreview();
+    this.populateDoctorPortalSelect();
+    this.renderDoctorDirectory();
+    this.renderDiagnosticTests();
 
     if (!this.doctorsCache.length && !this.specialitiesCache.length && !this.testsCache.length) {
       console.warn('[Healthcare Platform] No healthcare datasets could be loaded from either primary or fallback endpoints.');
@@ -296,6 +303,47 @@ class HealthcarePlatform {
       if (idx === activeIndex) dot.classList.add('active');
       else dot.classList.remove('active');
     });
+  }
+
+  renderHeroDoctorPreview() {
+    const container = document.getElementById('hc-hero-doctor-preview-container');
+    if (!container) return;
+
+    if (!this.doctorsCache || this.doctorsCache.length === 0) {
+      container.innerHTML = `
+        <div class="hc-hero-widget-box hc-hero-doctor-preview" style="max-width: 540px; margin: 0 auto; display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
+          <div style="color: var(--hc-text-muted); font-size: 0.9rem;">No doctor profiles available.</div>
+        </div>
+      `;
+      return;
+    }
+
+    const leadDoc = this.doctorsCache[0];
+    container.innerHTML = `
+      <div class="hc-hero-widget-box hc-hero-doctor-preview" style="max-width: 540px; margin: 0 auto; display: flex; align-items: center; gap: 1.25rem;">
+        <img src="${leadDoc.avatar || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=200&q=80'}" alt="${leadDoc.name}" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--hc-primary);" loading="lazy">
+        <div style="flex: 1; text-align: left;">
+          <div style="color: var(--hc-primary); font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">${leadDoc.badge || leadDoc.specialityName}</div>
+          <h4 style="margin: 0; font-size: 1.15rem; color: #FFF;">${leadDoc.name}</h4>
+          <div style="font-size: 0.85rem; color: #94A3B8;">${leadDoc.hospitalName} • ${leadDoc.experienceYears}+ Yrs Exp</div>
+        </div>
+        <button class="hc-btn-book" onclick="window.HealthcareApp.startBooking('${leadDoc.id}')">Book</button>
+      </div>
+    `;
+  }
+
+  populateDoctorPortalSelect() {
+    const select = document.getElementById('hc-doctor-select-portal');
+    if (!select) return;
+
+    if (!this.doctorsCache || this.doctorsCache.length === 0) {
+      select.innerHTML = `<option value="">No doctors available</option>`;
+      return;
+    }
+
+    select.innerHTML = this.doctorsCache.map(doc => `
+      <option value="${doc.id}" ${doc.id === this.selectedDoctorForPortal ? 'selected' : ''}>${doc.name} (${doc.specialityName || 'Specialist'})</option>
+    `).join('');
   }
 
   // -------------------------------------------------------------
@@ -425,7 +473,7 @@ class HealthcarePlatform {
         <div class="hc-doctor-card-footer">
           <div class="hc-fee-container">
             <span class="hc-fee-label">Consultation Fee</span>
-            <span class="hc-fee-amount">${doc.consultationFee === 0 ? '₹0 (Free)' : `₹${doc.consultationFee}`}</span>
+            <span class="hc-fee-amount">${doc.feeDisplay || (doc.consultationFee === 0 ? '₹0 (Free)' : `₹${doc.consultationFee}`)}</span>
           </div>
           <div style="display: flex; gap: 0.5rem;">
             <button class="hc-btn-view-profile" onclick="window.HealthcareApp.openDoctorProfile('${doc.id}')">
@@ -799,7 +847,7 @@ class HealthcarePlatform {
     slotsContainer.innerHTML = `<div style="grid-column: 1 / -1; color: var(--hc-text-muted); font-size: 0.9rem;">Loading available slots...</div>`;
 
     try {
-      const docId = this.bookingState.doctor?.id || 'doc-1';
+      const docId = this.bookingState.doctor?.id || (this.doctorsCache && this.doctorsCache[0]?.id) || '';
       const date = this.bookingState.selectedDate || this.getInitialBookingDate();
 
       const primaryUrl = `${this.bookingApiEndpoint || '/api/booking/index.php'}?action=slots&doctorId=${encodeURIComponent(docId)}&date=${encodeURIComponent(date)}`;
@@ -866,7 +914,7 @@ class HealthcarePlatform {
     if (errBox) errBox.style.display = 'none';
 
     const payload = {
-      doctorId: this.bookingState.doctor ? this.bookingState.doctor.id : 'doc-1',
+      doctorId: this.bookingState.doctor ? this.bookingState.doctor.id : (this.doctorsCache && this.doctorsCache[0]?.id) || '',
       date: this.bookingState.selectedDate,
       time: this.bookingState.selectedSlot,
       consultationType: this.bookingState.consultationType,
@@ -902,12 +950,23 @@ class HealthcarePlatform {
     }
 
     if (!appointment) {
-      const doc = this.bookingState.doctor || (this.doctorsCache && this.doctorsCache[0]) || { name: 'Dr. Priya Sharma', specialityName: 'Oncology' };
+      const doc = this.bookingState.doctor || (this.doctorsCache && this.doctorsCache[0]);
+      if (!doc) {
+        if (errBox) {
+          errBox.style.display = 'block';
+          errBox.textContent = 'Unable to complete appointment. No doctor profiles found in catalog.';
+        }
+        if (btnConfirm) {
+          btnConfirm.removeAttribute('disabled');
+          btnConfirm.innerHTML = '<span>Confirm Consultation Booking →</span>';
+        }
+        return;
+      }
       appointment = {
         id: `APT-${Math.floor(100000 + Math.random() * 900000)}`,
-        doctorId: doc.id || 'doc-1',
-        doctorName: doc.name || 'Dr. Priya Sharma',
-        specialityName: doc.specialityName || 'Oncology',
+        doctorId: doc.id,
+        doctorName: doc.name,
+        specialityName: doc.specialityName,
         date: this.bookingState.selectedDate,
         time: this.bookingState.selectedSlot,
         consultationType: this.bookingState.consultationType,
@@ -979,6 +1038,7 @@ class HealthcarePlatform {
           <div class="hc-test-tags-row">
             <span class="hc-test-tag highlight">${test.category}</span>
             <span class="hc-test-tag">⏱️ ${test.reportTurnaround}</span>
+            ${test.sampleType ? `<span class="hc-test-tag">${test.icon || '🧪'} ${test.sampleType}</span>` : ''}
             ${test.homeCollection ? '<span class="hc-test-tag">🏠 Home Collection</span>' : ''}
           </div>
 
@@ -996,6 +1056,7 @@ class HealthcarePlatform {
           <div class="hc-test-price-box">
             <span class="hc-test-price">₹${test.price}</span>
             ${test.originalPrice ? `<span class="hc-test-original-price">₹${test.originalPrice}</span>` : ''}
+            ${test.avinyaSubsidy ? `<div style="font-size: 0.75rem; color: var(--hc-primary); font-weight: 700; margin-top: 2px;">${test.avinyaSubsidy}</div>` : ''}
           </div>
           <button class="hc-btn-primary" onclick="window.HealthcareApp.startTestBooking('${test.id}')" style="padding: 0.65rem 1.3rem; font-size: 0.88rem;">
             <span>Book Test →</span>

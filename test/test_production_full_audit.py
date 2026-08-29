@@ -13,18 +13,22 @@ import time
 
 TARGET_HOST = "https://avinyacarefoundation.org"
 
-def post_json(endpoint, payload, headers_extra=None, retries=1):
+def post_json(endpoint, payload, headers_extra=None, retries=2):
     url = f"{TARGET_HOST}{endpoint}"
     data = json.dumps(payload).encode('utf-8')
     headers = {'Content-Type': 'application/json'}
     if headers_extra:
         headers.update(headers_extra)
-    req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+    
     for attempt in range(retries + 1):
         try:
+            req = urllib.request.Request(url, data=data, headers=headers, method='POST')
             with urllib.request.urlopen(req, timeout=25) as response:
                 return response.getcode(), json.loads(response.read().decode('utf-8'))
         except urllib.error.HTTPError as e:
+            if e.code == 503 and attempt < retries:
+                time.sleep(3.0)
+                continue
             body = e.read().decode('utf-8')
             try:
                 return e.code, json.loads(body)
@@ -32,7 +36,7 @@ def post_json(endpoint, payload, headers_extra=None, retries=1):
                 return e.code, {"error": body}
         except Exception as e:
             if attempt < retries:
-                time.sleep(1.5)
+                time.sleep(3.0)
                 continue
             return 0, {"error": str(e)}
 
@@ -79,16 +83,19 @@ def run_production_audit():
     code, html_content = get_html("/doctors.html")
     print(f"   - GET /doctors.html -> HTTP {code} | Length: {len(html_content)} bytes")
     results.append(("Public Doctors HTML Page", code == 200 and len(html_content) > 1000))
+    time.sleep(2.0)
 
     code, docs_res = get_json("/api/healthcare/doctors.php")
     doc_count = len(docs_res.get("doctors", [])) if isinstance(docs_res, dict) and "doctors" in docs_res else 0
     print(f"   - GET /api/healthcare/doctors.php -> HTTP {code} | Doctors Count: {doc_count}")
     results.append(("Public Doctors API", code == 200 and doc_count > 0))
+    time.sleep(2.0)
 
     code, tests_res = get_json("/api/healthcare/tests.php")
     test_count = len(tests_res.get("tests", [])) if isinstance(tests_res, dict) and "tests" in tests_res else 0
     print(f"   - GET /api/healthcare/tests.php -> HTTP {code} | Diagnostic Packages Count: {test_count}")
     results.append(("Public Diagnostic Tests API", code == 200 and test_count > 0))
+    time.sleep(2.0)
 
     code, news_res = get_json("/api/news.php")
     news_count = len(news_res.get("articles", [])) if isinstance(news_res, dict) and "articles" in news_res else 0
@@ -110,7 +117,7 @@ def run_production_audit():
     ]
 
     for name, payload in form_tests:
-        time.sleep(1.0)
+        time.sleep(2.5)
         code, resp = post_json("/api/submit-form.php", payload)
         success = (code in [200, 201] and resp.get("status") in ["ok", "success"])
         delivery = resp.get("delivery_status") or resp.get("emailStatus") or "OK"
@@ -121,6 +128,7 @@ def run_production_audit():
     # TEST 3: Doctor Appointment & Diagnostic Package Booking APIs
     # -------------------------------------------------------------
     print("\n3️⃣ Testing Healthcare Appointment & Sample Booking APIs...")
+    time.sleep(2.5)
     hour = 9 + (ts % 7)
     doc_booking_payload = {
         "doctorId": "doc-1",
@@ -136,7 +144,7 @@ def run_production_audit():
     print(f"   - Doctor Booking -> HTTP {code} | Response: {resp.get('message') or resp.get('status')}")
     results.append(("Doctor Booking API", code in [200, 201] or (code == 409 and resp.get("status") == "error")))
 
-    time.sleep(1.0)
+    time.sleep(2.5)
     diag_booking_payload = {
         "testId": "test-1",
         "testName": "Comprehensive Cancer Biomarker Panel",
@@ -157,12 +165,13 @@ def run_production_audit():
     # TEST 4: Admin Authentication & Management Data APIs
     # -------------------------------------------------------------
     print("\n4️⃣ Testing Admin Authentication & Dashboard Payload...")
-    time.sleep(1.0)
+    time.sleep(2.5)
     code, auth_res = post_json("/api/admin-auth.php", {"action": "login", "email": "admin@gmail.com", "password": "Admin@1230"})
     token = auth_res.get("token")
     print(f"   - Admin Auth Login -> HTTP {code} | Token Issued: {token[:15] if token else 'None'}...")
     results.append(("Admin Authentication", code == 200 and token is not None))
 
+    time.sleep(2.5)
     auth_headers = {"Authorization": f"Bearer {token}"}
     code, data_res = post_json("/api/admin-data.php", {"action": "all"}, auth_headers)
     analytics = data_res.get("analytics", {})
@@ -173,14 +182,14 @@ def run_production_audit():
     # TEST 5: System User Management CRUD API
     # -------------------------------------------------------------
     print("\n5️⃣ Testing User Account CRUD Integration...")
-    time.sleep(1.0)
+    time.sleep(2.5)
     test_user_id = f"usr-prod-{ts}"
     code, save_usr = post_json("/api/admin-data.php", {"action": "save_user", "user": {
         "id": test_user_id, "name": "Prod Coordinator", "email": f"prodcoord.{ts}@avinyacarefoundation.org", "password": "AuditPassword@123", "role": "manager", "status": "active"
     }}, auth_headers)
     print(f"   - Save User -> HTTP {code} | Message: {save_usr.get('message')}")
     
-    time.sleep(1.0)
+    time.sleep(2.5)
     code, del_usr = post_json("/api/admin-data.php", {"action": "delete_user", "id": test_user_id}, auth_headers)
     print(f"   - Delete User -> HTTP {code} | Message: {del_usr.get('message')}")
     results.append(("System User Account CRUD", save_usr.get("status") == "ok" and del_usr.get("status") == "ok"))

@@ -192,6 +192,8 @@ if ($action === 'save_test') {
     $included = is_array($t['testsIncluded'] ?? null) ? $t['testsIncluded'] : (is_string($t['tests_included'] ?? null) ? json_decode($t['tests_included'], true) : []);
     $prep = $t['preparation'] ?? '';
     $turnaround = $t['report_turnaround'] ?? $t['reportTurnaround'] ?? '24 Hours';
+    $sampleType = $t['sample_type'] ?? $t['sampleType'] ?? 'Blood / Serum Sample';
+    $icon = $t['icon'] ?? '🧪';
     $home = !empty($t['home_collection']) || !empty($t['homeCollection']) ? 1 : 0;
     $centre = !empty($t['centre_visit']) || !empty($t['centreVisit']) ? 1 : 0;
     $prio = !empty($t['is_priority']) || !empty($t['isPriority']) ? 1 : 0;
@@ -199,15 +201,15 @@ if ($action === 'save_test') {
 
     if ($pdo !== null) {
         $stmt = $pdo->prepare("INSERT INTO `diagnostic_tests`
-            (`test_id`, `name`, `category`, `tagline`, `description`, `price`, `original_price`, `avinya_subsidy`, `tests_included`, `preparation`, `report_turnaround`, `home_collection`, `centre_visit`, `is_priority`, `badge`, `is_active`)
-            VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :subsidy, :inc, :prep, :turnaround, :home, :centre, :prio, :badge, 1)
+            (`test_id`, `name`, `category`, `tagline`, `description`, `price`, `original_price`, `avinya_subsidy`, `tests_included`, `preparation`, `report_turnaround`, `sample_type`, `icon`, `home_collection`, `centre_visit`, `is_priority`, `badge`, `is_active`)
+            VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :subsidy, :inc, :prep, :turnaround, :stype, :icon, :home, :centre, :prio, :badge, 1)
             ON DUPLICATE KEY UPDATE
-            `name` = VALUES(`name`), `category` = VALUES(`category`), `tagline` = VALUES(`tagline`), `description` = VALUES(`description`), `price` = VALUES(`price`), `original_price` = VALUES(`original_price`), `avinya_subsidy` = VALUES(`avinya_subsidy`), `tests_included` = VALUES(`tests_included`), `preparation` = VALUES(`preparation`), `report_turnaround` = VALUES(`report_turnaround`), `home_collection` = VALUES(`home_collection`), `centre_visit` = VALUES(`centre_visit`), `is_priority` = VALUES(`is_priority`), `badge` = VALUES(`badge`), `is_active` = 1");
+            `name` = VALUES(`name`), `category` = VALUES(`category`), `tagline` = VALUES(`tagline`), `description` = VALUES(`description`), `price` = VALUES(`price`), `original_price` = VALUES(`original_price`), `avinya_subsidy` = VALUES(`avinya_subsidy`), `tests_included` = VALUES(`tests_included`), `preparation` = VALUES(`preparation`), `report_turnaround` = VALUES(`report_turnaround`), `sample_type` = VALUES(`sample_type`), `icon` = VALUES(`icon`), `home_collection` = VALUES(`home_collection`), `centre_visit` = VALUES(`centre_visit`), `is_priority` = VALUES(`is_priority`), `badge` = VALUES(`badge`), `is_active` = 1");
         
         $stmt->execute([
             ':t_id' => $tId, ':name' => $name, ':cat' => $cat, ':tagline' => $tagline, ':descr' => $descr,
             ':price' => $price, ':orig_price' => $origPrice, ':subsidy' => $subsidy, ':inc' => json_encode($included),
-            ':prep' => $prep, ':turnaround' => $turnaround, ':home' => $home, ':centre' => $centre, ':prio' => $prio, ':badge' => $badge
+            ':prep' => $prep, ':turnaround' => $turnaround, ':stype' => $sampleType, ':icon' => $icon, ':home' => $home, ':centre' => $centre, ':prio' => $prio, ':badge' => $badge
         ]);
     }
 

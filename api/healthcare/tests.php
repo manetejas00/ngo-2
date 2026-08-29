@@ -37,6 +37,8 @@ try {
                 'testsIncluded' => json_decode($r['tests_included'] ?? '[]', true) ?: [],
                 'preparation' => $r['preparation'],
                 'reportTurnaround' => $r['report_turnaround'],
+                'sampleType' => $r['sample_type'] ?? 'Blood / Serum Sample',
+                'icon' => $r['icon'] ?? '🧪',
                 'homeCollection' => (bool) $r['home_collection'],
                 'centreVisit' => (bool) $r['centre_visit'],
                 'isPriority' => (bool) $r['is_priority'],

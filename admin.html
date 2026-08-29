@@ -1495,6 +1495,17 @@
           <input type="text" id="testTurnaround" class="search-input" placeholder="24 to 36 Hours">
         </div>
 
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Sample Type</label>
+            <input type="text" id="testSampleType" class="search-input" placeholder="Blood / Serum Sample">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Icon Emoji</label>
+            <input type="text" id="testIcon" class="search-input" placeholder="🧪">
+          </div>
+        </div>
+
         <div>
           <label style="font-size: 12px; color: var(--text-muted);">Description</label>
           <textarea id="testDescription" class="search-input" style="height: 60px; resize: vertical;" placeholder="Detailed clinical description of the test package..."></textarea>
@@ -2644,6 +2655,8 @@
           document.getElementById('testSubsidy').value = t.avinya_subsidy || t.avinyaSubsidy || '';
           document.getElementById('testTagline').value = t.tagline || '';
           document.getElementById('testTurnaround').value = t.report_turnaround || t.reportTurnaround || '';
+          document.getElementById('testSampleType').value = t.sample_type || t.sampleType || 'Blood / Serum Sample';
+          document.getElementById('testIcon').value = t.icon || '🧪';
           document.getElementById('testDescription').value = t.description || '';
           const inc = Array.isArray(t.tests_included) ? t.tests_included : (Array.isArray(t.testsIncluded) ? t.testsIncluded : []);
           document.getElementById('testIncluded').value = inc.join(', ');
@@ -2677,6 +2690,8 @@
         avinyaSubsidy: document.getElementById('testSubsidy').value.trim(),
         tagline: document.getElementById('testTagline').value.trim(),
         reportTurnaround: document.getElementById('testTurnaround').value.trim(),
+        sampleType: document.getElementById('testSampleType').value.trim(),
+        icon: document.getElementById('testIcon').value.trim(),
         description: document.getElementById('testDescription').value.trim(),
         testsIncluded: testsIncluded
       };

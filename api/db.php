@@ -225,6 +225,7 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
 
         // 7. Diagnostic Test Packages Catalog Table
+        // 7. Diagnostic Test Packages Catalog Table
         "CREATE TABLE IF NOT EXISTS `diagnostic_tests` (
             `id` INT AUTO_INCREMENT PRIMARY KEY,
             `test_id` VARCHAR(100) UNIQUE NOT NULL,
@@ -238,6 +239,8 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             `tests_included` TEXT DEFAULT NULL,
             `preparation` TEXT DEFAULT NULL,
             `report_turnaround` VARCHAR(100) DEFAULT NULL,
+            `sample_type` VARCHAR(100) DEFAULT 'Blood / Serum Sample',
+            `icon` VARCHAR(255) DEFAULT '🧪',
             `home_collection` TINYINT(1) DEFAULT 1,
             `centre_visit` TINYINT(1) DEFAULT 1,
             `is_priority` TINYINT(1) DEFAULT 0,
@@ -268,6 +271,18 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
 
     foreach ($queries as $sql) {
         $pdo->exec($sql);
+    }
+
+    try {
+        $cols = $pdo->query("SHOW COLUMNS FROM `diagnostic_tests`")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('sample_type', $cols, true)) {
+            $pdo->exec("ALTER TABLE `diagnostic_tests` ADD COLUMN `sample_type` VARCHAR(100) DEFAULT 'Blood / Serum Sample' AFTER `report_turnaround`");
+        }
+        if (!in_array('icon', $cols, true)) {
+            $pdo->exec("ALTER TABLE `diagnostic_tests` ADD COLUMN `icon` VARCHAR(255) DEFAULT '🧪' AFTER `sample_type`");
+        }
+    } catch (Throwable $e) {
+        // Table created or column addition safely handled
     }
 
     seedCatalogFromJSON($pdo);
@@ -329,10 +344,10 @@ function seedCatalogFromJSON(PDO $pdo, bool $force = false): array {
                 $testData = json_decode((string) file_get_contents($testsFile), true);
                 $testList = $testData['tests'] ?? $testData ?? [];
                 $stmt = $pdo->prepare("INSERT INTO `diagnostic_tests`
-                    (`test_id`, `name`, `category`, `tagline`, `description`, `price`, `original_price`, `avinya_subsidy`, `tests_included`, `preparation`, `report_turnaround`, `home_collection`, `centre_visit`, `is_priority`, `badge`, `is_active`)
-                    VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :subsidy, :inc, :prep, :turnaround, :home, :centre, :prio, :badge, 1)
+                    (`test_id`, `name`, `category`, `tagline`, `description`, `price`, `original_price`, `avinya_subsidy`, `tests_included`, `preparation`, `report_turnaround`, `sample_type`, `icon`, `home_collection`, `centre_visit`, `is_priority`, `badge`, `is_active`)
+                    VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :subsidy, :inc, :prep, :turnaround, :stype, :icon, :home, :centre, :prio, :badge, 1)
                     ON DUPLICATE KEY UPDATE
-                    `name` = VALUES(`name`), `category` = VALUES(`category`), `price` = VALUES(`price`), `description` = VALUES(`description`)");
+                    `name` = VALUES(`name`), `category` = VALUES(`category`), `price` = VALUES(`price`), `description` = VALUES(`description`), `sample_type` = VALUES(`sample_type`), `icon` = VALUES(`icon`)");
                 
                 foreach ($testList as $t) {
                     $stmt->execute([
@@ -347,6 +362,8 @@ function seedCatalogFromJSON(PDO $pdo, bool $force = false): array {
                         ':inc' => json_encode($t['testsIncluded'] ?? []),
                         ':prep' => $t['preparation'] ?? '',
                         ':turnaround' => $t['reportTurnaround'] ?? '24 Hours',
+                        ':stype' => $t['sampleType'] ?? 'Blood / Serum Sample',
+                        ':icon' => $t['icon'] ?? '🧪',
                         ':home' => !empty($t['homeCollection']) ? 1 : 0,
                         ':centre' => !empty($t['centreVisit']) ? 1 : 0,
                         ':prio' => !empty($t['isPriority']) ? 1 : 0,
