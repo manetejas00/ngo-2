@@ -1622,6 +1622,15 @@
     let statusChartInstance = null;
     let trendChartInstance = null;
 
+    function getApiBaseUrl() {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        if (window.location.port && window.location.port !== '3000') {
+          return 'http://localhost:3000';
+        }
+      }
+      return '';
+    }
+
     let rawData = {
       formSubmissions: [],
       doctorBookings: [],
@@ -1669,7 +1678,7 @@
       btn.disabled = true;
 
       try {
-        const response = await fetch('/api/admin-auth.php', {
+        const response = await fetch(getApiBaseUrl() + '/api/admin-auth.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'login', email, password })
@@ -1706,7 +1715,7 @@
       if (!adminToken) return;
 
       try {
-        const res = await fetch('/api/admin-data.php', {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -2497,7 +2506,7 @@
       };
 
       try {
-        const res = await fetch('/api/admin-data.php', {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
           body: JSON.stringify({ action: 'save_user', user: userData })
@@ -2518,7 +2527,7 @@
     async function deleteUser(userId) {
       if (!confirm(`Are you sure you want to delete user account '${userId}'?`)) return;
       try {
-        const res = await fetch('/api/admin-data.php', {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
           body: JSON.stringify({ action: 'delete_user', id: userId })
@@ -2621,7 +2630,7 @@
       };
 
       try {
-        const res = await fetch('/api/admin-data.php', {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
           body: JSON.stringify({ action: 'save_doctor', doctor: doctorData })
@@ -2642,7 +2651,7 @@
     async function deleteDoctor(docId) {
       if (!confirm(`Are you sure you want to delete doctor profile '${docId}'?`)) return;
       try {
-        const res = await fetch('/api/admin-data.php', {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
           body: JSON.stringify({ action: 'delete_doctor', id: docId })
@@ -2721,7 +2730,7 @@
       };
 
       try {
-        const res = await fetch('/api/admin-data.php', {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
           body: JSON.stringify({ action: 'save_test', test: testData })
@@ -2742,7 +2751,7 @@
     async function deleteTest(testId) {
       if (!confirm(`Are you sure you want to delete test package '${testId}'?`)) return;
       try {
-        const res = await fetch('/api/admin-data.php', {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
           body: JSON.stringify({ action: 'delete_test', id: testId })
@@ -2762,7 +2771,7 @@
     async function reseedCatalog() {
       if (!confirm('Re-seed doctors, tests, and users catalog from pre-recorded default data? Existing records will be refreshed.')) return;
       try {
-        const res = await fetch('/api/admin-data.php', {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
           body: JSON.stringify({ action: 'seed_catalog' })
@@ -2781,7 +2790,7 @@
 
     async function updateBookingStatus(type, id, status) {
       try {
-        const res = await fetch('/api/admin-data.php', {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

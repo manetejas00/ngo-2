@@ -5,6 +5,7 @@
  */
 
 import { createServer } from 'node:http';
+import { randomBytes } from 'node:crypto';
 import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
 import { join, extname, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -513,15 +514,16 @@ function getFormattedISTTimestamp() {
 await initPersistentCache();
 
 const server = createServer(async (req, res) => {
+  // Universal CORS Headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+
   const urlPath = req.url.split('?')[0];
 
   // Handle CORS OPTIONS preflight
   if (req.method === 'OPTIONS') {
-    res.writeHead(204, {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    });
+    res.writeHead(204);
     res.end();
     return;
   }
@@ -756,6 +758,139 @@ const server = createServer(async (req, res) => {
       'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     });
     res.end(JSON.stringify(data));
+  }
+
+  // ADMIN AUTHENTICATION ENDPOINT: /api/admin-auth.php
+  if (urlPath === '/api/admin-auth.php' || urlPath === '/api/admin-auth') {
+    try {
+      const payload = (req.method === 'POST' || req.method === 'PUT') ? await parseJsonBody(req) : {};
+      const action = (payload.action || 'login').toLowerCase().trim();
+
+      const validEmails = ['admin@gmail.com', 'admin@gamil.com'];
+      const validPassword = 'Admin@1230';
+
+      if (action === 'login') {
+        const email = (payload.email || '').toLowerCase().trim();
+        const password = (payload.password || '').trim();
+
+        if (validEmails.includes(email) && password === validPassword) {
+          const token = 'AVG-ADM-' + randomBytes(24).toString('hex');
+          return sendJson(200, {
+            status: 'ok',
+            message: 'Admin authentication successful.',
+            token,
+            user: {
+              email,
+              role: 'Super Admin',
+              name: 'Avinya Care Administrator'
+            }
+          });
+        } else {
+          return sendJson(401, {
+            status: 'error',
+            message: 'Invalid email or password. Please check your credentials.'
+          });
+        }
+      } else if (action === 'verify') {
+        const authHeader = req.headers['authorization'] || '';
+        const tokenMatch = authHeader.match(/Bearer\s+(.*)$/i);
+        const token = tokenMatch ? tokenMatch[1].trim() : (payload.token || '').trim();
+
+        if (token.startsWith('AVG-ADM-') && token.length >= 20) {
+          return sendJson(200, {
+            status: 'ok',
+            authenticated: true,
+            user: {
+              email: 'admin@gmail.com',
+              role: 'Super Admin'
+            }
+          });
+        } else {
+          return sendJson(401, {
+            status: 'error',
+            message: 'Invalid or expired admin session token.'
+          });
+        }
+      } else {
+        return sendJson(400, { status: 'error', message: 'Invalid admin auth action.' });
+      }
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // ADMIN DATA & MANAGEMENT ENDPOINT: /api/admin-data.php
+  if (urlPath === '/api/admin-data.php' || urlPath === '/api/admin-data') {
+    try {
+      const payload = (req.method === 'POST' || req.method === 'PUT') ? await parseJsonBody(req) : {};
+      const authHeader = req.headers['authorization'] || '';
+      const tokenMatch = authHeader.match(/Bearer\s+(.*)$/i);
+      const token = tokenMatch ? tokenMatch[1].trim() : (payload.token || '').trim();
+
+      const isAuthenticated = token.startsWith('AVG-ADM-') && token.length >= 20;
+      if (!isAuthenticated) {
+        return sendJson(401, {
+          status: 'error',
+          message: 'Unauthorized access. Valid admin session token required.'
+        });
+      }
+
+      const action = (payload.action || 'all').toLowerCase().trim();
+
+      if (action === 'all') {
+        const [doctors, tests, appointments, testBookings, stats, logs] = await Promise.all([
+          getDoctors(),
+          getDiagnosticTests(),
+          getAppointments(),
+          getTestBookings(),
+          getHealthcareStats(),
+          getNotificationLogs()
+        ]);
+
+        return sendJson(200, {
+          status: 'ok',
+          timestamp: new Date().toISOString(),
+          analytics: {
+            totalFormSubmissions: 0,
+            totalDoctorBookings: appointments.length,
+            totalDiagnosticBookings: testBookings.length,
+            totalEmailLogs: logs.length,
+            totalActivityLogs: 0,
+            totalDoctors: doctors.length,
+            totalDiagnosticTests: tests.length,
+            totalUsers: 1,
+            totalDonationsAmount: 0,
+            totalDonationsCount: 0,
+            formCountsByType: {},
+            doctorStatusCounts: {},
+            diagStatusCounts: {}
+          },
+          data: {
+            formSubmissions: [],
+            doctorBookings: appointments,
+            diagnosticBookings: testBookings,
+            emailLogs: logs,
+            activityLogs: [],
+            doctorsCatalog: doctors,
+            diagnosticTestsCatalog: tests,
+            usersCatalog: [{
+              id: 1,
+              user_id: 'usr-admin-01',
+              name: 'Avinya Care Administrator',
+              email: 'admin@gmail.com',
+              role: 'Super Admin',
+              status: 'active',
+              last_login: new Date().toISOString(),
+              created_at: new Date().toISOString()
+            }]
+          }
+        });
+      }
+
+      return sendJson(200, { status: 'ok', message: `Action ${action} executed.` });
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
   }
 
   // 1. Specialities List

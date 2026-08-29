@@ -179,7 +179,9 @@ class HealthcarePlatform {
   // Data Loading
   // -------------------------------------------------------------
   async fetchJsonEndpoint(endpoint) {
-    const res = await fetch(endpoint, {
+    const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port && window.location.port !== '3000' ? 'http://localhost:3000' : '';
+    const fullUrl = endpoint.startsWith('http') ? endpoint : (apiBase + endpoint);
+    const res = await fetch(fullUrl, {
       headers: { Accept: 'application/json' }
     });
 
@@ -284,6 +286,11 @@ class HealthcarePlatform {
 
     const scrolled = -rect.top;
     const progress = Math.max(0, Math.min(1, scrolled / totalDist));
+
+    // Update Microscopic Doctors Canvas Engine scroll progress
+    if (window.doctorsEngine) {
+      window.doctorsEngine.updateScrollProgress(progress);
+    }
 
     // 6 Distinct Stages
     let activeIndex = 0;
