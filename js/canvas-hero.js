@@ -26,10 +26,31 @@ class HeroCanvasEngine {
 
   init() {
     this.resize();
+
+    const handleScroll = () => {
+      const heroContainer = document.querySelector('.hero-scroll-container');
+      if (heroContainer) {
+        const containerTop = heroContainer.offsetTop;
+        const containerHeight = heroContainer.offsetHeight - window.innerHeight;
+        if (containerHeight > 0) {
+          const scrollY = window.scrollY || window.pageYOffset || 0;
+          let progress = (scrollY - containerTop) / containerHeight;
+          progress = Math.max(0, Math.min(1, progress));
+          this.updateScrollProgress(progress);
+        }
+      }
+    };
+
     window.addEventListener('resize', () => {
       this.resize();
+      handleScroll();
       this.needsRedraw = true;
     });
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Force initial scroll position calculation
+    handleScroll();
 
     // Fast prioritized preloader
     this.preloadFrames();

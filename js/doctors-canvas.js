@@ -26,10 +26,30 @@ class DoctorsCanvasEngine {
 
   init() {
     this.resize();
+
+    const handleScroll = () => {
+      const heroWrapper = document.querySelector('.hc-hero-scroll-wrapper');
+      if (heroWrapper) {
+        const rect = heroWrapper.getBoundingClientRect();
+        const totalDist = heroWrapper.offsetHeight - window.innerHeight;
+        if (totalDist > 0) {
+          const scrolled = -rect.top;
+          const progress = Math.max(0, Math.min(1, scrolled / totalDist));
+          this.updateScrollProgress(progress);
+        }
+      }
+    };
+
     window.addEventListener('resize', () => {
       this.resize();
+      handleScroll();
       this.needsRedraw = true;
     });
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Force immediate initial scroll position sync
+    handleScroll();
 
     // 2-Phase Prioritized Preloader
     this.preloadFrames();
