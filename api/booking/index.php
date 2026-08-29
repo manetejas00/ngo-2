@@ -260,13 +260,15 @@ function availableSlots(string $doctorId, string $date, array $bookings): array 
     if (!isset($doctors[$doctorId])) throw new InvalidArgumentException('Selected doctor was not found.');
     $schedule = $doctors[$doctorId]['schedule'] ?? [];
     $day = (int) (new DateTimeImmutable($date . ' 12:00:00', new DateTimeZone('Asia/Kolkata')))->format('w');
-    if (!in_array($day, $schedule['workingDays'] ?? [1,2,3,4,5,6], true)) return [];
+    $availableDates = array_values(array_filter($schedule['availableDates'] ?? [], 'is_string'));
+    if (!empty($availableDates) && !in_array($date, $availableDates, true)) return [];
+    if (empty($availableDates) && !in_array($day, $schedule['workingDays'] ?? [1,2,3,4,5,6], true)) return [];
 
     $start = minutes($schedule['startTime'] ?? '09:00');
     $end = minutes($schedule['endTime'] ?? '17:00');
     $duration = max(5, (int) ($schedule['slotDurationMins'] ?? 30));
-    $breakStart = isset($schedule['breakStart']) ? minutes($schedule['breakStart']) : -1;
-    $breakEnd = isset($schedule['breakEnd']) ? minutes($schedule['breakEnd']) : -1;
+    $breakStart = !empty($schedule['breakStart']) ? minutes($schedule['breakStart']) : -1;
+    $breakEnd = !empty($schedule['breakEnd']) ? minutes($schedule['breakEnd']) : -1;
     $occupied = [];
     foreach ($bookings as $booking) {
         if (($booking['doctorId'] ?? '') === $doctorId && ($booking['date'] ?? '') === $date && in_array($booking['status'] ?? '', ACTIVE_STATUSES, true)) {
@@ -275,6 +277,15 @@ function availableSlots(string $doctorId, string $date, array $bookings): array 
     }
 
     $slots = [];
+    $explicitSlots = array_values(array_filter($schedule['slots'] ?? [], 'is_string'));
+    if (!empty($explicitSlots)) {
+        foreach ($explicitSlots as $time) {
+            if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $time)) continue;
+            $label = timeLabel(minutes($time));
+            if (!isset($occupied[normalizeTime($label)])) $slots[] = ['time' => $label, 'label' => $label, 'available' => true];
+        }
+        return $slots;
+    }
     for ($cursor = $start; $cursor + $duration <= $end; $cursor += $duration) {
         if ($breakStart >= 0 && $cursor >= $breakStart && $cursor < $breakEnd) continue;
         $label = timeLabel($cursor);

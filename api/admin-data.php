@@ -125,6 +125,20 @@ if ($action === 'save_doctor') {
     $sched = is_array($doc['schedule'] ?? null) ? $doc['schedule'] : (is_string($doc['schedule'] ?? null) ? json_decode($doc['schedule'], true) : [
         'workingDays' => [1,2,3,4,5,6], 'startTime' => '09:00', 'endTime' => '17:00', 'slotDurationMins' => 30, 'breakStart' => '13:00', 'breakEnd' => '14:00'
     ]);
+    $sched = is_array($sched) ? $sched : [];
+    $sched['workingDays'] = array_values(array_unique(array_filter(array_map('intval', $sched['workingDays'] ?? [1,2,3,4,5,6]), fn($day) => $day >= 0 && $day <= 6)));
+    $sched['startTime'] = preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', (string) ($sched['startTime'] ?? '')) ? $sched['startTime'] : '09:00';
+    $sched['endTime'] = preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', (string) ($sched['endTime'] ?? '')) ? $sched['endTime'] : '17:00';
+    $sched['slotDurationMins'] = max(5, min(240, (int) ($sched['slotDurationMins'] ?? 30)));
+    foreach (['breakStart', 'breakEnd'] as $field) {
+        $value = trim((string) ($sched[$field] ?? ''));
+        $sched[$field] = preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $value) ? $value : '';
+    }
+    $sched['availableDates'] = array_values(array_unique(array_filter(array_map('strval', $sched['availableDates'] ?? []), fn($date) => preg_match('/^\d{4}-\d{2}-\d{2}$/', $date))));
+    $sched['slots'] = array_values(array_unique(array_filter(array_map('strval', $sched['slots'] ?? []), fn($time) => preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $time))));
+    if ($sched['startTime'] >= $sched['endTime']) {
+        http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'Doctor schedule end time must be after start time.']); exit(0);
+    }
 
     if ($pdo !== null) {
         $stmt = $pdo->prepare("INSERT INTO `doctors`

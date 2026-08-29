@@ -82,6 +82,27 @@ class HealthcarePlatform {
     return `${year}-${month}-${day}`;
   }
 
+  getDoctorBookingDates(doctor, limit = 7) {
+    const schedule = doctor?.schedule || {};
+    const tomorrow = new Date();
+    tomorrow.setHours(12, 0, 0, 0);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minimum = this.formatLocalDate(tomorrow);
+    const explicitDates = Array.isArray(schedule.availableDates)
+      ? [...new Set(schedule.availableDates)].filter(date => /^\d{4}-\d{2}-\d{2}$/.test(date) && date >= minimum).sort()
+      : [];
+    if (explicitDates.length) return explicitDates.slice(0, limit);
+
+    const workingDays = Array.isArray(schedule.workingDays) ? schedule.workingDays.map(Number) : [1,2,3,4,5,6];
+    const dates = [];
+    for (let offset = 0; offset < 60 && dates.length < limit; offset++) {
+      const date = new Date(tomorrow);
+      date.setDate(tomorrow.getDate() + offset);
+      if (workingDays.includes(date.getDay())) dates.push(this.formatLocalDate(date));
+    }
+    return dates;
+  }
+
   async init() {
     this.setupNavigationHooks();
     this.setupScrollHero();
@@ -501,7 +522,8 @@ class HealthcarePlatform {
   startBooking(doctorId) {
     const doc = this.doctorsCache.find(d => d.id === doctorId) || this.doctorsCache[0];
     this.bookingState.doctor = doc;
-    this.bookingState.selectedDate = this.getInitialBookingDate();
+    const managedDates = this.getDoctorBookingDates(doc);
+    this.bookingState.selectedDate = managedDates[0] || null;
     this.bookingState.selectedSlot = null;
     this.bookingState.consultationType = 'in-clinic';
 
@@ -535,13 +557,11 @@ class HealthcarePlatform {
       // Step 1: Select Consultation Type & Date
       if (headerTitle) headerTitle.innerText = `Book with ${doc.name}`;
 
-      // Generate date chips for next 7 days
+      // Dates are generated only from the schedule managed in the admin panel.
       const dateChips = [];
-      const today = new Date();
-      for (let i = 1; i <= 7; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() + i);
-        const iso = this.formatLocalDate(d);
+      const managedDates = this.getDoctorBookingDates(doc);
+      for (const iso of managedDates) {
+        const d = new Date(`${iso}T12:00:00`);
         const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
         const dayNum = d.getDate();
         const isActive = this.bookingState.selectedDate === iso ? 'active' : '';
@@ -580,7 +600,7 @@ class HealthcarePlatform {
         <div style="margin-bottom: 1.25rem;">
           <label class="hc-input-label" style="display: block; margin-bottom: 0.5rem;">2. Choose Date</label>
           <div class="hc-date-strip">
-            ${dateChips.join('')}
+            ${dateChips.length ? dateChips.join('') : '<div style="color:var(--hc-text-muted);font-size:0.9rem;padding:0.75rem 0;">No appointment dates are currently enabled by the administrator.</div>'}
           </div>
         </div>
 
@@ -602,7 +622,11 @@ class HealthcarePlatform {
         </div>
       `;
 
-      this.fetchAndRenderSlots();
+      if (this.bookingState.selectedDate) this.fetchAndRenderSlots();
+      else {
+        const slotsContainer = document.getElementById('hc-booking-slots-grid');
+        if (slotsContainer) slotsContainer.innerHTML = '<div style="grid-column:1/-1;color:var(--hc-text-muted);font-size:0.9rem;">Choose Date is unavailable until an administrator publishes the doctor schedule.</div>';
+      }
     } else if (step === 2) {
       // Step 2: Patient Details Form
       if (headerTitle) headerTitle.innerText = 'Patient Information';
@@ -1564,7 +1588,14 @@ class HealthcarePlatform {
   }
 }
 
-// Global Export & Auto-Init
-document.addEventListener('DOMContentLoaded', () => {
-  window.HealthcareApp = new HealthcarePlatform();
-});
+// Global Export & Auto-Init. Initialize immediately when a cached/deferred script
+// arrives after DOMContentLoaded, otherwise wait for the document as usual.
+function initializeHealthcarePlatform() {
+  if (!window.HealthcareApp) window.HealthcareApp = new HealthcarePlatform();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeHealthcarePlatform, { once: true });
+} else {
+  initializeHealthcarePlatform();
+}
