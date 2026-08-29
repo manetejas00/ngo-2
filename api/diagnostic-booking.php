@@ -3,14 +3,39 @@ declare(strict_types=1);
 
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo json_encode(['status' => 'error', 'message' => 'Method not allowed']); exit; }
-
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/activity-logger.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    try {
+        $pdo = getDatabaseConnection();
+        $bookings = [];
+        if ($pdo !== null) {
+            $rows = $pdo->query("SELECT * FROM `diagnostic_bookings` ORDER BY `created_at` DESC LIMIT 500")->fetchAll();
+            foreach ($rows as $row) {
+                $bookings[] = [
+                    'id' => $row['booking_id'], 'testId' => $row['test_id'], 'testName' => $row['test_name'],
+                    'price' => (float) $row['price'], 'collectionMethod' => $row['collection_method'],
+                    'patientName' => $row['patient_name'], 'patientEmail' => $row['patient_email'],
+                    'patientPhone' => $row['patient_phone'], 'patientAge' => (int) $row['patient_age'],
+                    'patientGender' => $row['patient_gender'], 'homeAddress' => $row['home_address'],
+                    'pincode' => $row['pincode'], 'city' => $row['city'], 'date' => $row['booking_date'],
+                    'timeSlot' => $row['time_slot'], 'status' => $row['status'], 'createdAt' => $row['created_at']
+                ];
+            }
+        }
+        echo json_encode(['status' => 'ok', 'testBookings' => $bookings, 'count' => count($bookings)]);
+    } catch (Throwable $exception) {
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'message' => 'Unable to load diagnostic bookings.']);
+    }
+    exit;
+}
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo json_encode(['status' => 'error', 'message' => 'Method not allowed']); exit; }
 
 
 function diagnosticEnv(string $name, string $default = ''): string {

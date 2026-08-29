@@ -1209,7 +1209,7 @@ class HealthcarePlatform {
     try {
       const [aptData, testRes] = await Promise.all([
         this.fetchJsonEndpoint(`${this.bookingApiEndpoint}?action=list&sort=newest`),
-        fetch('/api/healthcare/test-bookings')
+        fetch('/api/diagnostic-booking.php')
       ]);
 
       const testData = await testRes.json();
