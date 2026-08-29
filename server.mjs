@@ -1001,11 +1001,21 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, '0.0.0.0', async () => {
-  console.log(`Avinya Care Node.js server running on http://0.0.0.0:${PORT}`);
-  try {
-    await startMailHogServer();
-  } catch (err) {
-    console.warn('[MailHog Startup Warning]', err.message);
+process.on('uncaughtException', (err) => {
+  console.error('[Server Uncaught Exception Notice]', err.message);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Server Unhandled Rejection Notice]', reason);
+});
+
+server.listen(PORT, async () => {
+  console.log(`Avinya Care Node.js server running on port ${PORT}`);
+  if (process.env.ENABLE_MAILHOG === 'true' || process.env.ENVIRONMENT === 'development') {
+    try {
+      await startMailHogServer();
+    } catch (err) {
+      console.warn('[MailHog Startup Warning]', err.message);
+    }
   }
 });

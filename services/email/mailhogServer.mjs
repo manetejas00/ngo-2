@@ -32,74 +32,82 @@ async function persistMailHogMessages() {
 // 1. MailHog Local SMTP Server (Port 1025)
 // -------------------------------------------------------------------
 function startSmtpServer() {
-  const server = net.createServer((socket) => {
-    let state = 'CONNECTED';
-    let currentMsg = {
-      id: `mh-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-      timestamp: new Date().toISOString(),
-      from: '',
-      to: [],
-      raw: '',
-      subject: '',
-      html: '',
-      text: '',
-      headers: {}
-    };
+  try {
+    const server = net.createServer((socket) => {
+      let state = 'CONNECTED';
+      let currentMsg = {
+        id: `mh-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        timestamp: new Date().toISOString(),
+        from: '',
+        to: [],
+        raw: '',
+        subject: '',
+        html: '',
+        text: '',
+        headers: {}
+      };
 
-    socket.write('220 Avinya Care MailHog ESMTP Server Ready\r\n');
+      socket.write('220 Avinya Care MailHog ESMTP Server Ready\r\n');
 
-    socket.on('data', async (chunk) => {
-      const lines = chunk.toString().split('\r\n');
+      socket.on('data', async (chunk) => {
+        const lines = chunk.toString().split('\r\n');
 
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
 
-        if (state === 'DATA_MODE') {
-          if (line === '.') {
-            state = 'CONNECTED';
-            parseRawEmail(currentMsg);
-            mailhogMessages.unshift(currentMsg);
-            await persistMailHogMessages();
-            console.log(`[MailHog SMTP] Received email from <${currentMsg.from}> to <${currentMsg.to.join(', ')}>: "${currentMsg.subject}"`);
-            socket.write('250 2.0.0 OK : queued as ' + currentMsg.id + '\r\n');
-          } else {
-            currentMsg.raw += (line.startsWith('..') ? line.substring(1) : line) + '\r\n';
+          if (state === 'DATA_MODE') {
+            if (line === '.') {
+              state = 'CONNECTED';
+              parseRawEmail(currentMsg);
+              mailhogMessages.unshift(currentMsg);
+              await persistMailHogMessages();
+              console.log(`[MailHog SMTP] Received email from <${currentMsg.from}> to <${currentMsg.to.join(', ')}>: "${currentMsg.subject}"`);
+              socket.write('250 2.0.0 OK : queued as ' + currentMsg.id + '\r\n');
+            } else {
+              currentMsg.raw += (line.startsWith('..') ? line.substring(1) : line) + '\r\n';
+            }
+            continue;
           }
-          continue;
-        }
 
-        const cmd = line.trim().toUpperCase();
-        if (cmd.startsWith('HELO') || cmd.startsWith('EHLO')) {
-          socket.write('250-Avinya Care MailHog Server\r\n250-PIPELINING\r\n250-8BITMIME\r\n250 OK\r\n');
-        } else if (cmd.startsWith('MAIL FROM:')) {
-          const match = line.match(/MAIL FROM:\s*<([^>]+)>/i) || line.match(/MAIL FROM:\s*(\S+)/i);
-          currentMsg.from = match ? match[1] : line.replace(/MAIL FROM:/i, '').trim();
-          socket.write('250 2.1.0 Sender OK\r\n');
-        } else if (cmd.startsWith('RCPT TO:')) {
-          const match = line.match(/RCPT TO:\s*<([^>]+)>/i) || line.match(/RCPT TO:\s*(\S+)/i);
-          const recipient = match ? match[1] : line.replace(/RCPT TO:/i, '').trim();
-          currentMsg.to.push(recipient);
-          socket.write('250 2.1.5 Recipient OK\r\n');
-        } else if (cmd === 'DATA') {
-          state = 'DATA_MODE';
-          socket.write('354 Start mail input; end with <CR><LF>.<CR><LF>\r\n');
-        } else if (cmd === 'QUIT') {
-          socket.write('221 2.0.0 Goodbye\r\n');
-          socket.end();
-        } else if (cmd === 'RSET') {
-          state = 'CONNECTED';
-          currentMsg = { id: `mh-${Date.now()}`, timestamp: new Date().toISOString(), from: '', to: [], raw: '', subject: '', html: '', text: '', headers: {} };
-          socket.write('250 2.0.0 OK\r\n');
-        } else if (cmd.length > 0) {
-          socket.write('250 OK\r\n');
+          const cmd = line.trim().toUpperCase();
+          if (cmd.startsWith('HELO') || cmd.startsWith('EHLO')) {
+            socket.write('250-Avinya Care MailHog Server\r\n250-PIPELINING\r\n250-8BITMIME\r\n250 OK\r\n');
+          } else if (cmd.startsWith('MAIL FROM:')) {
+            const match = line.match(/MAIL FROM:\s*<([^>]+)>/i) || line.match(/MAIL FROM:\s*(\S+)/i);
+            currentMsg.from = match ? match[1] : line.replace(/MAIL FROM:/i, '').trim();
+            socket.write('250 2.1.0 Sender OK\r\n');
+          } else if (cmd.startsWith('RCPT TO:')) {
+            const match = line.match(/RCPT TO:\s*<([^>]+)>/i) || line.match(/RCPT TO:\s*(\S+)/i);
+            const recipient = match ? match[1] : line.replace(/RCPT TO:/i, '').trim();
+            currentMsg.to.push(recipient);
+            socket.write('250 2.1.5 Recipient OK\r\n');
+          } else if (cmd === 'DATA') {
+            state = 'DATA_MODE';
+            socket.write('354 Start mail input; end with <CR><LF>.<CR><LF>\r\n');
+          } else if (cmd === 'QUIT') {
+            socket.write('221 2.0.0 Goodbye\r\n');
+            socket.end();
+          } else if (cmd === 'RSET') {
+            state = 'CONNECTED';
+            currentMsg = { id: `mh-${Date.now()}`, timestamp: new Date().toISOString(), from: '', to: [], raw: '', subject: '', html: '', text: '', headers: {} };
+            socket.write('250 2.0.0 OK\r\n');
+          } else if (cmd.length > 0) {
+            socket.write('250 OK\r\n');
+          }
         }
-      }
+      });
     });
-  });
 
-  server.listen(SMTP_PORT, () => {
-    console.log(`[MailHog SMTP] Listening on smtp://127.0.0.1:${SMTP_PORT}`);
-  });
+    server.on('error', (err) => {
+      console.warn(`[MailHog SMTP Notice] Port ${SMTP_PORT} unavailable (${err.message}). MailHog SMTP skipped.`);
+    });
+
+    server.listen(SMTP_PORT, () => {
+      console.log(`[MailHog SMTP] Listening on smtp://127.0.0.1:${SMTP_PORT}`);
+    });
+  } catch (err) {
+    console.warn('[MailHog SMTP Startup Warning]', err.message);
+  }
 }
 
 function parseRawEmail(msg) {
@@ -136,44 +144,52 @@ function escapeHtml(str) {
 // 2. MailHog Web Dashboard UI & REST API (Port 8025)
 // -------------------------------------------------------------------
 function startWebDashboard() {
-  const server = http.createServer((req, res) => {
-    const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  try {
+    const server = http.createServer((req, res) => {
+      const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 
-    if (url.pathname === '/api/v1/messages' || url.pathname === '/api/v2/messages') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(mailhogMessages));
-      return;
-    }
-
-    if (url.pathname === '/api/v1/clean' || url.pathname === '/api/v1/delete/all') {
-      mailhogMessages = [];
-      persistMailHogMessages();
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok', cleared: true }));
-      return;
-    }
-
-    if (url.pathname.startsWith('/api/v1/messages/')) {
-      const id = url.pathname.replace('/api/v1/messages/', '');
-      const found = mailhogMessages.find((m) => m.id === id);
-      if (found) {
+      if (url.pathname === '/api/v1/messages' || url.pathname === '/api/v2/messages') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(found));
-      } else {
-        res.writeHead(404, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Message not found' }));
+        res.end(JSON.stringify(mailhogMessages));
+        return;
       }
-      return;
-    }
 
-    // Render Web UI Dashboard
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(getMailHogHtml());
-  });
+      if (url.pathname === '/api/v1/clean' || url.pathname === '/api/v1/delete/all') {
+        mailhogMessages = [];
+        persistMailHogMessages();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'ok', cleared: true }));
+        return;
+      }
 
-  server.listen(UI_PORT, () => {
-    console.log(`[MailHog Web UI] Listening on http://localhost:${UI_PORT}`);
-  });
+      if (url.pathname.startsWith('/api/v1/messages/')) {
+        const id = url.pathname.replace('/api/v1/messages/', '');
+        const found = mailhogMessages.find((m) => m.id === id);
+        if (found) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(found));
+        } else {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Message not found' }));
+        }
+        return;
+      }
+
+      // Render Web UI Dashboard
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(getMailHogHtml());
+    });
+
+    server.on('error', (err) => {
+      console.warn(`[MailHog Web UI Notice] Port ${UI_PORT} unavailable (${err.message}). MailHog Web UI skipped.`);
+    });
+
+    server.listen(UI_PORT, () => {
+      console.log(`[MailHog Web UI] Listening on http://localhost:${UI_PORT}`);
+    });
+  } catch (err) {
+    console.warn('[MailHog Web UI Startup Warning]', err.message);
+  }
 }
 
 function getMailHogHtml() {
