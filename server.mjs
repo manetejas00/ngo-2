@@ -41,7 +41,8 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const PORT = process.env.PORT || 3000;
+const rawPort = process.env.PORT || 3000;
+const PORT = typeof rawPort === 'string' && /^\d+$/.test(rawPort) ? parseInt(rawPort, 10) : rawPort;
 const CACHE_DIR = join(__dirname, 'cache');
 const CACHE_FILE = join(CACHE_DIR, 'news_cache.json');
 const CACHE_TTL_MS = 3600 * 1000; // 1 hour in milliseconds
@@ -1009,13 +1010,28 @@ process.on('unhandledRejection', (reason) => {
   console.error('[Server Unhandled Rejection Notice]', reason);
 });
 
-server.listen(PORT, async () => {
-  console.log(`Avinya Care Node.js server running on port ${PORT}`);
-  if (process.env.ENABLE_MAILHOG === 'true' || process.env.ENVIRONMENT === 'development') {
-    try {
-      await startMailHogServer();
-    } catch (err) {
-      console.warn('[MailHog Startup Warning]', err.message);
+const listenHost = typeof PORT === 'number' ? '0.0.0.0' : undefined;
+
+if (listenHost) {
+  server.listen(PORT, listenHost, async () => {
+    console.log(`Avinya Care Node.js server running on http://${listenHost}:${PORT}`);
+    if (process.env.ENABLE_MAILHOG === 'true' || process.env.ENVIRONMENT === 'development') {
+      try {
+        await startMailHogServer();
+      } catch (err) {
+        console.warn('[MailHog Startup Warning]', err.message);
+      }
     }
-  }
-});
+  });
+} else {
+  server.listen(PORT, async () => {
+    console.log(`Avinya Care Node.js server running on socket ${PORT}`);
+    if (process.env.ENABLE_MAILHOG === 'true' || process.env.ENVIRONMENT === 'development') {
+      try {
+        await startMailHogServer();
+      } catch (err) {
+        console.warn('[MailHog Startup Warning]', err.message);
+      }
+    }
+  });
+}
