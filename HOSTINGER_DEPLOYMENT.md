@@ -32,21 +32,38 @@ Hostinger standard Web Hosting serves static HTML, CSS, JavaScript, and PHP scri
 
 ---
 
-## 🚀 One-Command Automated SSH Deployment
+## 🚀 Guarded branch deployment
 
-To deploy from your local environment to the live Hostinger Staging & Production web servers:
+Each branch deploys only to its matching environment after the quality gate passes:
 
 ```bash
-# 1. Switch to staging branch
-git checkout staging
-git add .
-git commit -m "Deployment update"
+# staging branch -> test.avinyacarefoundation.org
 git push origin staging
 
-# 2. Build deployment package & trigger SSH upload script
-zip -r avinya-care-hostinger-deployment.zip . -x "node_modules/*" ".git/*" ".DS_Store"
-./deploy.exp
+# main branch -> avinyacarefoundation.org
+git push origin main
 ```
+
+The GitHub deployment requires these repository secrets:
+
+- `HOSTINGER_SSH_HOST`
+- `HOSTINGER_SSH_PORT` (normally `65002`)
+- `HOSTINGER_SSH_USER`
+- `HOSTINGER_SSH_PRIVATE_KEY`
+
+The matching public key must be installed for the Hostinger SSH account. The workflow validates the release, deploys only the matching branch, preserves the remote `.env` and `storage/`, checks the live pages and APIs, and automatically restores the previous release if verification fails.
+
+For a guarded local deployment with SSH key authentication:
+
+```bash
+export HOSTINGER_SSH_HOST="your-host"
+export HOSTINGER_SSH_PORT="65002"
+export HOSTINGER_SSH_USER="your-user"
+./deploy.exp staging
+./deploy.exp production
+```
+
+Do not deploy staging and production in one command. Promote a verified staging commit by merging it into `main`.
 
 ---
 

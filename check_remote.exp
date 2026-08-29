@@ -1,10 +1,10 @@
-#!/usr/bin/expect -f
-set timeout 60
-set pass "@qLVTyL|J5"
-spawn ssh -p 65002 -o StrictHostKeyChecking=no u382139760@82.112.239.95 "cp -rf domains/test.avinyacarefoundation.org/public_html/* domains/avinyacarefoundation.org/public_html/ 2>/dev/null || true && mkdir -p domains/avinyacarefoundation.org/public_html/api && cp -rf domains/test.avinyacarefoundation.org/public_html/api/* domains/avinyacarefoundation.org/public_html/api/ 2>/dev/null || true && cd domains/avinyacarefoundation.org/public_html && cp -f .env.production .env && ls -la && ls -la api/"
-expect {
-    "password:" {
-        send "$pass\r"
-    }
-}
-expect eof
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+: "${HOSTINGER_SSH_HOST:?Set HOSTINGER_SSH_HOST}"
+: "${HOSTINGER_SSH_USER:?Set HOSTINGER_SSH_USER}"
+HOSTINGER_SSH_PORT="${HOSTINGER_SSH_PORT:-65002}"
+
+ssh -p "$HOSTINGER_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+  "${HOSTINGER_SSH_USER}@${HOSTINGER_SSH_HOST}" \
+  'for root in domains/test.avinyacarefoundation.org/public_html domains/avinyacarefoundation.org/public_html; do printf "%s: " "$root"; test -s "$root/index.html" && test -s "$root/api/booking/index.php" && cat "$root/.release" 2>/dev/null || echo unhealthy; done'

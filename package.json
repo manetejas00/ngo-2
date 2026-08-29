@@ -7,8 +7,10 @@
   "scripts": {
     "start": "node server.mjs",
     "dev": "node server.mjs",
-    "build": "echo 'Avinya Care build ready'",
-    "test": "node --check server.mjs"
+    "build": "node scripts/preflight.mjs",
+    "test": "node scripts/preflight.mjs",
+    "smoke:staging": "node scripts/live-smoke.mjs https://test.avinyacarefoundation.org",
+    "smoke:production": "node scripts/live-smoke.mjs https://avinyacarefoundation.org"
   },
   "keywords": [
     "ngo",

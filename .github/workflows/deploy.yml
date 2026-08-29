@@ -1,0 +1,72 @@
+name: Deploy website
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Deployment quality gate]
+    types: [completed]
+
+concurrency:
+  group: deploy-${{ github.event.workflow_run.head_branch || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       (github.event.workflow_run.head_branch == 'main' || github.event.workflow_run.head_branch == 'staging'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve release
+        id: release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          REF_NAME: ${{ github.ref_name }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_run" ]]; then
+            echo "branch=$RUN_BRANCH" >> "$GITHUB_OUTPUT"
+            echo "sha=$RUN_SHA" >> "$GITHUB_OUTPUT"
+          else
+            echo "branch=$REF_NAME" >> "$GITHUB_OUTPUT"
+            echo "sha=$CURRENT_SHA" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.release.outputs.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Configure Hostinger SSH
+        env:
+          HOSTINGER_SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+          HOSTINGER_SSH_HOST: ${{ secrets.HOSTINGER_SSH_HOST }}
+          HOSTINGER_SSH_PORT: ${{ secrets.HOSTINGER_SSH_PORT }}
+        run: |
+          test -n "$HOSTINGER_SSH_PRIVATE_KEY"
+          test -n "$HOSTINGER_SSH_HOST"
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
+          printf '%s\n' "$HOSTINGER_SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 600 "$HOME/.ssh/id_ed25519"
+          ssh-keyscan -p "${HOSTINGER_SSH_PORT:-65002}" "$HOSTINGER_SSH_HOST" >> "$HOME/.ssh/known_hosts"
+      - name: Deploy and verify
+        env:
+          GITHUB_REF_NAME: ${{ steps.release.outputs.branch }}
+          GITHUB_SHA: ${{ steps.release.outputs.sha }}
+          HOSTINGER_SSH_HOST: ${{ secrets.HOSTINGER_SSH_HOST }}
+          HOSTINGER_SSH_PORT: ${{ secrets.HOSTINGER_SSH_PORT }}
+          HOSTINGER_SSH_USER: ${{ secrets.HOSTINGER_SSH_USER }}
+        run: |
+          environment=staging
+          [[ "$GITHUB_REF_NAME" == "main" ]] && environment=production
+          ./scripts/deploy-hostinger.sh "$environment"

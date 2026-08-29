@@ -1,21 +1,6 @@
-#!/usr/bin/expect -f
-set timeout 120
-set pass "@qLVTyL|J5"
+#!/usr/bin/env bash
+set -Eeuo pipefail
 
-puts "===> Uploading deployment zip to Hostinger Staging..."
-spawn scp -P 65002 -o StrictHostKeyChecking=no avinya-care-hostinger-deployment.zip u382139760@82.112.239.95:domains/test.avinyacarefoundation.org/public_html/avinya-care-hostinger-deployment.zip
-expect {
-    "password:" {
-        send "$pass\r"
-    }
-}
-expect eof
-
-puts "===> Syncing Staging and Production web roots..."
-spawn ssh -p 65002 -o StrictHostKeyChecking=no u382139760@82.112.239.95 "cd domains/test.avinyacarefoundation.org/public_html && unzip -o avinya-care-hostinger-deployment.zip && cp -f .env.staging .env && rm -f avinya-care-hostinger-deployment.zip && mkdir -p ~/domains/avinyacarefoundation.org/public_html/api ~/domains/avinyacarefoundation.org/public_html/css ~/domains/avinyacarefoundation.org/public_html/js ~/domains/avinyacarefoundation.org/public_html/services ~/domains/avinyacarefoundation.org/public_html/assets ~/domains/avinyacarefoundation.org/public_html/storage && cp -rf * ~/domains/avinyacarefoundation.org/public_html/ 2>/dev/null || true && cp -rf .htaccess .env.production ~/domains/avinyacarefoundation.org/public_html/ 2>/dev/null || true && cd ~/domains/avinyacarefoundation.org/public_html && cp -f .env.production .env && echo DEPLOYMENT_SUCCESS"
-expect {
-    "password:" {
-        send "$pass\r"
-    }
-}
-expect eof
+echo "deploy.exp now uses the guarded, environment-specific deployment workflow."
+echo "SSH key authentication and HOSTINGER_SSH_HOST/HOSTINGER_SSH_USER are required."
+exec "$(git rev-parse --show-toplevel)/scripts/deploy-hostinger.sh" "${1:-staging}"
