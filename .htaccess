@@ -1,12 +1,17 @@
 # Hostinger LiteSpeed / Apache Configuration for Avinya Care Foundation
 DirectoryIndex index.html index.php
 
+# Disable Passenger/Node proxy for static assets and PHP files (prevents 503 proxy errors)
+<IfModule mod_passenger.c>
+  PassengerEnabled off
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # Serve existing static files directly from LiteSpeed/Apache disk
+  # Serve existing static files and PHP scripts directly from LiteSpeed/Apache disk
   RewriteCond %{REQUEST_FILENAME} -f
-  RewriteRule \.(html|css|js|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot)$ - [L]
+  RewriteRule \.(html|htm|css|js|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot|php)$ - [L]
 
   # Route /api/submit-form to submit-form.php on Apache/PHP hosts
   RewriteRule ^api/submit-form/?$ api/submit-form.php [L,NC]
