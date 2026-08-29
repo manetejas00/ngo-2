@@ -9,7 +9,7 @@ class HeroCanvasEngine {
     if (!this.canvas) return;
     this.ctx = this.canvas.getContext('2d', { alpha: false }); // Optimize context for fast rendering
 
-    this.frameCount = 300;
+    this.frameCount = 360;
     this.images = new Array(this.frameCount);
     this.imagesLoadedCount = 0;
     this.currentFrameIndex = 0;
