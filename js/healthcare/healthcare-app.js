@@ -514,11 +514,13 @@ class HealthcarePlatform {
     const container = document.getElementById('hc-profile-modal-content');
     if (!modal || !container) return;
 
+    const expertiseList = Array.isArray(doc.areasOfExpertise) ? doc.areasOfExpertise : [];
+
     container.innerHTML = `
       <div style="display: flex; gap: 1.25rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
         <img src="${doc.avatar}" alt="${doc.name}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--hc-primary); box-shadow: var(--hc-shadow-md); flex-shrink: 0;">
         <div style="flex: 1; min-width: 200px;">
-          <div class="hc-doctor-badge-tag" style="margin-bottom: 0.3rem;">${doc.badge}</div>
+          ${doc.badge ? `<div class="hc-doctor-badge-tag" style="margin-bottom: 0.3rem;">${doc.badge}</div>` : ''}
           <h2 style="font-size: 1.4rem; font-weight: 800; margin: 0 0 0.25rem 0;">${doc.name}</h2>
           <div style="color: var(--hc-primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem;">${doc.specialityName}</div>
           <div style="color: var(--hc-text-muted); font-size: 0.85rem;">${doc.qualification} • ${doc.experienceYears} Years Exp</div>
@@ -527,19 +529,21 @@ class HealthcarePlatform {
 
       <div style="background: var(--hc-surface-alt); padding: 1rem; border-radius: var(--hc-radius-md); margin-bottom: 1.25rem;">
         <h4 style="font-size: 0.82rem; font-weight: 800; text-transform: uppercase; color: var(--hc-text-muted); margin: 0 0 0.4rem 0;">About the Specialist</h4>
-        <p style="margin: 0; font-size: 0.9rem; line-height: 1.55; color: var(--hc-text-main);">${doc.about}</p>
+        <p style="margin: 0; font-size: 0.9rem; line-height: 1.55; color: var(--hc-text-main);">${doc.about || ''}</p>
       </div>
 
+      ${expertiseList.length > 0 ? `
       <div style="margin-bottom: 1.25rem;">
         <h4 style="font-size: 0.82rem; font-weight: 800; text-transform: uppercase; color: var(--hc-text-muted); margin: 0 0 0.5rem 0;">Key Clinical Expertise</h4>
         <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
-          ${doc.areasOfExpertise.map(area => `
+          ${expertiseList.map(area => `
             <span style="background: var(--hc-primary-light); color: var(--hc-primary); padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700;">
               ✓ ${area}
             </span>
           `).join('')}
         </div>
       </div>
+      ` : ''}
 
       <div class="hc-form-grid-2" style="margin-bottom: 1.5rem;">
         <div style="background: var(--hc-surface-alt); padding: 0.85rem 1rem; border-radius: var(--hc-radius-md);">
