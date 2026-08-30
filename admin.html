@@ -925,42 +925,144 @@
 </head>
 <body>
 
-  <!-- Login Modal Overlay -->
+  <!-- Production Login Modal Overlay -->
   <div id="loginOverlay" class="login-overlay">
-    <div class="login-card" style="max-width: 480px; padding: 28px;">
-      <img src="assets/logo.png" alt="Avinya Care Foundation" onerror="this.src='favicon.svg'" style="max-height: 54px; margin-bottom: 12px;">
-      <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 6px;">Avinya Care Access Portal</h2>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.4;">Select a role account below to sign in and experience isolated booking & appointment views.</p>
-      
-      <div id="loginError" class="login-error" style="display: none;"></div>
+    <div class="login-card" style="max-width: 440px; padding: 32px 28px; background: #0F172A; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <img src="assets/logo.png" alt="Avinya Care Foundation" onerror="this.src='favicon.svg'" style="max-height: 52px; margin-bottom: 10px;">
+        <h2 style="font-size: 22px; font-weight: 700; color: #F8FAFC; margin-bottom: 4px;">Sign In to Admin Portal</h2>
+        <p style="font-size: 13px; color: #94A3B8;">Enter your credentials to access your dashboard</p>
+      </div>
 
-      <form id="loginForm" onsubmit="handleDevLogin(event)">
-        <div class="form-group" style="margin-bottom: 20px; text-align: left;">
-          <label style="font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 6px; display: block;">Select User Account *</label>
-          <select id="loginUserSelect" class="form-control" style="width: 100%; height: 46px; font-size: 14px; background: #0F172A; border: 1px solid rgba(255, 255, 255, 0.18); color: #F8FAFC; border-radius: 8px; padding: 0 12px;">
-            <optgroup label="👑 System Administrators">
-              <option value="usr-admin-01" selected>🔑 Super Admin (admin@gmail.com)</option>
-              <option value="usr-2">🔑 Healthcare Coordinator (health@avinyacarefoundation.org)</option>
-            </optgroup>
-            <optgroup label="🩺 Doctors (Doctor Appointments)">
-              <option value="usr-doc-doc-1">👨‍⚕️ Dr. Priya Sharma - Medical Oncology</option>
-              <option value="usr-doc-doc-2">👨‍⚕️ Dr. Rajesh K. Varma - Interventional Cardiology</option>
-              <option value="usr-doc-doc-3">👨‍⚕️ Dr. Ananya Sengupta - Radiation Oncology</option>
-              <option value="usr-doc-doc-4">👨‍⚕️ Dr. Vikramaditya Rathore - Surgical Oncology</option>
-              <option value="usr-doc-doc-5">👨‍⚕️ Dr. Meera Nambiar - Hemat-Oncology</option>
-              <option value="usr-doc-doc-6">👨‍⚕️ Dr. Kavita Joshi - Gynecologic Oncology</option>
-              <option value="usr-doc-doc-7">👨‍⚕️ Dr. Arvind Deshmukh - Pediatric Oncology</option>
-              <option value="usr-doc-doc-9">👨‍⚕️ Dr. Shalini Raman - Neuro-Oncology</option>
-              <option value="usr-doc-doc-10">👨‍⚕️ Dr. Farooq Qureshi - Gastrointestinal Oncology</option>
-            </optgroup>
-            <optgroup label="🧪 Diagnostic Providers / Labs (Test Bookings)">
-              <option value="usr-prov-provider-1">🔬 Avinya Central Diagnostics & Pathology (Mumbai)</option>
-              <option value="usr-prov-provider-2">🔬 Metropolis Cancer Diagnostics & Advanced Imaging (New Delhi)</option>
-            </optgroup>
-          </select>
+      <div id="loginError" class="login-error" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #FCA5A5; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group" style="margin-bottom: 16px; text-align: left;">
+          <label style="font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 6px; display: block;">Email or Username *</label>
+          <input type="text" id="loginEmail" class="form-control" placeholder="e.g. admin@gmail.com or doctor.doc-1@avinyacarefoundation.org" required style="width: 100%; height: 44px; font-size: 14px; background: #1E293B; border: 1px solid rgba(255, 255, 255, 0.15); color: #F8FAFC; border-radius: 8px; padding: 0 12px;">
         </div>
-        <button type="submit" id="loginBtn" class="btn btn-primary btn-login" style="width: 100%; height: 46px; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <span>🔒 Log In as Selected Account</span>
+
+        <div class="form-group" style="margin-bottom: 16px; text-align: left;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label style="font-weight: 600; font-size: 13px; color: #CBD5E1;">Password *</label>
+            <a href="javascript:void(0)" onclick="openForgotPasswordModal()" style="font-size: 12px; color: #38BDF8; text-decoration: none;">Forgot Password?</a>
+          </div>
+          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required style="width: 100%; height: 44px; font-size: 14px; background: #1E293B; border: 1px solid rgba(255, 255, 255, 0.15); color: #F8FAFC; border-radius: 8px; padding: 0 12px;">
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #94A3B8; cursor: pointer;">
+            <input type="checkbox" id="loginRemember" style="accent-color: #0D9488;"> Remember Me
+          </label>
+        </div>
+
+        <button type="submit" id="loginBtn" class="btn btn-primary btn-login" style="width: 100%; height: 46px; font-size: 15px; font-weight: 600; background: #0D9488; border: none; border-radius: 8px; color: #FFF; cursor: pointer;">
+          🔒 Sign In
+        </button>
+      </form>
+
+      <!-- Initial Test Credentials Reference -->
+      <div style="margin-top: 22px; padding: 14px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; text-align: left; font-size: 12px; color: #94A3B8;">
+        <div style="font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">💡 Default Initial Login Credentials (Password: <code style="color:#5EEAD4">Admin@1230</code>):</div>
+        <div style="display: grid; gap: 4px;">
+          <div>• <strong>Super Admin:</strong> <code style="color:#38BDF8">admin@gmail.com</code></div>
+          <div>• <strong>Coordinator:</strong> <code style="color:#38BDF8">health@avinyacarefoundation.org</code></div>
+          <div>• <strong>Doctor:</strong> <code style="color:#38BDF8">doctor.doc-1@avinyacarefoundation.org</code></div>
+          <div>• <strong>Diagnostic Lab:</strong> <code style="color:#38BDF8">lab.mumbai@avinyacarefoundation.org</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgotPasswordModal" class="login-overlay" style="display: none; z-index: 10040;">
+    <div class="login-card" style="max-width: 420px; padding: 28px; background: #0F172A; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px;">
+      <h3 style="font-size: 18px; font-weight: 700; color: #F8FAFC; margin-bottom: 6px;">🔑 Reset Your Password</h3>
+      <p style="font-size: 13px; color: #94A3B8; margin-bottom: 18px;">Enter your registered email address below and we'll send you a password reset link.</p>
+      
+      <div id="forgotMsg" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+
+      <form id="forgotForm" onsubmit="handleForgotPasswordSubmit(event)">
+        <div class="form-group" style="margin-bottom: 18px; text-align: left;">
+          <label style="font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 6px; display: block;">Registered Email Address *</label>
+          <input type="email" id="forgotEmail" class="form-control" placeholder="e.g. doctor.doc-1@avinyacarefoundation.org" required style="width: 100%; height: 44px; font-size: 14px; background: #1E293B; border: 1px solid rgba(255, 255, 255, 0.15); color: #F8FAFC; border-radius: 8px; padding: 0 12px;">
+        </div>
+
+        <button type="submit" id="forgotBtn" class="btn btn-primary" style="width: 100%; height: 44px; font-size: 14px; font-weight: 600; background: #0D9488; border: none; border-radius: 8px; color: #FFF;">
+          📧 Send Reset Link
+        </button>
+      </form>
+      <div style="margin-top: 16px; text-align: center;">
+        <a href="javascript:void(0)" onclick="closeForgotPasswordModal()" style="font-size: 13px; color: #38BDF8; text-decoration: none;">← Back to Sign In</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Force Password Change Modal -->
+  <div id="forcePasswordModal" class="login-overlay" style="display: none; z-index: 10050;">
+    <div class="login-card" style="max-width: 460px; padding: 28px; background: #0F172A; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 16px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <span style="font-size: 24px;">🔐</span>
+        <h3 style="font-size: 18px; font-weight: 700; color: #F8FAFC; margin: 0;">Change Your Password</h3>
+      </div>
+      <p style="font-size: 13px; color: #FCD34D; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); padding: 10px 12px; border-radius: 8px; margin-bottom: 18px;">
+        ⚠️ <strong>Security Action Required:</strong> You are using an initial account password (<code>Admin@1230</code>). Please set a strong custom password before accessing the dashboard.
+      </p>
+
+      <div id="forceError" class="login-error" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #FCA5A5; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+
+      <form id="forcePasswordForm" onsubmit="handleForcePasswordSubmit(event)">
+        <div class="form-group" style="margin-bottom: 14px; text-align: left;">
+          <label style="font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 4px; display: block;">Current Password *</label>
+          <input type="password" id="forceCurrentPassword" class="form-control" placeholder="Admin@1230" required style="width: 100%; height: 42px; font-size: 14px; background: #1E293B; border: 1px solid rgba(255, 255, 255, 0.15); color: #F8FAFC; border-radius: 8px; padding: 0 12px;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px; text-align: left;">
+          <label style="font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 4px; display: block;">New Strong Password *</label>
+          <input type="password" id="forceNewPassword" class="form-control" placeholder="e.g. Doctor@2026" required style="width: 100%; height: 42px; font-size: 14px; background: #1E293B; border: 1px solid rgba(255, 255, 255, 0.15); color: #F8FAFC; border-radius: 8px; padding: 0 12px;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px; text-align: left;">
+          <label style="font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 4px; display: block;">Confirm New Password *</label>
+          <input type="password" id="forceConfirmPassword" class="form-control" placeholder="Confirm your new password" required style="width: 100%; height: 42px; font-size: 14px; background: #1E293B; border: 1px solid rgba(255, 255, 255, 0.15); color: #F8FAFC; border-radius: 8px; padding: 0 12px;">
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.8); padding: 12px; border-radius: 8px; font-size: 12px; color: #94A3B8; margin-bottom: 18px;">
+          <div style="font-weight: 600; color: #CBD5E1; margin-bottom: 4px;">Password Security Requirements:</div>
+          <div>✓ Minimum 8 characters</div>
+          <div>✓ At least 1 uppercase letter (A-Z) & 1 lowercase letter (a-z)</div>
+          <div>✓ At least 1 number (0-9) & 1 special character (!@#$%^&*)</div>
+        </div>
+
+        <button type="submit" id="forceSubmitBtn" class="btn btn-primary" style="width: 100%; height: 44px; font-size: 14px; font-weight: 600; background: #0D9488; border: none; border-radius: 8px; color: #FFF;">
+          🔒 Save New Password & Continue
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal (via Email Link) -->
+  <div id="resetPasswordModal" class="login-overlay" style="display: none; z-index: 10060;">
+    <div class="login-card" style="max-width: 440px; padding: 28px; background: #0F172A; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px;">
+      <h3 style="font-size: 18px; font-weight: 700; color: #F8FAFC; margin-bottom: 6px;">🔑 Set New Password</h3>
+      <p style="font-size: 13px; color: #94A3B8; margin-bottom: 18px;">Please enter your new strong password below.</p>
+
+      <div id="resetMsg" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+
+      <form id="resetPasswordForm" onsubmit="handleResetPasswordSubmit(event)">
+        <input type="hidden" id="resetTokenInput">
+        <div class="form-group" style="margin-bottom: 14px; text-align: left;">
+          <label style="font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 4px; display: block;">New Password *</label>
+          <input type="password" id="resetNewPassword" class="form-control" placeholder="••••••••" required style="width: 100%; height: 42px; font-size: 14px; background: #1E293B; border: 1px solid rgba(255, 255, 255, 0.15); color: #F8FAFC; border-radius: 8px; padding: 0 12px;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 18px; text-align: left;">
+          <label style="font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 4px; display: block;">Confirm New Password *</label>
+          <input type="password" id="resetConfirmPassword" class="form-control" placeholder="••••••••" required style="width: 100%; height: 42px; font-size: 14px; background: #1E293B; border: 1px solid rgba(255, 255, 255, 0.15); color: #F8FAFC; border-radius: 8px; padding: 0 12px;">
+        </div>
+
+        <button type="submit" id="resetSubmitBtn" class="btn btn-primary" style="width: 100%; height: 44px; font-size: 14px; font-weight: 600; background: #0D9488; border: none; border-radius: 8px; color: #FFF;">
+          🔒 Reset Password & Sign In
         </button>
       </form>
     </div>
@@ -1660,208 +1762,47 @@
     };
 
     window.addEventListener('DOMContentLoaded', () => {
-      loadTempUsers();
-      if (adminToken) {
+      const hash = window.location.hash || '';
+      const search = window.location.search || '';
+      let resetToken = '';
+      if (hash.includes('reset-password?token=')) {
+        resetToken = hash.split('token=')[1];
+      } else if (search.includes('reset_token=')) {
+        resetToken = new URLSearchParams(search).get('reset_token');
+      }
+
+      if (resetToken) {
         document.getElementById('loginOverlay').style.display = 'none';
-        applyRolePermissions();
-        fetchAdminData();
-        startAutoPolling();
+        document.getElementById('resetTokenInput').value = resetToken;
+        document.getElementById('resetPasswordModal').style.display = 'flex';
+        return;
+      }
+
+      if (adminToken) {
+        if (currentUser && currentUser.must_change_password) {
+          document.getElementById('loginOverlay').style.display = 'none';
+          document.getElementById('forcePasswordModal').style.display = 'flex';
+        } else {
+          document.getElementById('loginOverlay').style.display = 'none';
+          applyRolePermissions();
+          fetchAdminData();
+          startAutoPolling();
+        }
       } else {
         document.getElementById('loginOverlay').style.display = 'flex';
       }
     });
 
-    async function loadTempUsers() {
-      const select = document.getElementById('loginUserSelect');
-      if (!select) return;
-      try {
-        const res = await fetch(getApiBaseUrl() + '/api/admin-auth.php?action=get_temp_users');
-        const json = await res.json();
-        if (json.status === 'ok' && Array.isArray(json.users)) {
-          const users = json.users;
-          const admins = users.filter(u => u.role === 'admin' || u.role === 'manager');
-          const doctors = users.filter(u => u.role === 'doctor');
-          const providers = users.filter(u => u.role === 'diagnostic_provider');
-
-          let html = '';
-          if (admins.length > 0) {
-            html += `<optgroup label="👑 System Administrators">`;
-            admins.forEach(u => {
-              html += `<option value="${u.userId}">🔑 ${escapeHtml(u.name)} (${escapeHtml(u.email)})</option>`;
-            });
-            html += `</optgroup>`;
-          }
-          if (doctors.length > 0) {
-            html += `<optgroup label="🩺 Doctors (Doctor Appointments)">`;
-            doctors.forEach(u => {
-              const spec = u.subtitle ? ` - ${u.subtitle}` : '';
-              html += `<option value="${u.userId}">👨‍⚕️ ${escapeHtml(u.name)}${escapeHtml(spec)}</option>`;
-            });
-            html += `</optgroup>`;
-          }
-          if (providers.length > 0) {
-            html += `<optgroup label="🧪 Diagnostic Providers / Labs (Test Bookings)">`;
-            providers.forEach(u => {
-              html += `<option value="${u.userId}">🔬 ${escapeHtml(u.name)}</option>`;
-            });
-            html += `</optgroup>`;
-          }
-          select.innerHTML = html;
-        }
-      } catch (err) {
-        console.error('Error loading dev users:', err);
-        select.innerHTML = `<option value="usr-admin-01">Super Admin (admin@gmail.com)</option>`;
-      }
-    }
-
-    function applyRolePermissions() {
-      if (!currentUser) return;
-
-      const role = currentUser.role || 'admin';
-      const name = currentUser.name || 'User';
-
-      // Header Pill
-      const roleText = document.getElementById('roleText');
-      const roleIcon = document.getElementById('roleIcon');
-      if (roleText) {
-        let roleTitle = 'Super Admin';
-        let icon = '👑';
-        if (role === 'doctor') {
-          roleTitle = `Doctor: ${name}`;
-          icon = '👨‍⚕️';
-        } else if (role === 'diagnostic_provider') {
-          roleTitle = `Lab Provider: ${name}`;
-          icon = '🔬';
-        } else if (role === 'manager') {
-          roleTitle = `Manager: ${name}`;
-          icon = '📋';
-        }
-        roleText.innerText = `Logged in as: ${roleTitle}`;
-        if (roleIcon) roleIcon.innerText = icon;
-      }
-
-      // Sidebar Badge
-      const nameBadge = document.getElementById('adminNameBadge');
-      const roleBadge = document.getElementById('adminRoleBadge');
-      const avatarBadge = document.getElementById('adminAvatarBadge');
-      if (nameBadge) nameBadge.innerText = name;
-      if (roleBadge) {
-        roleBadge.innerText = role === 'doctor' ? 'Doctor Account' : (role === 'diagnostic_provider' ? 'Diagnostic Provider' : (role === 'manager' ? 'Healthcare Ops Manager' : 'System Administrator'));
-      }
-      if (avatarBadge) {
-        avatarBadge.innerText = role === 'doctor' ? 'DOC' : (role === 'diagnostic_provider' ? 'LAB' : (role === 'manager' ? 'MGR' : 'ADM'));
-      }
-
-      // Menu links visibility according to role
-      const allNavLinks = document.querySelectorAll('.sidebar-nav-link');
-      const menuLabels = document.querySelectorAll('.menu-group-label');
-
-      allNavLinks.forEach(link => {
-        const tab = link.getAttribute('data-tab');
-        if (role === 'doctor') {
-          if (tab === 'dashboard' || tab === 'doctor') {
-            link.style.display = 'flex';
-          } else {
-            link.style.display = 'none';
-          }
-        } else if (role === 'diagnostic_provider') {
-          if (tab === 'dashboard' || tab === 'diagnostic') {
-            link.style.display = 'flex';
-          } else {
-            link.style.display = 'none';
-          }
-        } else {
-          link.style.display = 'flex';
-        }
-      });
-
-      menuLabels.forEach(label => {
-        if (role === 'doctor' || role === 'diagnostic_provider') {
-          const txt = label.innerText.trim();
-          if (txt === 'FORM SUBMISSIONS' || txt === 'SYSTEM AUDIT & LOGS' || txt === 'ADMINISTRATION') {
-            label.style.display = 'none';
-          } else {
-            label.style.display = 'block';
-          }
-        } else {
-          label.style.display = 'block';
-        }
-      });
-
-      // Default active tab enforcement
-      if (role === 'doctor' && currentTab !== 'doctor' && currentTab !== 'dashboard') {
-        switchTab('doctor');
-      } else if (role === 'diagnostic_provider' && currentTab !== 'diagnostic' && currentTab !== 'dashboard') {
-        switchTab('diagnostic');
-      }
-    }
-
-    function startAutoPolling() {
-      if (autoPollTimer) clearInterval(autoPollTimer);
-      // Auto-poll every 5 minutes (300,000 ms)
-      autoPollTimer = setInterval(() => {
-        console.log('[Auto-Sync] 5-minute background refresh triggered...');
-        fetchAdminData(true);
-      }, 5 * 60 * 1000);
-    }
-
-    function toggleMobileSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      if (sidebar) sidebar.classList.toggle('open');
-    }
-
-    function resetStateAndTables() {
-      rawData = {
-        formSubmissions: [],
-        doctorBookings: [],
-        diagnosticBookings: [],
-        emailLogs: [],
-        activityLogs: [],
-        doctorsCatalog: [],
-        diagnosticTestsCatalog: [],
-        usersCatalog: []
-      };
-
-      const tbody = document.getElementById('tableBody');
-      if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">⏳ Loading authorized records...</td></tr>`;
-      }
-
-      const setVal = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) el.innerText = val;
-      };
-
-      setVal('statSubmissions', '0');
-      setVal('statDonations', '₹0');
-      setVal('statDoctorBookings', '0');
-      setVal('statDiagnosticBookings', '0');
-      setVal('sideDoctorCount', '0');
-      setVal('sideDiagCount', '0');
-      setVal('sideDoctorsCatalogCount', '0');
-      setVal('sideTestsCatalogCount', '0');
-      setVal('sideFormContactCount', '0');
-      setVal('sideFormNewsletterCount', '0');
-      setVal('sideFormVolunteerCount', '0');
-      setVal('sideFormSupportCount', '0');
-      setVal('sideFormDonationCount', '0');
-      setVal('sideFormPartnershipCount', '0');
-      setVal('sideFormFeedbackCount', '0');
-      setVal('sideFormsCount', '0');
-      setVal('sideEmailCount', '0');
-      setVal('sideActivityCount', '0');
-      setVal('sideUsersCatalogCount', '0');
-    }
-
-    async function handleDevLogin(event) {
+    async function handleLogin(event) {
       event.preventDefault();
-      const select = document.getElementById('loginUserSelect');
-      const userId = select.value;
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const remember = document.getElementById('loginRemember') ? document.getElementById('loginRemember').checked : false;
       const errorDiv = document.getElementById('loginError');
       const btn = document.getElementById('loginBtn');
 
-      if (!userId) {
-        errorDiv.innerText = 'Please select a user account to log in.';
+      if (!email || !password) {
+        errorDiv.innerText = 'Please enter your email/username and password.';
         errorDiv.style.display = 'block';
         return;
       }
@@ -1874,31 +1815,223 @@
         const response = await fetch(getApiBaseUrl() + '/api/admin-auth.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'temp_login', userId })
+          body: JSON.stringify({ action: 'login', email, password })
         });
         const data = await response.json();
 
         if (response.ok && data.status === 'ok' && data.token) {
           adminToken = data.token;
-          currentUser = data.user || { role: 'admin', name: 'Super Admin' };
-          localStorage.setItem('avinya_admin_token', adminToken);
-          localStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
-          
+          currentUser = data.user || { role: 'admin', name: 'User' };
+
+          if (remember) {
+            localStorage.setItem('avinya_admin_token', adminToken);
+            localStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
+          } else {
+            sessionStorage.setItem('avinya_admin_token', adminToken);
+            sessionStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
+            localStorage.setItem('avinya_admin_token', adminToken);
+            localStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
+          }
+
+          if (currentUser.must_change_password) {
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('forcePasswordModal').style.display = 'flex';
+            return;
+          }
+
           resetStateAndTables();
           document.getElementById('loginOverlay').style.display = 'none';
           applyRolePermissions();
           fetchAdminData();
           startAutoPolling();
         } else {
-          errorDiv.innerText = data.message || 'Authentication failed.';
+          errorDiv.innerText = data.message || 'Authentication failed. Please check your credentials.';
           errorDiv.style.display = 'block';
         }
       } catch (err) {
         errorDiv.innerText = 'Network error authenticating login.';
         errorDiv.style.display = 'block';
       } finally {
-        btn.innerText = '🔒 Log In as Selected Account';
+        btn.innerText = '🔒 Sign In';
         btn.disabled = false;
+      }
+    }
+
+    async function handleForcePasswordSubmit(event) {
+      event.preventDefault();
+      const currentPassword = document.getElementById('forceCurrentPassword').value.trim();
+      const newPassword = document.getElementById('forceNewPassword').value.trim();
+      const confirmPassword = document.getElementById('forceConfirmPassword').value.trim();
+      const errorDiv = document.getElementById('forceError');
+      const btn = document.getElementById('forceSubmitBtn');
+
+      if (newPassword !== confirmPassword) {
+        errorDiv.innerText = 'New password and confirmation password do not match.';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      errorDiv.style.display = 'none';
+      btn.innerText = 'Saving New Password...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(getApiBaseUrl() + '/api/admin-auth.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + adminToken
+          },
+          body: JSON.stringify({ action: 'force_change_password', currentPassword, newPassword, confirmPassword })
+        });
+        const data = await response.json();
+
+        if (response.ok && data.status === 'ok') {
+          alert('✅ Password changed successfully! Welcome to your dashboard.');
+          if (currentUser) currentUser.must_change_password = false;
+          localStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
+          document.getElementById('forcePasswordModal').style.display = 'none';
+          resetStateAndTables();
+          applyRolePermissions();
+          fetchAdminData();
+          startAutoPolling();
+        } else {
+          errorDiv.innerText = data.message || 'Error updating password.';
+          errorDiv.style.display = 'block';
+        }
+      } catch (err) {
+        errorDiv.innerText = 'Network error updating password.';
+        errorDiv.style.display = 'block';
+      } finally {
+        btn.innerText = '🔒 Save New Password & Continue';
+        btn.disabled = false;
+      }
+    }
+
+    function openForgotPasswordModal() {
+      document.getElementById('forgotPasswordModal').style.display = 'flex';
+    }
+
+    function closeForgotPasswordModal() {
+      document.getElementById('forgotPasswordModal').style.display = 'none';
+    }
+
+    async function handleForgotPasswordSubmit(event) {
+      event.preventDefault();
+      const email = document.getElementById('forgotEmail').value.trim();
+      const msgDiv = document.getElementById('forgotMsg');
+      const btn = document.getElementById('forgotBtn');
+
+      if (!email) return;
+
+      btn.innerText = 'Sending Link...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-auth.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'forgot_password', email })
+        });
+        const json = await res.json();
+        msgDiv.className = 'login-error';
+        msgDiv.style.background = 'rgba(16, 185, 129, 0.15)';
+        msgDiv.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        msgDiv.style.color = '#6EE7B7';
+        msgDiv.innerText = json.message || 'If an account exists with this email address, a password reset link has been sent.';
+        msgDiv.style.display = 'block';
+      } catch (err) {
+        msgDiv.style.background = 'rgba(239, 68, 68, 0.15)';
+        msgDiv.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        msgDiv.style.color = '#FCA5A5';
+        msgDiv.innerText = 'Network error sending reset email.';
+        msgDiv.style.display = 'block';
+      } finally {
+        btn.innerText = '📧 Send Reset Link';
+        btn.disabled = false;
+      }
+    }
+
+    async function handleResetPasswordSubmit(event) {
+      event.preventDefault();
+      const token = document.getElementById('resetTokenInput').value.trim();
+      const newPassword = document.getElementById('resetNewPassword').value.trim();
+      const confirmPassword = document.getElementById('resetConfirmPassword').value.trim();
+      const msgDiv = document.getElementById('resetMsg');
+      const btn = document.getElementById('resetSubmitBtn');
+
+      if (newPassword !== confirmPassword) {
+        msgDiv.innerText = 'New password and confirm password do not match.';
+        msgDiv.style.display = 'block';
+        return;
+      }
+
+      btn.innerText = 'Resetting Password...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-auth.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'reset_password', token, newPassword, confirmPassword })
+        });
+        const json = await res.json();
+
+        if (res.ok && json.status === 'ok') {
+          alert('✅ Password reset successfully! Please sign in using your new password.');
+          document.getElementById('resetPasswordModal').style.display = 'none';
+          document.getElementById('loginOverlay').style.display = 'flex';
+          if (history.replaceState) history.replaceState(null, '', 'admin.html');
+        } else {
+          msgDiv.innerText = json.message || 'Password reset failed.';
+          msgDiv.style.display = 'block';
+        }
+      } catch (err) {
+        msgDiv.innerText = 'Network error resetting password.';
+        msgDiv.style.display = 'block';
+      } finally {
+        btn.innerText = '🔒 Reset Password & Sign In';
+        btn.disabled = false;
+      }
+    }
+
+    async function adminResetPassword(userId, userName) {
+      if (!confirm(`Are you sure you want to reset password for ${userName} (${userId}) to Admin@1230?\nThe user will be forced to create a new password upon next login.`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-auth.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + adminToken
+          },
+          body: JSON.stringify({ action: 'admin_user_action', sub_action: 'reset_password', targetUserId: userId })
+        });
+        const json = await res.json();
+        alert(json.message || 'Password reset operation completed.');
+        fetchAdminData(true);
+      } catch (err) {
+        alert('Network error resetting user password.');
+      }
+    }
+
+    async function adminToggleStatus(userId, status) {
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-auth.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + adminToken
+          },
+          body: JSON.stringify({ action: 'admin_user_action', sub_action: 'toggle_status', targetUserId: userId, status })
+        });
+        const json = await res.json();
+        alert(json.message || 'User status updated.');
+        fetchAdminData(true);
+      } catch (err) {
+        alert('Network error updating user status.');
       }
     }
 

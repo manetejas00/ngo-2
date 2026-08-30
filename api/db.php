@@ -273,11 +273,15 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             `user_id` VARCHAR(100) UNIQUE NOT NULL,
             `name` VARCHAR(255) NOT NULL,
             `email` VARCHAR(255) UNIQUE NOT NULL,
+            `phone` VARCHAR(50) DEFAULT NULL,
+            `avatar` TEXT DEFAULT NULL,
             `password_hash` VARCHAR(255) DEFAULT NULL,
             `role` VARCHAR(50) NOT NULL DEFAULT 'admin',
             `doctor_id` VARCHAR(100) DEFAULT NULL,
             `provider_id` VARCHAR(100) DEFAULT NULL,
             `status` VARCHAR(50) NOT NULL DEFAULT 'active',
+            `must_change_password` TINYINT(1) DEFAULT 1,
+            `password_changed_at` DATETIME DEFAULT NULL,
             `last_login` DATETIME DEFAULT NULL,
             `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
             `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -285,6 +289,18 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             INDEX `idx_user_role` (`role`),
             INDEX `idx_user_doc` (`doctor_id`),
             INDEX `idx_user_prov` (`provider_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
+        // 10. Password Resets Table
+        "CREATE TABLE IF NOT EXISTS `password_resets` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `email` VARCHAR(191) NOT NULL,
+            `token` VARCHAR(255) NOT NULL,
+            `expires_at` DATETIME NOT NULL,
+            `used` TINYINT(1) DEFAULT 0,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_reset_email` (`email`),
+            INDEX `idx_reset_token` (`token`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
     ];
 
@@ -310,6 +326,18 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
         }
         if (!in_array('provider_id', $colsUsers, true)) {
             $pdo->exec("ALTER TABLE `users` ADD COLUMN `provider_id` VARCHAR(100) DEFAULT NULL AFTER `doctor_id`");
+        }
+        if (!in_array('must_change_password', $colsUsers, true)) {
+            $pdo->exec("ALTER TABLE `users` ADD COLUMN `must_change_password` TINYINT(1) DEFAULT 1 AFTER `status`");
+        }
+        if (!in_array('password_changed_at', $colsUsers, true)) {
+            $pdo->exec("ALTER TABLE `users` ADD COLUMN `password_changed_at` DATETIME DEFAULT NULL AFTER `must_change_password`");
+        }
+        if (!in_array('phone', $colsUsers, true)) {
+            $pdo->exec("ALTER TABLE `users` ADD COLUMN `phone` VARCHAR(50) DEFAULT NULL AFTER `email`");
+        }
+        if (!in_array('avatar', $colsUsers, true)) {
+            $pdo->exec("ALTER TABLE `users` ADD COLUMN `avatar` TEXT DEFAULT NULL AFTER `phone`");
         }
 
         $colsDiagBookings = $pdo->query("SHOW COLUMNS FROM `diagnostic_bookings`")->fetchAll(PDO::FETCH_COLUMN);
@@ -467,18 +495,19 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
     $seeded = 0;
     try {
         $stmt = $pdo->prepare("INSERT INTO `users`
-            (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`, `last_login`)
-            VALUES (:u_id, :name, :email, :pass_hash, :role, :doc_id, :prov_id, 'active', NOW())
+            (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`, `must_change_password`, `last_login`)
+            VALUES (:u_id, :name, :email, :pass_hash, :role, :doc_id, :prov_id, 'active', 1, NOW())
             ON DUPLICATE KEY UPDATE
             `name` = VALUES(`name`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = 'active'");
 
+        $defaultPassHash = password_hash('Admin@1230', PASSWORD_DEFAULT);
+
         // 1. Seed Super Admin
-        $adminPassHash = password_hash('Admin@1230', PASSWORD_DEFAULT);
         $stmt->execute([
             ':u_id' => 'usr-admin-01',
             ':name' => 'Super Admin',
             ':email' => 'admin@gmail.com',
-            ':pass_hash' => $adminPassHash,
+            ':pass_hash' => $defaultPassHash,
             ':role' => 'admin',
             ':doc_id' => null,
             ':prov_id' => null
@@ -486,12 +515,11 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
         $seeded++;
 
         // 1b. Seed Healthcare Coordinator Manager
-        $mgrPassHash = password_hash('HealthCare@2026', PASSWORD_DEFAULT);
         $stmt->execute([
             ':u_id' => 'usr-2',
             ':name' => 'Healthcare Coordinator',
             ':email' => 'health@avinyacarefoundation.org',
-            ':pass_hash' => $mgrPassHash,
+            ':pass_hash' => $defaultPassHash,
             ':role' => 'manager',
             ':doc_id' => null,
             ':prov_id' => null
@@ -505,13 +533,12 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
             $cleanDocId = preg_replace('/[^a-zA-Z0-9_-]/', '', $docId);
             $email = "doctor.{$cleanDocId}@avinyacarefoundation.org";
             $userId = "usr-doc-{$cleanDocId}";
-            $passHash = password_hash('Doctor@2026', PASSWORD_DEFAULT);
 
             $stmt->execute([
                 ':u_id' => $userId,
                 ':name' => $d['name'],
                 ':email' => $email,
-                ':pass_hash' => $passHash,
+                ':pass_hash' => $defaultPassHash,
                 ':role' => 'doctor',
                 ':doc_id' => $docId,
                 ':prov_id' => null
@@ -526,13 +553,12 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
             $cleanProvId = preg_replace('/[^a-zA-Z0-9_-]/', '', $provId);
             $userId = "usr-prov-{$cleanProvId}";
             $email = $p['email'] ?? "provider.{$cleanProvId}@avinyacarefoundation.org";
-            $passHash = password_hash('Provider@2026', PASSWORD_DEFAULT);
 
             $stmt->execute([
                 ':u_id' => $userId,
                 ':name' => $p['name'],
                 ':email' => $email,
-                ':pass_hash' => $passHash,
+                ':pass_hash' => $defaultPassHash,
                 ':role' => 'diagnostic_provider',
                 ':doc_id' => null,
                 ':prov_id' => $provId

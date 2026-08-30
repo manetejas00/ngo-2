@@ -7,6 +7,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { hashPassword, verifyPassword, validatePasswordStrength, generateResetToken } from './healthcareAuthService.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -819,28 +820,39 @@ const SEED_TEST_BOOKINGS = [
 ];
 
 export function buildUsersCatalog(doctors = DEFAULT_DOCTORS, providers = DEFAULT_DIAGNOSTIC_PROVIDERS) {
+  const defaultHash = hashPassword('Admin@1230');
   const users = [
     {
       id: 'usr-admin-01',
       user_id: 'usr-admin-01',
       name: 'Super Admin',
       email: 'admin@gmail.com',
+      phone: '+91 98765 00000',
+      avatar: '',
+      password_hash: defaultHash,
       role: 'admin',
       subtitle: 'System Administrator',
       doctorId: null,
       providerId: null,
-      status: 'active'
+      status: 'active',
+      must_change_password: true,
+      password_changed_at: null
     },
     {
       id: 'usr-2',
       user_id: 'usr-2',
       name: 'Healthcare Coordinator',
       email: 'health@avinyacarefoundation.org',
+      phone: '+91 98765 00002',
+      avatar: '',
+      password_hash: defaultHash,
       role: 'manager',
       subtitle: 'Healthcare Coordinator & Ops Manager',
       doctorId: null,
       providerId: null,
-      status: 'active'
+      status: 'active',
+      must_change_password: true,
+      password_changed_at: null
     }
   ];
 
@@ -850,11 +862,16 @@ export function buildUsersCatalog(doctors = DEFAULT_DOCTORS, providers = DEFAULT
       user_id: `usr-doc-${doc.id}`,
       name: doc.name,
       email: `doctor.${doc.id}@avinyacarefoundation.org`,
+      phone: '+91 98200 11223',
+      avatar: doc.avatar || '',
+      password_hash: defaultHash,
       role: 'doctor',
       subtitle: doc.specialityName || 'Medical Specialist',
       doctorId: doc.id,
       providerId: null,
-      status: 'active'
+      status: 'active',
+      must_change_password: true,
+      password_changed_at: null
     });
   });
 
@@ -864,11 +881,16 @@ export function buildUsersCatalog(doctors = DEFAULT_DOCTORS, providers = DEFAULT
       user_id: `usr-prov-${prov.id}`,
       name: prov.name,
       email: prov.email,
+      phone: prov.phone || '+91 98765 43210',
+      avatar: '',
+      password_hash: defaultHash,
       role: 'diagnostic_provider',
       subtitle: `${prov.city} Diagnostic Center`,
       doctorId: null,
       providerId: prov.id,
-      status: 'active'
+      status: 'active',
+      must_change_password: true,
+      password_changed_at: null
     });
   });
 
@@ -900,6 +922,7 @@ export async function getDb() {
       appointments: SEED_APPOINTMENTS,
       testBookings: SEED_TEST_BOOKINGS,
       users: buildUsersCatalog(DEFAULT_DOCTORS, DEFAULT_DIAGNOSTIC_PROVIDERS),
+      passwordResets: [],
       notificationLogs: []
     };
     await persistDb();
@@ -1481,4 +1504,232 @@ export async function getHealthcareStats() {
     activeSpecialities,
     lastSyncTime: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST'
   };
+}
+
+// -------------------------------------------------------------
+// AUTHENTICATION, PASSWORD RESETS & PROFILE MANAGEMENT
+// -------------------------------------------------------------
+
+export async function authenticateCredentials(emailOrUsername, password) {
+  const db = await getDb();
+  if (!emailOrUsername || !password) {
+    return { success: false, error: 'Email/Username and Password are required.' };
+  }
+
+  const query = emailOrUsername.trim().toLowerCase();
+  const user = db.users.find(u =>
+    (u.email && u.email.toLowerCase() === query) ||
+    (u.user_id && u.user_id.toLowerCase() === query) ||
+    (u.id && u.id.toLowerCase() === query)
+  );
+
+  if (!user) {
+    return { success: false, error: 'Invalid email/username or password.' };
+  }
+
+  const status = (user.status || 'active').toLowerCase();
+  if (status !== 'active') {
+    return { success: false, error: 'Your account is currently unavailable. Please contact the administrator.' };
+  }
+
+  const defaultHash = hashPassword('Admin@1230');
+  const userHash = user.password_hash || defaultHash;
+  const isMatch = verifyPassword(password, userHash);
+
+  if (!isMatch) {
+    return { success: false, error: 'Invalid email/username or password.' };
+  }
+
+  user.last_login = new Date().toISOString();
+  user.lastLogin = user.last_login;
+  await persistDb();
+
+  return {
+    success: true,
+    user: {
+      userId: user.user_id || user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone || '',
+      avatar: user.avatar || '',
+      role: user.role,
+      doctorId: user.doctorId || user.doctor_id || null,
+      providerId: user.providerId || user.provider_id || null,
+      must_change_password: user.must_change_password === undefined ? !user.password_changed_at : !!user.must_change_password,
+      password_changed_at: user.password_changed_at || null
+    }
+  };
+}
+
+export async function updateUserPassword(userId, currentPassword, newPassword, isForced = false) {
+  const db = await getDb();
+  const user = db.users.find(u => (u.user_id || u.id) === userId);
+  if (!user) {
+    return { success: false, error: 'User account not found.' };
+  }
+
+  const defaultHash = hashPassword('Admin@1230');
+  const userHash = user.password_hash || defaultHash;
+
+  if (currentPassword) {
+    const isMatch = verifyPassword(currentPassword, userHash);
+    if (!isMatch) {
+      return { success: false, error: 'Current password is incorrect.' };
+    }
+  }
+
+  if (currentPassword && currentPassword === newPassword) {
+    return { success: false, error: 'New password cannot be identical to current password.' };
+  }
+
+  const strengthCheck = validatePasswordStrength(newPassword);
+  if (!strengthCheck.valid) {
+    return { success: false, error: strengthCheck.message };
+  }
+
+  user.password_hash = hashPassword(newPassword);
+  user.must_change_password = false;
+  user.password_changed_at = new Date().toISOString();
+  await persistDb();
+
+  return { success: true, message: 'Password changed successfully.' };
+}
+
+export async function createPasswordResetToken(email) {
+  const db = await getDb();
+  if (!db.passwordResets) db.passwordResets = [];
+
+  const query = (email || '').trim().toLowerCase();
+  const user = db.users.find(u => u.email && u.email.toLowerCase() === query);
+
+  const token = generateResetToken();
+  if (!user || user.status === 'inactive') {
+    return { success: true, token, userFound: false };
+  }
+
+  const expiresAt = new Date(Date.now() + 45 * 60 * 1000).toISOString();
+  db.passwordResets.push({
+    id: 'rst-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+    email: user.email,
+    user_id: user.user_id || user.id,
+    user_name: user.name,
+    token: token,
+    expires_at: expiresAt,
+    used: false,
+    created_at: new Date().toISOString()
+  });
+
+  await persistDb();
+  return { success: true, token, userFound: true, user };
+}
+
+export async function resetPasswordWithToken(token, newPassword) {
+  const db = await getDb();
+  if (!db.passwordResets) db.passwordResets = [];
+
+  const record = db.passwordResets.find(r => r.token === token && !r.used);
+  if (!record) {
+    return { success: false, error: 'Invalid or expired password reset link.' };
+  }
+
+  const now = new Date();
+  const expiry = new Date(record.expires_at);
+  if (now > expiry) {
+    return { success: false, error: 'Password reset link has expired. Please request a new link.' };
+  }
+
+  const user = db.users.find(u => (u.user_id || u.id) === record.user_id || u.email === record.email);
+  if (!user) {
+    return { success: false, error: 'Associated user account not found.' };
+  }
+
+  const strengthCheck = validatePasswordStrength(newPassword);
+  if (!strengthCheck.valid) {
+    return { success: false, error: strengthCheck.message };
+  }
+
+  user.password_hash = hashPassword(newPassword);
+  user.must_change_password = false;
+  user.password_changed_at = new Date().toISOString();
+  record.used = true;
+
+  await persistDb();
+  return { success: true, message: 'Your password has been reset successfully. Please login using your new password.' };
+}
+
+export async function updateUserProfile(userId, profileData) {
+  const db = await getDb();
+  const user = db.users.find(u => (u.user_id || u.id) === userId);
+  if (!user) {
+    return { success: false, error: 'User account not found.' };
+  }
+
+  if (profileData.name) user.name = profileData.name.trim();
+  if (profileData.email) user.email = profileData.email.trim().toLowerCase();
+  if (profileData.phone !== undefined) user.phone = profileData.phone.trim();
+  if (profileData.avatar !== undefined) user.avatar = profileData.avatar.trim();
+
+  if (user.role === 'doctor' && user.doctorId && db.doctors) {
+    const doc = db.doctors.find(d => d.id === user.doctorId || d.doctor_id === user.doctorId);
+    if (doc) {
+      if (profileData.name) doc.name = profileData.name.trim();
+      if (profileData.phone) doc.phone = profileData.phone.trim();
+      if (profileData.avatar) doc.avatar = profileData.avatar.trim();
+      if (profileData.qualification) doc.qualification = profileData.qualification.trim();
+      if (profileData.about) doc.about = profileData.about.trim();
+      if (profileData.experienceYears) doc.experienceYears = parseInt(profileData.experienceYears, 10) || doc.experienceYears;
+      if (profileData.location) doc.location = profileData.location.trim();
+    }
+  }
+
+  if (user.role === 'diagnostic_provider' && user.providerId && db.diagnosticProviders) {
+    const prov = db.diagnosticProviders.find(p => p.id === user.providerId || p.provider_id === user.providerId);
+    if (prov) {
+      if (profileData.name) prov.name = profileData.name.trim();
+      if (profileData.email) prov.email = profileData.email.trim();
+      if (profileData.phone) prov.phone = profileData.phone.trim();
+      if (profileData.city) prov.city = profileData.city.trim();
+      if (profileData.address) prov.address = profileData.address.trim();
+    }
+  }
+
+  await persistDb();
+  return {
+    success: true,
+    message: 'Profile updated successfully.',
+    user: {
+      userId: user.user_id || user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone || '',
+      avatar: user.avatar || '',
+      role: user.role,
+      doctorId: user.doctorId || user.doctor_id || null,
+      providerId: user.providerId || user.provider_id || null
+    }
+  };
+}
+
+export async function adminResetUserPassword(targetUserId) {
+  const db = await getDb();
+  const user = db.users.find(u => (u.user_id || u.id) === targetUserId);
+  if (!user) return { success: false, error: 'User account not found.' };
+
+  user.password_hash = hashPassword('Admin@1230');
+  user.must_change_password = true;
+  user.password_changed_at = null;
+  await persistDb();
+
+  return { success: true, message: `Password for ${user.name} reset to Admin@1230. User will be required to change password upon next login.` };
+}
+
+export async function adminToggleUserStatus(targetUserId, status) {
+  const db = await getDb();
+  const user = db.users.find(u => (u.user_id || u.id) === targetUserId);
+  if (!user) return { success: false, error: 'User account not found.' };
+
+  user.status = status === 'active' ? 'active' : 'inactive';
+  await persistDb();
+
+  return { success: true, message: `User ${user.name} account status set to ${user.status}.` };
 }
