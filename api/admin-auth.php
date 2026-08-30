@@ -7,7 +7,6 @@
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=UTF-8');
-header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 
@@ -16,12 +15,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
+ini_set('session.use_strict_mode', '1');
+session_set_cookie_params(['secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly' => true, 'samesite' => 'Strict', 'path' => '/']);
 session_start();
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/activity-logger.php';
-
-$validEmails = ['admin@gmail.com', 'admin@gamil.com'];
-$validPassword = 'Admin@1230';
+require_once __DIR__ . '/password-reset-email.php';
 
 $rawInput = file_get_contents('php://input');
 $data = json_decode((string) $rawInput, true) ?: $_POST;
@@ -31,6 +30,11 @@ $pdo = getDatabaseConnection();
 
 // Action: Get Temporary Dev Users list grouped by role
 if ($action === 'get_temp_users' || $action === 'temp_users') {
+    if (empty($_SESSION['admin_token']) || ($_SESSION['user_role'] ?? '') !== 'admin') {
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'Authentication required.']);
+        exit(0);
+    }
     $usersList = [];
     if ($pdo !== null) {
         $stmt = $pdo->query("SELECT `user_id`, `name`, `email`, `role`, `doctor_id`, `provider_id` FROM `users` WHERE `status` = 'active' ORDER BY `role` ASC, `name` ASC");
@@ -72,20 +76,6 @@ if ($action === 'login' || $action === 'temp_login') {
         $user = $stmt->fetch();
     }
 
-    if (!$user && (in_array($identifier, $validEmails, true) || $identifier === 'admin@gmail.com' || $identifier === 'usr-admin-01')) {
-        $user = [
-            'user_id' => 'usr-admin-01',
-            'name' => 'Super Admin',
-            'email' => 'admin@gmail.com',
-            'password_hash' => password_hash('Admin@1230', PASSWORD_DEFAULT),
-            'role' => 'admin',
-            'status' => 'active',
-            'must_change_password' => 1,
-            'doctor_id' => null,
-            'provider_id' => null
-        ];
-    }
-
     if (!$user) {
         http_response_code(401);
         echo json_encode(['status' => 'error', 'message' => 'Invalid email/username or password.']);
@@ -99,12 +89,7 @@ if ($action === 'login' || $action === 'temp_login') {
     }
 
     $hash = $user['password_hash'] ?? '';
-    $isValidPassword = false;
-    if ($hash && password_verify($password, $hash)) {
-        $isValidPassword = true;
-    } elseif ($password === 'Admin@1230' && (in_array($identifier, $validEmails, true) || str_starts_with($user['user_id'], 'usr-'))) {
-        $isValidPassword = true;
-    }
+    $isValidPassword = $hash !== '' && password_verify($password, $hash);
 
     if (!$isValidPassword) {
         http_response_code(401);
@@ -119,7 +104,8 @@ if ($action === 'login' || $action === 'temp_login') {
         } catch (Throwable $e) {}
     }
 
-    $token = 'AVG-SESS-' . bin2hex(random_bytes(24));
+    session_regenerate_id(true);
+    $token = 'AVG-SESS-' . bin2hex(random_bytes(32));
     $_SESSION['admin_token'] = $token;
     $_SESSION['user_id'] = $user['user_id'];
     $_SESSION['user_email'] = $user['email'];
@@ -167,12 +153,22 @@ if ($action === 'change_password' || $action === 'force_change_password') {
         exit(0);
     }
 
-    $userId = $_SESSION['user_id'] ?? 'usr-admin-01';
+    $userId = (string) ($_SESSION['user_id'] ?? '');
+    if ($userId === '' || empty($_SESSION['admin_token'])) {
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'Authentication required.']);
+        exit(0);
+    }
+    if ($currentPass === '') {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Current password is required.']);
+        exit(0);
+    }
     if ($pdo !== null) {
         $stmt = $pdo->prepare("SELECT `password_hash` FROM `users` WHERE `user_id` = :uid LIMIT 1");
         $stmt->execute([':uid' => $userId]);
         $u = $stmt->fetch();
-        if ($u && $currentPass && !password_verify($currentPass, $u['password_hash']) && $currentPass !== 'Admin@1230') {
+        if (!$u || !password_verify($currentPass, (string) $u['password_hash'])) {
             http_response_code(400);
             echo json_encode(['status' => 'error', 'message' => 'Current password is incorrect.']);
             exit(0);
@@ -203,9 +199,32 @@ if ($action === 'forgot_password') {
         $u = $stmt->fetch();
         if ($u) {
             $token = bin2hex(random_bytes(32));
+            $tokenHash = hash('sha256', $token);
             $expiresAt = date('Y-m-d H:i:s', strtotime('+45 minutes'));
+            $pdo->prepare("UPDATE `password_resets` SET `used` = 1 WHERE `email` = :e AND `used` = 0")->execute([':e' => $email]);
             $ins = $pdo->prepare("INSERT INTO `password_resets` (`email`, `token`, `expires_at`, `used`) VALUES (:e, :t, :exp, 0)");
-            $ins->execute([':e' => $email, ':t' => $token, ':exp' => $expiresAt]);
+            $ins->execute([':e' => $email, ':t' => $tokenHash, ':exp' => $expiresAt]);
+
+            $configuredBase = rtrim(resetMailEnv('RESET_BASE_URL'), '/');
+            $host = preg_replace('/[^a-z0-9.:-]/i', '', (string) ($_SERVER['HTTP_HOST'] ?? ''));
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $baseUrl = $configuredBase !== '' ? $configuredBase : ($host !== '' ? $scheme . '://' . $host : '');
+            $resetUrl = $baseUrl . '/admin.html#reset-password?token=' . rawurlencode($token);
+            $mail = $baseUrl !== '' ? sendPasswordResetEmail($email, (string) ($u['name'] ?? ''), $resetUrl, 45) : ['sent' => false, 'error' => 'Application base URL is not configured.'];
+            $smtpStatus = !empty($mail['sent']) ? 'SENT' : 'FAILED';
+            $log = $pdo->prepare("INSERT INTO `email_logs` (`reference_id`, `form_or_booking_type`, `recipient_role`, `recipient_email`, `subject`, `smtp_status`, `delivery_method`, `error_message`) VALUES (:ref, 'PASSWORD_RESET', 'user', :email, :subject, :status, 'HOSTINGER_SSL_SMTP', :error)");
+            $log->execute([
+                ':ref' => 'RESET-' . bin2hex(random_bytes(8)), ':email' => $email,
+                ':subject' => $mail['subject'] ?? 'Password Reset — Avinya Care Foundation', ':status' => $smtpStatus,
+                ':error' => $mail['error'] ?? null
+            ]);
+            if (empty($mail['sent'])) {
+                $pdo->prepare("UPDATE `password_resets` SET `used` = 1 WHERE `token` = :t")->execute([':t' => $tokenHash]);
+                error_log('Password reset email delivery failed: ' . ($mail['error'] ?? 'Unknown SMTP error'));
+                http_response_code(503);
+                echo json_encode(['status' => 'error', 'message' => 'The reset email could not be delivered. Please try again later.']);
+                exit(0);
+            }
         }
     }
 
@@ -230,10 +249,15 @@ if ($action === 'reset_password') {
         echo json_encode(['status' => 'error', 'message' => 'New password and confirmation password do not match.']);
         exit(0);
     }
+    if (strlen($newPass) < 8 || !preg_match('/[A-Z]/', $newPass) || !preg_match('/[a-z]/', $newPass) || !preg_match('/[0-9]/', $newPass) || !preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\\\|,.<>\/?]/', $newPass)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Password must be at least 8 chars long with uppercase, lowercase, number, and special character.']);
+        exit(0);
+    }
 
     if ($pdo !== null) {
         $stmt = $pdo->prepare("SELECT * FROM `password_resets` WHERE `token` = :t AND `used` = 0 AND `expires_at` > NOW() LIMIT 1");
-        $stmt->execute([':t' => $token]);
+        $stmt->execute([':t' => hash('sha256', $token)]);
         $rst = $stmt->fetch();
         if (!$rst) {
             http_response_code(400);
@@ -266,9 +290,7 @@ if ($action === 'verify') {
         $token = trim((string) ($data['token'] ?? $_GET['token'] ?? ''));
     }
 
-    $isValidToken = (!empty($_SESSION['admin_token']) && $_SESSION['admin_token'] === $token) ||
-                    str_starts_with($token, 'AVG-SESS-') ||
-                    (str_starts_with($token, 'AVG-ADM-') && strlen($token) >= 20);
+    $isValidToken = !empty($_SESSION['admin_token']) && hash_equals((string) $_SESSION['admin_token'], $token);
 
     if ($isValidToken) {
         $userRole = $_SESSION['user_role'] ?? 'admin';
@@ -305,8 +327,11 @@ if ($action === 'verify') {
 
 // Action: Logout
 if ($action === 'logout') {
-    unset($_SESSION['user_doc_id']);
-    unset($_SESSION['user_prov_id']);
+    $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+    }
     session_destroy();
 
     echo json_encode(['status' => 'ok', 'message' => 'Logged out successfully.']);

@@ -1712,15 +1712,28 @@
             <select id="usrRole" class="select-control" style="width: 100%;">
               <option value="admin">Admin</option>
               <option value="manager">Manager</option>
-              <option value="staff">Staff</option>
+              <option value="doctor">Doctor</option>
+              <option value="diagnostic_provider">Test / Lab User</option>
             </select>
           </div>
           <div style="flex: 1;">
             <label style="font-size: 12px; color: var(--text-muted);">Status</label>
             <select id="usrStatus" class="select-control" style="width: 100%;">
               <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="disabled">Disabled</option>
               <option value="suspended">Suspended</option>
             </select>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Doctor ID (Doctor role)</label>
+            <input type="text" id="usrDoctorId" class="search-input" placeholder="doc-1">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Provider ID (Lab role)</label>
+            <input type="text" id="usrProviderId" class="search-input" placeholder="provider-1">
           </div>
         </div>
 
@@ -2050,9 +2063,10 @@
         });
         const json = await res.json();
         msgDiv.className = 'login-error';
-        msgDiv.style.background = 'rgba(16, 185, 129, 0.15)';
-        msgDiv.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-        msgDiv.style.color = '#6EE7B7';
+        const delivered = res.ok && json.status === 'ok';
+        msgDiv.style.background = delivered ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+        msgDiv.style.borderColor = delivered ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)';
+        msgDiv.style.color = delivered ? '#6EE7B7' : '#FCA5A5';
         msgDiv.innerText = json.message || 'If an account exists with this email address, a password reset link has been sent.';
         msgDiv.style.display = 'block';
       } catch (err) {
@@ -2958,6 +2972,8 @@
           document.getElementById('usrPassword').value = '';
           document.getElementById('usrRole').value = u.role || 'admin';
           document.getElementById('usrStatus').value = u.status || 'active';
+          document.getElementById('usrDoctorId').value = u.doctor_id || '';
+          document.getElementById('usrProviderId').value = u.provider_id || '';
         }
       } else {
         title.innerText = 'Add New System User Account';
@@ -2981,7 +2997,9 @@
         email: document.getElementById('usrEmail').value.trim(),
         password: document.getElementById('usrPassword').value.trim(),
         role: document.getElementById('usrRole').value,
-        status: document.getElementById('usrStatus').value
+        status: document.getElementById('usrStatus').value,
+        doctorId: document.getElementById('usrDoctorId').value.trim(),
+        providerId: document.getElementById('usrProviderId').value.trim()
       };
 
       try {
@@ -3004,7 +3022,7 @@
     }
 
     async function deleteUser(userId) {
-      if (!confirm(`Are you sure you want to delete user account '${userId}'?`)) return;
+      if (!confirm(`Deactivate user account '${userId}'? Historical bookings will be preserved.`)) return;
       try {
         const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
           method: 'POST',
@@ -3013,7 +3031,7 @@
         });
         const data = await res.json();
         if (res.ok && data.status === 'ok') {
-          alert(`System user account '${userId}' deleted successfully.`);
+          alert(`System user account '${userId}' deactivated successfully.`);
           fetchAdminData();
         } else {
           alert('Failed to delete user: ' + (data.message || 'Error'));

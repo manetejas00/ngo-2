@@ -7,7 +7,6 @@
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=UTF-8');
-header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 
@@ -16,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
+ini_set('session.use_strict_mode', '1');
+session_set_cookie_params(['secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly' => true, 'samesite' => 'Strict', 'path' => '/']);
 session_start();
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/activity-logger.php';
@@ -34,13 +35,11 @@ if (!$token) {
     $token = trim((string) ($data['token'] ?? $_GET['token'] ?? ''));
 }
 
-$userRole = $_SESSION['user_role'] ?? 'admin';
+$userRole = $_SESSION['user_role'] ?? '';
 $userDocId = $_SESSION['user_doc_id'] ?? null;
 $userProvId = $_SESSION['user_prov_id'] ?? null;
 
-$isAuthenticated = (!empty($_SESSION['admin_token']) && $_SESSION['admin_token'] === $token) ||
-                    str_starts_with($token, 'AVG-SESS-') ||
-                    (str_starts_with($token, 'AVG-ADM-') && strlen($token) >= 20);
+$isAuthenticated = !empty($_SESSION['admin_token']) && $token !== '' && hash_equals((string) $_SESSION['admin_token'], $token);
 
 if (!$isAuthenticated) {
     http_response_code(401);
@@ -66,6 +65,11 @@ if ($action === 'update_status') {
         echo json_encode(['status' => 'error', 'message' => 'Missing ID or new status parameter.']);
         exit(0);
     }
+    if (!in_array($newStatus, ['pending', 'confirmed', 'completed', 'cancelled', 'rescheduled'], true)) {
+        http_response_code(422);
+        echo json_encode(['status' => 'error', 'message' => 'Invalid booking status.']);
+        exit(0);
+    }
 
     // Role-based authorization check for status updates
     if ($userRole === 'doctor') {
@@ -74,7 +78,10 @@ if ($action === 'update_status') {
             echo json_encode(['status' => 'error', 'message' => 'Forbidden: Doctors can only manage doctor appointments.']);
             exit(0);
         }
-        if ($pdo !== null && !empty($userDocId)) {
+        if (empty($userDocId)) {
+            http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Doctor account is not linked to a doctor profile.']); exit(0);
+        }
+        if ($pdo !== null) {
             $checkStmt = $pdo->prepare("SELECT `doctor_id` FROM `doctor_bookings` WHERE `booking_id` = :id");
             $checkStmt->execute([':id' => $id]);
             $bDoc = $checkStmt->fetchColumn();
@@ -90,7 +97,10 @@ if ($action === 'update_status') {
             echo json_encode(['status' => 'error', 'message' => 'Forbidden: Diagnostic Providers can only manage lab test bookings.']);
             exit(0);
         }
-        if ($pdo !== null && !empty($userProvId)) {
+        if (empty($userProvId)) {
+            http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Provider account is not linked to a lab profile.']); exit(0);
+        }
+        if ($pdo !== null) {
             $checkStmt = $pdo->prepare("SELECT b.`provider_id`, t.`provider_id` as t_prov FROM `diagnostic_bookings` b LEFT JOIN `diagnostic_tests` t ON b.test_id = t.test_id WHERE b.booking_id = :id");
             $checkStmt->execute([':id' => $id]);
             $row = $checkStmt->fetch();
@@ -100,6 +110,8 @@ if ($action === 'update_status') {
                 exit(0);
             }
         }
+    } elseif (!in_array($userRole, ['admin', 'manager'], true)) {
+        http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Forbidden.']); exit(0);
     }
 
     if ($type === 'doctor') {
@@ -293,37 +305,62 @@ if ($action === 'save_user') {
     $status = strtolower(trim((string) ($usr['status'] ?? 'active')));
     $password = trim((string) ($usr['password'] ?? ''));
 
+    $doctorId = trim((string) ($usr['doctorId'] ?? $usr['doctor_id'] ?? '')) ?: null;
+    $providerId = trim((string) ($usr['providerId'] ?? $usr['provider_id'] ?? '')) ?: null;
     if ($name === '' || $email === '') {
         http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'User name and email are required.']); exit(0);
     }
+    if (mb_strlen($name) > 255 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Enter a valid name and email address.']); exit(0);
+    }
+    if (!in_array($role, ['admin', 'manager', 'doctor', 'diagnostic_provider'], true) || !in_array($status, ['active', 'inactive', 'disabled', 'suspended'], true)) {
+        http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Invalid role or account status.']); exit(0);
+    }
+    if (($role === 'doctor' && $doctorId === null) || ($role === 'diagnostic_provider' && $providerId === null)) {
+        http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'The selected role requires a linked doctor or provider profile.']); exit(0);
+    }
+    if ($password !== '' && (strlen($password) < 8 || !preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/[0-9]/', $password) || !preg_match('/[^A-Za-z0-9]/', $password))) {
+        http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Password must contain uppercase, lowercase, number, and special character.']); exit(0);
+    }
 
     if ($pdo !== null) {
+        $exists = $pdo->prepare("SELECT 1 FROM `users` WHERE `user_id` = :uid LIMIT 1");
+        $exists->execute([':uid' => $uId]);
+        $isExistingUser = (bool) $exists->fetchColumn();
+        if (!$isExistingUser && $password === '') {
+            http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'A password is required when creating a user.']); exit(0);
+        }
+        $duplicate = $pdo->prepare("SELECT `user_id` FROM `users` WHERE LOWER(`email`) = :email AND `user_id` <> :uid LIMIT 1");
+        $duplicate->execute([':email' => $email, ':uid' => $uId]);
+        if ($duplicate->fetchColumn()) {
+            http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'A user with this email address already exists.']); exit(0);
+        }
         if ($password !== '') {
             $passHash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO `users`
-                (`user_id`, `name`, `email`, `password_hash`, `role`, `status`)
-                VALUES (:u_id, :name, :email, :pass_hash, :role, :status)
+                (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`)
+                VALUES (:u_id, :name, :email, :pass_hash, :role, :doctor_id, :provider_id, :status)
                 ON DUPLICATE KEY UPDATE
-                `name` = VALUES(`name`), `email` = VALUES(`email`), `password_hash` = VALUES(`password_hash`), `role` = VALUES(`role`), `status` = VALUES(`status`)");
+                `name` = VALUES(`name`), `email` = VALUES(`email`), `password_hash` = VALUES(`password_hash`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = VALUES(`status`)");
             $stmt->execute([
                 ':u_id' => $uId,
                 ':name' => $name,
                 ':email' => $email,
                 ':pass_hash' => $passHash,
-                ':role' => $role,
+                ':role' => $role, ':doctor_id' => $doctorId, ':provider_id' => $providerId,
                 ':status' => $status
             ]);
         } else {
             $stmt = $pdo->prepare("INSERT INTO `users`
-                (`user_id`, `name`, `email`, `role`, `status`)
-                VALUES (:u_id, :name, :email, :role, :status)
+                (`user_id`, `name`, `email`, `role`, `doctor_id`, `provider_id`, `status`)
+                VALUES (:u_id, :name, :email, :role, :doctor_id, :provider_id, :status)
                 ON DUPLICATE KEY UPDATE
-                `name` = VALUES(`name`), `email` = VALUES(`email`), `role` = VALUES(`role`), `status` = VALUES(`status`)");
+                `name` = VALUES(`name`), `email` = VALUES(`email`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = VALUES(`status`)");
             $stmt->execute([
                 ':u_id' => $uId,
                 ':name' => $name,
                 ':email' => $email,
-                ':role' => $role,
+                ':role' => $role, ':doctor_id' => $doctorId, ':provider_id' => $providerId,
                 ':status' => $status
             ]);
         }
@@ -340,11 +377,14 @@ if ($action === 'delete_user') {
         http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'User ID is required.']); exit(0);
     }
     if ($pdo !== null) {
-        $stmt = $pdo->prepare("DELETE FROM `users` WHERE `user_id` = :id");
+        if ($uId === (string) ($_SESSION['user_id'] ?? '')) {
+            http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'You cannot deactivate your own signed-in account.']); exit(0);
+        }
+        $stmt = $pdo->prepare("UPDATE `users` SET `status` = 'inactive' WHERE `user_id` = :id");
         $stmt->execute([':id' => $uId]);
     }
-    logActivity('USER_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Deleted system user {$uId}", ['userId' => $uId]);
-    echo json_encode(['status' => 'ok', 'message' => "System user {$uId} deleted successfully."]);
+    logActivity('USER_DEACTIVATED', 'admin', $_SESSION['user_email'] ?? '', "Deactivated system user {$uId}", ['userId' => $uId]);
+    echo json_encode(['status' => 'ok', 'message' => "System user {$uId} deactivated successfully."]);
     exit(0);
 }
 
@@ -394,8 +434,8 @@ if ($pdo !== null) {
                 $stmt->execute([':prov_id' => $userProvId]);
                 $diagnosticBookings = $stmt->fetchAll();
             }
-        } else {
-            // Admin role sees all data
+        } elseif (in_array($userRole, ['admin', 'manager'], true)) {
+            // Administrators and managers see operational data.
             $formSubmissions = $pdo->query("SELECT * FROM `form_submissions` ORDER BY `id` DESC LIMIT 200")->fetchAll();
             $doctorBookings = $pdo->query("SELECT * FROM `doctor_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
             $diagnosticBookings = $pdo->query("SELECT * FROM `diagnostic_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
@@ -404,6 +444,10 @@ if ($pdo !== null) {
             $doctorsCatalog = $pdo->query("SELECT * FROM `doctors` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
             $diagnosticTestsCatalog = $pdo->query("SELECT * FROM `diagnostic_tests` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
             $usersCatalog = $pdo->query("SELECT `id`, `user_id`, `name`, `email`, `role`, `doctor_id`, `provider_id`, `status`, `last_login`, `created_at` FROM `users` ORDER BY `id` ASC")->fetchAll();
+        } else {
+            http_response_code(403);
+            echo json_encode(['status' => 'error', 'message' => 'Role is not authorized for the Admin Panel.']);
+            exit(0);
         }
     } catch (Throwable $e) {
         error_log('Admin Data Fetch Warning: ' . $e->getMessage());

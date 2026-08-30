@@ -498,7 +498,7 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
             (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`, `must_change_password`, `last_login`)
             VALUES (:u_id, :name, :email, :pass_hash, :role, :doc_id, :prov_id, 'active', 1, NOW())
             ON DUPLICATE KEY UPDATE
-            `name` = VALUES(`name`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = 'active'");
+            `name` = VALUES(`name`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`)");
 
         $defaultPassHash = password_hash('Admin@1230', PASSWORD_DEFAULT);
 
@@ -570,4 +570,3 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
     }
     return $seeded;
 }
-
