@@ -940,6 +940,7 @@
           <select id="loginUserSelect" class="form-control" style="width: 100%; height: 46px; font-size: 14px; background: #0F172A; border: 1px solid rgba(255, 255, 255, 0.18); color: #F8FAFC; border-radius: 8px; padding: 0 12px;">
             <optgroup label="👑 System Administrators">
               <option value="usr-admin-01" selected>🔑 Super Admin (admin@gmail.com)</option>
+              <option value="usr-2">🔑 Healthcare Coordinator (health@avinyacarefoundation.org)</option>
             </optgroup>
             <optgroup label="🩺 Doctors (Doctor Appointments)">
               <option value="usr-doc-doc-1">👨‍⚕️ Dr. Priya Sharma - Medical Oncology</option>
@@ -1678,7 +1679,7 @@
         const json = await res.json();
         if (json.status === 'ok' && Array.isArray(json.users)) {
           const users = json.users;
-          const admins = users.filter(u => u.role === 'admin');
+          const admins = users.filter(u => u.role === 'admin' || u.role === 'manager');
           const doctors = users.filter(u => u.role === 'doctor');
           const providers = users.filter(u => u.role === 'diagnostic_provider');
 
@@ -1731,6 +1732,9 @@
         } else if (role === 'diagnostic_provider') {
           roleTitle = `Lab Provider: ${name}`;
           icon = '🔬';
+        } else if (role === 'manager') {
+          roleTitle = `Manager: ${name}`;
+          icon = '📋';
         }
         roleText.innerText = `Logged in as: ${roleTitle}`;
         if (roleIcon) roleIcon.innerText = icon;
@@ -1742,10 +1746,10 @@
       const avatarBadge = document.getElementById('adminAvatarBadge');
       if (nameBadge) nameBadge.innerText = name;
       if (roleBadge) {
-        roleBadge.innerText = role === 'doctor' ? 'Doctor Account' : (role === 'diagnostic_provider' ? 'Diagnostic Provider' : 'System Administrator');
+        roleBadge.innerText = role === 'doctor' ? 'Doctor Account' : (role === 'diagnostic_provider' ? 'Diagnostic Provider' : (role === 'manager' ? 'Healthcare Ops Manager' : 'System Administrator'));
       }
       if (avatarBadge) {
-        avatarBadge.innerText = role === 'doctor' ? 'DOC' : (role === 'diagnostic_provider' ? 'LAB' : 'ADM');
+        avatarBadge.innerText = role === 'doctor' ? 'DOC' : (role === 'diagnostic_provider' ? 'LAB' : (role === 'manager' ? 'MGR' : 'ADM'));
       }
 
       // Menu links visibility according to role

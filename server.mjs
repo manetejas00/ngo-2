@@ -1008,7 +1008,7 @@ const server = createServer(async (req, res) => {
             formSubmissions: [],
             doctorBookings: filteredAppointments,
             diagnosticBookings: filteredTestBookings,
-            emailLogs: sessionUser.role === 'admin' ? logs : [],
+            emailLogs: (sessionUser.role === 'admin' || sessionUser.role === 'manager') ? logs : [],
             activityLogs: [],
             doctorsCatalog: filteredDoctors,
             diagnosticTestsCatalog: filteredTests,

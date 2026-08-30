@@ -830,6 +830,17 @@ export function buildUsersCatalog(doctors = DEFAULT_DOCTORS, providers = DEFAULT
       doctorId: null,
       providerId: null,
       status: 'active'
+    },
+    {
+      id: 'usr-2',
+      user_id: 'usr-2',
+      name: 'Healthcare Coordinator',
+      email: 'health@avinyacarefoundation.org',
+      role: 'manager',
+      subtitle: 'Healthcare Coordinator & Ops Manager',
+      doctorId: null,
+      providerId: null,
+      status: 'active'
     }
   ];
 
@@ -1257,9 +1268,16 @@ export async function getDiagnosticProviders() {
 
 export async function getUsersCatalog() {
   const db = await getDb();
-  if (!db.users || db.users.length === 0) {
-    db.users = buildUsersCatalog(db.doctors, db.diagnosticProviders);
+  const catalog = buildUsersCatalog(db.doctors, db.diagnosticProviders);
+  if (!db.users || db.users.length < catalog.length) {
+    db.users = catalog;
     await persistDb();
+  } else {
+    if (!db.users.some(u => (u.user_id || u.id) === 'usr-2')) {
+      const usr2 = catalog.find(u => (u.user_id || u.id) === 'usr-2');
+      if (usr2) db.users.splice(1, 0, usr2);
+      await persistDb();
+    }
   }
   return db.users;
 }

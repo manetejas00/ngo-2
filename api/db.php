@@ -485,6 +485,19 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
         ]);
         $seeded++;
 
+        // 1b. Seed Healthcare Coordinator Manager
+        $mgrPassHash = password_hash('HealthCare@2026', PASSWORD_DEFAULT);
+        $stmt->execute([
+            ':u_id' => 'usr-2',
+            ':name' => 'Healthcare Coordinator',
+            ':email' => 'health@avinyacarefoundation.org',
+            ':pass_hash' => $mgrPassHash,
+            ':role' => 'manager',
+            ':doc_id' => null,
+            ':prov_id' => null
+        ]);
+        $seeded++;
+
         // 2. Seed Doctor User Accounts dynamically from `doctors` table
         $doctors = $pdo->query("SELECT `doctor_id`, `name` FROM `doctors`")->fetchAll();
         foreach ($doctors as $d) {
