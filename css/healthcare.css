@@ -808,19 +808,56 @@
 .hc-fee-container {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  flex: 1;
 }
 
 .hc-fee-label {
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  font-weight: 700;
   color: var(--hc-text-muted);
   text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+}
+
+.hc-fee-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
 }
 
 .hc-fee-amount {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: var(--hc-text-main);
+  line-height: 1.1;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+
+.hc-fee-amount.is-free {
+  color: var(--hc-primary);
+}
+
+.hc-fee-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--hc-primary);
+  background: var(--hc-primary-light);
+  border: 1px solid rgba(8, 127, 115, 0.25);
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  white-space: nowrap;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .hc-btn-book {
@@ -1806,6 +1843,12 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+  }
+
+  .hc-fee-main {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
   }
 
   .hc-card-actions {

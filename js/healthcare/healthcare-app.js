@@ -447,7 +447,9 @@ class HealthcarePlatform {
 
     const displayDoctors = this.showAllDoctors ? filtered : filtered.slice(0, 6);
 
-    grid.innerHTML = displayDoctors.map(doc => `
+    grid.innerHTML = displayDoctors.map(doc => {
+      const fee = this.parseFeeDisplay(doc);
+      return `
       <div class="hc-doctor-card" id="doc-card-${doc.id}">
         <div class="hc-doctor-card-header">
           <div class="hc-doctor-avatar-wrapper">
@@ -480,7 +482,10 @@ class HealthcarePlatform {
         <div class="hc-doctor-card-footer">
           <div class="hc-fee-container">
             <span class="hc-fee-label">Consultation Fee</span>
-            <span class="hc-fee-amount">${doc.feeDisplay || (doc.consultationFee === 0 ? '₹0 (Free)' : `₹${doc.consultationFee}`)}</span>
+            <div class="hc-fee-main">
+              <span class="hc-fee-amount ${fee.isFree ? 'is-free' : ''}">${fee.price}</span>
+              ${fee.tag ? `<span class="hc-fee-badge" title="${fee.rawTag}">${fee.tag}</span>` : ''}
+            </div>
           </div>
           <div class="hc-card-actions">
             <button class="hc-btn-view-profile" onclick="window.HealthcareApp.openDoctorProfile('${doc.id}')">
@@ -492,7 +497,30 @@ class HealthcarePlatform {
           </div>
         </div>
       </div>
-    `).join('');
+    `;}).join('');
+  }
+
+  parseFeeDisplay(doc) {
+    const raw = doc.feeDisplay || (doc.consultationFee === 0 ? '₹0 (Free / Avinya Supported)' : `₹${doc.consultationFee || 0}`);
+    const match = raw.match(/^([^(\n]+)(?:\s*\((.+)\))?$/);
+
+    let price = raw.trim();
+    let rawTag = '';
+
+    if (match) {
+      price = match[1].trim();
+      if (match[2]) rawTag = match[2].trim();
+    }
+
+    let tag = rawTag;
+    if (rawTag.includes('50% Avinya Care Concession')) tag = '50% Concession';
+    else if (rawTag.includes('Avinya Supported')) tag = 'Avinya Supported';
+    else if (rawTag.includes('Community Clinic')) tag = 'Community Clinic';
+    else if (rawTag.includes('Partner Rate')) tag = 'Partner Rate';
+
+    const isFree = price === '₹0' || price.toLowerCase().includes('free');
+
+    return { price, tag, rawTag, isFree };
   }
 
   showMoreDoctors() {
@@ -559,7 +587,10 @@ class HealthcarePlatform {
         </div>
         <div style="background: var(--hc-surface-alt); padding: 0.85rem 1rem; border-radius: var(--hc-radius-md);">
           <div style="font-size: 0.72rem; color: var(--hc-text-muted); font-weight: 700; text-transform: uppercase;">Consultation Fee</div>
-          <div style="font-weight: 800; font-size: 1.05rem; color: var(--hc-text-main); margin-top: 0.2rem;">${doc.feeDisplay || `₹${doc.consultationFee}`}</div>
+          <div style="display: flex; align-items: center; gap: 0.4rem; margin-top: 0.25rem; flex-wrap: wrap;">
+            <span style="font-weight: 800; font-size: 1.15rem; color: var(--hc-text-main);">${this.parseFeeDisplay(doc).price}</span>
+            ${this.parseFeeDisplay(doc).tag ? `<span class="hc-fee-badge">${this.parseFeeDisplay(doc).rawTag || this.parseFeeDisplay(doc).tag}</span>` : ''}
+          </div>
         </div>
       </div>
 
