@@ -1900,49 +1900,17 @@
       if (!currentUser) return;
       const role = (currentUser.role || 'admin').toLowerCase();
       syncCurrentUserChrome();
+      const allNav = [...document.querySelectorAll('.sidebar-nav-link[data-tab]')];
+      const doctorTabs = new Set(['dashboard', 'doctor']);
+      const labTabs = new Set(['dashboard', 'diagnostic']);
+      allNav.forEach(link => {
+        const tab = link.dataset.tab;
+        const visible = role === 'doctor' ? doctorTabs.has(tab) : role === 'diagnostic_provider' ? labTabs.has(tab) : true;
+        link.style.display = visible ? '' : 'none';
+      });
 
-      const userNameEl = document.getElementById('loggedInUserName');
-      if (userNameEl) {
-        userNameEl.innerText = `${currentUser.name || 'User'} (${role.toUpperCase()})`;
-      }
-
-      const formsMenu = document.getElementById('navFormsMenu');
-      const emailMenu = document.getElementById('navEmailMenu');
-      const activityMenu = document.getElementById('navActivityMenu');
-      const doctorsCatMenu = document.getElementById('navDoctorsCatalogMenu');
-      const testsCatMenu = document.getElementById('navTestsCatalogMenu');
-      const usersCatMenu = document.getElementById('navUsersCatalogMenu');
-      const doctorBookingsMenu = document.getElementById('navDoctorBookingsMenu');
-      const diagBookingsMenu = document.getElementById('navDiagBookingsMenu');
-
-      if (role === 'doctor') {
-        if (formsMenu) formsMenu.style.display = 'none';
-        if (emailMenu) emailMenu.style.display = 'none';
-        if (activityMenu) activityMenu.style.display = 'none';
-        if (doctorsCatMenu) doctorsCatMenu.style.display = 'none';
-        if (testsCatMenu) testsCatMenu.style.display = 'none';
-        if (usersCatMenu) usersCatMenu.style.display = 'none';
-        if (diagBookingsMenu) diagBookingsMenu.style.display = 'none';
-        if (doctorBookingsMenu) doctorBookingsMenu.style.display = 'block';
-      } else if (role === 'diagnostic_provider') {
-        if (formsMenu) formsMenu.style.display = 'none';
-        if (emailMenu) emailMenu.style.display = 'none';
-        if (activityMenu) activityMenu.style.display = 'none';
-        if (doctorsCatMenu) doctorsCatMenu.style.display = 'none';
-        if (testsCatMenu) testsCatMenu.style.display = 'none';
-        if (usersCatMenu) usersCatMenu.style.display = 'none';
-        if (doctorBookingsMenu) doctorBookingsMenu.style.display = 'none';
-        if (diagBookingsMenu) diagBookingsMenu.style.display = 'block';
-      } else {
-        if (formsMenu) formsMenu.style.display = 'block';
-        if (emailMenu) emailMenu.style.display = 'block';
-        if (activityMenu) activityMenu.style.display = 'block';
-        if (doctorsCatMenu) doctorsCatMenu.style.display = 'block';
-        if (testsCatMenu) testsCatMenu.style.display = 'block';
-        if (usersCatMenu) usersCatMenu.style.display = 'block';
-        if (doctorBookingsMenu) doctorBookingsMenu.style.display = 'block';
-        if (diagBookingsMenu) diagBookingsMenu.style.display = 'block';
-      }
+      if (role === 'doctor' && !doctorTabs.has(currentTab)) currentTab = 'doctor';
+      if (role === 'diagnostic_provider' && !labTabs.has(currentTab)) currentTab = 'diagnostic';
     }
 
     function userInitials(user) {
