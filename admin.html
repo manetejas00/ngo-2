@@ -1910,6 +1910,16 @@
         link.style.display = visible ? '' : 'none';
       });
 
+      document.querySelectorAll('.sidebar-menu .menu-group-label').forEach(label => {
+        let sibling = label.nextElementSibling;
+        let hasVisibleItem = false;
+        while (sibling && !sibling.classList.contains('menu-group-label')) {
+          if (sibling.classList.contains('sidebar-nav-link') && sibling.style.display !== 'none') hasVisibleItem = true;
+          sibling = sibling.nextElementSibling;
+        }
+        label.style.display = hasVisibleItem ? '' : 'none';
+      });
+
       if (role === 'doctor' && !doctorTabs.has(currentTab)) currentTab = 'doctor';
       if (role === 'diagnostic_provider' && !labTabs.has(currentTab)) currentTab = 'diagnostic';
     }
