@@ -1806,6 +1806,49 @@
       if (sidebar) sidebar.classList.toggle('open');
     }
 
+    function resetStateAndTables() {
+      rawData = {
+        formSubmissions: [],
+        doctorBookings: [],
+        diagnosticBookings: [],
+        emailLogs: [],
+        activityLogs: [],
+        doctorsCatalog: [],
+        diagnosticTestsCatalog: [],
+        usersCatalog: []
+      };
+
+      const tbody = document.getElementById('tableBody');
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">⏳ Loading authorized records...</td></tr>`;
+      }
+
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = val;
+      };
+
+      setVal('statSubmissions', '0');
+      setVal('statDonations', '₹0');
+      setVal('statDoctorBookings', '0');
+      setVal('statDiagnosticBookings', '0');
+      setVal('sideDoctorCount', '0');
+      setVal('sideDiagCount', '0');
+      setVal('sideDoctorsCatalogCount', '0');
+      setVal('sideTestsCatalogCount', '0');
+      setVal('sideFormContactCount', '0');
+      setVal('sideFormNewsletterCount', '0');
+      setVal('sideFormVolunteerCount', '0');
+      setVal('sideFormSupportCount', '0');
+      setVal('sideFormDonationCount', '0');
+      setVal('sideFormPartnershipCount', '0');
+      setVal('sideFormFeedbackCount', '0');
+      setVal('sideFormsCount', '0');
+      setVal('sideEmailCount', '0');
+      setVal('sideActivityCount', '0');
+      setVal('sideUsersCatalogCount', '0');
+    }
+
     async function handleDevLogin(event) {
       event.preventDefault();
       const select = document.getElementById('loginUserSelect');
@@ -1837,6 +1880,7 @@
           localStorage.setItem('avinya_admin_token', adminToken);
           localStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
           
+          resetStateAndTables();
           document.getElementById('loginOverlay').style.display = 'none';
           applyRolePermissions();
           fetchAdminData();
@@ -1866,6 +1910,7 @@
       localStorage.removeItem('avinya_user_obj');
       adminToken = '';
       currentUser = null;
+      resetStateAndTables();
       loadTempUsers();
       document.getElementById('loginOverlay').style.display = 'flex';
     }
