@@ -1811,6 +1811,40 @@
       }
     });
 
+    function resetStateAndTables() {
+      rawData = {
+        formSubmissions: [],
+        doctorBookings: [],
+        diagnosticBookings: [],
+        emailLogs: [],
+        activityLogs: [],
+        doctorsCatalog: [],
+        diagnosticTestsCatalog: [],
+        usersCatalog: []
+      };
+
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = val;
+      };
+
+      setVal('statSubmissions', '0');
+      setVal('statDonations', '₹0');
+      setVal('statDoctorBookings', '0');
+      setVal('statDiagnosticBookings', '0');
+
+      const tbody = document.getElementById('tableBody');
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" class="empty-state">
+              <div class="spinner"></div>
+              <p style="margin-top: 12px;">Loading authorized records...</p>
+            </td>
+          </tr>`;
+      }
+    }
+
     function togglePasswordVisibility(inputId, btnEl) {
       const input = document.getElementById(inputId);
       if (!input) return;
@@ -1929,7 +1963,8 @@
           errorDiv.style.display = 'block';
         }
       } catch (err) {
-        errorDiv.innerText = 'Network error authenticating login.';
+        console.error('Login error details:', err);
+        errorDiv.innerText = (err && err.message) ? ('Error: ' + err.message) : 'Network error authenticating login.';
         errorDiv.style.display = 'block';
       } finally {
         btn.innerText = '🔒 Sign In';
