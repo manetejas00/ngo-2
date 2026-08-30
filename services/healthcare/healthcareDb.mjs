@@ -421,6 +421,25 @@ const DEFAULT_DOCTORS = [
   }
 ];
 
+const DEFAULT_DIAGNOSTIC_PROVIDERS = [
+  {
+    id: 'provider-1',
+    name: 'Avinya Central Diagnostics & Pathology',
+    email: 'lab.mumbai@avinyacarefoundation.org',
+    phone: '+91 98765 43210',
+    city: 'Mumbai',
+    address: 'Avinya Center, Bandra West, Mumbai 400050'
+  },
+  {
+    id: 'provider-2',
+    name: 'Metropolis Cancer Diagnostics & Advanced Imaging',
+    email: 'lab.delhi@metropolis.in',
+    phone: '+91 11 2692 5858',
+    city: 'New Delhi',
+    address: 'A-23, Hauz Khas Enclave, New Delhi 110016'
+  }
+];
+
 const DEFAULT_DIAGNOSTIC_CENTRES = [
   {
     id: 'diag-centre-mumbai',
@@ -459,6 +478,7 @@ const DEFAULT_DIAGNOSTIC_CENTRES = [
 const DEFAULT_DIAGNOSTIC_TESTS = [
   {
     id: 'test-1',
+    providerId: 'provider-1',
     name: 'Comprehensive Cancer Biomarker Panel',
     category: 'Cancer Screening',
     tagline: 'Multi-tumor biomarker screening for early detection',
@@ -486,6 +506,7 @@ const DEFAULT_DIAGNOSTIC_TESTS = [
   },
   {
     id: 'test-2',
+    providerId: 'provider-1',
     name: 'Avinya Whole Body Oncology & Metabolic Shield',
     category: 'Full Body Checkup',
     tagline: '72 Essential Parameters for full body health & cancer markers',
@@ -514,6 +535,7 @@ const DEFAULT_DIAGNOSTIC_TESTS = [
   },
   {
     id: 'test-3',
+    providerId: 'provider-2',
     name: 'Liquid Biopsy & Circulating Tumor DNA Screen',
     category: 'Cancer Screening',
     tagline: 'Non-invasive next-generation genomic cancer surveillance',
@@ -750,6 +772,7 @@ const SEED_TEST_BOOKINGS = [
   {
     id: 'AVC-TST-2026-000051',
     testId: 'test-1',
+    providerId: 'provider-1',
     testName: 'Comprehensive Cancer Biomarker Panel',
     price: 3499,
     collectionMethod: 'home_collection',
@@ -773,6 +796,7 @@ const SEED_TEST_BOOKINGS = [
   {
     id: 'AVC-TST-2026-000052',
     testId: 'test-2',
+    providerId: 'provider-1',
     testName: 'Avinya Whole Body Oncology & Metabolic Shield',
     price: 4299,
     collectionMethod: 'centre_visit',
@@ -794,6 +818,52 @@ const SEED_TEST_BOOKINGS = [
   }
 ];
 
+export function buildUsersCatalog(doctors = DEFAULT_DOCTORS, providers = DEFAULT_DIAGNOSTIC_PROVIDERS) {
+  const users = [
+    {
+      id: 'usr-admin-01',
+      user_id: 'usr-admin-01',
+      name: 'Super Admin',
+      email: 'admin@gmail.com',
+      role: 'admin',
+      subtitle: 'System Administrator',
+      doctorId: null,
+      providerId: null,
+      status: 'active'
+    }
+  ];
+
+  (doctors || []).forEach(doc => {
+    users.push({
+      id: `usr-doc-${doc.id}`,
+      user_id: `usr-doc-${doc.id}`,
+      name: doc.name,
+      email: `doctor.${doc.id}@avinyacarefoundation.org`,
+      role: 'doctor',
+      subtitle: doc.specialityName || 'Medical Specialist',
+      doctorId: doc.id,
+      providerId: null,
+      status: 'active'
+    });
+  });
+
+  (providers || []).forEach(prov => {
+    users.push({
+      id: `usr-prov-${prov.id}`,
+      user_id: `usr-prov-${prov.id}`,
+      name: prov.name,
+      email: prov.email,
+      role: 'diagnostic_provider',
+      subtitle: `${prov.city} Diagnostic Center`,
+      doctorId: null,
+      providerId: prov.id,
+      status: 'active'
+    });
+  });
+
+  return users;
+}
+
 /**
  * Initializes and returns the in-memory database instance.
  */
@@ -803,6 +873,8 @@ export async function getDb() {
   try {
     const raw = await readFile(DB_FILE, 'utf-8');
     dbCache = JSON.parse(raw);
+    if (!dbCache.diagnosticProviders) dbCache.diagnosticProviders = DEFAULT_DIAGNOSTIC_PROVIDERS;
+    if (!dbCache.users) dbCache.users = buildUsersCatalog(dbCache.doctors || DEFAULT_DOCTORS, dbCache.diagnosticProviders);
   } catch (err) {
     // Initialize default database structure
     dbCache = {
@@ -811,10 +883,12 @@ export async function getDb() {
       specialities: DEFAULT_SPECIALITIES,
       hospitals: DEFAULT_HOSPITALS,
       doctors: DEFAULT_DOCTORS,
+      diagnosticProviders: DEFAULT_DIAGNOSTIC_PROVIDERS,
       diagnosticCentres: DEFAULT_DIAGNOSTIC_CENTRES,
       diagnosticTests: DEFAULT_DIAGNOSTIC_TESTS,
       appointments: SEED_APPOINTMENTS,
       testBookings: SEED_TEST_BOOKINGS,
+      users: buildUsersCatalog(DEFAULT_DOCTORS, DEFAULT_DIAGNOSTIC_PROVIDERS),
       notificationLogs: []
     };
     await persistDb();
@@ -1174,6 +1248,32 @@ export async function getDiagnosticTests(filters = {}) {
 export async function getDiagnosticCentres() {
   const db = await getDb();
   return db.diagnosticCentres;
+}
+
+export async function getDiagnosticProviders() {
+  const db = await getDb();
+  return db.diagnosticProviders || DEFAULT_DIAGNOSTIC_PROVIDERS;
+}
+
+export async function getUsersCatalog() {
+  const db = await getDb();
+  if (!db.users || db.users.length === 0) {
+    db.users = buildUsersCatalog(db.doctors, db.diagnosticProviders);
+    await persistDb();
+  }
+  return db.users;
+}
+
+export async function updateUserLastLogin(userId) {
+  const db = await getDb();
+  if (!db.users) return;
+  const target = db.users.find(u => (u.user_id || u.id) === userId);
+  if (target) {
+    const nowIso = new Date().toISOString();
+    target.last_login = nowIso;
+    target.lastLogin = nowIso;
+    await persistDb();
+  }
 }
 
 export async function createTestBooking(bookingData) {

@@ -252,7 +252,22 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             INDEX `idx_cat` (`category`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
 
-        // 8. System Admin Users Table
+        // 8. Diagnostic / Test Providers Table
+        "CREATE TABLE IF NOT EXISTS `diagnostic_providers` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `provider_id` VARCHAR(100) UNIQUE NOT NULL,
+            `name` VARCHAR(255) NOT NULL,
+            `email` VARCHAR(255) UNIQUE NOT NULL,
+            `phone` VARCHAR(50) DEFAULT NULL,
+            `city` VARCHAR(100) DEFAULT 'Mumbai',
+            `address` TEXT DEFAULT NULL,
+            `is_active` TINYINT(1) DEFAULT 1,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX `idx_provider_id` (`provider_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
+        // 9. System Users Table with Role Relationships
         "CREATE TABLE IF NOT EXISTS `users` (
             `id` INT AUTO_INCREMENT PRIMARY KEY,
             `user_id` VARCHAR(100) UNIQUE NOT NULL,
@@ -260,12 +275,16 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             `email` VARCHAR(255) UNIQUE NOT NULL,
             `password_hash` VARCHAR(255) DEFAULT NULL,
             `role` VARCHAR(50) NOT NULL DEFAULT 'admin',
+            `doctor_id` VARCHAR(100) DEFAULT NULL,
+            `provider_id` VARCHAR(100) DEFAULT NULL,
             `status` VARCHAR(50) NOT NULL DEFAULT 'active',
             `last_login` DATETIME DEFAULT NULL,
             `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
             `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX `idx_user_email` (`email`),
-            INDEX `idx_user_role` (`role`)
+            INDEX `idx_user_role` (`role`),
+            INDEX `idx_user_doc` (`doctor_id`),
+            INDEX `idx_user_prov` (`provider_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
     ];
 
@@ -274,17 +293,34 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
     }
 
     try {
-        $cols = $pdo->query("SHOW COLUMNS FROM `diagnostic_tests`")->fetchAll(PDO::FETCH_COLUMN);
-        if (!in_array('sample_type', $cols, true)) {
+        $colsTests = $pdo->query("SHOW COLUMNS FROM `diagnostic_tests`")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('sample_type', $colsTests, true)) {
             $pdo->exec("ALTER TABLE `diagnostic_tests` ADD COLUMN `sample_type` VARCHAR(100) DEFAULT 'Blood / Serum Sample' AFTER `report_turnaround`");
         }
-        if (!in_array('icon', $cols, true)) {
+        if (!in_array('icon', $colsTests, true)) {
             $pdo->exec("ALTER TABLE `diagnostic_tests` ADD COLUMN `icon` VARCHAR(255) DEFAULT '🧪' AFTER `sample_type`");
+        }
+        if (!in_array('provider_id', $colsTests, true)) {
+            $pdo->exec("ALTER TABLE `diagnostic_tests` ADD COLUMN `provider_id` VARCHAR(100) DEFAULT 'provider-1' AFTER `test_id`");
+        }
+
+        $colsUsers = $pdo->query("SHOW COLUMNS FROM `users`")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('doctor_id', $colsUsers, true)) {
+            $pdo->exec("ALTER TABLE `users` ADD COLUMN `doctor_id` VARCHAR(100) DEFAULT NULL AFTER `role`");
+        }
+        if (!in_array('provider_id', $colsUsers, true)) {
+            $pdo->exec("ALTER TABLE `users` ADD COLUMN `provider_id` VARCHAR(100) DEFAULT NULL AFTER `doctor_id`");
+        }
+
+        $colsDiagBookings = $pdo->query("SHOW COLUMNS FROM `diagnostic_bookings`")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('provider_id', $colsDiagBookings, true)) {
+            $pdo->exec("ALTER TABLE `diagnostic_bookings` ADD COLUMN `provider_id` VARCHAR(100) DEFAULT 'provider-1' AFTER `test_id`");
         }
     } catch (Throwable $e) {
         // Table created or column addition safely handled
     }
 
+    seedDiagnosticProviders($pdo);
     seedCatalogFromJSON($pdo);
     seedDefaultUsers($pdo);
 
@@ -379,48 +415,116 @@ function seedCatalogFromJSON(PDO $pdo, bool $force = false): array {
     return $results;
 }
 
-function seedDefaultUsers(PDO $pdo, bool $force = false): int {
+function seedDiagnosticProviders(PDO $pdo, bool $force = false): int {
     $seeded = 0;
     try {
-        $count = (int) $pdo->query("SELECT COUNT(*) FROM `users`")->fetchColumn();
+        $count = (int) $pdo->query("SELECT COUNT(*) FROM `diagnostic_providers`")->fetchColumn();
         if ($count === 0 || $force) {
-            $defaultUsers = [
+            $providers = [
                 [
-                    'id' => 'usr-1',
-                    'name' => 'System Administrator',
-                    'email' => 'admin@gmail.com',
-                    'password' => 'Admin@1230',
-                    'role' => 'admin',
-                    'status' => 'active'
+                    'provider_id' => 'provider-1',
+                    'name' => 'Avinya Central Diagnostics & Pathology',
+                    'email' => 'lab.mumbai@avinyacarefoundation.org',
+                    'phone' => '+91 98765 43210',
+                    'city' => 'Mumbai',
+                    'address' => 'Avinya Center, Bandra West, Mumbai 400050'
                 ],
                 [
-                    'id' => 'usr-2',
-                    'name' => 'Healthcare Coordinator',
-                    'email' => 'health@avinyacarefoundation.org',
-                    'password' => 'HealthCare@2026',
-                    'role' => 'manager',
-                    'status' => 'active'
+                    'provider_id' => 'provider-2',
+                    'name' => 'Metropolis Cancer Diagnostics & Advanced Imaging',
+                    'email' => 'lab.delhi@metropolis.in',
+                    'phone' => '+91 11 2692 5858',
+                    'city' => 'New Delhi',
+                    'address' => 'A-23, Hauz Khas Enclave, New Delhi 110016'
                 ]
             ];
 
-            $stmt = $pdo->prepare("INSERT INTO `users`
-                (`user_id`, `name`, `email`, `password_hash`, `role`, `status`, `last_login`)
-                VALUES (:u_id, :name, :email, :pass_hash, :role, :status, NOW())
+            $stmt = $pdo->prepare("INSERT INTO `diagnostic_providers`
+                (`provider_id`, `name`, `email`, `phone`, `city`, `address`, `is_active`)
+                VALUES (:p_id, :name, :email, :phone, :city, :addr, 1)
                 ON DUPLICATE KEY UPDATE
-                `name` = VALUES(`name`), `role` = VALUES(`role`), `status` = VALUES(`status`)");
+                `name` = VALUES(`name`), `email` = VALUES(`email`), `phone` = VALUES(`phone`)");
 
-            foreach ($defaultUsers as $u) {
-                $hash = password_hash($u['password'], PASSWORD_DEFAULT);
+            foreach ($providers as $p) {
                 $stmt->execute([
-                    ':u_id' => $u['id'],
-                    ':name' => $u['name'],
-                    ':email' => $u['email'],
-                    ':pass_hash' => $hash,
-                    ':role' => $u['role'],
-                    ':status' => $u['status']
+                    ':p_id' => $p['provider_id'],
+                    ':name' => $p['name'],
+                    ':email' => $p['email'],
+                    ':phone' => $p['phone'],
+                    ':city' => $p['city'],
+                    ':addr' => $p['address']
                 ]);
                 $seeded++;
             }
+        }
+    } catch (Throwable $e) {
+        error_log('Error seeding diagnostic providers: ' . $e->getMessage());
+    }
+    return $seeded;
+}
+
+function seedDefaultUsers(PDO $pdo, bool $force = false): int {
+    $seeded = 0;
+    try {
+        $stmt = $pdo->prepare("INSERT INTO `users`
+            (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`, `last_login`)
+            VALUES (:u_id, :name, :email, :pass_hash, :role, :doc_id, :prov_id, 'active', NOW())
+            ON DUPLICATE KEY UPDATE
+            `name` = VALUES(`name`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = 'active'");
+
+        // 1. Seed Super Admin
+        $adminPassHash = password_hash('Admin@1230', PASSWORD_DEFAULT);
+        $stmt->execute([
+            ':u_id' => 'usr-admin-01',
+            ':name' => 'Super Admin',
+            ':email' => 'admin@gmail.com',
+            ':pass_hash' => $adminPassHash,
+            ':role' => 'admin',
+            ':doc_id' => null,
+            ':prov_id' => null
+        ]);
+        $seeded++;
+
+        // 2. Seed Doctor User Accounts dynamically from `doctors` table
+        $doctors = $pdo->query("SELECT `doctor_id`, `name` FROM `doctors`")->fetchAll();
+        foreach ($doctors as $d) {
+            $docId = $d['doctor_id'];
+            $cleanDocId = preg_replace('/[^a-zA-Z0-9_-]/', '', $docId);
+            $email = "doctor.{$cleanDocId}@avinyacarefoundation.org";
+            $userId = "usr-doc-{$cleanDocId}";
+            $passHash = password_hash('Doctor@2026', PASSWORD_DEFAULT);
+
+            $stmt->execute([
+                ':u_id' => $userId,
+                ':name' => $d['name'],
+                ':email' => $email,
+                ':pass_hash' => $passHash,
+                ':role' => 'doctor',
+                ':doc_id' => $docId,
+                ':prov_id' => null
+            ]);
+            $seeded++;
+        }
+
+        // 3. Seed Diagnostic Provider User Accounts dynamically from `diagnostic_providers` table
+        $providers = $pdo->query("SELECT `provider_id`, `name`, `email` FROM `diagnostic_providers`")->fetchAll();
+        foreach ($providers as $p) {
+            $provId = $p['provider_id'];
+            $cleanProvId = preg_replace('/[^a-zA-Z0-9_-]/', '', $provId);
+            $userId = "usr-prov-{$cleanProvId}";
+            $email = $p['email'] ?? "provider.{$cleanProvId}@avinyacarefoundation.org";
+            $passHash = password_hash('Provider@2026', PASSWORD_DEFAULT);
+
+            $stmt->execute([
+                ':u_id' => $userId,
+                ':name' => $p['name'],
+                ':email' => $email,
+                ':pass_hash' => $passHash,
+                ':role' => 'diagnostic_provider',
+                ':doc_id' => null,
+                ':prov_id' => $provId
+            ]);
+            $seeded++;
         }
     } catch (Throwable $e) {
         error_log('Error seeding default users: ' . $e->getMessage());

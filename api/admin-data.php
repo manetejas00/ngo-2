@@ -34,7 +34,13 @@ if (!$token) {
     $token = trim((string) ($data['token'] ?? $_GET['token'] ?? ''));
 }
 
-$isAuthenticated = (!empty($_SESSION['admin_token']) && $_SESSION['admin_token'] === $token) || str_starts_with($token, 'AVG-ADM-');
+$userRole = $_SESSION['user_role'] ?? 'admin';
+$userDocId = $_SESSION['user_doc_id'] ?? null;
+$userProvId = $_SESSION['user_prov_id'] ?? null;
+
+$isAuthenticated = (!empty($_SESSION['admin_token']) && $_SESSION['admin_token'] === $token) ||
+                    str_starts_with($token, 'AVG-SESS-') ||
+                    (str_starts_with($token, 'AVG-ADM-') && strlen($token) >= 20);
 
 if (!$isAuthenticated) {
     http_response_code(401);
@@ -59,6 +65,41 @@ if ($action === 'update_status') {
         http_response_code(400);
         echo json_encode(['status' => 'error', 'message' => 'Missing ID or new status parameter.']);
         exit(0);
+    }
+
+    // Role-based authorization check for status updates
+    if ($userRole === 'doctor') {
+        if ($type !== 'doctor') {
+            http_response_code(403);
+            echo json_encode(['status' => 'error', 'message' => 'Forbidden: Doctors can only manage doctor appointments.']);
+            exit(0);
+        }
+        if ($pdo !== null && !empty($userDocId)) {
+            $checkStmt = $pdo->prepare("SELECT `doctor_id` FROM `doctor_bookings` WHERE `booking_id` = :id");
+            $checkStmt->execute([':id' => $id]);
+            $bDoc = $checkStmt->fetchColumn();
+            if ($bDoc !== $userDocId) {
+                http_response_code(403);
+                echo json_encode(['status' => 'error', 'message' => 'Forbidden: You do not have permission to manage this doctor appointment.']);
+                exit(0);
+            }
+        }
+    } elseif ($userRole === 'diagnostic_provider') {
+        if ($type !== 'diagnostic') {
+            http_response_code(403);
+            echo json_encode(['status' => 'error', 'message' => 'Forbidden: Diagnostic Providers can only manage lab test bookings.']);
+            exit(0);
+        }
+        if ($pdo !== null && !empty($userProvId)) {
+            $checkStmt = $pdo->prepare("SELECT b.`provider_id`, t.`provider_id` as t_prov FROM `diagnostic_bookings` b LEFT JOIN `diagnostic_tests` t ON b.test_id = t.test_id WHERE b.booking_id = :id");
+            $checkStmt->execute([':id' => $id]);
+            $row = $checkStmt->fetch();
+            if (!$row || ($row['provider_id'] !== $userProvId && $row['t_prov'] !== $userProvId)) {
+                http_response_code(403);
+                echo json_encode(['status' => 'error', 'message' => 'Forbidden: You do not have permission to manage this diagnostic booking.']);
+                exit(0);
+            }
+        }
     }
 
     if ($type === 'doctor') {
@@ -93,6 +134,15 @@ if ($action === 'update_status') {
     } else {
         http_response_code(400);
         echo json_encode(['status' => 'error', 'message' => 'Invalid booking type specified.']);
+        exit(0);
+    }
+}
+
+// Enforce Admin role for management actions
+if (in_array($action, ['save_doctor', 'delete_doctor', 'save_test', 'delete_test', 'save_user', 'delete_user', 'seed_catalog'], true)) {
+    if ($userRole !== 'admin') {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Forbidden: Only Super Administrators can alter catalog records or system accounts.']);
         exit(0);
     }
 }
@@ -323,19 +373,38 @@ $usersCatalog = [];
 
 if ($pdo !== null) {
     try {
-        $formSubmissions = $pdo->query("SELECT * FROM `form_submissions` ORDER BY `id` DESC LIMIT 200")->fetchAll();
-        $doctorBookings = $pdo->query("SELECT * FROM `doctor_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
-        $diagnosticBookings = $pdo->query("SELECT * FROM `diagnostic_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
-        $emailLogs = $pdo->query("SELECT * FROM `email_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
-        $activityLogs = $pdo->query("SELECT * FROM `activity_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
-        
-        // Auto-seed if doctors, tests, or users tables are empty
+        seedDiagnosticProviders($pdo, false);
         seedCatalogFromJSON($pdo, false);
         seedDefaultUsers($pdo, false);
 
-        $doctorsCatalog = $pdo->query("SELECT * FROM `doctors` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
-        $diagnosticTestsCatalog = $pdo->query("SELECT * FROM `diagnostic_tests` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
-        $usersCatalog = $pdo->query("SELECT `id`, `user_id`, `name`, `email`, `role`, `status`, `last_login`, `created_at` FROM `users` ORDER BY `id` ASC")->fetchAll();
+        if ($userRole === 'doctor') {
+            // Doctors can only view their own doctor bookings
+            if (!empty($userDocId)) {
+                $stmt = $pdo->prepare("SELECT * FROM `doctor_bookings` WHERE `doctor_id` = :doc_id ORDER BY `id` DESC LIMIT 200");
+                $stmt->execute([':doc_id' => $userDocId]);
+                $doctorBookings = $stmt->fetchAll();
+            }
+        } elseif ($userRole === 'diagnostic_provider') {
+            // Diagnostic Providers can only view test bookings assigned to their provider ID
+            if (!empty($userProvId)) {
+                $stmt = $pdo->prepare("SELECT b.* FROM `diagnostic_bookings` b 
+                    LEFT JOIN `diagnostic_tests` t ON b.test_id = t.test_id 
+                    WHERE b.provider_id = :prov_id OR t.provider_id = :prov_id 
+                    ORDER BY b.id DESC LIMIT 200");
+                $stmt->execute([':prov_id' => $userProvId]);
+                $diagnosticBookings = $stmt->fetchAll();
+            }
+        } else {
+            // Admin role sees all data
+            $formSubmissions = $pdo->query("SELECT * FROM `form_submissions` ORDER BY `id` DESC LIMIT 200")->fetchAll();
+            $doctorBookings = $pdo->query("SELECT * FROM `doctor_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
+            $diagnosticBookings = $pdo->query("SELECT * FROM `diagnostic_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
+            $emailLogs = $pdo->query("SELECT * FROM `email_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
+            $activityLogs = $pdo->query("SELECT * FROM `activity_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
+            $doctorsCatalog = $pdo->query("SELECT * FROM `doctors` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
+            $diagnosticTestsCatalog = $pdo->query("SELECT * FROM `diagnostic_tests` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
+            $usersCatalog = $pdo->query("SELECT `id`, `user_id`, `name`, `email`, `role`, `doctor_id`, `provider_id`, `status`, `last_login`, `created_at` FROM `users` ORDER BY `id` ASC")->fetchAll();
+        }
     } catch (Throwable $e) {
         error_log('Admin Data Fetch Warning: ' . $e->getMessage());
     }

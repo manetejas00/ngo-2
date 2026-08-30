@@ -26,12 +26,15 @@ import {
   updateAppointmentStatus,
   getDiagnosticTests,
   getDiagnosticCentres,
+  getDiagnosticProviders,
   createTestBooking,
   getTestBookings,
   updateTestBookingStatus,
   getHealthcareStats,
   getNotificationLogs,
-  updateNotificationLogStatus
+  updateNotificationLogStatus,
+  getUsersCatalog,
+  updateUserLastLogin
 } from './services/healthcare/healthcareDb.mjs';
 import {
   dispatchAppointmentCreatedEmails,
@@ -760,35 +763,87 @@ const server = createServer(async (req, res) => {
     res.end(JSON.stringify(data));
   }
 
+  // IN-MEMORY SESSION STORE FOR NODE BACKEND
+  const nodeSessionStore = global.nodeSessionStore || (global.nodeSessionStore = new Map());
+
   // ADMIN AUTHENTICATION ENDPOINT: /api/admin-auth.php
   if (urlPath === '/api/admin-auth.php' || urlPath === '/api/admin-auth') {
     try {
       const payload = (req.method === 'POST' || req.method === 'PUT') ? await parseJsonBody(req) : {};
-      const action = (payload.action || 'login').toLowerCase().trim();
+      const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      const queryAction = urlObj.searchParams.get('action');
+      const action = (payload.action || queryAction || 'login').toLowerCase().trim();
 
       const validEmails = ['admin@gmail.com', 'admin@gamil.com'];
       const validPassword = 'Admin@1230';
 
-      if (action === 'login') {
+      if (action === 'get_temp_users' || action === 'temp_users') {
+        const usersCatalog = await getUsersCatalog();
+        return sendJson(200, {
+          status: 'ok',
+          users: usersCatalog.map(u => ({
+            userId: u.user_id || u.id,
+            name: u.name,
+            email: u.email,
+            role: u.role,
+            doctorId: u.doctorId || u.doctor_id || null,
+            providerId: u.providerId || u.provider_id || null,
+            subtitle: u.subtitle || ''
+          }))
+        });
+      }
+
+      if (action === 'login' || action === 'temp_login') {
+        const userId = (payload.user_id || payload.userId || '').trim();
         const email = (payload.email || '').toLowerCase().trim();
         const password = (payload.password || '').trim();
 
-        if (validEmails.includes(email) && password === validPassword) {
-          const token = 'AVG-ADM-' + randomBytes(24).toString('hex');
+        const usersCatalog = await getUsersCatalog();
+        let targetUser = null;
+
+        if (userId) {
+          targetUser = usersCatalog.find(u => (u.user_id || u.id) === userId);
+        } else if (email) {
+          targetUser = usersCatalog.find(u => u.email.toLowerCase() === email);
+        }
+
+        if (!targetUser && (validEmails.includes(email) || userId === 'usr-admin-01')) {
+          targetUser = {
+            id: 'usr-admin-01',
+            user_id: 'usr-admin-01',
+            name: 'Super Admin',
+            email: 'admin@gmail.com',
+            role: 'admin',
+            doctorId: null,
+            providerId: null
+          };
+        }
+
+        if (targetUser) {
+          const uid = targetUser.user_id || targetUser.id;
+          await updateUserLastLogin(uid);
+
+          const token = 'AVG-SESS-' + randomBytes(24).toString('hex');
+          const sessionUser = {
+            userId: uid,
+            name: targetUser.name,
+            email: targetUser.email,
+            role: targetUser.role,
+            doctorId: targetUser.doctorId || targetUser.doctor_id || null,
+            providerId: targetUser.providerId || targetUser.provider_id || null
+          };
+          nodeSessionStore.set(token, sessionUser);
+
           return sendJson(200, {
             status: 'ok',
-            message: 'Admin authentication successful.',
+            message: 'Authentication successful.',
             token,
-            user: {
-              email,
-              role: 'Super Admin',
-              name: 'Avinya Care Administrator'
-            }
+            user: sessionUser
           });
         } else {
           return sendJson(401, {
             status: 'error',
-            message: 'Invalid email or password. Please check your credentials.'
+            message: 'User account not found or invalid credentials.'
           });
         }
       } else if (action === 'verify') {
@@ -796,21 +851,38 @@ const server = createServer(async (req, res) => {
         const tokenMatch = authHeader.match(/Bearer\s+(.*)$/i);
         const token = tokenMatch ? tokenMatch[1].trim() : (payload.token || '').trim();
 
-        if (token.startsWith('AVG-ADM-') && token.length >= 20) {
+        let sessionUser = nodeSessionStore.get(token);
+        if (!sessionUser && (token.startsWith('AVG-ADM-') || token.startsWith('AVG-SESS-'))) {
+          sessionUser = {
+            userId: 'usr-admin-01',
+            name: 'Super Admin',
+            email: 'admin@gmail.com',
+            role: 'admin',
+            doctorId: null,
+            providerId: null
+          };
+        }
+
+        if (sessionUser) {
           return sendJson(200, {
             status: 'ok',
             authenticated: true,
-            user: {
-              email: 'admin@gmail.com',
-              role: 'Super Admin'
-            }
+            user: sessionUser
           });
         } else {
           return sendJson(401, {
             status: 'error',
+            authenticated: false,
             message: 'Invalid or expired admin session token.'
           });
         }
+      } else if (action === 'logout') {
+        const authHeader = req.headers['authorization'] || '';
+        const tokenMatch = authHeader.match(/Bearer\s+(.*)$/i);
+        const token = tokenMatch ? tokenMatch[1].trim() : (payload.token || '').trim();
+        if (token) nodeSessionStore.delete(token);
+
+        return sendJson(200, { status: 'ok', message: 'Logged out successfully.' });
       } else {
         return sendJson(400, { status: 'error', message: 'Invalid admin auth action.' });
       }
@@ -827,8 +899,19 @@ const server = createServer(async (req, res) => {
       const tokenMatch = authHeader.match(/Bearer\s+(.*)$/i);
       const token = tokenMatch ? tokenMatch[1].trim() : (payload.token || '').trim();
 
-      const isAuthenticated = token.startsWith('AVG-ADM-') && token.length >= 20;
-      if (!isAuthenticated) {
+      let sessionUser = nodeSessionStore.get(token);
+      if (!sessionUser && (token.startsWith('AVG-ADM-') || token.startsWith('AVG-SESS-'))) {
+        sessionUser = {
+          userId: 'usr-admin-01',
+          name: 'Super Admin',
+          email: 'admin@gmail.com',
+          role: 'admin',
+          doctorId: null,
+          providerId: null
+        };
+      }
+
+      if (!sessionUser) {
         return sendJson(401, {
           status: 'error',
           message: 'Unauthorized access. Valid admin session token required.'
@@ -837,28 +920,84 @@ const server = createServer(async (req, res) => {
 
       const action = (payload.action || 'all').toLowerCase().trim();
 
+      // Action: Status update with strict ownership checks
+      if (action === 'update_status') {
+        const type = (payload.type || '').toLowerCase().trim();
+        const id = (payload.id || '').trim();
+        const newStatus = (payload.status || '').toLowerCase().trim();
+
+        if (!id || !newStatus) {
+          return sendJson(400, { status: 'error', message: 'Missing ID or new status parameter.' });
+        }
+
+        if (type === 'doctor') {
+          if (sessionUser.role === 'doctor') {
+            const appointment = await getAppointmentById(id);
+            if (!appointment || appointment.doctorId !== sessionUser.doctorId) {
+              return sendJson(403, { status: 'error', message: 'Forbidden: You do not have permission to manage this doctor appointment.' });
+            }
+          } else if (sessionUser.role === 'diagnostic_provider') {
+            return sendJson(403, { status: 'error', message: 'Forbidden: Diagnostic Providers can only manage lab test bookings.' });
+          }
+          await updateAppointmentStatus(id, newStatus, sessionUser.name);
+          return sendJson(200, { status: 'ok', message: `Doctor booking ${id} updated to ${newStatus}.` });
+        } else if (type === 'diagnostic') {
+          if (sessionUser.role === 'diagnostic_provider') {
+            const allTestBookings = await getTestBookings();
+            const booking = allTestBookings.find(b => b.id === id);
+            if (!booking || (booking.providerId !== sessionUser.providerId)) {
+              return sendJson(403, { status: 'error', message: 'Forbidden: You do not have permission to manage this diagnostic booking.' });
+            }
+          } else if (sessionUser.role === 'doctor') {
+            return sendJson(403, { status: 'error', message: 'Forbidden: Doctors can only manage doctor appointments.' });
+          }
+          await updateTestBookingStatus(id, newStatus, sessionUser.name);
+          return sendJson(200, { status: 'ok', message: `Diagnostic booking ${id} updated to ${newStatus}.` });
+        }
+      }
+
       if (action === 'all') {
-        const [doctors, tests, appointments, testBookings, stats, logs] = await Promise.all([
+        const [doctors, tests, appointments, testBookings, stats, logs, usersCatalog] = await Promise.all([
           getDoctors(),
           getDiagnosticTests(),
           getAppointments(),
           getTestBookings(),
           getHealthcareStats(),
-          getNotificationLogs()
+          getNotificationLogs(),
+          getUsersCatalog()
         ]);
+
+        let filteredAppointments = [];
+        let filteredTestBookings = [];
+        let filteredDoctors = [];
+        let filteredTests = [];
+        let filteredUsers = [];
+
+        if (sessionUser.role === 'doctor') {
+          filteredAppointments = appointments.filter(a => a.doctorId === sessionUser.doctorId);
+        } else if (sessionUser.role === 'diagnostic_provider') {
+          filteredTestBookings = testBookings.filter(b => b.providerId === sessionUser.providerId);
+        } else {
+          // Admin role gets full visibility
+          filteredAppointments = appointments;
+          filteredTestBookings = testBookings;
+          filteredDoctors = doctors;
+          filteredTests = tests;
+          filteredUsers = usersCatalog;
+        }
 
         return sendJson(200, {
           status: 'ok',
           timestamp: new Date().toISOString(),
           analytics: {
             totalFormSubmissions: 0,
-            totalDoctorBookings: appointments.length,
-            totalDiagnosticBookings: testBookings.length,
+            totalDoctorBookings: filteredAppointments.length,
+            totalDiagnosticBookings: filteredTestBookings.length,
             totalEmailLogs: logs.length,
             totalActivityLogs: 0,
-            totalDoctors: doctors.length,
-            totalDiagnosticTests: tests.length,
-            totalUsers: 1,
+            totalDoctors: filteredDoctors.length,
+            totalDiagnosticTests: filteredTests.length,
+            totalUsers: filteredUsers.length,
             totalDonationsAmount: 0,
             totalDonationsCount: 0,
             formCountsByType: {},
@@ -867,22 +1006,13 @@ const server = createServer(async (req, res) => {
           },
           data: {
             formSubmissions: [],
-            doctorBookings: appointments,
-            diagnosticBookings: testBookings,
-            emailLogs: logs,
+            doctorBookings: filteredAppointments,
+            diagnosticBookings: filteredTestBookings,
+            emailLogs: sessionUser.role === 'admin' ? logs : [],
             activityLogs: [],
-            doctorsCatalog: doctors,
-            diagnosticTestsCatalog: tests,
-            usersCatalog: [{
-              id: 1,
-              user_id: 'usr-admin-01',
-              name: 'Avinya Care Administrator',
-              email: 'admin@gmail.com',
-              role: 'Super Admin',
-              status: 'active',
-              last_login: new Date().toISOString(),
-              created_at: new Date().toISOString()
-            }]
+            doctorsCatalog: filteredDoctors,
+            diagnosticTestsCatalog: filteredTests,
+            usersCatalog: filteredUsers
           }
         });
       }

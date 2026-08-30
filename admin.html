@@ -927,30 +927,39 @@
 
   <!-- Login Modal Overlay -->
   <div id="loginOverlay" class="login-overlay">
-    <div class="login-card">
-      <img src="assets/logo.png" alt="Avinya Care Foundation" onerror="this.src='favicon.svg'">
-      <h2>Avinya Care Admin Login</h2>
-      <p>Enter your authorized credentials to access management records.</p>
+    <div class="login-card" style="max-width: 480px; padding: 28px;">
+      <img src="assets/logo.png" alt="Avinya Care Foundation" onerror="this.src='favicon.svg'" style="max-height: 54px; margin-bottom: 12px;">
+      <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 6px;">Avinya Care Access Portal</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.4;">Select a role account below to sign in and experience isolated booking & appointment views.</p>
       
-      <div class="cred-hint-box">
-        <strong>🔑 Admin Credentials:</strong><br>
-        Email: <code>admin@gmail.com</code> (or <code>admin@gamil.com</code>)<br>
-        Password: <code>Admin@1230</code>
-      </div>
+      <div id="loginError" class="login-error" style="display: none;"></div>
 
-      <div id="loginError" class="login-error"></div>
-
-      <form id="loginForm" onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label>Admin Email</label>
-          <input type="email" id="loginEmail" class="form-control" value="admin@gmail.com" required placeholder="admin@gmail.com">
+      <form id="loginForm" onsubmit="handleDevLogin(event)">
+        <div class="form-group" style="margin-bottom: 20px; text-align: left;">
+          <label style="font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 6px; display: block;">Select User Account *</label>
+          <select id="loginUserSelect" class="form-control" style="width: 100%; height: 46px; font-size: 14px; background: #0F172A; border: 1px solid rgba(255, 255, 255, 0.18); color: #F8FAFC; border-radius: 8px; padding: 0 12px;">
+            <optgroup label="👑 System Administrators">
+              <option value="usr-admin-01" selected>🔑 Super Admin (admin@gmail.com)</option>
+            </optgroup>
+            <optgroup label="🩺 Doctors (Doctor Appointments)">
+              <option value="usr-doc-doc-1">👨‍⚕️ Dr. Priya Sharma - Medical Oncology</option>
+              <option value="usr-doc-doc-2">👨‍⚕️ Dr. Rajesh K. Varma - Interventional Cardiology</option>
+              <option value="usr-doc-doc-3">👨‍⚕️ Dr. Ananya Sengupta - Radiation Oncology</option>
+              <option value="usr-doc-doc-4">👨‍⚕️ Dr. Vikramaditya Rathore - Surgical Oncology</option>
+              <option value="usr-doc-doc-5">👨‍⚕️ Dr. Meera Nambiar - Hemat-Oncology</option>
+              <option value="usr-doc-doc-6">👨‍⚕️ Dr. Kavita Joshi - Gynecologic Oncology</option>
+              <option value="usr-doc-doc-7">👨‍⚕️ Dr. Arvind Deshmukh - Pediatric Oncology</option>
+              <option value="usr-doc-doc-9">👨‍⚕️ Dr. Shalini Raman - Neuro-Oncology</option>
+              <option value="usr-doc-doc-10">👨‍⚕️ Dr. Farooq Qureshi - Gastrointestinal Oncology</option>
+            </optgroup>
+            <optgroup label="🧪 Diagnostic Providers / Labs (Test Bookings)">
+              <option value="usr-prov-provider-1">🔬 Avinya Central Diagnostics & Pathology (Mumbai)</option>
+              <option value="usr-prov-provider-2">🔬 Metropolis Cancer Diagnostics & Advanced Imaging (New Delhi)</option>
+            </optgroup>
+          </select>
         </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="loginPassword" class="form-control" value="Admin@1230" required placeholder="••••••••">
-        </div>
-        <button type="submit" id="loginBtn" class="btn btn-primary btn-login">
-          Sign In to Dashboard
+        <button type="submit" id="loginBtn" class="btn btn-primary btn-login" style="width: 100%; height: 46px; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span>🔒 Log In as Selected Account</span>
         </button>
       </form>
     </div>
@@ -1053,10 +1062,10 @@
       <!-- Sidebar Footer User Card -->
       <div class="sidebar-footer">
         <div class="admin-user-card">
-          <div class="user-avatar">ADM</div>
+          <div class="user-avatar" id="adminAvatarBadge">ADM</div>
           <div>
-            <div class="user-email" id="adminEmailBadge">admin@gmail.com</div>
-            <div class="user-role">System Administrator</div>
+            <div class="user-email" id="adminNameBadge">Super Admin</div>
+            <div class="user-role" id="adminRoleBadge">System Administrator</div>
           </div>
         </div>
         <div class="sidebar-actions">
@@ -1074,9 +1083,12 @@
           <button class="mobile-toggle-btn" onclick="toggleMobileSidebar()">☰</button>
           <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
         </div>
-        <div class="header-right">
+        <div class="header-right" style="display: flex; align-items: center; gap: 12px;">
           <div class="admin-status-pill">
             <span class="status-dot"></span> Live Auto-Sync (5m)
+          </div>
+          <div id="roleUserPill" style="font-size: 13px; font-weight: 600; padding: 6px 14px; background: rgba(13, 148, 136, 0.15); border: 1px solid rgba(13, 148, 136, 0.4); color: #5EEAD4; border-radius: 20px; display: flex; align-items: center; gap: 6px;">
+            <span id="roleIcon">👤</span> <span id="roleText">Logged in as: Super Admin</span>
           </div>
         </div>
       </header>
@@ -1600,6 +1612,10 @@
 
   <script>
     let adminToken = localStorage.getItem('avinya_admin_token') || '';
+    let currentUser = null;
+    try {
+      currentUser = JSON.parse(localStorage.getItem('avinya_user_obj') || 'null');
+    } catch(e) {}
 
     function getInitialTab() {
       const hash = window.location.hash ? window.location.hash.replace('#', '').trim() : '';
@@ -1643,14 +1659,138 @@
     };
 
     window.addEventListener('DOMContentLoaded', () => {
+      loadTempUsers();
       if (adminToken) {
         document.getElementById('loginOverlay').style.display = 'none';
+        applyRolePermissions();
         fetchAdminData();
         startAutoPolling();
       } else {
         document.getElementById('loginOverlay').style.display = 'flex';
       }
     });
+
+    async function loadTempUsers() {
+      const select = document.getElementById('loginUserSelect');
+      if (!select) return;
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-auth.php?action=get_temp_users');
+        const json = await res.json();
+        if (json.status === 'ok' && Array.isArray(json.users)) {
+          const users = json.users;
+          const admins = users.filter(u => u.role === 'admin');
+          const doctors = users.filter(u => u.role === 'doctor');
+          const providers = users.filter(u => u.role === 'diagnostic_provider');
+
+          let html = '';
+          if (admins.length > 0) {
+            html += `<optgroup label="👑 System Administrators">`;
+            admins.forEach(u => {
+              html += `<option value="${u.userId}">🔑 ${escapeHtml(u.name)} (${escapeHtml(u.email)})</option>`;
+            });
+            html += `</optgroup>`;
+          }
+          if (doctors.length > 0) {
+            html += `<optgroup label="🩺 Doctors (Doctor Appointments)">`;
+            doctors.forEach(u => {
+              const spec = u.subtitle ? ` - ${u.subtitle}` : '';
+              html += `<option value="${u.userId}">👨‍⚕️ ${escapeHtml(u.name)}${escapeHtml(spec)}</option>`;
+            });
+            html += `</optgroup>`;
+          }
+          if (providers.length > 0) {
+            html += `<optgroup label="🧪 Diagnostic Providers / Labs (Test Bookings)">`;
+            providers.forEach(u => {
+              html += `<option value="${u.userId}">🔬 ${escapeHtml(u.name)}</option>`;
+            });
+            html += `</optgroup>`;
+          }
+          select.innerHTML = html;
+        }
+      } catch (err) {
+        console.error('Error loading dev users:', err);
+        select.innerHTML = `<option value="usr-admin-01">Super Admin (admin@gmail.com)</option>`;
+      }
+    }
+
+    function applyRolePermissions() {
+      if (!currentUser) return;
+
+      const role = currentUser.role || 'admin';
+      const name = currentUser.name || 'User';
+
+      // Header Pill
+      const roleText = document.getElementById('roleText');
+      const roleIcon = document.getElementById('roleIcon');
+      if (roleText) {
+        let roleTitle = 'Super Admin';
+        let icon = '👑';
+        if (role === 'doctor') {
+          roleTitle = `Doctor: ${name}`;
+          icon = '👨‍⚕️';
+        } else if (role === 'diagnostic_provider') {
+          roleTitle = `Lab Provider: ${name}`;
+          icon = '🔬';
+        }
+        roleText.innerText = `Logged in as: ${roleTitle}`;
+        if (roleIcon) roleIcon.innerText = icon;
+      }
+
+      // Sidebar Badge
+      const nameBadge = document.getElementById('adminNameBadge');
+      const roleBadge = document.getElementById('adminRoleBadge');
+      const avatarBadge = document.getElementById('adminAvatarBadge');
+      if (nameBadge) nameBadge.innerText = name;
+      if (roleBadge) {
+        roleBadge.innerText = role === 'doctor' ? 'Doctor Account' : (role === 'diagnostic_provider' ? 'Diagnostic Provider' : 'System Administrator');
+      }
+      if (avatarBadge) {
+        avatarBadge.innerText = role === 'doctor' ? 'DOC' : (role === 'diagnostic_provider' ? 'LAB' : 'ADM');
+      }
+
+      // Menu links visibility according to role
+      const allNavLinks = document.querySelectorAll('.sidebar-nav-link');
+      const menuLabels = document.querySelectorAll('.menu-group-label');
+
+      allNavLinks.forEach(link => {
+        const tab = link.getAttribute('data-tab');
+        if (role === 'doctor') {
+          if (tab === 'dashboard' || tab === 'doctor') {
+            link.style.display = 'flex';
+          } else {
+            link.style.display = 'none';
+          }
+        } else if (role === 'diagnostic_provider') {
+          if (tab === 'dashboard' || tab === 'diagnostic') {
+            link.style.display = 'flex';
+          } else {
+            link.style.display = 'none';
+          }
+        } else {
+          link.style.display = 'flex';
+        }
+      });
+
+      menuLabels.forEach(label => {
+        if (role === 'doctor' || role === 'diagnostic_provider') {
+          const txt = label.innerText.trim();
+          if (txt === 'FORM SUBMISSIONS' || txt === 'SYSTEM AUDIT & LOGS' || txt === 'ADMINISTRATION') {
+            label.style.display = 'none';
+          } else {
+            label.style.display = 'block';
+          }
+        } else {
+          label.style.display = 'block';
+        }
+      });
+
+      // Default active tab enforcement
+      if (role === 'doctor' && currentTab !== 'doctor' && currentTab !== 'dashboard') {
+        switchTab('doctor');
+      } else if (role === 'diagnostic_provider' && currentTab !== 'diagnostic' && currentTab !== 'dashboard') {
+        switchTab('diagnostic');
+      }
+    }
 
     function startAutoPolling() {
       if (autoPollTimer) clearInterval(autoPollTimer);
@@ -1666,12 +1806,18 @@
       if (sidebar) sidebar.classList.toggle('open');
     }
 
-    async function handleLogin(event) {
+    async function handleDevLogin(event) {
       event.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value.trim();
+      const select = document.getElementById('loginUserSelect');
+      const userId = select.value;
       const errorDiv = document.getElementById('loginError');
       const btn = document.getElementById('loginBtn');
+
+      if (!userId) {
+        errorDiv.innerText = 'Please select a user account to log in.';
+        errorDiv.style.display = 'block';
+        return;
+      }
 
       errorDiv.style.display = 'none';
       btn.innerText = 'Authenticating...';
@@ -1681,33 +1827,46 @@
         const response = await fetch(getApiBaseUrl() + '/api/admin-auth.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'login', email, password })
+          body: JSON.stringify({ action: 'temp_login', userId })
         });
         const data = await response.json();
 
         if (response.ok && data.status === 'ok' && data.token) {
           adminToken = data.token;
+          currentUser = data.user || { role: 'admin', name: 'Super Admin' };
           localStorage.setItem('avinya_admin_token', adminToken);
+          localStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
+          
           document.getElementById('loginOverlay').style.display = 'none';
+          applyRolePermissions();
           fetchAdminData();
           startAutoPolling();
         } else {
-          errorDiv.innerText = data.message || 'Invalid admin credentials.';
+          errorDiv.innerText = data.message || 'Authentication failed.';
           errorDiv.style.display = 'block';
         }
       } catch (err) {
-        errorDiv.innerText = 'Network error authenticating admin login.';
+        errorDiv.innerText = 'Network error authenticating login.';
         errorDiv.style.display = 'block';
       } finally {
-        btn.innerText = 'Sign In to Dashboard';
+        btn.innerText = '🔒 Log In as Selected Account';
         btn.disabled = false;
       }
     }
 
     function handleLogout() {
       if (autoPollTimer) clearInterval(autoPollTimer);
+      fetch(getApiBaseUrl() + '/api/admin-auth.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'logout' })
+      }).catch(() => {});
+
       localStorage.removeItem('avinya_admin_token');
+      localStorage.removeItem('avinya_user_obj');
       adminToken = '';
+      currentUser = null;
+      loadTempUsers();
       document.getElementById('loginOverlay').style.display = 'flex';
     }
 
@@ -1900,6 +2059,14 @@
     }
 
     function switchTab(tab) {
+      if (currentUser) {
+        const role = currentUser.role || 'admin';
+        if (role === 'doctor' && tab !== 'doctor' && tab !== 'dashboard') {
+          tab = 'doctor';
+        } else if (role === 'diagnostic_provider' && tab !== 'diagnostic' && tab !== 'dashboard') {
+          tab = 'diagnostic';
+        }
+      }
       currentTab = tab;
       try {
         localStorage.setItem('avinya_active_tab', tab);
@@ -2444,14 +2611,25 @@
         tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No system users found. Click "➕ Add User".</td></tr>`;
         return;
       }
+      const formatLastLogin = (val) => {
+        if (!val || val === 'NULL' || val === 'null') return '<span style="color:#64748B">Never</span>';
+        try {
+          const d = new Date(val);
+          if (isNaN(d.getTime())) return escapeHtml(val);
+          return d.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+        } catch (e) {
+          return escapeHtml(val);
+        }
+      };
+
       tbody.innerHTML = items.map(item => `
         <tr>
           <td><code style="color:#5EEAD4">${item.user_id || item.id}</code></td>
           <td><strong>${escapeHtml(item.name)}</strong></td>
           <td><a href="mailto:${item.email}" style="color:#60A5FA">${escapeHtml(item.email)}</a></td>
-          <td><span class="badge ${(item.role || 'admin') === 'admin' ? 'badge-warning' : 'badge-info'}">${(item.role || 'admin').toUpperCase()}</span></td>
+          <td><span class="badge ${(item.role || 'admin') === 'admin' ? 'badge-warning' : ((item.role || '').includes('doc') ? 'badge-info' : 'badge-teal')}">${(item.role || 'admin').replace('_', ' ').toUpperCase()}</span></td>
           <td><span class="badge ${(item.status || 'active') === 'active' ? 'badge-success' : 'badge-danger'}">${(item.status || 'active').toUpperCase()}</span></td>
-          <td style="color:var(--text-muted);font-size:12px">${item.last_login || '-'}</td>
+          <td style="color:#CBD5E1;font-size:12px;white-space:nowrap">${formatLastLogin(item.last_login || item.lastLogin)}</td>
           <td>
             <div style="display:flex;gap:6px">
               <button class="btn btn-outline" style="padding:4px 8px;font-size:12px" onclick="openUserModal('${item.user_id || item.id}')">✏️ Edit</button>
