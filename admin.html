@@ -1806,6 +1806,11 @@
           fetchAdminData();
           startAutoPolling();
         }
+      } else {
+        document.getElementById('loginOverlay').style.display = 'flex';
+      }
+    });
+
     function togglePasswordVisibility(inputId, btnEl) {
       const input = document.getElementById(inputId);
       if (!input) return;
