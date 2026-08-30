@@ -1182,13 +1182,13 @@
 
       <!-- Sidebar Footer User Card -->
       <div class="sidebar-footer">
-        <div class="admin-user-card">
+        <button type="button" class="admin-user-card" onclick="openCurrentUserProfile()" title="View or edit my profile" style="width:100%;background:none;border:0;color:inherit;text-align:left;cursor:pointer;">
           <div class="user-avatar" id="adminAvatarBadge">ADM</div>
           <div>
             <div class="user-email" id="adminNameBadge">Super Admin</div>
             <div class="user-role" id="adminRoleBadge">System Administrator</div>
           </div>
-        </div>
+        </button>
         <div class="sidebar-actions">
           <button class="btn btn-danger btn-sm" style="width:100%" onclick="handleLogout()" title="Logout">Logout</button>
         </div>
@@ -1208,9 +1208,9 @@
           <div class="admin-status-pill">
             <span class="status-dot"></span> Live Auto-Sync (5m)
           </div>
-          <div id="roleUserPill" style="font-size: 13px; font-weight: 600; padding: 6px 14px; background: rgba(13, 148, 136, 0.15); border: 1px solid rgba(13, 148, 136, 0.4); color: #5EEAD4; border-radius: 20px; display: flex; align-items: center; gap: 6px;">
-            <span id="roleIcon">👤</span> <span id="roleText">Logged in as: Super Admin</span>
-          </div>
+          <button type="button" id="roleUserPill" onclick="openCurrentUserProfile()" title="Open my profile" style="font-size:13px;font-weight:600;padding:5px 12px 5px 5px;background:rgba(13,148,136,.15);border:1px solid rgba(13,148,136,.4);color:#5EEAD4;border-radius:24px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <span id="roleIcon" class="user-avatar" style="width:30px;height:30px;font-size:10px;overflow:hidden;">USR</span><span id="roleText">Logged in as: Super Admin</span>
+          </button>
         </div>
       </header>
 
@@ -1702,6 +1702,10 @@
           <label style="font-size: 12px; color: var(--text-muted);">Email Address *</label>
           <input type="email" id="usrEmail" class="search-input" required placeholder="user@gmail.com">
         </div>
+        <div style="display:flex;gap:12px;">
+          <div style="flex:1"><label style="font-size:12px;color:var(--text-muted);">Mobile</label><input type="tel" id="usrPhone" class="search-input" placeholder="+91 98765 43210"></div>
+          <div style="flex:1"><label style="font-size:12px;color:var(--text-muted);">Profile Image URL</label><input type="url" id="usrAvatar" class="search-input" placeholder="https://..."></div>
+        </div>
         <div>
           <label style="font-size: 12px; color: var(--text-muted);">Password (Leave blank to keep existing password)</label>
           <input type="password" id="usrPassword" class="search-input" placeholder="••••••••">
@@ -1742,6 +1746,26 @@
           <button type="submit" class="btn btn-teal">Save System User</button>
         </div>
       </form>
+  </div>
+
+  <!-- Signed-in User Profile CRUD Modal -->
+  <div id="profileModal" class="modal-overlay">
+    <div class="modal-card" style="max-width:520px;">
+      <div class="modal-header"><div class="modal-title">My Profile</div><button class="close-btn" onclick="closeProfileModal()">✕</button></div>
+      <form id="profileForm" onsubmit="saveCurrentUserProfile(event)" style="padding:18px;display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;gap:14px;padding:14px;background:rgba(13,148,136,.08);border-radius:12px;">
+          <div id="profileAvatarPreview" class="user-avatar" style="width:64px;height:64px;font-size:17px;overflow:hidden;">USR</div>
+          <div><strong id="profileDisplayName">User</strong><div id="profileProtectedRole" style="color:var(--text-muted);font-size:12px;margin-top:4px;">Role</div></div>
+        </div>
+        <div><label style="font-size:12px;color:var(--text-muted);">Full Name *</label><input id="profileName" class="search-input" required maxlength="255"></div>
+        <div><label style="font-size:12px;color:var(--text-muted);">Email *</label><input id="profileEmail" type="email" class="search-input" required></div>
+        <div><label style="font-size:12px;color:var(--text-muted);">Mobile</label><input id="profilePhone" type="tel" class="search-input" maxlength="20" placeholder="+91 98765 43210"></div>
+        <div><label style="font-size:12px;color:var(--text-muted);">Profile Image URL</label><input id="profileAvatar" type="url" class="search-input" placeholder="https://example.com/photo.jpg" oninput="previewCurrentAvatar()"></div>
+        <div style="font-size:12px;color:var(--text-muted);">Role, status and ownership IDs are protected and cannot be changed from this profile.</div>
+        <div id="profileMessage" style="display:none;padding:10px;border-radius:8px;font-size:13px;"></div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;"><button type="button" class="btn btn-outline" onclick="closeProfileModal()">Cancel</button><button type="submit" class="btn btn-teal">Save Profile</button></div>
+      </form>
+    </div>
   </div>
 
   <script>
@@ -1875,6 +1899,7 @@
     function applyRolePermissions() {
       if (!currentUser) return;
       const role = (currentUser.role || 'admin').toLowerCase();
+      syncCurrentUserChrome();
 
       const userNameEl = document.getElementById('loggedInUserName');
       if (userNameEl) {
@@ -1917,6 +1942,77 @@
         if (usersCatMenu) usersCatMenu.style.display = 'block';
         if (doctorBookingsMenu) doctorBookingsMenu.style.display = 'block';
         if (diagBookingsMenu) diagBookingsMenu.style.display = 'block';
+      }
+    }
+
+    function userInitials(user) {
+      return String((user && user.name) || 'User').trim().split(/\s+/).slice(0, 2).map(part => part[0] || '').join('').toUpperCase() || 'USR';
+    }
+
+    function setAvatarElement(element, user) {
+      if (!element) return;
+      const initials = userInitials(user);
+      const avatar = String((user && user.avatar) || '').trim();
+      element.textContent = initials;
+      if (avatar && /^https?:\/\//i.test(avatar)) {
+        element.innerHTML = `<img src="${escapeHtml(avatar)}" alt="${escapeHtml((user && user.name) || 'User')}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent='${initials}'">`;
+      }
+    }
+
+    function syncCurrentUserChrome() {
+      if (!currentUser) return;
+      setAvatarElement(document.getElementById('adminAvatarBadge'), currentUser);
+      setAvatarElement(document.getElementById('roleIcon'), currentUser);
+      const name = currentUser.name || 'User';
+      const role = String(currentUser.role || 'user').replaceAll('_', ' ');
+      document.getElementById('adminNameBadge').textContent = name;
+      document.getElementById('adminRoleBadge').textContent = role.replace(/\b\w/g, c => c.toUpperCase());
+      document.getElementById('roleText').textContent = `Logged in as: ${name}`;
+    }
+
+    async function openCurrentUserProfile() {
+      if (!adminToken) return;
+      const message = document.getElementById('profileMessage');
+      message.style.display = 'none';
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-auth.php', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'get_profile' })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'ok') throw new Error(data.message || 'Unable to load profile.');
+        currentUser = { ...currentUser, ...data.user };
+        document.getElementById('profileName').value = currentUser.name || '';
+        document.getElementById('profileEmail').value = currentUser.email || '';
+        document.getElementById('profilePhone').value = currentUser.phone || '';
+        document.getElementById('profileAvatar').value = currentUser.avatar || '';
+        document.getElementById('profileDisplayName').textContent = currentUser.name || 'User';
+        document.getElementById('profileProtectedRole').textContent = `${String(currentUser.role || 'user').replaceAll('_', ' ').toUpperCase()} · ${String(currentUser.status || 'active').toUpperCase()}`;
+        setAvatarElement(document.getElementById('profileAvatarPreview'), currentUser);
+        document.getElementById('profileModal').style.display = 'flex';
+      } catch (error) { alert(error.message || 'Unable to load profile.'); }
+    }
+
+    function previewCurrentAvatar() {
+      setAvatarElement(document.getElementById('profileAvatarPreview'), { name: document.getElementById('profileName').value, avatar: document.getElementById('profileAvatar').value });
+    }
+
+    function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
+
+    async function saveCurrentUserProfile(event) {
+      event.preventDefault();
+      const payload = { action: 'update_profile', name: document.getElementById('profileName').value.trim(), email: document.getElementById('profileEmail').value.trim(), phone: document.getElementById('profilePhone').value.trim(), avatar: document.getElementById('profileAvatar').value.trim() };
+      const message = document.getElementById('profileMessage');
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-auth.php', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'ok') throw new Error(data.message || 'Profile update failed.');
+        currentUser = { ...currentUser, ...data.user };
+        localStorage.setItem('avinya_user_obj', JSON.stringify(currentUser)); sessionStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
+        syncCurrentUserChrome();
+        message.textContent = 'Profile saved successfully.'; message.style.cssText = 'display:block;padding:10px;border-radius:8px;font-size:13px;background:rgba(16,185,129,.15);color:#6EE7B7';
+      } catch (error) {
+        message.textContent = error.message || 'Profile update failed.'; message.style.cssText = 'display:block;padding:10px;border-radius:8px;font-size:13px;background:rgba(239,68,68,.15);color:#FCA5A5';
       }
     }
 
@@ -2755,7 +2851,7 @@
         <tr>
           <td><code style="color:#5EEAD4">${item.submission_id || item.id}</code></td>
           <td><span class="badge badge-info">${(item.form_type || 'contact').toUpperCase()}</span></td>
-          <td><strong>${escapeHtml(item.name)}</strong></td>
+          <td><div style="display:flex;align-items:center;gap:10px"><div class="user-avatar" style="width:36px;height:36px;font-size:10px;overflow:hidden">${item.avatar && /^https?:\/\//i.test(item.avatar) ? `<img src="${escapeHtml(item.avatar)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent='${userInitials(item)}'">` : userInitials(item)}</div><div><strong>${escapeHtml(item.name)}</strong>${item.phone ? `<br><small style="color:var(--text-muted)">${escapeHtml(item.phone)}</small>` : ''}</div></div></td>
           <td><a href="mailto:${item.email}" style="color:#60A5FA">${escapeHtml(item.email)}</a></td>
           <td>${escapeHtml(item.phone || '-')}</td>
           <td>${item.form_type === 'donation' ? '<strong style="color:#34D399">₹' + item.amount + ' (' + (item.pan ? 'PAN: ' + item.pan : '80G') + ')</strong>' : escapeHtml((item.message || item.skills || item.organization || '').substring(0, 30))}</td>
@@ -2947,8 +3043,9 @@
           <td style="color:#CBD5E1;font-size:12px;white-space:nowrap">${formatLastLogin(item.last_login || item.lastLogin)}</td>
           <td>
             <div style="display:flex;gap:6px">
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px" onclick="openUserModal('${item.user_id || item.id}')">👁️ View</button>
               <button class="btn btn-outline" style="padding:4px 8px;font-size:12px" onclick="openUserModal('${item.user_id || item.id}')">✏️ Edit</button>
-              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;color:#F87171;border-color:#F87171" onclick="deleteUser('${item.user_id || item.id}')">🗑️ Delete</button>
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;color:#F87171;border-color:#F87171" onclick="deleteUser('${item.user_id || item.id}')">⛔ Deactivate</button>
             </div>
           </td>
         </tr>
@@ -2969,6 +3066,8 @@
           document.getElementById('usrIdDisplay').readOnly = true;
           document.getElementById('usrName').value = u.name || '';
           document.getElementById('usrEmail').value = u.email || '';
+          document.getElementById('usrPhone').value = u.phone || '';
+          document.getElementById('usrAvatar').value = u.avatar || '';
           document.getElementById('usrPassword').value = '';
           document.getElementById('usrRole').value = u.role || 'admin';
           document.getElementById('usrStatus').value = u.status || 'active';
@@ -2995,6 +3094,8 @@
         id: uId,
         name: document.getElementById('usrName').value.trim(),
         email: document.getElementById('usrEmail').value.trim(),
+        phone: document.getElementById('usrPhone').value.trim(),
+        avatar: document.getElementById('usrAvatar').value.trim(),
         password: document.getElementById('usrPassword').value.trim(),
         role: document.getElementById('usrRole').value,
         status: document.getElementById('usrStatus').value,

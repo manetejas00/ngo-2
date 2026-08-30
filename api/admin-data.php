@@ -304,6 +304,8 @@ if ($action === 'save_user') {
     $role = strtolower(trim((string) ($usr['role'] ?? 'admin')));
     $status = strtolower(trim((string) ($usr['status'] ?? 'active')));
     $password = trim((string) ($usr['password'] ?? ''));
+    $phone = trim((string) ($usr['phone'] ?? ''));
+    $avatar = trim((string) ($usr['avatar'] ?? ''));
 
     $doctorId = trim((string) ($usr['doctorId'] ?? $usr['doctor_id'] ?? '')) ?: null;
     $providerId = trim((string) ($usr['providerId'] ?? $usr['provider_id'] ?? '')) ?: null;
@@ -315,6 +317,12 @@ if ($action === 'save_user') {
     }
     if (!in_array($role, ['admin', 'manager', 'doctor', 'diagnostic_provider'], true) || !in_array($status, ['active', 'inactive', 'disabled', 'suspended'], true)) {
         http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Invalid role or account status.']); exit(0);
+    }
+    if ($phone !== '' && !preg_match('/^[0-9+() .-]{7,20}$/', $phone)) {
+        http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Enter a valid phone number.']); exit(0);
+    }
+    if ($avatar !== '' && (!filter_var($avatar, FILTER_VALIDATE_URL) || !preg_match('#^https?://#i', $avatar))) {
+        http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Profile image must be a valid HTTP or HTTPS URL.']); exit(0);
     }
     if (($role === 'doctor' && $doctorId === null) || ($role === 'diagnostic_provider' && $providerId === null)) {
         http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'The selected role requires a linked doctor or provider profile.']); exit(0);
@@ -338,27 +346,27 @@ if ($action === 'save_user') {
         if ($password !== '') {
             $passHash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO `users`
-                (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`)
-                VALUES (:u_id, :name, :email, :pass_hash, :role, :doctor_id, :provider_id, :status)
+                (`user_id`, `name`, `email`, `phone`, `avatar`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`)
+                VALUES (:u_id, :name, :email, :phone, :avatar, :pass_hash, :role, :doctor_id, :provider_id, :status)
                 ON DUPLICATE KEY UPDATE
-                `name` = VALUES(`name`), `email` = VALUES(`email`), `password_hash` = VALUES(`password_hash`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = VALUES(`status`)");
+                `name` = VALUES(`name`), `email` = VALUES(`email`), `phone` = VALUES(`phone`), `avatar` = VALUES(`avatar`), `password_hash` = VALUES(`password_hash`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = VALUES(`status`)");
             $stmt->execute([
                 ':u_id' => $uId,
                 ':name' => $name,
                 ':email' => $email,
-                ':pass_hash' => $passHash,
+                ':phone' => $phone ?: null, ':avatar' => $avatar ?: null, ':pass_hash' => $passHash,
                 ':role' => $role, ':doctor_id' => $doctorId, ':provider_id' => $providerId,
                 ':status' => $status
             ]);
         } else {
             $stmt = $pdo->prepare("INSERT INTO `users`
-                (`user_id`, `name`, `email`, `role`, `doctor_id`, `provider_id`, `status`)
-                VALUES (:u_id, :name, :email, :role, :doctor_id, :provider_id, :status)
+                (`user_id`, `name`, `email`, `phone`, `avatar`, `role`, `doctor_id`, `provider_id`, `status`)
+                VALUES (:u_id, :name, :email, :phone, :avatar, :role, :doctor_id, :provider_id, :status)
                 ON DUPLICATE KEY UPDATE
-                `name` = VALUES(`name`), `email` = VALUES(`email`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = VALUES(`status`)");
+                `name` = VALUES(`name`), `email` = VALUES(`email`), `phone` = VALUES(`phone`), `avatar` = VALUES(`avatar`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = VALUES(`status`)");
             $stmt->execute([
                 ':u_id' => $uId,
-                ':name' => $name,
+                ':name' => $name, ':phone' => $phone ?: null, ':avatar' => $avatar ?: null,
                 ':email' => $email,
                 ':role' => $role, ':doctor_id' => $doctorId, ':provider_id' => $providerId,
                 ':status' => $status
@@ -443,7 +451,7 @@ if ($pdo !== null) {
             $activityLogs = $pdo->query("SELECT * FROM `activity_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
             $doctorsCatalog = $pdo->query("SELECT * FROM `doctors` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
             $diagnosticTestsCatalog = $pdo->query("SELECT * FROM `diagnostic_tests` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
-            $usersCatalog = $pdo->query("SELECT `id`, `user_id`, `name`, `email`, `role`, `doctor_id`, `provider_id`, `status`, `last_login`, `created_at` FROM `users` ORDER BY `id` ASC")->fetchAll();
+            $usersCatalog = $pdo->query("SELECT `id`, `user_id`, `name`, `email`, `phone`, `avatar`, `role`, `doctor_id`, `provider_id`, `status`, `last_login`, `created_at` FROM `users` ORDER BY `id` ASC")->fetchAll();
         } else {
             http_response_code(403);
             echo json_encode(['status' => 'error', 'message' => 'Role is not authorized for the Admin Panel.']);

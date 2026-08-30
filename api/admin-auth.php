@@ -136,6 +136,56 @@ if ($action === 'login' || $action === 'temp_login') {
     exit(0);
 }
 
+// Action: View/update the signed-in user's own profile.
+if ($action === 'get_profile' || $action === 'update_profile') {
+    $headers = getallheaders();
+    $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches);
+    $requestToken = trim((string) ($matches[1] ?? $data['token'] ?? ''));
+    if (empty($_SESSION['admin_token']) || $requestToken === '' || !hash_equals((string) $_SESSION['admin_token'], $requestToken)) {
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'Authentication required.']);
+        exit(0);
+    }
+    $userId = (string) ($_SESSION['user_id'] ?? '');
+    $stmt = $pdo?->prepare("SELECT `user_id`, `name`, `email`, `phone`, `avatar`, `role`, `doctor_id`, `provider_id`, `status`, `last_login` FROM `users` WHERE `user_id` = :uid LIMIT 1");
+    $stmt?->execute([':uid' => $userId]);
+    $profile = $stmt?->fetch();
+    if (!$profile) {
+        http_response_code(404); echo json_encode(['status' => 'error', 'message' => 'Profile not found.']); exit(0);
+    }
+
+    if ($action === 'update_profile') {
+        $name = trim((string) ($data['name'] ?? ''));
+        $email = strtolower(trim((string) ($data['email'] ?? '')));
+        $phone = trim((string) ($data['phone'] ?? ''));
+        $avatar = trim((string) ($data['avatar'] ?? ''));
+        if ($name === '' || mb_strlen($name) > 255 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Enter a valid name and email address.']); exit(0);
+        }
+        if ($phone !== '' && !preg_match('/^[0-9+() .-]{7,20}$/', $phone)) {
+            http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Enter a valid phone number.']); exit(0);
+        }
+        if ($avatar !== '' && (!filter_var($avatar, FILTER_VALIDATE_URL) || !preg_match('#^https?://#i', $avatar))) {
+            http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Profile image must be a valid HTTPS or HTTP URL.']); exit(0);
+        }
+        $duplicate = $pdo->prepare("SELECT 1 FROM `users` WHERE LOWER(`email`) = :email AND `user_id` <> :uid LIMIT 1");
+        $duplicate->execute([':email' => $email, ':uid' => $userId]);
+        if ($duplicate->fetchColumn()) {
+            http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'That email address is already in use.']); exit(0);
+        }
+        $update = $pdo->prepare("UPDATE `users` SET `name` = :name, `email` = :email, `phone` = :phone, `avatar` = :avatar WHERE `user_id` = :uid");
+        $update->execute([':name' => $name, ':email' => $email, ':phone' => $phone ?: null, ':avatar' => $avatar ?: null, ':uid' => $userId]);
+        $_SESSION['user_name'] = $name;
+        $_SESSION['user_email'] = $email;
+        $profile = array_merge($profile, ['name' => $name, 'email' => $email, 'phone' => $phone, 'avatar' => $avatar]);
+        logActivity('PROFILE_UPDATED', (string) $profile['role'], $email, 'Updated own profile');
+    }
+
+    echo json_encode(['status' => 'ok', 'message' => $action === 'update_profile' ? 'Profile updated successfully.' : 'Profile loaded.', 'user' => $profile]);
+    exit(0);
+}
+
 // Action: Force Change Password or Normal Password Change
 if ($action === 'change_password' || $action === 'force_change_password') {
     $currentPass = trim((string) ($data['currentPassword'] ?? $data['current_password'] ?? ''));
