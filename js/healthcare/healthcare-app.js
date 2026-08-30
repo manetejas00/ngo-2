@@ -482,7 +482,7 @@ class HealthcarePlatform {
             <span class="hc-fee-label">Consultation Fee</span>
             <span class="hc-fee-amount">${doc.feeDisplay || (doc.consultationFee === 0 ? '₹0 (Free)' : `₹${doc.consultationFee}`)}</span>
           </div>
-          <div style="display: flex; gap: 0.5rem;">
+          <div class="hc-card-actions">
             <button class="hc-btn-view-profile" onclick="window.HealthcareApp.openDoctorProfile('${doc.id}')">
               View Profile
             </button>
@@ -1069,7 +1069,7 @@ class HealthcarePlatform {
             ${test.originalPrice ? `<span class="hc-test-original-price">₹${test.originalPrice}</span>` : ''}
             ${test.avinyaSubsidy ? `<div style="font-size: 0.75rem; color: var(--hc-primary); font-weight: 700; margin-top: 2px;">${test.avinyaSubsidy}</div>` : ''}
           </div>
-          <button class="hc-btn-primary" onclick="window.HealthcareApp.startTestBooking('${test.id}')" style="padding: 0.65rem 1.3rem; font-size: 0.88rem;">
+          <button class="hc-btn-primary" onclick="window.HealthcareApp.startTestBooking('${test.id}')" style="padding: 0.65rem 1.3rem; font-size: 0.88rem; white-space: nowrap; flex-shrink: 0;">
             <span>Book Test →</span>
           </button>
         </div>

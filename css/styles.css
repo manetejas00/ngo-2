@@ -117,6 +117,7 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+  white-space: nowrap;
 }
 
 /* Utility Tag Labels & Headers */
@@ -219,6 +220,8 @@ button {
   font-size: 0.95rem;
   transition: all var(--transition-fast);
   box-shadow: 0 4px 16px rgba(244, 117, 40, 0.3);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-primary:hover {
@@ -251,6 +254,8 @@ button {
   font-size: 0.95rem;
   border: 1px solid var(--gray-200);
   transition: all var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-secondary:hover {
