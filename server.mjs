@@ -513,6 +513,29 @@ async function saveSubmission(submissionRecord) {
   }
 }
 
+async function getFormSubmissions() {
+  try {
+    const raw = await readFile(SUBMISSIONS_FILE, 'utf-8');
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list)) return [];
+    return list.map(item => ({
+      id: item.submissionId || item.id || item.submission_id || ('SUB-' + Date.now()),
+      submission_id: item.submissionId || item.id || item.submission_id || ('SUB-' + Date.now()),
+      form_type: (item.formType || item.form_type || 'contact').toLowerCase(),
+      name: item.name || 'Anonymous',
+      email: item.email || '',
+      phone: item.phone || '',
+      organization: item.organization || '',
+      message: item.message || '',
+      amount: item.amount || null,
+      delivery_status: item.deliveryStatus || item.delivery_status || 'SENT',
+      created_at: item.timestampIST || item.created_at || new Date().toISOString()
+    }));
+  } catch (e) {
+    return [];
+  }
+}
+
 function getFormattedISTTimestamp() {
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' });
@@ -1098,14 +1121,15 @@ const server = createServer(async (req, res) => {
       }
 
       if (action === 'all') {
-        const [doctors, tests, appointments, testBookings, stats, logs, usersCatalog] = await Promise.all([
+        const [doctors, tests, appointments, testBookings, stats, logs, usersCatalog, formSubmissions] = await Promise.all([
           getDoctors(),
           getDiagnosticTests(),
           getAppointments(),
           getTestBookings(),
           getHealthcareStats(),
           getNotificationLogs(),
-          getUsersCatalog()
+          getUsersCatalog(),
+          getFormSubmissions()
         ]);
 
         let filteredAppointments = [];
@@ -1113,25 +1137,52 @@ const server = createServer(async (req, res) => {
         let filteredDoctors = [];
         let filteredTests = [];
         let filteredUsers = [];
+        let filteredFormSubmissions = [];
 
         if (sessionUser.role === 'doctor') {
-          filteredAppointments = appointments.filter(a => a.doctorId === sessionUser.doctorId);
+          filteredAppointments = appointments.filter(a => a.doctorId === sessionUser.doctorId || a.doctor_id === sessionUser.doctorId);
         } else if (sessionUser.role === 'diagnostic_provider') {
-          filteredTestBookings = testBookings.filter(b => b.providerId === sessionUser.providerId);
+          filteredTestBookings = testBookings.filter(b => b.providerId === sessionUser.providerId || b.provider_id === sessionUser.providerId);
         } else {
-          // Admin role gets full visibility
+          // Admin & Manager role gets full visibility
           filteredAppointments = appointments;
           filteredTestBookings = testBookings;
           filteredDoctors = doctors;
           filteredTests = tests;
           filteredUsers = usersCatalog;
+          filteredFormSubmissions = formSubmissions;
         }
+
+        const formCountsByType = {};
+        let totalDonationsAmount = 0;
+        let totalDonationsCount = 0;
+
+        (formSubmissions || []).forEach(fs => {
+          const ft = (fs.form_type || 'contact').toLowerCase();
+          formCountsByType[ft] = (formCountsByType[ft] || 0) + 1;
+          if (ft === 'donation') {
+            totalDonationsCount++;
+            totalDonationsAmount += parseFloat(fs.amount || 0) || 0;
+          }
+        });
+
+        const doctorStatusCounts = {};
+        (filteredAppointments || []).forEach(b => {
+          const st = (b.status || 'pending').toLowerCase();
+          doctorStatusCounts[st] = (doctorStatusCounts[st] || 0) + 1;
+        });
+
+        const diagStatusCounts = {};
+        (filteredTestBookings || []).forEach(b => {
+          const st = (b.status || 'pending').toLowerCase();
+          diagStatusCounts[st] = (diagStatusCounts[st] || 0) + 1;
+        });
 
         return sendJson(200, {
           status: 'ok',
           timestamp: new Date().toISOString(),
           analytics: {
-            totalFormSubmissions: 0,
+            totalFormSubmissions: filteredFormSubmissions.length,
             totalDoctorBookings: filteredAppointments.length,
             totalDiagnosticBookings: filteredTestBookings.length,
             totalEmailLogs: logs.length,
@@ -1139,14 +1190,14 @@ const server = createServer(async (req, res) => {
             totalDoctors: filteredDoctors.length,
             totalDiagnosticTests: filteredTests.length,
             totalUsers: filteredUsers.length,
-            totalDonationsAmount: 0,
-            totalDonationsCount: 0,
-            formCountsByType: {},
-            doctorStatusCounts: {},
-            diagStatusCounts: {}
+            totalDonationsAmount,
+            totalDonationsCount,
+            formCountsByType,
+            doctorStatusCounts,
+            diagStatusCounts
           },
           data: {
-            formSubmissions: [],
+            formSubmissions: filteredFormSubmissions,
             doctorBookings: filteredAppointments,
             diagnosticBookings: filteredTestBookings,
             emailLogs: (sessionUser.role === 'admin' || sessionUser.role === 'manager') ? logs : [],

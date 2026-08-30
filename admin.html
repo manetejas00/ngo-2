@@ -1714,10 +1714,10 @@
   </div>
 
   <script>
-    let adminToken = localStorage.getItem('avinya_admin_token') || '';
+    let adminToken = localStorage.getItem('avinya_admin_token') || sessionStorage.getItem('avinya_admin_token') || '';
     let currentUser = null;
     try {
-      currentUser = JSON.parse(localStorage.getItem('avinya_user_obj') || 'null');
+      currentUser = JSON.parse(localStorage.getItem('avinya_user_obj') || sessionStorage.getItem('avinya_user_obj') || 'null');
     } catch(e) {}
 
     function getInitialTab() {
@@ -2045,14 +2045,18 @@
 
       localStorage.removeItem('avinya_admin_token');
       localStorage.removeItem('avinya_user_obj');
+      sessionStorage.removeItem('avinya_admin_token');
+      sessionStorage.removeItem('avinya_user_obj');
       adminToken = '';
       currentUser = null;
       resetStateAndTables();
-      loadTempUsers();
       document.getElementById('loginOverlay').style.display = 'flex';
     }
 
     async function fetchAdminData(isSilent = false) {
+      if (!adminToken) {
+        adminToken = localStorage.getItem('avinya_admin_token') || sessionStorage.getItem('avinya_admin_token') || '';
+      }
       if (!adminToken) return;
 
       try {
