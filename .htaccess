@@ -1,6 +1,20 @@
 # Hostinger LiteSpeed / Apache Configuration for Avinya Care Foundation
 DirectoryIndex index.html index.php
 
+# Disable Directory Browsing (Prevents file listing data leaks)
+Options -Indexes
+
+# Block Public Access to Sensitive Files & System Directories
+<FilesMatch "^\.(env|git|github|htaccess)|(cache|storage|scripts|docs|\.agents)/|(\.log|\.sh|\.exp|\.mjs|\.lock)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
 # Disable Passenger/Node proxy for static assets and PHP files (prevents 503 proxy errors)
 <IfModule mod_passenger.c>
   PassengerEnabled off
@@ -8,6 +22,12 @@ DirectoryIndex index.html index.php
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
+
+  # Force HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP_HOST} !^localhost [NC]
+  RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
   # Serve existing static files and PHP scripts directly from LiteSpeed/Apache disk
   RewriteCond %{REQUEST_FILENAME} -f
@@ -35,11 +55,18 @@ DirectoryIndex index.html index.php
   RewriteRule ^api/news/generate/?$ api/news_generate.json [L,NC]
 </IfModule>
 
-# Enable CORS Headers & Cache Control
+# Enable CORS & Security Headers
 <IfModule mod_headers.c>
   Header set Access-Control-Allow-Origin "*"
-  Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
-  Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+  Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, X-CSRF-Token"
+  Header set Access-Control-Allow-Methods "GET, POST, PATCH, PUT, DELETE, OPTIONS"
+
+  # Enterprise Security Headers (Data Leak & Injection Protection)
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 
   # Prevent aggressive caching of HTML and PHP API files
   <FilesMatch "\.(html|htm|php)$">

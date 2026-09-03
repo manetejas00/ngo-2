@@ -152,6 +152,7 @@ async function runTestSuite() {
   let failed = 0;
 
   for (const testCase of TEST_FORMS) {
+    await new Promise(r => setTimeout(r, 150));
     console.log(`[TEST] Executing: ${testCase.name} (Form Type: ${testCase.form_type})...`);
     try {
       const res = await makePostRequest(SERVER_URL, {
