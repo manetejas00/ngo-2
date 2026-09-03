@@ -129,11 +129,11 @@ class DoctorsCanvasEngine {
   render() {
     if (!this.canvas || !this.ctx) return;
 
-    // Smooth frame lerp interpolation (0.25 lerp speed)
+    // Smooth frame lerp interpolation (0.3 lerp speed matching hero canvas)
     const delta = this.targetFrameIndex - this.currentFrameIndex;
     
     if (Math.abs(delta) > 0.02) {
-      this.currentFrameIndex += delta * 0.25;
+      this.currentFrameIndex += delta * 0.3;
       this.needsRedraw = true;
     } else if (this.currentFrameIndex !== this.targetFrameIndex) {
       this.currentFrameIndex = this.targetFrameIndex;
@@ -185,11 +185,11 @@ class DoctorsCanvasEngine {
 
         // Soft dark cinematic tint & radial vignette for text contrast
         const vignetteGrad = this.ctx.createRadialGradient(
-          width / 2, height / 2, width * 0.3,
+          width / 2, height / 2, width * 0.35,
           width / 2, height / 2, width * 0.85
         );
-        vignetteGrad.addColorStop(0, 'rgba(11, 13, 20, 0.35)');
-        vignetteGrad.addColorStop(1, 'rgba(11, 13, 20, 0.75)');
+        vignetteGrad.addColorStop(0, 'rgba(10, 15, 29, 0.15)');
+        vignetteGrad.addColorStop(1, 'rgba(10, 15, 29, 0.65)');
 
         this.ctx.fillStyle = vignetteGrad;
         this.ctx.fillRect(0, 0, width, height);
@@ -197,8 +197,8 @@ class DoctorsCanvasEngine {
         // Soft bottom infusion gradient to seamlessly blend canvas with next section
         const bottomGrad = this.ctx.createLinearGradient(0, height * 0.6, 0, height);
         bottomGrad.addColorStop(0, 'rgba(10, 15, 29, 0)');
-        bottomGrad.addColorStop(0.6, 'rgba(10, 15, 29, 0.6)');
-        bottomGrad.addColorStop(1, 'rgba(10, 15, 29, 0.95)');
+        bottomGrad.addColorStop(0.6, 'rgba(10, 15, 29, 0.5)');
+        bottomGrad.addColorStop(1, 'rgba(10, 15, 29, 0.92)');
 
         this.ctx.fillStyle = bottomGrad;
         this.ctx.fillRect(0, height * 0.6, width, height * 0.4);
