@@ -46,11 +46,13 @@
   --body-large-size: clamp(1.1rem, 1.4vw, 1.25rem);
   --body-size: clamp(1rem, 1.2vw, 1.15rem);
 
-  /* Transitions */
+  /* Transitions & Animation Tokens (Emil Kowalski Design Engineering) */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-fast: 0.2s var(--ease-out-expo);
-  --transition-normal: 0.4s var(--ease-out-expo);
-  --transition-slow: 0.8s var(--ease-out-expo);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --transition-fast: 160ms var(--ease-out);
+  --transition-normal: 280ms var(--ease-out);
+  --transition-slow: 450ms var(--ease-out);
 }
 
 /* ==========================================================================
@@ -218,20 +220,22 @@ button {
   color: #FFFFFF;
   font-weight: 700;
   font-size: 0.95rem;
-  transition: all var(--transition-fast);
+  transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
   box-shadow: 0 4px 16px rgba(244, 117, 40, 0.3);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-.btn-primary:hover {
-  background-color: var(--brand-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(244, 117, 40, 0.4);
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    background-color: var(--brand-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(244, 117, 40, 0.4);
+  }
 }
 
 .btn-primary:active {
-  transform: translateY(0);
+  transform: scale(0.97);
 }
 
 .btn-primary .arrow {
@@ -566,20 +570,22 @@ button {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) translateY(30px);
+  transform: translate(-50%, -50%) scale(0.96);
   width: 100%;
   max-width: 880px;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo), visibility 0.7s;
+  will-change: opacity, transform;
+  transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out), visibility 180ms;
   pointer-events: none;
 }
 
 .hero-narrative-card.active {
   opacity: 1;
   visibility: visible;
-  transform: translate(-50%, -50%) translateY(0);
+  transform: translate(-50%, -50%) scale(1);
   pointer-events: auto;
+  transition: opacity 280ms var(--ease-out), transform 280ms var(--ease-out), visibility 0s;
 }
 
 .hero-title {
@@ -699,12 +705,12 @@ button {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.98);
+  transform: translate(-50%, -50%) scale(0.96);
   width: 100%;
   opacity: 0;
   visibility: hidden;
-  filter: blur(10px);
-  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1), transform 700ms cubic-bezier(0.22, 1, 0.36, 1), filter 700ms, visibility 700ms;
+  will-change: opacity, transform;
+  transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out), visibility 180ms;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -715,8 +721,8 @@ button {
 .typography-sentence.active {
   opacity: 1;
   visibility: visible;
-  filter: blur(0);
   transform: translate(-50%, -50%) scale(1);
+  transition: opacity 280ms var(--ease-out), transform 280ms var(--ease-out), visibility 0s;
 }
 
 .typo-word {
@@ -726,7 +732,7 @@ button {
   letter-spacing: -0.04em;
   line-height: 1.02;
   color: rgba(255, 255, 255, 0.14);
-  transition: color 500ms cubic-bezier(0.22, 1, 0.36, 1), text-shadow 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: color 220ms var(--ease-out), text-shadow 220ms var(--ease-out);
   display: inline-block;
   user-select: none;
 }
@@ -2888,5 +2894,18 @@ textarea:focus {
     max-width: 0;
     opacity: 0;
     margin-left: 0;
+  }
+}
+
+/* Accessibility: Reduced Motion (Emil Kowalski Guideline) */
+@media (prefers-reduced-motion: reduce) {
+  .hero-narrative-card,
+  .typography-sentence {
+    transform: translate(-50%, -50%) !important;
+    transition: opacity 200ms ease, visibility 200ms !important;
+  }
+  .btn-primary,
+  .nav-brand {
+    transition: background-color 200ms ease, opacity 200ms ease !important;
   }
 }
