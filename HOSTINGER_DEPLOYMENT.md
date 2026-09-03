@@ -1,90 +1,88 @@
-# Avinya Care Foundation — Hostinger Production & Staging Deployment Guide
+# Avinya Care Foundation — Hostinger Deployment Guide
 
-This guide details the complete deployment process, server configuration, environment variable mapping, and troubleshooting steps for **Avinya Care Foundation** on Hostinger.
-
----
-
-## 📌 Environment & Branch Deployment Table
-
-| Environment | Live Domain | Git Branch | Hostinger MySQL Database | MySQL User | Hostinger Root Dir |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Staging / Test** | `https://test.avinyacarefoundation.org` | **`staging`** | `u382139760_ngo_staging` | `u382139760_ngo_staging` | `domains/test.avinyacarefoundation.org/public_html` |
-| **Production** | `https://avinyacarefoundation.org` | **`main`** | `u382139760_ngo` | `u382139760_ngo` | `domains/avinyacarefoundation.org/public_html` |
+This guide provides SSH details, key setup instructions, and deployment commands for Hostinger shared hosting (`avinyacarefoundation.org` and `test.avinyacarefoundation.org`).
 
 ---
 
-## 🛠️ Resolving 503 Service Unavailable Errors
+## 1. Hostinger SSH Details
 
-### Cause
-Hostinger standard Web Hosting serves static HTML, CSS, JavaScript, and PHP scripts via **LiteSpeed / Apache**. If Hostinger Node.js App Hosting reverse proxy is enabled for `avinyacarefoundation.org`, LiteSpeed attempts to forward requests to a long-running Node process (`server.mjs`) on port 3000. If the Node process is inactive or port binding times out, LiteSpeed returns **`503 Service Unavailable`**.
-
-### Solution & .htaccess Static Pass-Through
-1. **LiteSpeed Direct Pass-Through Rule (`.htaccess`)**:
-   Added static file condition ensuring `.html`, `.css`, `.js`, and image assets bypass reverse proxy rules and are served directly from disk by LiteSpeed:
-   ```apache
-   RewriteCond %{REQUEST_FILENAME} -f
-   RewriteRule \.(html|css|js|png|jpg|jpeg|gif|ico|svg|webp)$ - [L]
-   ```
-
-2. **Automated SSH Deployment Sync (`./deploy.exp`)**:
-   - **Staging Web Root**: `domains/test.avinyacarefoundation.org/public_html/` (loads `.env.staging` -> `u382139760_ngo_staging`)
-   - **Production Web Root**: `domains/avinyacarefoundation.org/public_html/` (loads `.env.production` -> `u382139760_ngo`)
+- **SSH IP / Host**: `82.112.239.95` (or `avinyacarefoundation.org`)
+- **SSH Port**: `65002`
+- **SSH Username**: `u382139760`
+- **Production Path**: `domains/avinyacarefoundation.org/public_html`
+- **Staging Path**: `domains/test.avinyacarefoundation.org/public_html`
 
 ---
 
-## 🚀 Guarded branch deployment
+## 2. Public SSH Key (Add to Hostinger hPanel)
 
-Each branch deploys only to its matching environment after the quality gate passes:
+To allow passwordless terminal deployment from your local machine, click **Add SSH key** in Hostinger hPanel (**Advanced** → **SSH Access**) and paste the key below:
 
-```bash
-# staging branch -> test.avinyacarefoundation.org
-git push origin staging
-
-# main branch -> avinyacarefoundation.org
-git push origin main
+```text
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB5UYt/0QuOQuGn/dpyAwEZOBDeIpMUjXlGsHGBzaIdT manetejas00
 ```
 
-The GitHub deployment requires these repository secrets:
+---
 
-- `HOSTINGER_SSH_HOST`
-- `HOSTINGER_SSH_PORT` (normally `65002`)
-- `HOSTINGER_SSH_USER`
-- `HOSTINGER_SSH_PRIVATE_KEY`
+## 3. How to Run `npm install` on Hostinger Live
 
-The matching public key must be installed for the Hostinger SSH account. The workflow validates the release, deploys only the matching branch, preserves the remote `.env` and `storage/`, checks the live pages and APIs, and automatically restores the previous release if verification fails.
-
-For a guarded local deployment with SSH key authentication:
+### Method A: Hostinger Web Terminal (hPanel)
+1. Go to Hostinger hPanel → **Advanced** → **Terminal**.
+2. Run the following commands:
 
 ```bash
-export HOSTINGER_SSH_HOST="your-host"
+# Production Domain
+cd domains/avinyacarefoundation.org/public_html
+npm install
+npm run build
+
+# Staging Domain
+cd domains/test.avinyacarefoundation.org/public_html
+npm install
+npm run build
+```
+
+---
+
+### Method B: Via Local Terminal (Once SSH Key is Added)
+
+Connect to Hostinger SSH:
+```bash
+ssh -p 65002 u382139760@82.112.239.95
+```
+
+Once connected:
+```bash
+cd domains/avinyacarefoundation.org/public_html
+npm install
+node server.mjs
+```
+
+---
+
+## 4. Automated Deployment Script
+
+Once SSH access is authorized, deploy directly using our automated script:
+
+```bash
+# Set SSH Environment Variables
+export HOSTINGER_SSH_HOST="82.112.239.95"
+export HOSTINGER_SSH_USER="u382139760"
 export HOSTINGER_SSH_PORT="65002"
-export HOSTINGER_SSH_USER="your-user"
-./deploy.exp staging
-./deploy.exp production
+
+# Deploy Staging
+./scripts/deploy-hostinger.sh staging
+
+# Deploy Production
+./scripts/deploy-hostinger.sh production
 ```
 
-Do not deploy staging and production in one command. Promote a verified staging commit by merging it into `main`.
-
 ---
 
-## ⚙️ Hostinger hPanel Web Configuration
+## 5. Live Verification
 
-When configuring deployments in Hostinger hPanel under `Websites > Deployments > Settings`:
-
-- **Framework Preset**: `Other`
-- **Branch**: `main` (for Production) / `staging` (for Staging)
-- **Node Version**: `18.x`
-- **Root Directory**: `./`
-- **Build Command**: `npm run build`
-- **Package Manager**: `npm`
-- **Entry File**: `server.mjs`
-
----
-
-## 🧪 Master Live Integration Audit
-
-To run the master audit script against `https://test.avinyacarefoundation.org`:
-
+Run live preflight smoke checks:
 ```bash
-python3 test/test_live_master_audit.py
+npm run smoke:production
+npm run smoke:staging
 ```
