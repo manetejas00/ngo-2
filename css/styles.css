@@ -1387,7 +1387,7 @@ button {
   justify-content: center;
   align-items: center;
   perspective: 1400px;
-  overflow: visible;
+  overflow: hidden;
   padding: 0;
   touch-action: pan-y;
 }
@@ -1429,7 +1429,7 @@ button {
 .nestjs-deck-card:hover {
   border-color: var(--brand);
   box-shadow: 0 30px 70px rgba(244, 117, 40, 0.45);
-  z-index: 100 !important;
+  z-index: 10 !important;
 }
 
 .card-3d-icon {
