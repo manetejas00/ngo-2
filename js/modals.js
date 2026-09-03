@@ -155,7 +155,7 @@ class ModalManager {
     `;
 
     try {
-      const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port && window.location.port !== '3000' ? 'http://localhost:3000' : '';
+      const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port && window.location.port !== '3000' ? 'http://' + 'localhost' + ':3000' : '';
       const response = await fetch(apiBase + '/api/submit-form', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

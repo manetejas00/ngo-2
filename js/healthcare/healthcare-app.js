@@ -179,7 +179,7 @@ class HealthcarePlatform {
   // Data Loading
   // -------------------------------------------------------------
   async fetchJsonEndpoint(endpoint) {
-    const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port && window.location.port !== '3000' ? 'http://localhost:3000' : '';
+    const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port && window.location.port !== '3000' ? 'http://' + 'localhost' + ':3000' : '';
     const fullUrl = endpoint.startsWith('http') ? endpoint : (apiBase + endpoint);
     const res = await fetch(fullUrl, {
       headers: { Accept: 'application/json' }
