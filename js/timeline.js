@@ -43,13 +43,13 @@ class JourneyTimeline {
       paused: true
     });
 
-    // Pinned ScrollTrigger with responsive scroll length
-    const endDist = window.innerWidth <= 768 ? '+=600' : '+=1400';
+    // Pinned ScrollTrigger on desktop/tablet, natural scrolling on mobile
+    const isMobile = window.innerWidth <= 768;
     this.trigger = ScrollTrigger.create({
       trigger: '#journey',
       start: 'top top',
-      end: endDist,
-      pin: true,
+      end: isMobile ? '+=400' : '+=1400',
+      pin: !isMobile,
       anticipatePin: 1,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
