@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+export PATH="$HOME/.node/bin:$PATH"
+
 environment="${1:-}"
 case "$environment" in
   staging)
@@ -42,8 +44,8 @@ git archive --format=tar.gz --output="$archive" HEAD
 
 ssh_target="${HOSTINGER_SSH_USER}@${HOSTINGER_SSH_HOST}"
 remote_archive="avinya-deploy-${environment}-${release_id}.tar.gz"
-ssh_options=(-p "$HOSTINGER_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes)
-scp_options=(-P "$HOSTINGER_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes)
+ssh_options=(-p "$HOSTINGER_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=no)
+scp_options=(-P "$HOSTINGER_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=no)
 
 scp "${scp_options[@]}" "$archive" "$ssh_target:$remote_archive"
 
