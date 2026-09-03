@@ -329,8 +329,8 @@ class ModalManager {
           <span class="category-tag">${role}</span>
           <h2 style="font-size: 2.2rem; margin-top: 0.5rem; margin-bottom: 1rem;">${author}'s Journey</h2>
         </div>
-        <div style="width: 100%; height: 260px; border-radius: 20px; overflow: hidden; margin-bottom: 1.5rem;">
-          <img src="${imgUrl}" alt="${author}" style="width: 100%; height: 100%; object-fit: cover;">
+        <div style="width: 100%; height: 320px; max-height: 50vh; border-radius: 20px; overflow: hidden; margin-bottom: 1.5rem; background: #f1f5f9;">
+          <img src="${imgUrl}" alt="${author}" style="width: 100%; height: 100%; object-fit: cover; object-position: center top;">
         </div>
         <blockquote style="font-size: 1.25rem; font-style: italic; color: #087F73; border-left: 4px solid #087F73; padding-left: 1rem; margin-bottom: 1.5rem;">
           "${quote}"
