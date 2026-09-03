@@ -1,7 +1,7 @@
 /**
  * Avinya Care Foundation - GSAP 3D Card Deck Controller
  * Controls Section 6 (#journey - "Every step of your health journey.")
- * Guaranteed 100% dead-center focal alignment for every card stage.
+ * Perfect 100% dead-center focal alignment with responsive scroll scrubbing on both Mobile & Desktop.
  */
 
 class JourneyTimeline {
@@ -25,14 +25,19 @@ class JourneyTimeline {
   }
 
   init() {
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+    if (typeof gsap === 'undefined') return;
 
-    gsap.registerPlugin(ScrollTrigger, Draggable);
+    if (typeof ScrollTrigger !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+    if (typeof Draggable !== 'undefined') {
+      gsap.registerPlugin(Draggable);
+    }
 
-    const cards = this.cards;
     const numCards = this.numCards;
+    const isMobile = window.innerWidth <= 768;
 
-    // Smooth scrub tween object
+    // Smooth scrub tween for card transitions
     this.scrubTween = gsap.to(this.playhead, {
       progress: 0,
       onUpdate: () => {
@@ -43,54 +48,53 @@ class JourneyTimeline {
       paused: true
     });
 
-    // Pinned ScrollTrigger on desktop/tablet, natural scrolling on mobile
-    const isMobile = window.innerWidth <= 768;
-    this.trigger = ScrollTrigger.create({
-      trigger: '#journey',
-      start: 'top top',
-      end: isMobile ? '+=400' : '+=1400',
-      pin: !isMobile,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        // Map scroll progress (0 to 0.85) to (0 to numCards - 1), hold last card from 0.85 to 1.0
-        const normProgress = gsap.utils.clamp(0, 1, self.progress / 0.85);
-        const targetProgress = normProgress * (numCards - 1);
-        this.scrubTween.vars.progress = targetProgress;
-        this.scrubTween.invalidate().restart();
-      }
-    });
-
-    // Touch & Mouse Dragging Support with native vertical page scrolling on mobile
-    const selfObj = this;
-    Draggable.create(this.track, {
-      type: "x",
-      allowNativeTouchScrolling: true,
-      onPress() {
-        selfObj.startProgress = selfObj.playhead.progress;
-      },
-      onDrag() {
-        const delta = (this.startX - this.x) * 0.003;
-        const target = gsap.utils.clamp(0, numCards - 1, selfObj.startProgress + delta);
-        selfObj.scrubTween.vars.progress = target;
-        selfObj.scrubTween.invalidate().restart();
-      }
-    });
-
-    // Arrow Button Navigation
-    if (this.prevBtn) {
-      this.prevBtn.addEventListener('click', () => this.prevCard());
-    }
-    if (this.nextBtn) {
-      this.nextBtn.addEventListener('click', () => this.nextCard());
+    // ScrollTrigger: Desktop pins & scrubs, Mobile changes cards cleanly on page scroll
+    if (typeof ScrollTrigger !== 'undefined') {
+      const selfObj = this;
+      this.trigger = ScrollTrigger.create({
+        trigger: '#journey',
+        start: isMobile ? 'top 70%' : 'top top',
+        end: isMobile ? 'bottom 30%' : '+=1600',
+        pin: !isMobile,
+        anticipatePin: 1,
+        onUpdate: (self) => {
+          if (isMobile) {
+            // Mobile: Step cleanly to integer card stage as section passes through screen
+            const rawProgress = self.progress * (numCards - 1);
+            const activeCard = gsap.utils.clamp(0, numCards - 1, Math.round(rawProgress));
+            if (activeCard !== selfObj.currentIndex) {
+              selfObj.goToStage(activeCard);
+            }
+          } else {
+            // Desktop: Smooth 3D scrub timeline with pinned section
+            const normProgress = gsap.utils.clamp(0, 1, self.progress / 0.85);
+            const targetProgress = normProgress * (numCards - 1);
+            selfObj.scrubTween.vars.progress = targetProgress;
+            selfObj.scrubTween.invalidate().restart();
+          }
+        }
+      });
     }
 
-    // Dot Indicators Click Navigation
-    if (this.dots && this.dots.length) {
-      this.dots.forEach((dot, idx) => {
-        dot.addEventListener('click', () => {
-          this.goToStage(idx);
-        });
+    // Touch & Mouse Dragging Support with Snap on Drag Release
+    if (typeof Draggable !== 'undefined') {
+      const selfObj = this;
+      Draggable.create(this.track, {
+        type: "x",
+        allowNativeTouchScrolling: true,
+        onPress() {
+          selfObj.startProgress = selfObj.playhead.progress;
+        },
+        onDrag() {
+          const delta = (this.startX - this.x) * 0.003;
+          const target = gsap.utils.clamp(0, numCards - 1, selfObj.startProgress + delta);
+          selfObj.playhead.progress = target;
+          selfObj.renderCards(target);
+        },
+        onDragEnd() {
+          const closestCard = Math.round(selfObj.playhead.progress);
+          selfObj.goToStage(closestCard);
+        }
       });
     }
 
@@ -108,7 +112,6 @@ class JourneyTimeline {
     this.cards.forEach((card, i) => {
       const diff = i - clampedProgress; // slot distance from focal center
 
-      // Calculate 3D transforms based on exact distance from center
       const absDiff = Math.abs(diff);
       const scale = gsap.utils.clamp(0.65, 1.05, 1.05 - absDiff * 0.18);
       const opacity = gsap.utils.clamp(0, 1, 1 - absDiff * 0.45);
