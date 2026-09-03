@@ -5,6 +5,8 @@ require_once __DIR__ . '/WhatsAppService.php';
 require_once __DIR__ . '/EmailService.php';
 require_once dirname(__DIR__) . '/db.php';
 require_once dirname(__DIR__) . '/activity-logger.php';
+require_once dirname(__DIR__) . '/rate_limiter.php';
+enforcePhpRateLimit(15, 60);
 
 
 date_default_timezone_set('Asia/Kolkata');

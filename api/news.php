@@ -11,6 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
+require_once __DIR__ . '/rate_limiter.php';
+enforcePhpRateLimit(60, 60);
+
 // Default Open-Access Health & Science News Feed Endpoints
 $defaultEndpoints = [
     'https://saurav.tech/NewsAPI/top-headlines/category/health/in.json',

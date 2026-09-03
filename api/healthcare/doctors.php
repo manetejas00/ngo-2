@@ -12,6 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/db.php';
+require_once dirname(__DIR__) . '/rate_limiter.php';
+enforcePhpRateLimit(60, 60);
 
 try {
     $pdo = getDatabaseConnection();

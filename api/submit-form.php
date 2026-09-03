@@ -14,6 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
+require_once __DIR__ . '/rate_limiter.php';
+enforcePhpRateLimit(15, 60);
+
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/activity-logger.php';
 
