@@ -61,10 +61,11 @@ class JourneyTimeline {
       }
     });
 
-    // Touch & Mouse Dragging Support
+    // Touch & Mouse Dragging Support with native vertical page scrolling on mobile
     const selfObj = this;
     Draggable.create(this.track, {
       type: "x",
+      allowNativeTouchScrolling: true,
       onPress() {
         selfObj.startProgress = selfObj.playhead.progress;
       },
