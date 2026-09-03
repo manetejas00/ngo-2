@@ -53,11 +53,11 @@ if (empty($email)) {
  * Sends authenticated SSL SMTP emails directly via Hostinger (smtp.hostinger.com:465)
  */
 function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
-    $host = 'ssl://smtp.hostinger.com';
-    $port = 465;
-    $user = 'info@test.avinyacarefoundation.org';
-    $pass = '@qLVTyL|J5';
-    $from = 'info@test.avinyacarefoundation.org';
+    $host = 'ssl://' . preg_replace('#^ssl://#', '', getenv('SMTP_HOST') ?: 'smtp.hostinger.com');
+    $port = (int) (getenv('SMTP_PORT') ?: 465);
+    $user = getenv('SMTP_USER') ?: 'info@test.avinyacarefoundation.org';
+    $pass = getenv('SMTP_PASS') ?: '';
+    $from = getenv('SMTP_FROM') ?: $user;
     $fromName = 'Avinya Care Foundation';
     $boundary = '=_AvinyaLogo_' . bin2hex(random_bytes(8));
     $logoPath = dirname(__DIR__) . '/assets/logo.png';

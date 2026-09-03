@@ -617,6 +617,15 @@ function excelColumn(int $number): string {
     return $name;
 }
 
+function sanitizeFormulaString(string $value): string {
+    if ($value === '') return '';
+    $firstChar = substr($value, 0, 1);
+    if (in_array($firstChar, ['=', '+', '-', '@', "\t", "\r"], true)) {
+        return "'" . $value;
+    }
+    return $value;
+}
+
 function worksheetXml(array $bookings): string {
     $headers = ['Booking ID','Customer Name','Email','Phone','Doctor','Original Booking Date','Original Slot','Current Booking Date','Current Slot','Status','Created At','Updated At','Cancelled At','Completed At','Rescheduled At','Notes','WhatsApp Confirmation','WhatsApp Status','WhatsApp Sent At','WhatsApp Provider','WhatsApp Message ID','WhatsApp Last Error','WhatsApp History','Email Fallback','Email Status','Email Sent At','Email Last Error','Email History','Reschedule History','Audit History'];
     $rows = [$headers];
@@ -639,7 +648,8 @@ function worksheetXml(array $bookings): string {
         foreach ($row as $columnIndex => $value) {
             $ref = excelColumn($columnIndex + 1) . ($rowIndex + 1);
             $style = $rowIndex === 0 ? ' s="1"' : '';
-            $cells .= '<c r="' . $ref . '" t="inlineStr"' . $style . '><is><t>' . xmlEscape((string) $value) . '</t></is></c>';
+            $safeVal = $rowIndex === 0 ? (string)$value : sanitizeFormulaString((string)$value);
+            $cells .= '<c r="' . $ref . '" t="inlineStr"' . $style . '><is><t>' . xmlEscape($safeVal) . '</t></is></c>';
         }
         $sheetRows .= '<row r="' . ($rowIndex + 1) . '">' . $cells . '</row>';
     }
@@ -778,21 +788,80 @@ try {
             'message' => $notificationStatus === 'already_sent' ? 'WhatsApp confirmation was already sent; no duplicate was created.' : ($sent ? 'WhatsApp confirmation resent.' : 'Booking remains confirmed, but WhatsApp could not be sent.')
         ]);
     }
+function getAuthSessionUser(): ?array {
+    ini_set('session.use_strict_mode', '1');
+    session_set_cookie_params(['secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly' => true, 'samesite' => 'Strict', 'path' => '/']);
+    if (session_status() === PHP_SESSION_NONE) { session_start(); }
+
+    $headers = getallheaders();
+    $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    $token = '';
+    if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+        $token = trim($matches[1]);
+    }
+    if (!$token) {
+        $token = trim((string) ($_GET['token'] ?? $_POST['token'] ?? ''));
+    }
+
+    $isAuthenticated = !empty($_SESSION['admin_token']) && $token !== '' && hash_equals((string) $_SESSION['admin_token'], $token);
+    if (!$isAuthenticated) return null;
+
+    return [
+        'role' => strtolower((string) ($_SESSION['user_role'] ?? 'user')),
+        'doctorId' => $_SESSION['user_doc_id'] ?? null,
+        'providerId' => $_SESSION['user_prov_id'] ?? null,
+        'email' => strtolower((string) ($_SESSION['user_email'] ?? ''))
+    ];
+}
+
     if (($method === 'PATCH' || $method === 'POST') && $action === 'status') {
+        $authUser = getAuthSessionUser();
+        if (!$authUser) {
+            respondJson(401, ['success' => false, 'status' => 'error', 'message' => 'Authentication required to update appointment status.']);
+        }
         $data = requestBody();
         $id = trim((string) ($_GET['id'] ?? $data['id'] ?? ''));
+        $existing = findBooking($id);
+        if (!$existing) {
+            respondJson(404, ['success' => false, 'status' => 'error', 'message' => 'Booking not found.']);
+        }
+        if ($authUser['role'] === 'doctor' && ($existing['doctorId'] ?? '') !== $authUser['doctorId']) {
+            respondJson(403, ['success' => false, 'status' => 'error', 'message' => 'Forbidden: Doctors can only manage their own appointments.']);
+        }
+        if ($authUser['role'] === 'user' && strtolower((string) ($existing['patientEmail'] ?? '')) !== $authUser['email']) {
+            respondJson(403, ['success' => false, 'status' => 'error', 'message' => 'Forbidden: You do not have permission to manage this booking.']);
+        }
+
         $booking = updateBooking($id, $data);
         respondJson(200, ['success' => true, 'status' => 'ok', 'booking' => $booking, 'appointment' => $booking]);
     }
     if ($method === 'GET' && $action === 'list') {
+        $authUser = getAuthSessionUser();
+        if (!$authUser) {
+            respondJson(401, ['success' => false, 'status' => 'error', 'message' => 'Authentication required to view doctor appointments.']);
+        }
         $all = readLedger();
-        $filtered = filteredBookings($all, $_GET);
+        $queryParams = $_GET;
+        if ($authUser['role'] === 'doctor' && !empty($authUser['doctorId'])) {
+            $queryParams['doctorId'] = $authUser['doctorId'];
+        } elseif ($authUser['role'] === 'user' && !empty($authUser['email'])) {
+            $all = array_values(array_filter($all, fn($b) => strtolower((string)($b['patientEmail'] ?? '')) === $authUser['email']));
+        }
+        $filtered = filteredBookings($all, $queryParams);
         respondJson(200, ['success' => true, 'status' => 'ok', 'bookings' => $filtered, 'appointments' => $filtered, 'count' => count($filtered), 'total' => count($all)]);
     }
     if ($method === 'GET' && $action === 'export') {
+        $authUser = getAuthSessionUser();
+        if (!$authUser || !in_array($authUser['role'], ['admin', 'manager'], true)) {
+            respondJson(403, ['success' => false, 'status' => 'error', 'message' => 'Forbidden: Export requires admin authorization.']);
+        }
         exportWorkbook(readLedger());
     }
     if ($method === 'GET' && $action === 'export_filtered') {
+        $authUser = getAuthSessionUser();
+        if (!$authUser || !in_array($authUser['role'], ['admin', 'manager'], true)) {
+            respondJson(403, ['success' => false, 'status' => 'error', 'message' => 'Forbidden: Export requires admin authorization.']);
+        }
         exportWorkbook(filteredBookings(readLedger(), $_GET));
     }
     respondJson(404, ['success' => false, 'status' => 'error', 'message' => 'Booking API action not found.']);

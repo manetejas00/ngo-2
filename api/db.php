@@ -58,7 +58,7 @@ function getDatabaseConnection(): ?PDO {
     $port = (int) getDbEnv('DB_PORT', '3306');
     $dbname = getDbEnv('DB_NAME', 'u382139760_ngo');
     $user = getDbEnv('DB_USER', 'u382139760_ngo');
-    $pass = getDbEnv('DB_PASS', '@qLVTyL|J5');
+    $pass = getDbEnv('DB_PASS', '');
 
     if ($dbname === '' || $user === '') return null;
 

@@ -14,10 +14,46 @@ require_once __DIR__ . '/activity-logger.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
+        ini_set('session.use_strict_mode', '1');
+        session_set_cookie_params(['secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly' => true, 'samesite' => 'Strict', 'path' => '/']);
+        if (session_status() === PHP_SESSION_NONE) { session_start(); }
+
+        $headers = getallheaders();
+        $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+        $token = '';
+        if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+            $token = trim($matches[1]);
+        }
+        if (!$token) {
+            $token = trim((string) ($_GET['token'] ?? ''));
+        }
+
+        $isAuthenticated = !empty($_SESSION['admin_token']) && $token !== '' && hash_equals((string) $_SESSION['admin_token'], $token);
+        if (!$isAuthenticated) {
+            http_response_code(401);
+            echo json_encode(['status' => 'error', 'message' => 'Authentication required to view diagnostic bookings.']);
+            exit;
+        }
+
+        $userRole = strtolower((string) ($_SESSION['user_role'] ?? 'user'));
+        $userProvId = $_SESSION['user_prov_id'] ?? null;
+        $userEmail = strtolower((string) ($_SESSION['user_email'] ?? ''));
+
         $pdo = getDatabaseConnection();
         $bookings = [];
         if ($pdo !== null) {
-            $rows = $pdo->query("SELECT * FROM `diagnostic_bookings` ORDER BY `created_at` DESC LIMIT 500")->fetchAll();
+            if (in_array($userRole, ['admin', 'manager'], true)) {
+                $rows = $pdo->query("SELECT * FROM `diagnostic_bookings` ORDER BY `created_at` DESC LIMIT 500")->fetchAll();
+            } elseif ($userRole === 'diagnostic_provider' && !empty($userProvId)) {
+                $stmt = $pdo->prepare("SELECT b.* FROM `diagnostic_bookings` b LEFT JOIN `diagnostic_tests` t ON b.test_id = t.test_id WHERE b.provider_id = :p_id OR t.provider_id = :p_id ORDER BY b.created_at DESC LIMIT 200");
+                $stmt->execute([':p_id' => $userProvId]);
+                $rows = $stmt->fetchAll();
+            } else {
+                $stmt = $pdo->prepare("SELECT * FROM `diagnostic_bookings` WHERE LOWER(`patient_email`) = :email ORDER BY `created_at` DESC LIMIT 100");
+                $stmt->execute([':email' => $userEmail]);
+                $rows = $stmt->fetchAll();
+            }
+
             foreach ($rows as $row) {
                 $bookings[] = [
                     'id' => $row['booking_id'], 'testId' => $row['test_id'], 'testName' => $row['test_name'],
