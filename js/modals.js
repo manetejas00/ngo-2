@@ -48,9 +48,9 @@ class ModalManager {
   openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
-      // Restore template if container exists
+      // Restore template if container exists (except dynamic modals like story-modal and guide-modal)
       const container = modal.querySelector('.modal-container');
-      if (container && this.templates[modalId]) {
+      if (container && this.templates[modalId] && modalId !== 'story-modal' && modalId !== 'guide-modal') {
         container.innerHTML = this.templates[modalId];
       }
 
