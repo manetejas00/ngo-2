@@ -77,7 +77,11 @@ html {
 body {
   overflow-x: hidden;
   line-height: 1.6;
-  background-color: var(--background);
+  background-color: #0A0A0A !important;
+}
+
+.pin-spacer {
+  background-color: #0A0A0A !important;
 }
 
 /* Custom Scrollbar */
@@ -898,12 +902,7 @@ button {
   padding: 1.85rem 1.55rem 1.65rem;
   cursor: pointer;
   transform-style: preserve-3d;
-  transition: 
-    transform 600ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 450ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 450ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 450ms cubic-bezier(0.16, 1, 0.3, 1),
-    background 450ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1), border-color 450ms, box-shadow 450ms, opacity 450ms;
   position: relative;
   user-select: none;
   opacity: 0.9;
@@ -1344,84 +1343,104 @@ button {
    6. CONTINUUM OF CARE — NESTJS 3D OVERLAPPING CARD DECK CAROUSEL (#journey)
    ========================================================================== */
 .section-journey {
-  padding: 9rem 5% 8rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 5% 2.5rem;
   background-color: var(--black) !important;
   color: #FFFFFF !important;
   position: relative;
   overflow: hidden;
+  border: none !important;
+  outline: 1px solid var(--black);
+  margin-bottom: -1px;
+  box-sizing: border-box;
 }
 
 .journey-wrapper {
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .nestjs-split-header {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  gap: 3.5rem;
+  gap: 2.5rem;
   align-items: flex-end;
-  margin-bottom: 4rem;
+  margin-bottom: 1.5rem;
 }
 
 .nestjs-card-deck-viewport {
+  position: relative;
   width: 100%;
-  overflow: hidden;
-  padding: 2.5rem 0 3.5rem;
-  perspective: 1200px;
+  max-width: 1400px;
+  height: 440px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1400px;
+  overflow: visible;
+  padding: 0;
 }
 
 .nestjs-card-deck-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
-  gap: 2rem;
-  transition: transform 0.6s var(--ease-out-expo);
-  padding: 1rem;
+  justify-content: center;
+  align-items: center;
 }
 
 .nestjs-deck-card {
-  flex: 0 0 min(370px, 82vw);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(340px, 82vw);
+  height: 390px;
+  margin: 0;
+  transform: translate(-50%, -50%);
   background: linear-gradient(145deg, #1C1C1C 0%, #111111 100%);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 28px;
-  padding: 3.2rem 2.4rem;
+  border-radius: 24px;
+  padding: 1.8rem 1.6rem;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  position: relative;
-  transition: transform 0.5s var(--ease-out-expo), border-color 0.5s, box-shadow 0.5s, opacity 0.5s;
-  cursor: pointer;
+  cursor: grab;
+  user-select: none;
   transform-style: preserve-3d;
-  min-height: 420px;
-}
-
-/* Stacked 3D Overlapping Depth Effect */
-.nestjs-deck-card {
-  transform: scale(0.92) rotateY(-5deg);
-  opacity: 0.65;
+  will-change: transform, opacity;
+  box-sizing: border-box;
 }
 
 .nestjs-deck-card.active,
 .nestjs-deck-card:hover {
-  transform: scale(1.04) translateY(-14px) rotateY(0deg);
-  opacity: 1;
   border-color: var(--brand);
-  box-shadow: 0 30px 70px rgba(244, 117, 40, 0.35);
-  z-index: 10;
+  box-shadow: 0 30px 70px rgba(244, 117, 40, 0.45);
+  z-index: 100 !important;
 }
 
 .card-3d-icon {
-  width: 68px;
-  height: 68px;
-  border-radius: 18px;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--brand);
-  margin-bottom: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  margin-bottom: 0.85rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   transition: transform var(--transition-fast), background var(--transition-fast);
 }
 
@@ -1437,21 +1456,21 @@ button {
   color: var(--brand);
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .card-deck-title {
-  font-size: 1.65rem;
+  font-size: 1.45rem;
   font-weight: 800;
   color: #FFFFFF;
   line-height: 1.2;
-  margin-bottom: 1rem;
+  margin-bottom: 0.65rem;
 }
 
 .card-deck-desc {
-  font-size: 1.02rem;
+  font-size: 0.95rem;
   color: var(--text-light-muted);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 /* Controls */
@@ -1459,8 +1478,10 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
+  gap: 1.25rem;
   margin-top: 2rem;
+  position: relative;
+  z-index: 200;
 }
 
 .deck-arrow-btn {
@@ -1512,6 +1533,10 @@ button {
   padding: 9rem 5% 8rem;
   background-color: var(--black) !important;
   color: #FFFFFF !important;
+  position: relative;
+  border: none !important;
+  outline: 1px solid var(--black);
+  margin-top: -1px;
 }
 
 .stories-grid {
@@ -2818,9 +2843,77 @@ textarea:focus {
     width: 100%;
     justify-content: center;
   }
+
+  /* Section 6: Continuum of Care (#journey) Mobile & Tablet Responsive */
+  .section-journey {
+    min-height: auto;
+    padding: 4.5rem 4% 3rem;
+  }
+  .nestjs-split-header {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .nestjs-card-deck-viewport {
+    height: 390px;
+  }
+  .nestjs-deck-card {
+    width: min(310px, 86vw);
+    height: 360px;
+    padding: 1.6rem 1.4rem;
+    border-radius: 20px;
+  }
+  .card-3d-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.8rem;
+  }
+  .card-deck-title {
+    font-size: 1.35rem;
+    margin-bottom: 0.5rem;
+  }
+  .card-deck-desc {
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+  .nestjs-deck-controls {
+    margin-top: 1.5rem;
+    gap: 1rem;
+  }
 }
 
 @media (max-width: 640px) {
+  /* Section 6 (#journey) Mobile Small */
+  .nestjs-card-deck-viewport {
+    height: 370px;
+  }
+  .nestjs-deck-card {
+    width: min(285px, 88vw);
+    height: 345px;
+    padding: 1.4rem 1.2rem;
+  }
+  .card-3d-icon {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 0.6rem;
+  }
+  .card-step-num {
+    font-size: 0.75rem;
+  }
+  .card-deck-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.35rem;
+  }
+  .card-deck-desc {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .deck-arrow-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+
   .hero-scroll-container {
     height: 350vh;
   }
