@@ -1,185 +1,65 @@
 {
-  "timestamp": 1788688177927,
+  "timestamp": 1788689548257,
   "articles": [
     {
-      "id": "gemini-ai-topic-1788688177927-1-9qi9",
-      "title": "CRISPR-Guided Nanoparticles Deliver Precision Chemotherapy Directly into Solid Tumors",
-      "description": "Bioengineered lipid nanoparticles navigate bloodstream barriers to deliver targeted cytotoxic payloads exclusively into tumor microenvironments, sparing healthy surrounding tissues.",
-      "category": "Cancer Research",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T09:49:37.927Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788688177927-2-2pdc",
-      "title": "Liquid Biopsy Multi-Cancer Early Detection Blood Panels Approved for Clinical Pilot Studies",
-      "description": "High-throughput sequencing analyzing cell-free circulating tumor DNA (ctDNA) achieves over 92% specificity across 12 common solid cancer types before physical symptoms emerge.",
-      "category": "Early Detection",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T09:19:37.927Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788688177927-3-c57r",
-      "title": "Grassroots Caregiver Navigation Network Drastically Shortens Time-to-Treatment in Mumbai–Virar",
-      "description": "Community caregiver navigators guide newly diagnosed patients through biopsy confirmation, government financial schemes, and specialist appointments within 10 days of first consultation.",
-      "category": "Care",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T08:49:37.927Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788688177927-4-c0om",
-      "title": "AI-Enhanced Ultrasound Triaging Identifies Suspicious Breast Masses with 98% Clinical Concordance",
-      "description": "Point-of-care ultrasound devices integrated with real-time deep learning neural networks assist primary care physicians in differentiating benign cysts from malignant lesions instantly.",
-      "category": "Early Detection",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T08:19:37.927Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788688177927-5-wccx",
-      "title": "AI-Powered Genomic Screening Identifies High-Risk Breast Cancer Biomarkers 3 Years Earlier",
-      "description": "Multi-center clinical trials utilizing machine learning predictive models reveal microscopic cellular mutations years before physical mammogram detection, enabling targeted preventive interventions.",
-      "category": "Cancer Research",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T07:49:37.927Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788688177918-1-yrfv",
-      "title": "AI-Powered Genomic Screening Identifies High-Risk Breast Cancer Biomarkers 3 Years Earlier",
-      "description": "Multi-center clinical trials utilizing machine learning predictive models reveal microscopic cellular mutations years before physical mammogram detection, enabling targeted preventive interventions.",
-      "category": "Cancer Research",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T09:49:37.918Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788688177918-2-3j44",
-      "title": "National Cervical Cancer Elimination Drive Introduces Single-Dose HPV Vaccination Protocol",
-      "description": "Public health authorities and partner clinics adopt streamlined single-dose immunization schedules for adolescent girls, establishing robust lifelong immunity against high-risk oncogenic HPV strains.",
-      "category": "Prevention",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T09:19:37.918Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788688177918-3-nooa",
-      "title": "Mobile AI Diagnostic Vans Expand Early Oral & Cervical Screening Across Maharashtra",
-      "description": "Avinya Care Foundation and regional health networks deploy solar-powered diagnostic vans equipped with portable colposcopy and AI-assisted oral visual examination tools for underserved rural communities.",
-      "category": "Early Detection",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T08:49:37.918Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788688177918-4-urpu",
+      "id": "gemini-ai-topic-1788689557001-2-yqdf",
       "title": "Structured Anti-Inflammatory Nutrition & Mindfulness Protocol Reduces Chemotherapy Fatigue by 40%",
       "description": "Clinical studies across tertiary oncology centers highlight that personalized plant-based anti-inflammatory nutrition paired with supervised light exercise significantly accelerates post-chemotherapy recovery.",
       "category": "Care",
       "source": "Gemini AI Medical Engine",
       "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T08:19:37.918Z",
+      "publishedAt": "2026-09-06T09:42:37.001Z",
       "isAIGenerated": true,
       "url": "#",
       "urlToImage": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80"
     },
     {
-      "id": "gemini-ai-topic-1788688177918-5-hhfv",
-      "title": "Grassroots Caregiver Navigation Network Drastically Shortens Time-to-Treatment in Mumbai–Virar",
-      "description": "Community caregiver navigators guide newly diagnosed patients through biopsy confirmation, government financial schemes, and specialist appointments within 10 days of first consultation.",
-      "category": "Care",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T07:49:37.918Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788688177537-2-rwkf",
-      "title": "CRISPR-Guided Nanoparticles Deliver Precision Chemotherapy Directly into Solid Tumors",
-      "description": "Bioengineered lipid nanoparticles navigate bloodstream barriers to deliver targeted cytotoxic payloads exclusively into tumor microenvironments, sparing healthy surrounding tissues.",
-      "category": "Cancer Research",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T09:19:37.537Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788688177537-3-4obs",
-      "title": "National Cervical Cancer Elimination Drive Introduces Single-Dose HPV Vaccination Protocol",
-      "description": "Public health authorities and partner clinics adopt streamlined single-dose immunization schedules for adolescent girls, establishing robust lifelong immunity against high-risk oncogenic HPV strains.",
-      "category": "Prevention",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T08:49:37.537Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788688177537-4-jlb8",
+      "id": "gemini-ai-topic-1788689557001-3-ir84",
       "title": "Liquid Biopsy Multi-Cancer Early Detection Blood Panels Approved for Clinical Pilot Studies",
       "description": "High-throughput sequencing analyzing cell-free circulating tumor DNA (ctDNA) achieves over 92% specificity across 12 common solid cancer types before physical symptoms emerge.",
       "category": "Early Detection",
       "source": "Gemini AI Medical Engine",
       "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T08:19:37.537Z",
+      "publishedAt": "2026-09-06T09:12:37.001Z",
       "isAIGenerated": true,
       "url": "#",
       "urlToImage": "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
     },
     {
-      "id": "gemini-ai-topic-1788688177537-5-40sj",
-      "title": "AI-Powered Genomic Screening Identifies High-Risk Breast Cancer Biomarkers 3 Years Earlier",
-      "description": "Multi-center clinical trials utilizing machine learning predictive models reveal microscopic cellular mutations years before physical mammogram detection, enabling targeted preventive interventions.",
-      "category": "Cancer Research",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T07:49:37.537Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788688177537-1-klw3",
+      "id": "gemini-ai-topic-1788689557001-4-1hu4",
       "title": "Grassroots Caregiver Navigation Network Drastically Shortens Time-to-Treatment in Mumbai–Virar",
       "description": "Community caregiver navigators guide newly diagnosed patients through biopsy confirmation, government financial schemes, and specialist appointments within 10 days of first consultation.",
       "category": "Care",
       "source": "Gemini AI Medical Engine",
       "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T09:49:37.537Z",
+      "publishedAt": "2026-09-06T08:42:37.001Z",
       "isAIGenerated": true,
       "url": "#",
       "urlToImage": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "gemini-ai-topic-1788689557001-5-6zif",
+      "title": "Digital Palliative & Tele-Oncology Clinics Connect Homebound Patients with Oncology Specialists",
+      "description": "24/7 tele-oncology support platforms provide symptom management, dosage adjustments, and psychosocial counseling directly into patients' living rooms across Maharashtra.",
+      "category": "Care",
+      "source": "Gemini AI Medical Engine",
+      "apiProvider": "Gemini AI Engine",
+      "publishedAt": "2026-09-06T08:12:37.001Z",
+      "isAIGenerated": true,
+      "url": "#",
+      "urlToImage": "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "gemini-ai-topic-1788689557001-1-6vt9",
+      "title": "National Cervical Cancer Elimination Drive Introduces Single-Dose HPV Vaccination Protocol",
+      "description": "Public health authorities and partner clinics adopt streamlined single-dose immunization schedules for adolescent girls, establishing robust lifelong immunity against high-risk oncogenic HPV strains.",
+      "category": "Prevention",
+      "source": "Gemini AI Medical Engine",
+      "apiProvider": "Gemini AI Engine",
+      "publishedAt": "2026-09-06T10:12:37.001Z",
+      "isAIGenerated": true,
+      "url": "#",
+      "urlToImage": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80"
     },
     {
       "id": "cancer-news-1",
@@ -187,7 +67,7 @@
       "description": "New clinical research demonstrates how targeted immunotherapy approaches can significantly enhance survival outcomes and minimize side effects for early-stage oncology patients.",
       "category": "Cancer Research",
       "source": "National Cancer Institute",
-      "publishedAt": "2026-09-06T07:49:31.705Z",
+      "publishedAt": "2026-09-06T08:07:36.382Z",
       "url": "https://www.cancer.gov/news-events",
       "urlToImage": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
@@ -198,7 +78,7 @@
       "description": "Community health initiatives and mobile diagnostic clinics reach underserved populations, empowering individuals to take proactive steps in routine breast and colorectal screenings.",
       "category": "Awareness & Detection",
       "source": "World Health Organization",
-      "publishedAt": "2026-09-06T04:49:31.706Z",
+      "publishedAt": "2026-09-06T05:07:36.384Z",
       "url": "https://www.who.int/health-topics/cancer",
       "urlToImage": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
@@ -209,7 +89,7 @@
       "description": "Liquid biopsy technology shows high accuracy in detecting circulating tumor DNA across multiple cancer types, offering hope for earlier clinical diagnosis.",
       "category": "Early Detection",
       "source": "American Cancer Society",
-      "publishedAt": "2026-09-05T19:49:31.706Z",
+      "publishedAt": "2026-09-05T20:07:36.384Z",
       "url": "https://www.cancer.org/research",
       "urlToImage": "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
@@ -220,7 +100,7 @@
       "description": "Integrative health guidelines emphasize tailored physical activity and clinical nutrition plans to enhance energy levels and reduce recurrence risk post-treatment.",
       "category": "Survivorship",
       "source": "Harvard Health Publishing",
-      "publishedAt": "2026-09-05T09:49:31.706Z",
+      "publishedAt": "2026-09-05T10:07:36.384Z",
       "url": "https://www.health.harvard.edu",
       "urlToImage": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
@@ -231,13 +111,13 @@
       "description": "Non-profit partnerships deploy portable ultrasound and digital mammography units to ensure geographic location does not limit life-saving early detection.",
       "category": "Healthcare Policy",
       "source": "Global Health Journal",
-      "publishedAt": "2026-09-05T03:49:31.706Z",
+      "publishedAt": "2026-09-05T04:07:36.384Z",
       "url": "https://www.sciencedirect.com/journal/global-health-journal",
       "urlToImage": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
     },
     {
-      "id": "api-news-cp53k-0",
+      "id": "api-news-49hvd-0",
       "title": "Long Covid More Severe In Women Than Men, Suggests Study",
       "description": "The study found that 91% of patients, who were followed up for five months on average, continued to experience Covid-19 symptoms. Breathlessness was the most common symptom of long Covid-19, followed by fatigue",
       "category": "Global Health",
@@ -249,7 +129,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-18ylt-2",
+      "id": "api-news-p07b6-2",
       "title": "Why We Can't 'Boost' Our Way Out of the COVID-19 Pandemic in the Long Term – The Wire Science",
       "description": "While current vaccines are effective at preventing severe disease, the next phase of vaccine development will need to focus on triggering long-lived antibody response.",
       "category": "Global Health",
@@ -261,7 +141,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-32v10-3",
+      "id": "api-news-wg6qm-3",
       "title": "Let's manage pain, learn about 'Pain Medicine'",
       "description": "Pain Medicine is a relatively new medical specialty that deals with the comprehensive management of chronic pain. Chronic pain refers to any pain condition that lasts more than 3 months.",
       "category": "Global Health",
@@ -273,7 +153,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-a2d8i-5",
+      "id": "api-news-r3pyx-5",
       "title": "Good HDL cholesterol may keep Alzheimer's away: study",
       "description": "Having good cholesterol or high-density lipoprotein (HDL) in the body is essential to health as it may protect the brain and keep Alzheimer's disease at bay, according to a recent study. Researchers from University of Southern California's (USC) Keck School o…",
       "category": "Global Health",
@@ -285,7 +165,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-p1v10-6",
+      "id": "api-news-8flr9-6",
       "title": "CDC confirms 4 Americans got Coronavirus from Mink; here is all you need to know about the first animal-to-human transmission of COVID virus",
       "description": "The US health agency recently revealed that a variant of COVID witnessed majorly in mink in 2020 had infected at least four Americans.",
       "category": "Global Health",
@@ -297,7 +177,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-ejkbt-1",
+      "id": "api-news-szlvu-1",
       "title": "Study evaluates the use of a diagnostic code for Long COVID",
       "description": "Researchers evaluated the use of U09.9, a CD-10-CM code described as 'Post coronavirus disease 2019 (COVID-19) condition, unspecified' for post-acute COVID-19 sequelae (long COVID).",
       "category": "Global Health",
@@ -309,7 +189,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-z0las-8",
+      "id": "api-news-tvxj7-8",
       "title": "Johns Hopkins University: Mediterranean-Style Diet Further Linked to Reduced Risk of Preeclampsia in Pregnant Women of All Races",
       "description": "A new Johns Hopkins Medicine study that surveyed a racially diverse group of more than 8,000 women has added to evidence that following a Mediterranean-style diet could lower the risk of preeclampsia by at least 20%.Preeclampsia is a potentially leth",
       "category": "Prevention",
@@ -321,7 +201,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-atg7p-9",
+      "id": "api-news-55cn7-9",
       "title": "Johns Hopkins University: Lab Grown, Self-Sustainable Muscle Cells Repair Muscle Injury and Disease, Mouse Study Shows",
       "description": "In proof-of-concept experiments, Johns Hopkins Medicine scientists say they have successfully cultivated human muscle stem cells capable of renewing themselves and repairing muscle tissue damage in mice, potentially advancing efforts to treat muscle",
       "category": "Global Health",
@@ -333,7 +213,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-5sqrb-11",
+      "id": "api-news-mrucy-11",
       "title": "Bacteria in urine may signal aggressive prostate cancer: Study",
       "description": "Researchers in the UK have identified five types of bacteria in urine which may be linked to aggressive prostate cancer. The findings, published in the journal European Urology Oncology, could help pave the way for treatments that could target these particula…",
       "category": "Cancer Research",
@@ -345,7 +225,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-4y4iu-12",
+      "id": "api-news-h256n-12",
       "title": "Genetically modified mosquitoes for controlling vector-borne diseases? Successful trial gives hope",
       "description": "The findings were achieved after a decade of fight for public acceptance, regulatory approvals",
       "category": "Global Health",
@@ -357,7 +237,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-jzol7-4",
+      "id": "api-news-3r07r-4",
       "title": "newsGP",
       "description": "People using antidepressants to treat depression have similar outcomes to those who do not, new research suggests.",
       "category": "Global Health",
@@ -369,7 +249,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-2xez6-15",
+      "id": "api-news-fxm1a-15",
       "title": "Intermittent fasting is not for all, experts list health problems that could worsen on this diet",
       "description": "Intermittent fasting decreases glucose concentration and increases fatty acid oxidation which helps the body break down stored fats.",
       "category": "Prevention",
@@ -381,7 +261,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-52f0m-16",
+      "id": "api-news-cgqb8-16",
       "title": "Worried About Your Family’s Health Due to White Sugar? Here Are Some Amazing Healthy Alternatives",
       "description": "To help you make better diet choices and yet continue enjoying the same sweetness, here are 5 healthy substitutes to processed sugar that not only make your food tasty but also have their own health benefits.",
       "category": "Global Health",
@@ -393,7 +273,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-mijtx-17",
+      "id": "api-news-6yzeh-17",
       "title": "Liver cancer is increasing because of unhealthy lifestyle – Mysuru Today",
       "description": "Prime News, National, Karnataka, Health, Disease, Mysuru, April 21:- Liver cancer is rising because of an unhealthy lifestyle, said Dr M S Vishveshwara, Chief Radiation Oncologist and Medical Superint",
       "category": "Cancer Research",

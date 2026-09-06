@@ -180,7 +180,28 @@ if ($action === 'save_doctor') {
     $rating = (float) ($doc['rating'] ?? 4.95);
     $revs = (int) ($doc['reviews_count'] ?? $doc['reviewsCount'] ?? 100);
     $badge = $doc['badge'] ?? 'Medical Specialist';
-    $avatar = $doc['avatar'] ?? 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80';
+    $avatar = $doc['avatar'] ?? '/assets/doctors/default-doctor.jpg';
+    
+    // Process uploaded photoBase64 if provided
+    $photoData = $doc['photoBase64'] ?? $doc['image'] ?? null;
+    if ($photoData && is_string($photoData) && str_starts_with($photoData, 'data:image/')) {
+        $doctorDir = __DIR__ . '/../assets/doctors';
+        if (!is_dir($doctorDir)) {
+            @mkdir($doctorDir, 0755, true);
+        }
+        if (preg_match('/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/', $photoData, $matches)) {
+            $ext = $matches[1] === 'jpeg' ? 'jpg' : $matches[1];
+            $decoded = base64_decode($matches[2]);
+            if ($decoded !== false) {
+                $safeFilename = 'doc_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $docId) . '_' . time() . '.' . $ext;
+                $targetPath = $doctorDir . '/' . $safeFilename;
+                if (file_put_contents($targetPath, $decoded) !== false) {
+                    $avatar = '/assets/doctors/' . $safeFilename;
+                }
+            }
+        }
+    }
+    
     $about = $doc['about'] ?? '';
     $expert = is_array($doc['areasOfExpertise'] ?? null) ? $doc['areasOfExpertise'] : (is_string($doc['areas_of_expertise'] ?? null) ? json_decode($doc['areas_of_expertise'], true) : []);
     $langs = is_array($doc['languages'] ?? null) ? $doc['languages'] : (is_string($doc['languages'] ?? null) ? json_decode($doc['languages'], true) : ['English', 'Hindi']);

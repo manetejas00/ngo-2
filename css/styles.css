@@ -793,7 +793,7 @@ button {
    Apple-Grade Spacing, Cinematic Depth, Glassmorphic Cards & Atmospheric Lighting
    ========================================================================== */
 .section-nestjs-stack {
-  padding: 10rem 2% 10rem;
+  padding: 8rem 2% 8rem;
   background-color: #080A09 !important;
   background-image: 
     radial-gradient(ellipse 60% 45% at 75% 55%, rgba(244, 117, 40, 0.09) 0%, transparent 60%),
@@ -801,7 +801,9 @@ button {
     radial-gradient(circle at 50% 0%, rgba(98, 181, 159, 0.04) 0%, transparent 55%);
   color: #FFFFFF !important;
   position: relative;
-  overflow: visible;
+  overflow: hidden;
+  isolation: isolate;
+  z-index: 10;
 }
 
 .section-nestjs-stack::before {

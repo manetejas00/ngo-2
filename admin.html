@@ -1537,9 +1537,53 @@
             <label style="font-size: 12px; color: var(--text-muted);">Badge</label>
             <input type="text" id="docBadge" class="search-input" placeholder="Oncology Specialist">
           </div>
-          <div style="flex: 2;">
-            <label style="font-size: 12px; color: var(--text-muted);">Avatar Image URL</label>
-            <input type="url" id="docAvatar" class="search-input" placeholder="https://images.unsplash.com/...">
+        </div>
+
+        <!-- DOCTOR PHOTO / AVATAR SELECTOR & UPLOAD -->
+        <div style="border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; background: rgba(255, 255, 255, 0.02); display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label style="font-size: 13px; font-weight: 700; color: #5EEAD4; display: flex; align-items: center; gap: 6px; margin: 0;">
+              <span>📸 Doctor Profile Photo</span>
+              <span style="font-size: 11px; font-weight: normal; color: var(--text-muted);">(Upload image or pick Indian preset)</span>
+            </label>
+            <span id="docAvatarStatus" style="font-size: 11px; color: #34D399; font-weight: 600;"></span>
+          </div>
+          
+          <div style="display: flex; gap: 16px; align-items: center;">
+            <!-- Live Preview -->
+            <div style="position: relative; width: 80px; height: 80px; flex-shrink: 0; border-radius: 50%; overflow: hidden; border: 2px solid var(--brand); box-shadow: 0 0 15px rgba(244, 117, 40, 0.35); background: #141716; cursor: pointer;" onclick="document.getElementById('docAvatarFileInput').click()" title="Click to upload photo">
+              <img id="docAvatarPreview" src="/assets/doctors/default-doctor.jpg" alt="Doctor Preview" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/assets/doctors/default-doctor.jpg'">
+              <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.65); text-align: center; font-size: 9px; color: #FFF; padding: 2px 0;">Upload</div>
+            </div>
+
+            <!-- Upload / URL Controls -->
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                <input type="file" id="docAvatarFileInput" accept="image/jpeg,image/png,image/webp,image/jpg" style="display: none;" onchange="handleDoctorImageFileSelect(event)">
+                <button type="button" class="btn btn-teal" style="padding: 6px 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;" onclick="document.getElementById('docAvatarFileInput').click()">
+                  <span>📁 Upload Photo File</span>
+                </button>
+                <button type="button" class="btn btn-outline" id="btnTogglePresets" style="padding: 6px 12px; font-size: 12px;" onclick="toggleDoctorPresetGallery()">
+                  <span>👤 Indian Presets ▾</span>
+                </button>
+                <button type="button" class="btn btn-outline" style="padding: 6px 10px; font-size: 12px; color: #F87171; border-color: rgba(248,113,113,0.3);" onclick="removeDoctorAvatar()" title="Reset photo to default">
+                  <span>✕ Reset</span>
+                </button>
+              </div>
+
+              <div>
+                <input type="text" id="docAvatar" class="search-input" style="font-size: 12px; padding: 6px 10px;" placeholder="Image URL or path (e.g. /assets/doctors/doc-1-priya-sharma.jpg)" oninput="updateDoctorAvatarPreview(this.value)">
+                <input type="hidden" id="docAvatarBase64">
+              </div>
+            </div>
+          </div>
+
+          <!-- Preset Doctors Gallery Grid (Collapsible Quick Picker) -->
+          <div id="docPresetGallery" style="display: none; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px;">
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">Click an Indian doctor photo to select instantly:</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px;" id="docPresetGalleryGrid">
+              <!-- Dynamically populated / Preset photos -->
+            </div>
           </div>
         </div>
 
@@ -2951,7 +2995,7 @@
           <td><code style="color:#5EEAD4">${item.doctor_id || item.id}</code></td>
           <td>
             <div style="display:flex;align-items:center;gap:10px">
-              <img src="${item.avatar || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80'}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.2)">
+              <img src="${item.avatar || '/assets/doctors/default-doctor.jpg'}" alt="${escapeHtml(item.name)}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--brand);box-shadow:0 2px 8px rgba(0,0,0,0.4);" onerror="this.src='/assets/doctors/default-doctor.jpg'">
               <div>
                 <strong>${escapeHtml(item.name)}</strong><br>
                 <small style="color:var(--text-muted)">${escapeHtml(item.qualification || '')}</small>
@@ -3121,8 +3165,112 @@
       }
     }
 
+    const INDIAN_DOCTOR_PRESETS = [
+      { id: 'doc-1', name: 'Dr. Priya Sharma', role: 'Medical Oncology', avatar: '/assets/doctors/doc-1-priya-sharma.jpg' },
+      { id: 'doc-2', name: 'Dr. Rajesh K. Varma', role: 'Cardiology', avatar: '/assets/doctors/doc-2-rajesh-varma.jpg' },
+      { id: 'doc-3', name: 'Dr. Ananya Sengupta', role: 'Gynec Oncology', avatar: '/assets/doctors/doc-3-ananya-sengupta.jpg' },
+      { id: 'doc-4', name: 'Dr. Vikramaditya Rathore', role: 'Surgical Oncology', avatar: '/assets/doctors/doc-4-vikramaditya-rathore.jpg' },
+      { id: 'doc-5', name: 'Dr. Meera Nambiar', role: 'Internal Medicine', avatar: '/assets/doctors/doc-5-meera-nambiar.jpg' },
+      { id: 'doc-6', name: 'Dr. Siddharth Balakrishnan', role: 'Neurology', avatar: '/assets/doctors/doc-6-siddharth-balakrishnan.jpg' },
+      { id: 'doc-7', name: 'Dr. Kavita Joshi', role: 'Ophthalmology', avatar: '/assets/doctors/doc-7-kavita-joshi.jpg' },
+      { id: 'doc-8', name: 'Dr. Arvind Deshmukh', role: 'Orthopedic Oncology', avatar: '/assets/doctors/doc-8-arvind-deshmukh.jpg' },
+      { id: 'doc-9', name: 'Dr. Shalini Raman', role: 'Pediatric Oncology', avatar: '/assets/doctors/doc-9-shalini-raman.jpg' },
+      { id: 'doc-10', name: 'Dr. Farooq Qureshi', role: 'Dermatology & Skin', avatar: '/assets/doctors/doc-10-farooq-qureshi.jpg' }
+    ];
+
+    function initDoctorPresets() {
+      const grid = document.getElementById('docPresetGalleryGrid');
+      if (!grid) return;
+      grid.innerHTML = INDIAN_DOCTOR_PRESETS.map(p => `
+        <div onclick="selectPresetDoctorAvatar('${p.avatar}', '${escapeHtml(p.name)}')" style="cursor:pointer; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:6px; text-align:center; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--brand)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)'">
+          <img src="${p.avatar}" alt="${escapeHtml(p.name)}" style="width:48px; height:48px; border-radius:50%; object-fit:cover; margin:0 auto 4px; display:block; border:1px solid rgba(255,255,255,0.2);">
+          <div style="font-size:10px; font-weight:700; color:#FFF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(p.name)}</div>
+          <div style="font-size:9px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(p.role)}</div>
+        </div>
+      `).join('');
+    }
+
+    function toggleDoctorPresetGallery() {
+      const gallery = document.getElementById('docPresetGallery');
+      const btn = document.getElementById('btnTogglePresets');
+      if (!gallery) return;
+      const isHidden = gallery.style.display === 'none' || !gallery.style.display;
+      gallery.style.display = isHidden ? 'block' : 'none';
+      if (btn) btn.innerHTML = isHidden ? '<span>👤 Hide Presets ▴</span>' : '<span>👤 Indian Presets ▾</span>';
+      if (isHidden) initDoctorPresets();
+    }
+
+    function updateDoctorAvatarPreview(url) {
+      const preview = document.getElementById('docAvatarPreview');
+      const status = document.getElementById('docAvatarStatus');
+      const cleanUrl = (url || '').trim();
+      if (preview) {
+        preview.src = cleanUrl || '/assets/doctors/default-doctor.jpg';
+      }
+      if (status) {
+        status.innerText = cleanUrl ? '✓ Photo URL set' : '';
+      }
+    }
+
+    function selectPresetDoctorAvatar(avatarUrl, doctorName) {
+      document.getElementById('docAvatar').value = avatarUrl;
+      document.getElementById('docAvatarBase64').value = '';
+      updateDoctorAvatarPreview(avatarUrl);
+      const status = document.getElementById('docAvatarStatus');
+      if (status) status.innerText = `✓ Selected: ${doctorName}`;
+    }
+
+    function removeDoctorAvatar() {
+      document.getElementById('docAvatar').value = '/assets/doctors/default-doctor.jpg';
+      document.getElementById('docAvatarBase64').value = '';
+      document.getElementById('docAvatarFileInput').value = '';
+      updateDoctorAvatarPreview('/assets/doctors/default-doctor.jpg');
+      const status = document.getElementById('docAvatarStatus');
+      if (status) status.innerText = 'Reset to default';
+    }
+
+    function handleDoctorImageFileSelect(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file (JPEG, PNG, WebP).');
+        return;
+      }
+
+      if (file.size > 8 * 1024 * 1024) {
+        alert('Image file size exceeds 8MB limit. Please choose a smaller image.');
+        return;
+      }
+
+      const status = document.getElementById('docAvatarStatus');
+      if (status) status.innerText = 'Loading image...';
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Data = e.target.result;
+        document.getElementById('docAvatarBase64').value = base64Data;
+        document.getElementById('docAvatar').value = `[Uploaded File: ${file.name}]`;
+        const preview = document.getElementById('docAvatarPreview');
+        if (preview) preview.src = base64Data;
+        if (status) status.innerText = `✓ Ready to save (${(file.size / 1024).toFixed(1)} KB)`;
+      };
+      reader.onerror = function() {
+        alert('Failed to read image file.');
+      };
+      reader.readAsDataURL(file);
+    }
+
     function openDoctorModal(docId = null) {
       document.getElementById('doctorForm').reset();
+      document.getElementById('docAvatarBase64').value = '';
+      document.getElementById('docAvatarFileInput').value = '';
+      document.getElementById('docAvatarStatus').innerText = '';
+      const gallery = document.getElementById('docPresetGallery');
+      if (gallery) gallery.style.display = 'none';
+      const btn = document.getElementById('btnTogglePresets');
+      if (btn) btn.innerHTML = '<span>👤 Indian Presets ▾</span>';
+
       document.querySelectorAll('#docWorkingDays input').forEach(input => { input.checked = [1,2,3,4,5,6].includes(Number(input.value)); });
       document.getElementById('docScheduleStart').value = '09:00';
       document.getElementById('docScheduleEnd').value = '17:00';
@@ -3148,7 +3296,11 @@
           document.getElementById('docFee').value = doc.consultation_fee ?? doc.consultationFee ?? 0;
           document.getElementById('docFeeDisplay').value = doc.fee_display || doc.feeDisplay || '';
           document.getElementById('docBadge').value = doc.badge || '';
-          document.getElementById('docAvatar').value = doc.avatar || '';
+          
+          const currentAvatar = doc.avatar || '/assets/doctors/default-doctor.jpg';
+          document.getElementById('docAvatar').value = currentAvatar;
+          updateDoctorAvatarPreview(currentAvatar);
+
           document.getElementById('docAbout').value = doc.about || '';
           let schedule = doc.schedule || {};
           if (typeof schedule === 'string') {
@@ -3169,6 +3321,8 @@
         document.getElementById('docId').value = '';
         document.getElementById('docIdDisplay').value = '';
         document.getElementById('docIdDisplay').readOnly = false;
+        document.getElementById('docAvatar').value = '/assets/doctors/default-doctor.jpg';
+        updateDoctorAvatarPreview('/assets/doctors/default-doctor.jpg');
       }
       modal.style.display = 'flex';
     }
@@ -3181,6 +3335,13 @@
       event.preventDefault();
       const docId = document.getElementById('docId').value || document.getElementById('docIdDisplay').value.trim();
       const splitScheduleLines = value => value.split(/[\n,]+/).map(item => item.trim()).filter(Boolean);
+      
+      const photoBase64 = document.getElementById('docAvatarBase64').value;
+      let avatarVal = document.getElementById('docAvatar').value.trim();
+      if (avatarVal.startsWith('[Uploaded File:')) {
+        avatarVal = ''; // Will be assigned by backend after saving photoBase64
+      }
+
       const doctorData = {
         id: docId,
         name: document.getElementById('docName').value.trim(),
@@ -3192,7 +3353,9 @@
         consultationFee: parseFloat(document.getElementById('docFee').value) || 0,
         feeDisplay: document.getElementById('docFeeDisplay').value.trim(),
         badge: document.getElementById('docBadge').value.trim(),
-        avatar: document.getElementById('docAvatar').value.trim(),
+        avatar: avatarVal || '/assets/doctors/default-doctor.jpg',
+        photoBase64: photoBase64 || undefined,
+        image: photoBase64 || undefined,
         about: document.getElementById('docAbout').value.trim(),
         schedule: {
           workingDays: [...document.querySelectorAll('#docWorkingDays input:checked')].map(input => Number(input.value)),
@@ -3214,7 +3377,7 @@
         });
         const data = await res.json();
         if (res.ok && data.status === 'ok') {
-          alert('Doctor profile saved successfully!');
+          alert('Doctor profile with photo saved successfully!');
           closeDoctorModal();
           fetchAdminData();
         } else {

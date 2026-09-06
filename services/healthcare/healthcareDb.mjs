@@ -1830,6 +1830,105 @@ export async function adminResetUserPassword(targetUserId) {
   return { success: true, message: `Password for ${user.name} reset to Admin@1230. User will be required to change password upon next login.` };
 }
 
+export async function addDiagnosticTest(testData) {
+  const db = await getDb();
+  const newId = testData.id || `test-${Date.now()}`;
+  const newTest = {
+    id: newId,
+    name: testData.name || 'Diagnostic Package',
+    category: testData.category || 'Cancer Screening',
+    tagline: testData.tagline || '',
+    description: testData.description || '',
+    price: Number(testData.price) || 999,
+    originalPrice: Number(testData.originalPrice) || Number(testData.price) * 1.5,
+    avinyaSubsidy: testData.avinyaSubsidy || 'Subsidized',
+    testsIncluded: Array.isArray(testData.testsIncluded) ? testData.testsIncluded : (typeof testData.testsIncluded === 'string' ? testData.testsIncluded.split(',').map(s => s.trim()).filter(Boolean) : []),
+    preparation: testData.preparation || 'Follow standard preparation guidelines.',
+    reportTurnaround: testData.reportTurnaround || '24 to 36 Hours',
+    sampleType: testData.sampleType || 'Blood / Serum Sample',
+    icon: testData.icon || '🧪',
+    homeCollection: testData.homeCollection !== false,
+    centreVisit: testData.centreVisit !== false,
+    isPriority: !!testData.isPriority,
+    badge: testData.badge || 'Recommended'
+  };
+
+  db.diagnosticTests.push(newTest);
+  await persistDb();
+  return newTest;
+}
+
+export async function updateDiagnosticTest(id, updates) {
+  const db = await getDb();
+  const index = db.diagnosticTests.findIndex(t => t.id === id);
+  if (index === -1) throw new Error(`Test package ${id} not found.`);
+
+  const updated = {
+    ...db.diagnosticTests[index],
+    ...updates,
+    id // preserve ID
+  };
+  if (typeof updated.testsIncluded === 'string') {
+    updated.testsIncluded = updated.testsIncluded.split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  db.diagnosticTests[index] = updated;
+  await persistDb();
+  return updated;
+}
+
+export async function deleteDiagnosticTest(id) {
+  const db = await getDb();
+  const index = db.diagnosticTests.findIndex(t => t.id === id);
+  if (index === -1) throw new Error(`Test package ${id} not found.`);
+  const deleted = db.diagnosticTests.splice(index, 1)[0];
+  await persistDb();
+  return deleted;
+}
+
+export async function saveUserAccount(userData) {
+  const db = await getDb();
+  const userId = userData.id || userData.user_id || `usr-${Date.now()}`;
+  const index = db.users.findIndex(u => (u.user_id || u.id) === userId);
+  
+  const defaultHash = hashPassword('Admin@1230');
+  const record = {
+    id: userId,
+    user_id: userId,
+    name: userData.name || 'User',
+    email: (userData.email || '').toLowerCase().trim(),
+    phone: userData.phone || '',
+    avatar: userData.avatar || '',
+    password_hash: userData.password ? hashPassword(userData.password) : (index !== -1 ? db.users[index].password_hash : defaultHash),
+    role: userData.role || 'manager',
+    subtitle: userData.subtitle || (userData.role === 'admin' ? 'System Administrator' : 'Staff Member'),
+    doctorId: userData.doctorId || null,
+    providerId: userData.providerId || null,
+    status: userData.status || 'active',
+    must_change_password: false,
+    password_changed_at: new Date().toISOString()
+  };
+
+  if (index !== -1) {
+    db.users[index] = { ...db.users[index], ...record };
+  } else {
+    db.users.push(record);
+  }
+
+  await persistDb();
+  return record;
+}
+
+export async function deleteUserAccount(userId) {
+  const db = await getDb();
+  const user = db.users.find(u => (u.user_id || u.id) === userId);
+  if (user) {
+    user.status = 'inactive';
+    await persistDb();
+  }
+  return user;
+}
+
 export async function adminToggleUserStatus(targetUserId, status) {
   const db = await getDb();
   const user = db.users.find(u => (u.user_id || u.id) === targetUserId);
@@ -1840,3 +1939,5 @@ export async function adminToggleUserStatus(targetUserId, status) {
 
   return { success: true, message: `User ${user.name} account status set to ${user.status}.` };
 }
+
+

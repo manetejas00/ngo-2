@@ -45,7 +45,12 @@ import {
   resetPasswordWithToken,
   updateUserProfile,
   adminResetUserPassword,
-  adminToggleUserStatus
+  adminToggleUserStatus,
+  addDiagnosticTest,
+  updateDiagnosticTest,
+  deleteDiagnosticTest,
+  saveUserAccount,
+  deleteUserAccount
 } from './services/healthcare/healthcareDb.mjs';
 import {
   dispatchAppointmentCreatedEmails,
@@ -1398,6 +1403,113 @@ const server = createServer(async (req, res) => {
           await updateTestBookingStatus(id, newStatus, sessionUser.name);
           return sendJson(200, { status: 'ok', message: `Diagnostic booking ${id} updated to ${newStatus}.` });
         }
+      }
+
+      // Action: Save Doctor (with photo upload support)
+      if (action === 'save_doctor') {
+        const doc = payload.doctor || payload;
+        const name = (doc.name || '').trim();
+        if (!name) {
+          return sendJson(400, { status: 'error', message: 'Doctor name is required.' });
+        }
+
+        // If photo base64 is provided in doctor object, store it locally
+        if (doc.photoBase64 || doc.image) {
+          const photoData = doc.photoBase64 || doc.image;
+          const storedUrl = await saveUploadedDoctorPhoto(photoData, doc.id || name);
+          doc.avatar = storedUrl;
+        }
+
+        const docId = (doc.id || doc.doctor_id || '').trim();
+        let savedDoc;
+        const existing = docId ? await getDoctorById(docId) : null;
+        if (existing) {
+          savedDoc = await updateDoctor(docId, doc);
+        } else {
+          savedDoc = await addDoctor(doc);
+        }
+
+        return sendJson(200, {
+          status: 'ok',
+          message: `Doctor profile for ${name} saved successfully.`,
+          doctorId: savedDoc.id,
+          avatarUrl: savedDoc.avatar,
+          doctor: savedDoc
+        });
+      }
+
+      // Action: Delete Doctor
+      if (action === 'delete_doctor') {
+        const docId = (payload.id || payload.doctorId || '').trim();
+        if (!docId) {
+          return sendJson(400, { status: 'error', message: 'Doctor ID is required.' });
+        }
+        const deleted = await deleteDoctor(docId);
+        return sendJson(200, { status: 'ok', message: `Doctor ${docId} deleted successfully.`, deleted });
+      }
+
+      // Action: Save Diagnostic Test Package
+      if (action === 'save_test') {
+        const t = payload.test || payload;
+        const name = (t.name || '').trim();
+        if (!name) {
+          return sendJson(400, { status: 'error', message: 'Test package name is required.' });
+        }
+        const testId = (t.id || t.test_id || '').trim();
+        const allTests = await getDiagnosticTests();
+        const existing = testId ? allTests.find(item => item.id === testId) : null;
+        let savedTest;
+        if (existing) {
+          savedTest = await updateDiagnosticTest(testId, t);
+        } else {
+          savedTest = await addDiagnosticTest(t);
+        }
+        return sendJson(200, { status: 'ok', message: `Test package ${name} saved successfully.`, test: savedTest });
+      }
+
+      // Action: Delete Diagnostic Test Package
+      if (action === 'delete_test') {
+        const testId = (payload.id || payload.testId || '').trim();
+        if (!testId) {
+          return sendJson(400, { status: 'error', message: 'Test package ID is required.' });
+        }
+        const deleted = await deleteDiagnosticTest(testId);
+        return sendJson(200, { status: 'ok', message: `Test package ${testId} deleted successfully.`, deleted });
+      }
+
+      // Action: Save System User
+      if (action === 'save_user') {
+        const u = payload.user || payload;
+        const name = (u.name || '').trim();
+        if (!name) {
+          return sendJson(400, { status: 'error', message: 'User name is required.' });
+        }
+        const savedUser = await saveUserAccount(u);
+        return sendJson(200, { status: 'ok', message: `User ${name} saved successfully.`, user: savedUser });
+      }
+
+      // Action: Delete System User
+      if (action === 'delete_user') {
+        const userId = (payload.id || payload.userId || '').trim();
+        if (!userId) {
+          return sendJson(400, { status: 'error', message: 'User ID is required.' });
+        }
+        const deleted = await deleteUserAccount(userId);
+        return sendJson(200, { status: 'ok', message: `User ${userId} deactivated successfully.`, user: deleted });
+      }
+
+      // Action: Upload Doctor Image
+      if (action === 'upload_doctor_image' || action === 'upload_photo') {
+        const photoData = payload.image || payload.photo || payload.avatar || payload.file || payload.photoBase64;
+        if (!photoData) {
+          return sendJson(400, { status: 'error', message: 'Missing image/photoBase64 payload.' });
+        }
+        const docId = (payload.doctorId || payload.id || 'doctor').trim();
+        const storedUrl = await saveUploadedDoctorPhoto(photoData, docId);
+        if (payload.doctorId) {
+          try { await updateDoctorAvatar(payload.doctorId, storedUrl); } catch (_) {}
+        }
+        return sendJson(200, { status: 'ok', avatarUrl: storedUrl, message: 'Doctor photo uploaded successfully.' });
       }
 
       if (action === 'all') {
