@@ -18,7 +18,8 @@ class ModalManager {
   init() {
     const modalIds = [
       'donate-modal', 'volunteer-modal', 'support-modal',
-      'contact-modal', 'csr-modal', 'newsletter-modal', 'feedback-modal', 'guide-modal', 'story-modal'
+      'contact-modal', 'csr-modal', 'newsletter-modal', 'feedback-modal', 'guide-modal', 'story-modal',
+      'privacy-modal', 'terms-modal', 'compliance-modal'
     ];
 
     modalIds.forEach(id => {
@@ -106,35 +107,71 @@ class ModalManager {
   }
 
   selectAmount(amount) {
+    this.isCustom = false;
     this.selectedAmount = amount;
+    const customContainer = document.getElementById('custom-amount-container');
+    if (customContainer) {
+      customContainer.style.display = 'none';
+    }
+
     document.querySelectorAll('#donate-modal .amount-btn').forEach(btn => {
-      const btnText = btn.textContent.replace(/[^\d]/g, '');
-      const btnAmount = parseInt(btnText, 10);
-      btn.classList.toggle('active', btnAmount === amount || (btnText === '10' && amount === 10000));
+      const btnText = btn.textContent.trim().toLowerCase();
+      if (btnText === 'custom') {
+        btn.classList.remove('active');
+      } else {
+        const numText = btnText.replace(/[^\d]/g, '');
+        const btnAmount = parseInt(numText, 10);
+        btn.classList.toggle('active', btnAmount === amount || (btnText === '10k' && amount === 10000));
+      }
     });
+    this.updateImpactStatement();
+  }
+
+  selectCustom() {
+    this.isCustom = true;
+    document.querySelectorAll('#donate-modal .amount-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.trim().toLowerCase() === 'custom');
+    });
+
+    const customContainer = document.getElementById('custom-amount-container');
+    const customInput = document.getElementById('custom-amount-input');
+    if (customContainer) {
+      customContainer.style.display = 'block';
+    }
+    if (customInput) {
+      customInput.focus();
+      const val = parseInt(customInput.value, 10);
+      if (val && val >= 100) {
+        this.selectedAmount = val;
+      } else {
+        this.selectedAmount = 1500;
+        customInput.value = 1500;
+      }
+    }
+    this.updateImpactStatement();
+  }
+
+  handleCustomAmountInput(value) {
+    let amt = parseInt(value, 10);
+    if (!isNaN(amt) && amt >= 100) {
+      this.selectedAmount = amt;
+    } else {
+      this.selectedAmount = 100;
+    }
     this.updateImpactStatement();
   }
 
   updateImpactStatement() {
     const statement = document.getElementById('impact-calculator-statement');
     if (!statement) return;
-    const amount = this.selectedAmount;
-    const freq = this.isMonthly ? 'monthly' : 'one-time';
+    const amount = this.selectedAmount || 1000;
+    const formattedAmount = new Intl.NumberFormat('en-IN').format(amount);
+    const count = Math.max(1, Math.floor(amount / 500));
+    const indLabel = count === 1 ? 'individual' : 'individuals';
 
-    let desc = `₹${new Intl.NumberFormat('en-IN').format(amount)} provides early screening kits and medical counseling for patients in need.`;
-    if (amount <= 500) {
-      desc = `₹500 sponsors primary oral & breast cancer awareness kits for 1 rural family.`;
-    } else if (amount <= 1000) {
-      desc = `₹1,000 provides diagnostic screening guidance and local travel assistance for 2 individuals.`;
-    } else if (amount <= 2500) {
-      desc = `₹2,500 funds 2 clinical oncology diagnostic screenings + specialist counseling at mobile health camps.`;
-    } else if (amount <= 5000) {
-      desc = `₹5,000 provides 1 month of clinical nutrition packages and compassionate caregiver navigation.`;
-    } else {
-      desc = `₹10,000 sponsors advanced diagnostic imaging support and palliative care navigation for 3 patients.`;
-    }
+    const desc = `Impact: ₹${formattedAmount} provides diagnostic screening guidance and local travel assistance for ${count} ${indLabel}.`;
 
-    statement.innerHTML = `✨ <strong>Impact (${freq}):</strong> ${desc}<br><span style="font-size: 0.8rem; color: #087F73; font-weight: 600; display: inline-block; margin-top: 4px;">✓ 100% Eligible for 80G Tax Exemption (Receipt delivered via email)</span>`;
+    statement.innerHTML = `✨ <strong>${desc}</strong><br><span style="font-size: 0.8rem; color: #087F73; font-weight: 600; display: inline-block; margin-top: 4px;">✓ 100% Eligible for 80G Tax Exemption (Receipt delivered via email)</span>`;
   }
 
   // --- SUBMIT FORM TO API ---
@@ -251,6 +288,55 @@ class ModalManager {
     this.selectAmount(defaultAmount);
   }
 
+  // --- VOLUNTEER MODAL ---
+  openVolunteerModal() {
+    this.openModal('volunteer-modal');
+  }
+
+  // --- PATIENT & CAREGIVER SUPPORT MODAL ---
+  openSupportModal() {
+    this.openModal('support-modal');
+  }
+
+  // --- CSR & PARTNERSHIP MODAL ---
+  openCSRModal() {
+    this.openModal('csr-modal');
+  }
+
+  openCsrModal() {
+    this.openCSRModal();
+  }
+
+  // --- CONTACT MODAL ---
+  openContactModal() {
+    this.openModal('contact-modal');
+  }
+
+  // --- NEWSLETTER MODAL ---
+  openNewsletterModal() {
+    this.openModal('newsletter-modal');
+  }
+
+  // --- FEEDBACK MODAL ---
+  openFeedbackModal() {
+    this.openModal('feedback-modal');
+  }
+
+  // --- PRIVACY POLICY MODAL ---
+  openPrivacyModal() {
+    this.openModal('privacy-modal');
+  }
+
+  // --- TERMS OF SERVICE MODAL ---
+  openTermsModal() {
+    this.openModal('terms-modal');
+  }
+
+  // --- LEGAL & COMPLIANCE MODAL ---
+  openComplianceModal() {
+    this.openModal('compliance-modal');
+  }
+
   submitDonation(e) {
     e.preventDefault();
     const form = e.target;
@@ -259,12 +345,21 @@ class ModalManager {
     const phone = form.querySelector('#donor-phone')?.value || '';
     const pan = form.querySelector('#donor-pan')?.value || '';
 
+    let amount = this.selectedAmount || 1000;
+    if (this.isCustom) {
+      const customInput = document.getElementById('custom-amount-input');
+      const val = parseInt(customInput?.value, 10);
+      if (val && val >= 100) {
+        amount = val;
+      }
+    }
+
     const payload = {
       name,
       email,
       phone,
       pan,
-      amount: this.selectedAmount || 1000,
+      amount,
       frequency: this.isMonthly ? 'monthly' : 'one-time',
       payment_status: 'SUCCESS',
       transaction_id: `TXN-${Date.now().toString().slice(-8)}`
@@ -325,19 +420,27 @@ class ModalManager {
     if (modalContainer) {
       modalContainer.innerHTML = `
         <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-        <div style="margin-bottom: 1.5rem;">
-          <span class="category-tag">${role}</span>
-          <h2 style="font-size: 2.2rem; margin-top: 0.5rem; margin-bottom: 1rem;">${author}'s Journey</h2>
+        <div style="display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.5rem;">
+          <img src="${imgUrl || 'assets/logo-emblem.png'}" alt="${author}" style="width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 2px solid var(--brand); flex-shrink: 0;" loading="lazy">
+          <div>
+            <span class="category-tag" style="background: rgba(235,94,40,0.15); color: var(--brand); border: 1px solid rgba(235,94,40,0.3); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 999px; margin-bottom: 0.25rem; display: inline-block;">${role}</span>
+            <h3 style="font-size: 1.6rem; font-weight: 800; color: #111827; margin: 0.25rem 0 0;">${author}'s Story</h3>
+          </div>
         </div>
-        <div style="width: 100%; height: 320px; max-height: 50vh; border-radius: 20px; overflow: hidden; margin-bottom: 1.5rem; background: #f1f5f9;">
-          <img src="${imgUrl}" alt="${author}" style="width: 100%; height: 100%; object-fit: cover; object-position: center top;">
-        </div>
-        <blockquote style="font-size: 1.25rem; font-style: italic; color: #087F73; border-left: 4px solid #087F73; padding-left: 1rem; margin-bottom: 1.5rem;">
+        <blockquote style="font-size: 1.15rem; font-style: italic; color: var(--brand); border-left: 3px solid var(--brand); padding-left: 1rem; margin: 0 0 1.5rem; line-height: 1.6; font-weight: 600;">
           "${quote}"
         </blockquote>
-        <div style="color: var(--text-dark-muted); font-size: 1.05rem; line-height: 1.7;">
-          <p style="margin-bottom: 1rem;">${fullStory}</p>
-          <p>“Avinya Care Foundation stood by my family during early diagnosis and treatment navigation. Having a dedicated support group in India changes everything.”</p>
+        <div style="color: #4B5563; font-size: 1.02rem; line-height: 1.75;">
+          <p style="margin-bottom: 1.25rem;">${fullStory}</p>
+          <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.25rem; margin-top: 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-weight: 700; color: #111827; font-size: 0.95rem;">Empowering lives across Mumbai-Virar</div>
+              <div style="font-size: 0.85rem; color: #6B7280;">Support early screening, dialysis aid, and patient navigation.</div>
+            </div>
+            <button class="btn-primary" style="padding: 0.6rem 1.4rem; font-size: 0.85rem;" onclick="window.AvinyaModals.closeAll(); window.AvinyaModals.openDonateModal(1000);">
+              <span>Support Care →</span>
+            </button>
+          </div>
         </div>
       `;
     }
@@ -377,3 +480,38 @@ class ModalManager {
 
 // Global Export
 window.AvinyaModals = new ModalManager();
+
+// Stories Section Expand/Collapse Manager
+window.AvinyaStories = {
+  isExpanded: false,
+  toggle: function() {
+    this.isExpanded = !this.isExpanded;
+    const hiddenCards = document.querySelectorAll('.stories-grid .story-card.story-card-extra');
+    const btnText = document.getElementById('toggle-stories-text');
+    const btnArrow = document.getElementById('toggle-stories-arrow');
+
+    hiddenCards.forEach((card, idx) => {
+      if (this.isExpanded) {
+        card.classList.remove('story-card-hidden');
+        card.classList.add('story-card-revealed');
+        card.style.animationDelay = `${idx * 0.05}s`;
+      } else {
+        card.classList.add('story-card-hidden');
+        card.classList.remove('story-card-revealed');
+        card.style.animationDelay = '0s';
+      }
+    });
+
+    if (this.isExpanded) {
+      if (btnText) btnText.textContent = 'Show Fewer Stories';
+      if (btnArrow) btnArrow.textContent = '↑';
+    } else {
+      if (btnText) btnText.textContent = 'Show More Stories (7 More)';
+      if (btnArrow) btnArrow.textContent = '↓';
+      const storiesSection = document.getElementById('stories');
+      if (storiesSection) {
+        storiesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }
+};

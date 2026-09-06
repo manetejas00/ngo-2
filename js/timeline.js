@@ -1,160 +1,215 @@
 /**
- * Avinya Care Foundation - GSAP 3D Card Deck Controller
- * Controls Section 6 (#journey - "Every step of your health journey.")
- * Perfect 100% dead-center focal alignment with responsive scroll scrubbing on both Mobile & Desktop.
+ * Avinya Care Foundation - NestJS 3D Overlapping Card Deck Controller
+ * Features:
+ * - Selected card is always positioned directly in the MIDDLE of the viewport
+ * - Natural scroll-driven progression pinned to stage as user scrolls through page
+ * - Trackpad & mousewheel horizontal scrub when hovering over deck
+ * - Keyboard arrow navigation (Left/Right)
+ * - Touch swipe gestures for mobile
+ * - Clickable stage cards, progress dots, and arrow buttons with smooth scroll synchronization
  */
 
 class JourneyTimeline {
   constructor() {
     this.section = document.getElementById('journey');
+    this.viewport = document.querySelector('.nestjs-card-deck-viewport');
     this.track = document.getElementById('nestjs-card-deck-track');
-    if (!this.section || !this.track) return;
-
-    this.cards = Array.from(this.track.querySelectorAll('.nestjs-deck-card'));
-    this.dots = Array.from(this.section.querySelectorAll('.deck-dot'));
-    this.prevBtn = this.section.querySelector('.deck-arrow-btn.prev');
-    this.nextBtn = this.section.querySelector('.deck-arrow-btn.next');
-
-    this.numCards = this.cards.length;
+    this.cards = Array.from(document.querySelectorAll('.nestjs-deck-card'));
+    this.dots = Array.from(document.querySelectorAll('.deck-dot'));
     this.currentIndex = 0;
-    this.playhead = { progress: 0 }; // ranges from 0 to (numCards - 1)
-    this.scrubTween = null;
-    this.trigger = null;
+    this.isWheeling = false;
+    this.wheelTimeout = null;
+
+    if (!this.section || !this.track || !this.cards.length) return;
 
     this.init();
   }
 
   init() {
-    if (typeof gsap === 'undefined') return;
-
-    if (typeof ScrollTrigger !== 'undefined') {
-      gsap.registerPlugin(ScrollTrigger);
-    }
-    if (typeof Draggable !== 'undefined') {
-      gsap.registerPlugin(Draggable);
-    }
-
-    const numCards = this.numCards;
-    const isMobile = window.innerWidth <= 768;
-
-    // Smooth scrub tween for card transitions
-    this.scrubTween = gsap.to(this.playhead, {
-      progress: 0,
-      onUpdate: () => {
-        this.renderCards(this.playhead.progress);
-      },
-      duration: 0.45,
-      ease: "power2.out",
-      paused: true
+    // 1. Initial State - center stage 0 after layout is ready
+    requestAnimationFrame(() => {
+      this.goToStage(0);
     });
 
-    // ScrollTrigger: Desktop pins & scrubs, Mobile changes cards cleanly on page scroll
-    if (typeof ScrollTrigger !== 'undefined') {
-      const selfObj = this;
-      this.trigger = ScrollTrigger.create({
-        trigger: '#journey',
-        start: isMobile ? 'top 70%' : 'top top',
-        end: isMobile ? 'bottom 30%' : '+=1600',
-        pin: !isMobile,
-        anticipatePin: 1,
-        onUpdate: (self) => {
-          if (isMobile) {
-            // Mobile: Step cleanly to integer card stage as section passes through screen
-            const rawProgress = self.progress * (numCards - 1);
-            const activeCard = gsap.utils.clamp(0, numCards - 1, Math.round(rawProgress));
-            if (activeCard !== selfObj.currentIndex) {
-              selfObj.goToStage(activeCard);
+    // 2. Responsive Recalculation on Resize
+    window.addEventListener('resize', () => {
+      this.goToStage(this.currentIndex, false);
+    });
+
+    // 3. Keyboard Arrow Navigation
+    document.addEventListener('keydown', (e) => {
+      const rect = this.section.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      if (!isVisible) return;
+
+      if (e.key === 'ArrowLeft') {
+        this.prevCard();
+      } else if (e.key === 'ArrowRight') {
+        this.nextCard();
+      }
+    });
+
+    // 4. Touch / Swipe Gesture support for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    this.track.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    this.track.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) {
+        this.nextCard();
+      } else if (touchEndX - touchStartX > 50) {
+        this.prevCard();
+      }
+    }, { passive: true });
+
+    // 5. Mouse Wheel / Trackpad Scroll on Carousel Stage
+    if (this.viewport) {
+      this.viewport.addEventListener('wheel', (e) => {
+        const absDeltaX = Math.abs(e.deltaX);
+        const absDeltaY = Math.abs(e.deltaY);
+
+        if (absDeltaX > 15 || (absDeltaY > 15 && !this.isWheeling)) {
+          const delta = absDeltaX > absDeltaY ? e.deltaX : e.deltaY;
+          if (delta > 15) {
+            if (this.currentIndex < this.cards.length - 1) {
+              e.preventDefault();
+              this.nextCard();
+              this.triggerWheelCooldown(500);
             }
-          } else {
-            // Desktop: Smooth 3D scrub timeline with pinned section
-            const normProgress = gsap.utils.clamp(0, 1, self.progress / 0.85);
-            const targetProgress = normProgress * (numCards - 1);
-            selfObj.scrubTween.vars.progress = targetProgress;
-            selfObj.scrubTween.invalidate().restart();
+          } else if (delta < -15) {
+            if (this.currentIndex > 0) {
+              e.preventDefault();
+              this.prevCard();
+              this.triggerWheelCooldown(500);
+            }
           }
         }
-      });
+      }, { passive: false });
     }
 
-    // Touch & Mouse Dragging Support with Snap on Drag Release
-    if (typeof Draggable !== 'undefined') {
-      const selfObj = this;
-      Draggable.create(this.track, {
-        type: "x",
-        allowNativeTouchScrolling: true,
-        onPress() {
-          selfObj.startProgress = selfObj.playhead.progress;
-        },
-        onDrag() {
-          const delta = (this.startX - this.x) * 0.003;
-          const target = gsap.utils.clamp(0, numCards - 1, selfObj.startProgress + delta);
-          selfObj.playhead.progress = target;
-          selfObj.renderCards(target);
-        },
-        onDragEnd() {
-          const closestCard = Math.round(selfObj.playhead.progress);
-          selfObj.goToStage(closestCard);
-        }
-      });
-    }
-
-    // Initialize to Card 0 (Stage 01) dead center
-    this.goToStage(0);
+    // 6. Page Scroll Triggering - Synchronize cards with page scroll position
+    this.handleScroll = this.handleScroll.bind(this);
+    window.addEventListener('scroll', () => {
+      requestAnimationFrame(this.handleScroll);
+    }, { passive: true });
   }
 
-  renderCards(currentProgress) {
-    const numCards = this.numCards;
-    const clampedProgress = gsap.utils.clamp(0, numCards - 1, currentProgress);
-    const activeIdx = Math.round(clampedProgress);
+  triggerWheelCooldown(duration = 400) {
+    this.isWheeling = true;
+    clearTimeout(this.wheelTimeout);
+    this.wheelTimeout = setTimeout(() => {
+      this.isWheeling = false;
+    }, duration);
+  }
 
-    this.currentIndex = activeIdx;
+  handleScroll() {
+    if (!this.section || this.isWheeling) return;
 
-    this.cards.forEach((card, i) => {
-      const diff = i - clampedProgress; // slot distance from focal center
+    const rect = this.section.getBoundingClientRect();
+    const scrollDistance = rect.height - window.innerHeight;
 
-      const absDiff = Math.abs(diff);
-      const scale = gsap.utils.clamp(0.65, 1.05, 1.05 - absDiff * 0.18);
-      const opacity = gsap.utils.clamp(0, 1, 1 - absDiff * 0.45);
-      const translateX = diff * 112; // percentage offset from center
-      const zIndex = Math.round(100 - absDiff * 20);
+    // Desktop Sticky Mode
+    if (scrollDistance > 50) {
+      if (rect.top <= 0 && rect.bottom >= window.innerHeight) {
+        const scrolled = -rect.top;
+        const progress = Math.max(0, Math.min(1, scrolled / scrollDistance));
+        const targetIndex = Math.min(this.cards.length - 1, Math.floor(progress * this.cards.length));
+        if (targetIndex !== this.currentIndex) {
+          this.goToStage(targetIndex, false);
+        }
+      } else if (rect.top > 0) {
+        if (this.currentIndex !== 0) {
+          this.goToStage(0, false);
+        }
+      } else if (rect.bottom < window.innerHeight) {
+        if (this.currentIndex !== this.cards.length - 1) {
+          this.goToStage(this.cards.length - 1, false);
+        }
+      }
+    } else {
+      // Mobile / standard non-sticky mode
+      const windowH = window.innerHeight;
+      const visibleTop = rect.top;
+      const visibleHeight = rect.height;
 
-      // Apply transform using GSAP set for 60fps performance
-      gsap.set(card, {
-        xPercent: translateX - 50, // -50 centers card on left: 50%
-        yPercent: -50,
-        scale: scale,
-        opacity: opacity,
-        zIndex: zIndex,
-        transformOrigin: "center center"
-      });
+      if (visibleTop < windowH * 0.65 && visibleTop + visibleHeight > windowH * 0.35) {
+        const scrollProgress = (windowH * 0.65 - visibleTop) / (visibleHeight * 0.7);
+        const clamped = Math.max(0, Math.min(1, scrollProgress));
+        const targetIndex = Math.floor(clamped * this.cards.length);
+        const safeIndex = Math.min(this.cards.length - 1, Math.max(0, targetIndex));
 
-      card.classList.toggle('active', i === activeIdx);
+        if (safeIndex !== this.currentIndex) {
+          this.goToStage(safeIndex, false);
+        }
+      }
+    }
+  }
+
+  goToStage(index, syncScroll = false) {
+    if (index < 0 || index >= this.cards.length) return;
+    this.currentIndex = index;
+
+    // Update Cards Active State & Perspective Classes
+    this.cards.forEach((card, idx) => {
+      if (idx === index) {
+        card.classList.add('active');
+        card.classList.remove('card-prev', 'card-next');
+      } else if (idx < index) {
+        card.classList.remove('active', 'card-next');
+        card.classList.add('card-prev');
+      } else {
+        card.classList.remove('active', 'card-prev');
+        card.classList.add('card-next');
+      }
     });
 
     // Update Dots Active State
-    if (this.dots && this.dots.length) {
-      this.dots.forEach((dot, idx) => {
-        dot.classList.toggle('active', idx === activeIdx);
-      });
+    this.dots.forEach((dot, idx) => {
+      if (idx === index) {
+        dot.classList.add('active');
+      } else {
+        dot.classList.remove('active');
+      }
+    });
+
+    // Calculate Track Slide Offset so the selected card is in the exact MIDDLE of the viewport
+    const targetCard = this.cards[index];
+    if (targetCard && this.viewport) {
+      const viewportWidth = this.viewport.clientWidth;
+      const cardWidth = targetCard.offsetWidth;
+      const cardLeft = targetCard.offsetLeft;
+      // Centering formula: center of viewport minus center of target card
+      const offset = (viewportWidth - cardWidth) / 2 - cardLeft;
+      this.track.style.transform = `translateX(${offset}px)`;
+    }
+
+    // Smoothly synchronize page scroll position if manually triggered
+    if (syncScroll && this.section) {
+      const scrollDistance = this.section.offsetHeight - window.innerHeight;
+      if (scrollDistance > 50) {
+        const targetScrollY = this.section.offsetTop + (index / (this.cards.length - 1)) * scrollDistance;
+        this.triggerWheelCooldown(600);
+        window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
+      }
     }
   }
 
-  goToStage(idx) {
-    const clampedIdx = gsap.utils.clamp(0, this.numCards - 1, idx);
-    this.currentIndex = clampedIdx;
-    this.scrubTween.vars.progress = clampedIdx;
-    this.scrubTween.invalidate().restart();
-  }
-
   nextCard() {
-    this.goToStage(this.currentIndex + 1);
+    const nextIdx = (this.currentIndex + 1) % this.cards.length;
+    this.goToStage(nextIdx, true);
   }
 
   prevCard() {
-    this.goToStage(this.currentIndex - 1);
+    const prevIdx = (this.currentIndex - 1 + this.cards.length) % this.cards.length;
+    this.goToStage(prevIdx, true);
   }
 }
 
+// Global Singleton Instance
 window.addEventListener('DOMContentLoaded', () => {
   window.AvinyaTimeline = new JourneyTimeline();
 });

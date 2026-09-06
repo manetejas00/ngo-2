@@ -52,7 +52,7 @@ async function runE2ETests() {
   if (docsData.doctors.length < 5) throw new Error('Expected at least 5 doctors');
 
   // 4. API: Get Slots
-  const testDate = '2026-09-02';
+  const testDate = '2026-10-15';
   const slotsRes = await request({ hostname: 'localhost', port: 3000, path: `/api/healthcare/doctors/doc-1/slots?date=${testDate}`, method: 'GET' });
   const slotsData = JSON.parse(slotsRes.body);
   const availSlot = slotsData.slots.find(s => s.available);

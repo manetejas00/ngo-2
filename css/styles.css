@@ -449,7 +449,7 @@ button {
   background: rgba(10, 10, 10, 0.96);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
-  z-index: 999;
+  z-index: 1500;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1168,6 +1168,8 @@ button {
   color: #FFFFFF !important;
   position: relative;
   overflow: visible;
+  z-index: 20;
+  isolation: isolate;
 }
 
 .stacked-panels-header {
@@ -1343,26 +1345,34 @@ button {
    6. CONTINUUM OF CARE — NESTJS 3D OVERLAPPING CARD DECK CAROUSEL (#journey)
    ========================================================================== */
 .section-journey {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 4rem 5% 2.5rem;
+  position: relative;
+  height: 350vh;
   background-color: var(--black) !important;
   color: #FFFFFF !important;
-  position: relative;
+  overflow: visible;
+  z-index: 25;
+  isolation: isolate;
+  padding: 0;
+}
+
+.journey-sticky-viewport {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
   overflow: hidden;
-  border: none !important;
-  outline: 1px solid var(--black);
-  margin-bottom: -1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--black);
+  padding: 3rem 5% 2rem;
   box-sizing: border-box;
-  touch-action: pan-y;
 }
 
 .journey-wrapper {
-  width: 100%;
   max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -1372,78 +1382,83 @@ button {
 .nestjs-split-header {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  gap: 2.5rem;
+  gap: 3.5rem;
   align-items: flex-end;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .nestjs-card-deck-viewport {
-  position: relative;
   width: 100%;
-  max-width: 1400px;
-  height: 440px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  perspective: 1400px;
   overflow: hidden;
-  padding: 0;
-  touch-action: pan-y;
+  padding: 1.5rem 0 2.2rem;
+  perspective: 1200px;
 }
 
 .nestjs-card-deck-track {
-  position: relative;
-  width: 100%;
-  height: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  touch-action: pan-y;
+  gap: 2rem;
+  transition: transform 0.6s var(--ease-out-expo);
+  padding: 1rem 0;
+  width: max-content;
+  will-change: transform;
 }
 
 .nestjs-deck-card {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(340px, 82vw);
-  height: 390px;
-  margin: 0;
-  transform: translate(-50%, -50%);
+  flex: 0 0 min(370px, 80vw);
   background: linear-gradient(145deg, #1C1C1C 0%, #111111 100%);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  padding: 1.8rem 1.6rem;
+  border-radius: 28px;
+  padding: 2.6rem 2.2rem;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  cursor: grab;
-  user-select: none;
+  position: relative;
+  transition: transform 0.6s var(--ease-out-expo), border-color 0.5s, box-shadow 0.5s, opacity 0.5s;
+  cursor: pointer;
   transform-style: preserve-3d;
-  will-change: transform, opacity;
+  min-height: 380px;
+  transform: scale(0.9) rotateY(-5deg);
+  opacity: 0.55;
+  user-select: none;
   box-sizing: border-box;
 }
 
-.nestjs-deck-card.active,
-.nestjs-deck-card:hover {
+.nestjs-deck-card.card-prev {
+  transform: scale(0.9) rotateY(5deg);
+  opacity: 0.55;
+}
+
+.nestjs-deck-card.card-next {
+  transform: scale(0.9) rotateY(-5deg);
+  opacity: 0.55;
+}
+
+.nestjs-deck-card.active {
+  transform: scale(1.05) translateY(-10px) rotateY(0deg);
+  opacity: 1;
   border-color: var(--brand);
-  box-shadow: 0 30px 70px rgba(244, 117, 40, 0.45);
-  z-index: 10 !important;
+  box-shadow: 0 30px 70px rgba(244, 117, 40, 0.35);
+  z-index: 10;
+}
+
+.nestjs-deck-card:hover:not(.active) {
+  opacity: 0.8;
+  transform: scale(0.94);
 }
 
 .card-3d-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
+  width: 62px;
+  height: 62px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--brand);
-  margin-bottom: 0.85rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   transition: transform var(--transition-fast), background var(--transition-fast);
 }
 
@@ -1463,17 +1478,17 @@ button {
 }
 
 .card-deck-title {
-  font-size: 1.45rem;
+  font-size: 1.55rem;
   font-weight: 800;
   color: #FFFFFF;
   line-height: 1.2;
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.85rem;
 }
 
 .card-deck-desc {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   color: var(--text-light-muted);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 /* Controls */
@@ -1481,8 +1496,8 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.25rem;
-  margin-top: 2rem;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
   position: relative;
   z-index: 200;
 }
@@ -1499,6 +1514,7 @@ button {
   align-items: center;
   justify-content: center;
   transition: all var(--transition-fast);
+  cursor: pointer;
 }
 
 .deck-arrow-btn:hover {
@@ -1540,6 +1556,8 @@ button {
   border: none !important;
   outline: 1px solid var(--black);
   margin-top: -1px;
+  z-index: 30;
+  isolation: isolate;
 }
 
 .stories-grid {
@@ -1565,6 +1583,25 @@ button {
 .story-card:hover {
   transform: translateY(-8px);
   border-color: var(--border-dark-hover);
+}
+
+.story-card.story-card-hidden {
+  display: none !important;
+}
+
+@keyframes storyFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.story-card.story-card-revealed {
+  animation: storyFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .story-image-box {
@@ -1644,6 +1681,8 @@ button {
   color: #FFFFFF !important;
   position: relative;
   overflow: hidden;
+  z-index: 35;
+  isolation: isolate;
 }
 
 .impact-header {
@@ -1710,6 +1749,9 @@ button {
   padding: 8rem 5%;
   background-color: var(--background);
   text-align: center;
+  position: relative;
+  z-index: 40;
+  isolation: isolate;
 }
 
 .community-wrapper {
@@ -1777,6 +1819,9 @@ button {
   padding: 8rem 5% 7rem;
   background-color: var(--background);
   border-top: 1px solid var(--gray-200);
+  position: relative;
+  z-index: 45;
+  isolation: isolate;
 }
 
 .news-updated-pill {
@@ -2120,6 +2165,9 @@ button {
   padding: 8rem 5% 7rem;
   background-color: var(--background);
   border-top: 1px solid var(--gray-200);
+  position: relative;
+  z-index: 50;
+  isolation: isolate;
 }
 
 .testimonials-grid {
@@ -2190,6 +2238,9 @@ button {
   padding: 9rem 5% 8rem;
   background-color: var(--black) !important;
   color: #FFFFFF !important;
+  position: relative;
+  z-index: 55;
+  isolation: isolate;
 }
 
 .action-grid {
@@ -2286,6 +2337,8 @@ button {
   text-align: center;
   position: relative;
   overflow: hidden;
+  z-index: 60;
+  isolation: isolate;
 }
 
 .cta-box {
@@ -2356,6 +2409,9 @@ button {
   padding: 6.5rem 5% 3.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 0.95rem;
+  position: relative;
+  z-index: 65;
+  isolation: isolate;
 }
 
 .footer-top {
@@ -2606,7 +2662,7 @@ button {
 
 .amount-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 0.6rem;
   margin-bottom: 1.25rem;
 }
@@ -2798,6 +2854,28 @@ textarea:focus {
     border-radius: 18px;
   }
 
+  /* Section 6: Continuum of Care Journey Mobile */
+  .section-journey {
+    height: auto;
+    padding: 5rem 5% 5rem;
+  }
+  .journey-sticky-viewport {
+    position: relative;
+    height: auto;
+    padding: 0;
+    overflow: visible;
+  }
+  .nestjs-split-header {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .nestjs-deck-card {
+    flex: 0 0 min(320px, 80vw);
+    padding: 2.2rem 1.8rem;
+    min-height: 350px;
+  }
+
   /* Section 13: Champion Manifesto CTA Mobile */
   .section-champion-manifesto {
     height: 350vh;
@@ -2846,77 +2924,9 @@ textarea:focus {
     width: 100%;
     justify-content: center;
   }
-
-  /* Section 6: Continuum of Care (#journey) Mobile & Tablet Responsive */
-  .section-journey {
-    min-height: auto;
-    padding: 4.5rem 4% 3rem;
-  }
-  .nestjs-split-header {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-  .nestjs-card-deck-viewport {
-    height: 390px;
-  }
-  .nestjs-deck-card {
-    width: min(310px, 86vw);
-    height: 360px;
-    padding: 1.6rem 1.4rem;
-    border-radius: 20px;
-  }
-  .card-3d-icon {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 0.8rem;
-  }
-  .card-deck-title {
-    font-size: 1.35rem;
-    margin-bottom: 0.5rem;
-  }
-  .card-deck-desc {
-    font-size: 0.9rem;
-    line-height: 1.45;
-  }
-  .nestjs-deck-controls {
-    margin-top: 1.5rem;
-    gap: 1rem;
-  }
 }
 
 @media (max-width: 640px) {
-  /* Section 6 (#journey) Mobile Small */
-  .nestjs-card-deck-viewport {
-    height: 370px;
-  }
-  .nestjs-deck-card {
-    width: min(285px, 88vw);
-    height: 345px;
-    padding: 1.4rem 1.2rem;
-  }
-  .card-3d-icon {
-    width: 42px;
-    height: 42px;
-    margin-bottom: 0.6rem;
-  }
-  .card-step-num {
-    font-size: 0.75rem;
-  }
-  .card-deck-title {
-    font-size: 1.2rem;
-    margin-bottom: 0.35rem;
-  }
-  .card-deck-desc {
-    font-size: 0.85rem;
-    line-height: 1.4;
-  }
-  .deck-arrow-btn {
-    width: 44px;
-    height: 44px;
-    font-size: 1.1rem;
-  }
-
   .hero-scroll-container {
     height: 350vh;
   }

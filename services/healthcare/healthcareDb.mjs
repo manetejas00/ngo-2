@@ -96,7 +96,7 @@ const DEFAULT_DOCTORS = [
     rating: 4.98,
     reviewsCount: 342,
     badge: 'Senior Medical Oncologist & Lead Volunteer',
-    avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80',
+    avatar: '/assets/doctors/doc-1-priya-sharma.jpg',
     about: 'Dr. Priya Sharma is a distinguished Medical Oncologist with 16+ years of clinical and research excellence in breast, lung, and gastrointestinal cancers. A passionate advocate for early screening, she heads Avinya Care\'s clinical advisory board and conducts volunteer consultation clinics.',
     areasOfExpertise: [
       'Targeted & Immunotherapy Protocols',
@@ -130,7 +130,7 @@ const DEFAULT_DOCTORS = [
     rating: 4.94,
     reviewsCount: 280,
     badge: 'Director of Preventive Cardiology',
-    avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80',
+    avatar: '/assets/doctors/doc-2-rajesh-varma.jpg',
     about: 'Dr. Rajesh Varma is a premier Interventional Cardiologist specializing in complex coronary interventions, heart failure management, and preventive cardio-oncology for cancer patients undergoing intensive chemotherapy.',
     areasOfExpertise: [
       'Cardio-Oncology & Heart Protection',
@@ -164,7 +164,7 @@ const DEFAULT_DOCTORS = [
     rating: 4.96,
     reviewsCount: 215,
     badge: 'Lead Gynec-Oncologist',
-    avatar: 'https://images.unsplash.com/photo-1651008376811-b90baee60c1f?auto=format&fit=crop&w=400&q=80',
+    avatar: '/assets/doctors/doc-3-ananya-sengupta.jpg',
     about: 'Dr. Ananya Sengupta specializes in robotic and laparoscopic gynecological oncology, cervical cancer prevention, HPV vaccination awareness drives, and ovarian mass evaluations.',
     areasOfExpertise: [
       'Cervical Cancer Screening & Colposcopy',
@@ -198,7 +198,7 @@ const DEFAULT_DOCTORS = [
     rating: 4.91,
     reviewsCount: 195,
     badge: 'Senior Surgical Oncologist',
-    avatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80',
+    avatar: '/assets/doctors/doc-4-vikramaditya-rathore.jpg',
     about: 'Dr. Vikramaditya Rathore is an internationally recognized Surgical Oncologist known for organ-preserving cancer resections, head & neck oncology, and complex thoracic surgeries.',
     areasOfExpertise: [
       'Organ Preservation Surgical Techniques',
@@ -232,7 +232,7 @@ const DEFAULT_DOCTORS = [
     rating: 4.97,
     reviewsCount: 410,
     badge: 'Chief Medical Officer - Avinya Clinics',
-    avatar: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80',
+    avatar: '/assets/doctors/doc-5-meera-nambiar.jpg',
     about: 'Dr. Meera Nambiar serves as the Chief Medical Officer at Avinya Care Foundation. She leads early diagnostic triage, primary healthcare consultations, metabolic health management, and community screening camps.',
     areasOfExpertise: [
       'Comprehensive Symptom & Health Triage',
@@ -266,7 +266,7 @@ const DEFAULT_DOCTORS = [
     rating: 4.93,
     reviewsCount: 168,
     badge: 'Senior Consultant Neurologist',
-    avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=400&q=80',
+    avatar: '/assets/doctors/doc-6-siddharth-balakrishnan.jpg',
     about: 'Dr. Siddharth Balakrishnan is a renowned Neurologist specializing in neuro-oncology, neurological rehabilitation, stroke care, and cognitive wellness.',
     areasOfExpertise: [
       'Brain Tumor Diagnostic Consultation',
@@ -300,7 +300,7 @@ const DEFAULT_DOCTORS = [
     rating: 4.92,
     reviewsCount: 185,
     badge: 'Consultant Ophthalmologist',
-    avatar: 'https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&w=400&q=80',
+    avatar: '/assets/doctors/doc-7-kavita-joshi.jpg',
     about: 'Dr. Kavita Joshi is an expert in ocular oncology, glaucoma, diabetic retinopathy, and preventive ocular screenings for cancer survivors.',
     areasOfExpertise: [
       'Ocular Tumors & Retinal Care',
@@ -334,7 +334,7 @@ const DEFAULT_DOCTORS = [
     rating: 4.95,
     reviewsCount: 220,
     badge: 'Senior Orthopedic Oncologist',
-    avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=400&q=80',
+    avatar: '/assets/doctors/doc-8-arvind-deshmukh.jpg',
     about: 'Dr. Arvind Deshmukh is a leading specialist in bone and soft tissue sarcomas, limb salvage surgeries, joint reconstruction, and spine tumors.',
     areasOfExpertise: [
       'Bone & Soft Tissue Sarcoma Care',
@@ -368,7 +368,7 @@ const DEFAULT_DOCTORS = [
     rating: 4.98,
     reviewsCount: 310,
     badge: 'Pediatric Care Specialist',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
+    avatar: '/assets/doctors/doc-9-shalini-raman.jpg',
     about: 'Dr. Shalini Raman specializes in childhood leukemia, solid tumors in children, routine pediatric wellness, and empathetic emotional guidance for families.',
     areasOfExpertise: [
       'Pediatric Leukemia & Lymphoma',
@@ -402,7 +402,7 @@ const DEFAULT_DOCTORS = [
     rating: 4.90,
     reviewsCount: 170,
     badge: 'Consultant Dermatologist',
-    avatar: 'https://images.unsplash.com/photo-1622902046580-2b47f47f5471?auto=format&fit=crop&w=400&q=80',
+    avatar: '/assets/doctors/doc-10-farooq-qureshi.jpg',
     about: 'Dr. Farooq Qureshi focuses on dermoscopy for early melanoma and skin lesion screening, radiation dermatitis care, and clinical dermatology.',
     areasOfExpertise: [
       'Melanoma & Non-Melanoma Skin Cancer Screening',
@@ -1007,6 +1007,113 @@ export async function getDoctors(filters = {}) {
 export async function getDoctorById(id) {
   const db = await getDb();
   return db.doctors.find(d => d.id === id) || null;
+}
+
+export async function addDoctor(doctorData) {
+  const db = await getDb();
+  const newId = doctorData.id || `doc-${Date.now()}`;
+  const newDoctor = {
+    id: newId,
+    name: doctorData.name || 'Dr. Specialist',
+    specialityId: doctorData.specialityId || 'general-physician',
+    specialityName: doctorData.specialityName || 'General Medicine',
+    qualification: doctorData.qualification || 'MBBS, MD',
+    experienceYears: Number(doctorData.experienceYears) || 5,
+    hospitalId: doctorData.hospitalId || 'avinya-clinic-mumbai',
+    hospitalName: doctorData.hospitalName || 'Avinya Care Community Clinic, Mumbai',
+    location: doctorData.location || 'Mumbai',
+    consultationFee: Number(doctorData.consultationFee) || 0,
+    feeDisplay: doctorData.feeDisplay || (Number(doctorData.consultationFee) === 0 ? '₹0 (Avinya Supported / Free)' : `₹${doctorData.consultationFee}`),
+    consultationTypes: doctorData.consultationTypes || ['in-clinic', 'online'],
+    rating: Number(doctorData.rating) || 5.0,
+    reviewsCount: Number(doctorData.reviewsCount) || 1,
+    badge: doctorData.badge || 'Consultant Specialist',
+    avatar: doctorData.avatar || '/assets/doctors/default-doctor.jpg',
+    about: doctorData.about || 'Specialist Doctor at Avinya Care Foundation partner network.',
+    areasOfExpertise: Array.isArray(doctorData.areasOfExpertise) ? doctorData.areasOfExpertise : ['Patient Care', 'Clinical Consultation'],
+    languages: Array.isArray(doctorData.languages) ? doctorData.languages : ['English', 'Hindi'],
+    schedule: doctorData.schedule || {
+      workingDays: [1, 2, 3, 4, 5, 6],
+      startTime: '09:00',
+      endTime: '17:00',
+      slotDurationMins: 30,
+      breakStart: '13:00',
+      breakEnd: '14:00'
+    }
+  };
+
+  db.doctors.push(newDoctor);
+
+  // Link user account
+  const defaultHash = hashPassword('Admin@1230');
+  db.users.push({
+    id: `usr-doc-${newId}`,
+    user_id: `usr-doc-${newId}`,
+    name: newDoctor.name,
+    email: doctorData.email || `doctor.${newId}@avinyacarefoundation.org`,
+    phone: doctorData.phone || '+91 98200 11223',
+    avatar: newDoctor.avatar,
+    password_hash: defaultHash,
+    role: 'doctor',
+    subtitle: newDoctor.specialityName,
+    doctorId: newId,
+    providerId: null,
+    status: 'active',
+    must_change_password: true,
+    password_changed_at: null
+  });
+
+  await persistDb();
+  return newDoctor;
+}
+
+export async function updateDoctor(id, updates) {
+  const db = await getDb();
+  const index = db.doctors.findIndex(d => d.id === id);
+  if (index === -1) {
+    throw new Error(`Doctor with ID ${id} not found.`);
+  }
+
+  const existing = db.doctors[index];
+  const updated = {
+    ...existing,
+    ...updates,
+    id: existing.id // preserve ID
+  };
+
+  if (updates.consultationFee !== undefined && !updates.feeDisplay) {
+    updated.feeDisplay = Number(updates.consultationFee) === 0 ? '₹0 (Avinya Supported / Free)' : `₹${updates.consultationFee}`;
+  }
+
+  db.doctors[index] = updated;
+
+  // Sync linked user
+  const user = db.users.find(u => u.doctorId === id || u.id === `usr-doc-${id}`);
+  if (user) {
+    if (updates.name) user.name = updates.name;
+    if (updates.avatar) user.avatar = updates.avatar;
+    if (updates.specialityName) user.subtitle = updates.specialityName;
+  }
+
+  await persistDb();
+  return updated;
+}
+
+export async function deleteDoctor(id) {
+  const db = await getDb();
+  const index = db.doctors.findIndex(d => d.id === id);
+  if (index === -1) {
+    throw new Error(`Doctor with ID ${id} not found.`);
+  }
+
+  const deleted = db.doctors.splice(index, 1)[0];
+  db.users = db.users.filter(u => u.doctorId !== id && u.id !== `usr-doc-${id}`);
+  await persistDb();
+  return deleted;
+}
+
+export async function updateDoctorAvatar(id, avatarUrl) {
+  return await updateDoctor(id, { avatar: avatarUrl });
 }
 
 // -------------------------------------------------------------

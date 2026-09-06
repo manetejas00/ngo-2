@@ -1,15 +1,79 @@
 {
   "status": "ok",
+  "count": 5,
+  "articles": [
+    {
+      "id": "gemini-ai-genomics-screening",
+      "title": "AI-Powered Genomic Screening Identifies High-Risk Breast Cancer Biomarkers 3 Years Earlier",
+      "description": "Multi-center clinical trials utilizing machine learning predictive models reveal microscopic cellular mutations years before physical mammogram detection, enabling targeted preventive interventions.",
+      "category": "Cancer Research",
+      "source": "Gemini AI Medical Engine",
+      "apiProvider": "Gemini AI Engine",
+      "isAIGenerated": true,
+      "publishedAt": "2026-09-06T08:30:00.000Z",
+      "url": "#",
+      "urlToImage": "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "gemini-ai-rural-mobile-screening",
+      "title": "Mobile AI Diagnostic Vans Expand Early Oral & Cervical Screening Across Maharashtra",
+      "description": "Avinya Care Foundation and regional health networks deploy solar-powered diagnostic vans equipped with portable colposcopy and AI-assisted oral visual examination tools for underserved rural communities.",
+      "category": "Early Detection",
+      "source": "Gemini AI Medical Engine",
+      "apiProvider": "Gemini AI Engine",
+      "isAIGenerated": true,
+      "publishedAt": "2026-09-06T07:00:00.000Z",
+      "url": "#",
+      "urlToImage": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "gemini-ai-cart-immunotherapy",
+      "title": "Next-Generation CAR-T Cell Immunotherapy Achieves Complete Remission in Refractory Lymphoma Trials",
+      "description": "Indigenous cellular engineering and targeted T-cell receptors demonstrate unprecedented success rates in halting aggressive hematologic malignancies while minimizing systemic toxicity.",
+      "category": "Treatment",
+      "source": "Gemini AI Medical Engine",
+      "apiProvider": "Gemini AI Engine",
+      "isAIGenerated": true,
+      "publishedAt": "2026-09-06T05:30:00.000Z",
+      "url": "#",
+      "urlToImage": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "gemini-ai-liquid-biopsy-mcda",
+      "title": "Liquid Biopsy Multi-Cancer Early Detection Blood Panels Approved for Clinical Pilot Studies",
+      "description": "High-throughput sequencing analyzing cell-free circulating tumor DNA (ctDNA) achieves over 92% specificity across 12 common solid cancer types before physical symptoms emerge.",
+      "category": "Early Detection",
+      "source": "Gemini AI Medical Engine",
+      "apiProvider": "Gemini AI Engine",
+      "isAIGenerated": true,
+      "publishedAt": "2026-09-06T03:00:00.000Z",
+      "url": "#",
+      "urlToImage": "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "gemini-ai-integrative-nutrition",
+      "title": "Structured Anti-Inflammatory Nutrition & Mindfulness Protocol Reduces Chemotherapy Fatigue by 40%",
+      "description": "Clinical studies across tertiary oncology centers highlight that personalized plant-based anti-inflammatory nutrition paired with supervised light exercise significantly accelerates post-chemotherapy recovery.",
+      "category": "Care",
+      "source": "Gemini AI Medical Engine",
+      "apiProvider": "Gemini AI Engine",
+      "isAIGenerated": true,
+      "publishedAt": "2026-09-05T23:00:00.000Z",
+      "url": "#",
+      "urlToImage": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80"
+    }
+  ],
   "article": {
-    "id": "gemini-ai-topic-static-1786910365",
+    "id": "gemini-ai-genomics-screening",
     "title": "AI-Powered Genomic Screening Identifies High-Risk Breast Cancer Biomarkers 3 Years Earlier",
-    "description": "Machine learning algorithms trained on multi-center clinical trials demonstrate high accuracy in predicting early-stage tissue mutations before physical mammogram detection.",
+    "description": "Multi-center clinical trials utilizing machine learning predictive models reveal microscopic cellular mutations years before physical mammogram detection, enabling targeted preventive interventions.",
     "category": "Cancer Research",
     "source": "Gemini AI Medical Engine",
-    "publishedAt": "2026-08-16T19:59:25.000Z",
+    "apiProvider": "Gemini AI Engine",
     "isAIGenerated": true,
+    "publishedAt": "2026-09-06T08:30:00.000Z",
     "url": "#",
     "urlToImage": "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
   },
-  "total": 13
+  "total": 10
 }

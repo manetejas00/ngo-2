@@ -328,7 +328,7 @@ class HealthcarePlatform {
     const leadDoc = this.doctorsCache[0];
     container.innerHTML = `
       <div class="hc-hero-widget-box hc-hero-doctor-preview" style="max-width: 540px; margin: 0 auto; display: flex; align-items: center; gap: 1.25rem;">
-        <img src="${leadDoc.avatar || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=200&q=80'}" alt="${leadDoc.name}" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--hc-primary);" loading="lazy">
+        <img src="${leadDoc.avatar || '/assets/doctors/default-doctor.jpg'}" alt="${leadDoc.name}" onerror="this.src='/assets/doctors/default-doctor.jpg'" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--hc-primary);" loading="lazy">
         <div style="flex: 1; text-align: left;">
           <div style="color: var(--hc-primary); font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">${leadDoc.badge || leadDoc.specialityName}</div>
           <h4 style="margin: 0; font-size: 1.15rem; color: #FFF;">${leadDoc.name}</h4>
@@ -453,7 +453,7 @@ class HealthcarePlatform {
       <div class="hc-doctor-card" id="doc-card-${doc.id}">
         <div class="hc-doctor-card-header">
           <div class="hc-doctor-avatar-wrapper">
-            <img src="${doc.avatar}" alt="${doc.name}" class="hc-doctor-avatar" loading="lazy">
+            <img src="${doc.avatar || '/assets/doctors/default-doctor.jpg'}" alt="${doc.name}" class="hc-doctor-avatar" onerror="this.src='/assets/doctors/default-doctor.jpg'" loading="lazy">
             <div class="hc-verified-badge" title="Verified Specialist">✓</div>
           </div>
           <div class="hc-doctor-info">
@@ -553,7 +553,7 @@ class HealthcarePlatform {
 
     container.innerHTML = `
       <div style="display: flex; gap: 1.25rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
-        <img src="${doc.avatar}" alt="${doc.name}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--hc-primary); box-shadow: var(--hc-shadow-md); flex-shrink: 0;">
+        <img src="${doc.avatar || '/assets/doctors/default-doctor.jpg'}" alt="${doc.name}" onerror="this.src='/assets/doctors/default-doctor.jpg'" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--hc-primary); box-shadow: var(--hc-shadow-md); flex-shrink: 0;">
         <div style="flex: 1; min-width: 200px;">
           ${doc.badge ? `<div class="hc-doctor-badge-tag" style="margin-bottom: 0.3rem;">${doc.badge}</div>` : ''}
           <h2 style="font-size: 1.4rem; font-weight: 800; margin: 0 0 0.25rem 0;">${doc.name}</h2>

@@ -65,67 +65,127 @@ class NewsService {
       };
     }
 
-    // 4. Return Embedded Fallback Dataset (Zero-failure guarantee)
+    // 4. Return Embedded Fallback Dataset (10 Groundbreaking Oncology & Healthcare Stories)
     this.articles = [
       {
-        id: "cancer-news-1",
-        title: "Advancements in Targeted Immunotherapy Show Promise for Early Cancer Interventions",
-        description: "New clinical research demonstrates how targeted immunotherapy approaches can significantly enhance survival outcomes and minimize side effects for early-stage oncology patients.",
+        id: "gemini-ai-genomics-screening",
+        title: "AI-Powered Genomic Screening Identifies High-Risk Breast Cancer Biomarkers 3 Years Earlier",
+        description: "Multi-center clinical trials utilizing machine learning predictive models reveal microscopic cellular mutations years before physical mammogram detection, enabling targeted preventive interventions.",
         category: "Cancer Research",
-        source: "National Cancer Institute",
-        publishedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-        url: "https://www.cancer.gov/news-events",
+        source: "Gemini AI Medical Engine",
+        apiProvider: "Gemini AI Engine",
+        isAIGenerated: true,
+        publishedAt: new Date(Date.now() - 3600000 * 1).toISOString(),
+        url: "#",
+        urlToImage: "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        id: "gemini-ai-rural-mobile-screening",
+        title: "Mobile AI Diagnostic Vans Expand Early Oral & Cervical Screening Across Maharashtra",
+        description: "Avinya Care Foundation and regional health networks deploy solar-powered diagnostic vans equipped with portable colposcopy and AI-assisted oral visual examination tools for underserved rural communities.",
+        category: "Early Detection",
+        source: "Gemini AI Medical Engine",
+        apiProvider: "Gemini AI Engine",
+        isAIGenerated: true,
+        publishedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+        url: "#",
+        urlToImage: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        id: "gemini-ai-cart-immunotherapy",
+        title: "Next-Generation CAR-T Cell Immunotherapy Achieves Complete Remission in Refractory Lymphoma Trials",
+        description: "Indigenous cellular engineering and targeted T-cell receptors demonstrate unprecedented success rates in halting aggressive hematologic malignancies while minimizing systemic toxicity.",
+        category: "Treatment",
+        source: "Gemini AI Medical Engine",
+        apiProvider: "Gemini AI Engine",
+        isAIGenerated: true,
+        publishedAt: new Date(Date.now() - 3600000 * 6).toISOString(),
+        url: "#",
         urlToImage: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80"
       },
       {
-        id: "cancer-news-2",
-        title: "Global Awareness Campaigns Driving Record Early Screening Participation",
-        description: "Community health initiatives and mobile diagnostic clinics reach underserved populations, empowering individuals to take proactive steps in routine breast and colorectal screenings.",
-        category: "Awareness & Detection",
-        source: "World Health Organization",
-        publishedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-        url: "https://www.who.int/health-topics/cancer",
-        urlToImage: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80"
-      },
-      {
-        id: "cancer-news-3",
-        title: "The Critical Role of Comprehensive Caregiver Support During Treatment",
-        description: "Studies highlight how emotional counseling, respite care, and financial navigation for family caregivers directly improve patient resilience and recovery quality.",
-        category: "Caregiver Support",
-        source: "Journal of Clinical Oncology",
-        publishedAt: new Date(Date.now() - 3600000 * 10).toISOString(),
-        url: "https://ascopubs.org/journal/jco",
-        urlToImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
-      },
-      {
-        id: "cancer-news-4",
-        title: "Breakthrough Blood Tests Enable Multi-Cancer Early Detection Before Symptoms Appear",
-        description: "Liquid biopsy technology shows high accuracy in detecting circulating tumor DNA across multiple cancer types, offering hope for earlier clinical diagnosis.",
+        id: "gemini-ai-liquid-biopsy-mcda",
+        title: "Liquid Biopsy Multi-Cancer Early Detection Blood Panels Approved for Clinical Pilot Studies",
+        description: "High-throughput sequencing analyzing cell-free circulating tumor DNA (ctDNA) achieves over 92% specificity across 12 common solid cancer types before physical symptoms emerge.",
         category: "Early Detection",
-        source: "American Cancer Society",
-        publishedAt: new Date(Date.now() - 3600000 * 14).toISOString(),
-        url: "https://www.cancer.org/research",
+        source: "Gemini AI Medical Engine",
+        apiProvider: "Gemini AI Engine",
+        isAIGenerated: true,
+        publishedAt: new Date(Date.now() - 3600000 * 9).toISOString(),
+        url: "#",
         urlToImage: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
       },
       {
-        id: "cancer-news-5",
-        title: "Nutritional and Lifestyle Interventions Support Long-Term Cancer Survivorship",
-        description: "Integrative health guidelines emphasize tailored physical activity and clinical nutrition plans to enhance energy levels and reduce recurrence risk post-treatment.",
-        category: "Survivorship",
-        source: "Harvard Health Publishing",
-        publishedAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-        url: "https://www.health.harvard.edu",
-        urlToImage: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80"
+        id: "gemini-ai-integrative-nutrition",
+        title: "Structured Anti-Inflammatory Nutrition & Mindfulness Protocol Reduces Chemotherapy Fatigue by 40%",
+        description: "Clinical studies across tertiary oncology centers highlight that personalized plant-based anti-inflammatory nutrition paired with supervised light exercise significantly accelerates post-chemotherapy recovery.",
+        category: "Care",
+        source: "Gemini AI Medical Engine",
+        apiProvider: "Gemini AI Engine",
+        isAIGenerated: true,
+        publishedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+        url: "#",
+        urlToImage: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80"
       },
       {
-        id: "cancer-news-6",
-        title: "Expanding Access to Affordable Diagnostic Imaging in Rural Healthcare Clinics",
-        description: "Non-profit partnerships deploy portable ultrasound and digital mammography units to ensure geographic location does not limit life-saving early detection.",
-        category: "Healthcare Policy",
-        source: "Global Health Journal",
+        id: "gemini-ai-crispr-nanoparticles",
+        title: "CRISPR-Guided Nanoparticles Deliver Precision Chemotherapy Directly into Solid Tumors",
+        description: "Bioengineered lipid nanoparticles navigate bloodstream barriers to deliver targeted cytotoxic payloads exclusively into tumor microenvironments, sparing healthy surrounding tissues.",
+        category: "Cancer Research",
+        source: "Gemini AI Medical Engine",
+        apiProvider: "Gemini AI Engine",
+        isAIGenerated: true,
+        publishedAt: new Date(Date.now() - 3600000 * 16).toISOString(),
+        url: "#",
+        urlToImage: "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        id: "gemini-ai-caregiver-navigation",
+        title: "Grassroots Caregiver Navigation Network Drastically Shortens Time-to-Treatment in Mumbai–Virar",
+        description: "Community caregiver navigators guide newly diagnosed patients through biopsy confirmation, government financial schemes, and specialist appointments within 10 days of first consultation.",
+        category: "Care",
+        source: "Gemini AI Medical Engine",
+        apiProvider: "Gemini AI Engine",
+        isAIGenerated: true,
+        publishedAt: new Date(Date.now() - 3600000 * 20).toISOString(),
+        url: "#",
+        urlToImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        id: "gemini-ai-hpv-vaccination-protocol",
+        title: "National Cervical Cancer Elimination Drive Introduces Single-Dose HPV Vaccination Protocol",
+        description: "Public health authorities and partner clinics adopt streamlined single-dose immunization schedules for adolescent girls, establishing robust lifelong immunity against high-risk oncogenic HPV strains.",
+        category: "Prevention",
+        source: "Gemini AI Medical Engine",
+        apiProvider: "Gemini AI Engine",
+        isAIGenerated: true,
+        publishedAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+        url: "#",
+        urlToImage: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        id: "gemini-ai-ultrasound-triaging",
+        title: "AI-Enhanced Ultrasound Triaging Identifies Suspicious Breast Masses with 98% Clinical Concordance",
+        description: "Point-of-care ultrasound devices integrated with real-time deep learning neural networks assist primary care physicians in differentiating benign cysts from malignant lesions instantly.",
+        category: "Early Detection",
+        source: "Gemini AI Medical Engine",
+        apiProvider: "Gemini AI Engine",
+        isAIGenerated: true,
         publishedAt: new Date(Date.now() - 3600000 * 30).toISOString(),
-        url: "https://www.sciencedirect.com/journal/global-health-journal",
+        url: "#",
         urlToImage: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        id: "gemini-ai-tele-palliative-clinics",
+        title: "Digital Palliative & Tele-Oncology Clinics Connect Homebound Patients with Oncology Specialists",
+        description: "24/7 tele-oncology support platforms provide symptom management, dosage adjustments, and psychosocial counseling directly into patients' living rooms across Maharashtra.",
+        category: "Care",
+        source: "Gemini AI Medical Engine",
+        apiProvider: "Gemini AI Engine",
+        isAIGenerated: true,
+        publishedAt: new Date(Date.now() - 3600000 * 36).toISOString(),
+        url: "#",
+        urlToImage: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80"
       }
     ];
 

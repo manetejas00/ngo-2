@@ -105,24 +105,11 @@ class ScrollTypographyEngine {
     const rawProgress = -rect.top / sectionHeight;
     const progress = Math.max(0, Math.min(1, rawProgress));
 
-    // Define 6 sentence timeline intervals
-    const stages = [
-      { start: 0.00, end: 0.18 }, // Sentence 0: Cancer can feel overwhelming.
-      { start: 0.18, end: 0.36 }, // Sentence 1: But no one should face it alone.
-      { start: 0.36, end: 0.54 }, // Sentence 2: Awareness creates understanding.
-      { start: 0.54, end: 0.72 }, // Sentence 3: Early detection creates possibilities.
-      { start: 0.72, end: 0.86 }, // Sentence 4: Support creates strength.
-      { start: 0.86, end: 1.00 }  // Sentence 5: Together, we create hope.
-    ];
-
-    let activeStageIdx = 0;
-    for (let i = 0; i < stages.length; i++) {
-      if (progress >= stages[i].start && progress <= stages[i].end) {
-        activeStageIdx = i;
-        break;
-      }
-    }
-    if (progress > 0.98) activeStageIdx = 5;
+    // Calculate dynamic sentence timeline intervals based on sentences count
+    const totalSentences = this.sentences.length || 1;
+    const step = 1 / totalSentences;
+    let activeStageIdx = Math.min(totalSentences - 1, Math.floor(progress / step));
+    if (progress >= 0.98) activeStageIdx = totalSentences - 1;
 
     // Toggle Active Sentence Visibility
     this.sentences.forEach((sentence, idx) => {
@@ -130,8 +117,9 @@ class ScrollTypographyEngine {
         sentence.classList.add('active');
 
         // Sub-stage calculation for Word-by-Word Illumination
-        const stage = stages[idx];
-        const stageProgress = (progress - stage.start) / (stage.end - stage.start);
+        const stageStart = idx * step;
+        const stageEnd = (idx + 1) * step;
+        const stageProgress = (progress - stageStart) / (stageEnd - stageStart);
         const clampedStageProgress = Math.max(0, Math.min(1, stageProgress));
 
         const words = Array.from(sentence.querySelectorAll('.typo-word'));
