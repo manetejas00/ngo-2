@@ -6,6 +6,9 @@ npm-debug.log*
 cache/
 *.log
 
+# Build outputs
+dist/
+
 # System / OS
 # Archives
 *.zip

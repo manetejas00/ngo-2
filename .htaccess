@@ -54,6 +54,12 @@ Options -Indexes
   RewriteRule ^api/news/?$ api/news.php [L,NC]
   RewriteRule ^api/news/refresh/?$ api/news.php [L,NC]
   RewriteRule ^api/news/generate/?$ api/news_generate.json [L,NC]
+
+  # SPA Fallback: Route all non-file/non-directory requests to index.html for React Router
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !^/api/
+  RewriteRule ^ index.html [L]
 </IfModule>
 
 # Enable CORS & Security Headers
