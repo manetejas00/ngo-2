@@ -13,6 +13,88 @@ export default function Header() {
     setIsMobileOpen(false);
   };
 
+  useEffect(() => {
+    let isTicking = false;
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      const navbar = document.querySelector('.navbar');
+      const heroContainer = document.querySelector('.hero-scroll-container');
+      const sections = document.querySelectorAll('section[id]');
+      const navLinks = document.querySelectorAll('.nav-links .nav-link');
+      const statementLines = document.querySelectorAll('.statement-line');
+
+      // 1. Dynamic Floating Navbar Theme
+      if (navbar) {
+        if (heroContainer) {
+          const heroTop = heroContainer.offsetTop;
+          const heroHeight = heroContainer.offsetHeight - window.innerHeight;
+          let progress = 0;
+          if (heroHeight > 0) {
+            progress = (scrollY - heroTop) / heroHeight;
+          }
+          if (progress < 0.65) {
+            navbar.classList.add('scrolled-dark');
+            navbar.classList.remove('scrolled-light');
+          } else {
+            navbar.classList.remove('scrolled-dark');
+            navbar.classList.add('scrolled-light');
+          }
+        }
+      }
+
+      // 2. Scroll Text Reveal Handler
+      statementLines.forEach((line) => {
+        const lineTop = line.getBoundingClientRect().top;
+        if (lineTop < window.innerHeight * 0.85) {
+          line.classList.add('revealed');
+        }
+      });
+
+      // 3. Active Section Link Highlighting
+      let currentSectionId = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 160;
+        const sectionHeight = section.offsetHeight;
+        if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+          currentSectionId = section.getAttribute('id');
+        }
+      });
+
+      if (currentSectionId) {
+        navLinks.forEach(link => {
+          const href = link.getAttribute('href');
+          if (href === `#${currentSectionId}`) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      }
+    };
+
+    const onScrollOrResize = () => {
+      if (!isTicking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          isTicking = false;
+        });
+        isTicking = true;
+      }
+    };
+
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize, { passive: true });
+
+    // Initial trigger
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
+    };
+  }, []);
+
   return (
     <>
       {/* 1. MINIMAL FLOATING DOCK NAVIGATION (NESTJS STYLE) */}

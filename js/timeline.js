@@ -209,7 +209,17 @@ class JourneyTimeline {
   }
 }
 
-// Global Singleton Instance
-window.addEventListener('DOMContentLoaded', () => {
+window.JourneyTimeline = JourneyTimeline;
+window.initJourneyTimeline = () => {
   window.AvinyaTimeline = new JourneyTimeline();
-});
+  return window.AvinyaTimeline;
+};
+
+// Auto-initialize if DOM is already ready or on DOMContentLoaded
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  window.AvinyaTimeline = new JourneyTimeline();
+} else {
+  window.addEventListener('DOMContentLoaded', () => {
+    window.AvinyaTimeline = new JourneyTimeline();
+  });
+}

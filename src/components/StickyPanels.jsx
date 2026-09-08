@@ -5,9 +5,12 @@ export default function StickyPanels() {
   const { openModal } = useModal();
 
   useEffect(() => {
-    if (window.StackedPanelsEngine) {
-      new window.StackedPanelsEngine();
-    }
+    const timer = setTimeout(() => {
+      if (window.StackedPanelsEngine) {
+        window.AvinyaStackedPanels = new window.StackedPanelsEngine();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   return (

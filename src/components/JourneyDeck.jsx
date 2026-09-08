@@ -5,9 +5,12 @@ export default function JourneyDeck() {
   const { openModal } = useModal();
 
   useEffect(() => {
-    if (window.JourneyTimeline) {
-      new window.JourneyTimeline();
-    }
+    const timer = setTimeout(() => {
+      if (window.JourneyTimeline) {
+        window.AvinyaTimeline = new window.JourneyTimeline();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   return (

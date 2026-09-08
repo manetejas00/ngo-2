@@ -150,6 +150,12 @@ class ScrollTypographyEngine {
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.ScrollTypographyEngine = ScrollTypographyEngine;
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
   window.AvinyaScrollTypography = new ScrollTypographyEngine();
-});
+} else {
+  window.addEventListener('DOMContentLoaded', () => {
+    window.AvinyaScrollTypography = new ScrollTypographyEngine();
+  });
+}

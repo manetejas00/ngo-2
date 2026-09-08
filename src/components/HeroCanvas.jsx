@@ -6,10 +6,12 @@ export default function HeroCanvas() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    // Initialize HeroCanvasEngine
-    if (window.HeroCanvasEngine && canvasRef.current) {
-      new window.HeroCanvasEngine();
-    }
+    const timer = setTimeout(() => {
+      if (window.HeroCanvasEngine && canvasRef.current) {
+        window.heroEngine = new window.HeroCanvasEngine();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   return (

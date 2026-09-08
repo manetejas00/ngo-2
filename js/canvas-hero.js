@@ -128,6 +128,43 @@ class HeroCanvasEngine {
       this.targetFrameIndex = newTarget;
       this.needsRedraw = true;
     }
+
+    // Hero narrative card scroll progression (7 stages)
+    this.updateHeroNarrativeCards(newProgress);
+  }
+
+  updateHeroNarrativeCards(p) {
+    let currentId = null;
+
+    if (p >= 0 && p < 0.14) {
+      currentId = 'card-1';
+    } else if (p >= 0.14 && p < 0.28) {
+      currentId = 'card-2';
+    } else if (p >= 0.28 && p < 0.42) {
+      currentId = 'card-3';
+    } else if (p >= 0.42 && p < 0.56) {
+      currentId = 'card-4';
+    } else if (p >= 0.56 && p < 0.70) {
+      currentId = 'card-5';
+    } else if (p >= 0.70 && p < 0.86) {
+      currentId = 'card-6';
+    } else if (p >= 0.86 && p <= 1.0) {
+      currentId = 'card-7';
+    }
+
+    if (currentId !== this.activeCardId) {
+      const cards = document.querySelectorAll('.hero-narrative-card');
+      cards.forEach(card => card.classList.remove('active'));
+      if (currentId) {
+        document.getElementById(currentId)?.classList.add('active');
+      }
+      this.activeCardId = currentId;
+    }
+
+    const scrollIndicator = document.querySelector('.scroll-indicator');
+    if (scrollIndicator) {
+      scrollIndicator.style.opacity = p > 0.08 ? '0' : '1';
+    }
   }
 
   render() {

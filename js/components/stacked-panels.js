@@ -62,6 +62,12 @@ class StackedPanelsEngine {
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.StackedPanelsEngine = StackedPanelsEngine;
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
   window.AvinyaStackedPanels = new StackedPanelsEngine();
-});
+} else {
+  window.addEventListener('DOMContentLoaded', () => {
+    window.AvinyaStackedPanels = new StackedPanelsEngine();
+  });
+}

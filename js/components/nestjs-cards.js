@@ -190,6 +190,12 @@ class NestJSCardStack {
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.NestJSCardStack = NestJSCardStack;
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
   window.AvinyaNestJSCards = new NestJSCardStack();
-});
+} else {
+  window.addEventListener('DOMContentLoaded', () => {
+    window.AvinyaNestJSCards = new NestJSCardStack();
+  });
+}

@@ -6,10 +6,12 @@ export default function OverlappingFanStack() {
   const stackRef = useRef(null);
 
   useEffect(() => {
-    // Instantiate NestJSCardStack engine logic
-    if (window.NestJSCardStack && stackRef.current) {
-      new window.NestJSCardStack();
-    }
+    const timer = setTimeout(() => {
+      if (window.NestJSCardStack && stackRef.current) {
+        window.AvinyaNestJSCards = new window.NestJSCardStack();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
