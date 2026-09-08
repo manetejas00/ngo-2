@@ -153,44 +153,44 @@ export default function JourneyDeck() {
       </section>
 
       {/* WHY IT MATTERS SECTION */}
-      <section id="why-it-matters" className="section-stories" style={{ background: '#080A09', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '7rem 2rem' }}>
-        <div className="section-header-center" style={{ maxWidth: '900px', margin: '0 auto 3.5rem' }}>
+      <section id="why-it-matters" className="section-stories why-it-matters-section">
+        <div className="section-header-center why-it-matters-header">
           <span className="category-tag category-tag-dark">WHY IT MATTERS</span>
           <h2 className="section-title section-title-dark" style={{ marginBottom: '1.25rem' }}>Early Detection Saves More Than Lives.</h2>
-          <p className="body-large-dark" style={{ maxWidth: '780px', margin: '0 auto', color: 'var(--text-light-sub)', lineHeight: 1.7 }}>
+          <p className="body-large-dark why-it-matters-subtitle">
             Late-stage cancer and heart treatment can cost families lakhs of rupees — and by then, outcomes are far less certain. A simple early screening test, costing a fraction of that, can catch warning signs years before symptoms appear. That's the difference our diagnostic centre is built to make.
           </p>
         </div>
 
-        <div className="action-grid" style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+        <div className="why-it-matters-grid">
           {/* Stat Card 1: 90% */}
-          <div className="action-card" style={{ background: '#141716', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="why-card">
             <div>
-              <span className="category-tag" style={{ background: 'rgba(235,94,40,0.15)', color: 'var(--brand)', fontWeight: 700, border: '1px solid rgba(235,94,40,0.3)', padding: '0.35rem 0.85rem', borderRadius: '999px', display: 'inline-block', marginBottom: '1.25rem', fontSize: '0.75rem', letterSpacing: '0.08em' }}>SURVIVAL IMPACT</span>
-              <h3 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--brand)', marginBottom: '0.75rem', lineHeight: 1.1 }}>90%</h3>
-              <p style={{ color: 'var(--text-light-sub)', fontSize: '0.98rem', lineHeight: 1.6 }}>
+              <span className="category-tag why-badge why-badge-brand">SURVIVAL IMPACT</span>
+              <h3 className="why-stat-num why-stat-brand">90%</h3>
+              <p className="why-stat-desc">
                 Higher survival rate when cancer is caught at Stage 1 vs Stage 4
               </p>
             </div>
           </div>
 
           {/* Stat Card 2: ₹5–10L+ */}
-          <div className="action-card" style={{ background: '#141716', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '2.5rem 2rem', display: 'flex', flexDirect: 'column', justifyContent: 'space-between' }}>
+          <div className="why-card">
             <div>
-              <span className="category-tag" style={{ background: 'rgba(42,157,143,0.15)', color: '#2A9D8F', fontWeight: 700, border: '1px solid rgba(42,157,143,0.3)', padding: '0.35rem 0.85rem', borderRadius: '999px', display: 'inline-block', marginBottom: '1.25rem', fontSize: '0.75rem', letterSpacing: '0.08em' }}>FINANCIAL RELIEF</span>
-              <h3 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#2A9D8F', marginBottom: '0.75rem', lineHeight: 1.1 }}>₹5–10L+</h3>
-              <p style={{ color: 'var(--text-light-sub)', fontSize: '0.98rem', lineHeight: 1.6 }}>
+              <span className="category-tag why-badge why-badge-teal">FINANCIAL RELIEF</span>
+              <h3 className="why-stat-num why-stat-teal">₹5–10L+</h3>
+              <p className="why-stat-desc">
                 Potential treatment cost a family avoids by catching a condition early
               </p>
             </div>
           </div>
 
           {/* Stat Card 3: 100% */}
-          <div className="action-card" style={{ background: '#141716', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px', padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="why-card">
             <div>
-              <span className="category-tag" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B', fontWeight: 700, border: '1px solid rgba(245,158,11,0.3)', padding: '0.35rem 0.85rem', borderRadius: '999px', display: 'inline-block', marginBottom: '1.25rem', fontSize: '0.75rem', letterSpacing: '0.08em' }}>COMMUNITY PROMISE</span>
-              <h3 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#F59E0B', marginBottom: '0.75rem', lineHeight: 1.1 }}>100%</h3>
-              <p style={{ color: 'var(--text-light-sub)', fontSize: '0.98rem', lineHeight: 1.6 }}>
+              <span className="category-tag why-badge why-badge-amber">COMMUNITY PROMISE</span>
+              <h3 className="why-stat-num why-stat-amber">100%</h3>
+              <p className="why-stat-desc">
                 Reinvested into free &amp; subsidised screening drives across Mumbai-Virar
               </p>
             </div>

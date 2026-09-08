@@ -1547,6 +1547,97 @@ button {
   box-shadow: 0 0 10px var(--brand);
 }
 
+/* Why It Matters Section Styles */
+.why-it-matters-section {
+  background: #080A09 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+  padding: 7rem 5% 7rem !important;
+}
+
+.why-it-matters-header {
+  max-width: 900px;
+  margin: 0 auto 3.5rem;
+  text-align: center;
+}
+
+.why-it-matters-subtitle {
+  max-width: 780px;
+  margin: 0 auto;
+  color: var(--text-light-muted);
+  line-height: 1.7;
+}
+
+.why-it-matters-grid {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  width: 100%;
+}
+
+.why-card {
+  background: #141716;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.why-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+.why-badge {
+  font-weight: 700;
+  border-radius: 999px;
+  display: inline-block;
+  margin-bottom: 1.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  padding: 0.35rem 0.85rem;
+}
+
+.why-badge-brand {
+  background: rgba(235, 94, 40, 0.15);
+  color: var(--brand);
+  border: 1px solid rgba(235, 94, 40, 0.3);
+}
+
+.why-badge-teal {
+  background: rgba(42, 157, 143, 0.15);
+  color: #2A9D8F;
+  border: 1px solid rgba(42, 157, 143, 0.3);
+}
+
+.why-badge-amber {
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.why-stat-num {
+  font-size: clamp(2.2rem, 4vw, 2.8rem);
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  line-height: 1.1;
+}
+
+.why-stat-brand { color: var(--brand); }
+.why-stat-teal { color: #2A9D8F; }
+.why-stat-amber { color: #F59E0B; }
+
+.why-stat-desc {
+  color: var(--text-light-muted);
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
 /* ==========================================================================
    7. HUMAN STORIES (DEEP BLACK #0A0A0A)
    ========================================================================== */
@@ -2856,26 +2947,37 @@ textarea:focus {
     border-radius: 18px;
   }
 
-  /* Section 6: Continuum of Care Journey Mobile */
+  /* Section 6: Continuum of Care Journey Mobile & Tablet */
   .section-journey {
     height: auto;
-    padding: 5rem 5% 5rem;
+    padding: 4.5rem 4% 4.5rem;
   }
   .journey-sticky-viewport {
     position: relative;
     height: auto;
     padding: 0;
-    overflow: visible;
+    overflow: hidden;
   }
   .nestjs-split-header {
     grid-template-columns: 1fr;
     gap: 1.25rem;
     margin-bottom: 2rem;
   }
+  .nestjs-card-deck-viewport {
+    padding: 1rem 0 2rem;
+    overflow: hidden;
+  }
   .nestjs-deck-card {
-    flex: 0 0 min(320px, 80vw);
-    padding: 2.2rem 1.8rem;
-    min-height: 350px;
+    flex: 0 0 min(310px, 84vw);
+    padding: 2rem 1.6rem;
+    min-height: 340px;
+  }
+  .why-it-matters-section {
+    padding: 4.5rem 4% 4.5rem !important;
+  }
+  .why-it-matters-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
   }
 
   /* Section 13: Champion Manifesto CTA Mobile */
@@ -3002,6 +3104,68 @@ textarea:focus {
     max-width: 0;
     opacity: 0;
     margin-left: 0;
+  }
+
+  /* Section 6: Continuum of Care Small Mobile (< 480px) */
+  .section-journey {
+    padding: 3.2rem 2% 3.5rem;
+  }
+  .journey-sticky-viewport {
+    overflow: hidden;
+  }
+  .nestjs-card-deck-viewport {
+    padding: 0.8rem 0 1.5rem;
+    overflow: hidden;
+  }
+  .nestjs-deck-card {
+    flex: 0 0 min(285px, 88vw);
+    padding: 1.5rem 1.25rem;
+    min-height: 320px;
+    border-radius: 20px;
+  }
+  .nestjs-deck-card .card-deck-title {
+    font-size: 1.35rem;
+    margin-bottom: 0.5rem;
+  }
+  .nestjs-deck-card .card-deck-desc {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .nestjs-deck-card button.btn-primary {
+    margin-top: 1.25rem !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.85rem !important;
+    width: 100%;
+    justify-content: center;
+  }
+  .nestjs-deck-controls {
+    gap: 0.8rem;
+    margin-top: 1.25rem;
+  }
+  .deck-arrow-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+  .deck-dots {
+    gap: 0.45rem;
+  }
+  .deck-dot {
+    width: 9px;
+    height: 9px;
+  }
+  .why-it-matters-section {
+    padding: 3.2rem 4% 3.5rem !important;
+  }
+  .why-it-matters-header {
+    margin-bottom: 2.2rem;
+  }
+  .why-it-matters-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.2rem;
+  }
+  .why-card {
+    padding: 1.6rem 1.2rem;
   }
 }
 
