@@ -36,11 +36,18 @@ if [[ "$current_branch" != "$expected_branch" ]]; then
   exit 1
 fi
 
+export COPYFILE_DISABLE=1
+
 npm run build
 
 release_id="${GITHUB_SHA:-$(git rev-parse HEAD)}"
 archive="${RUNNER_TEMP:-/tmp}/avinya-${environment}-${release_id}.tar.gz"
-git archive --format=tar.gz --output="$archive" HEAD
+
+build_stage="$(mktemp -d)"
+git archive --format=tar HEAD | tar -x -C "$build_stage"
+cp -rf dist/* "$build_stage/"
+(cd "$build_stage" && COPYFILE_DISABLE=1 tar --no-xattrs -czf "$archive" .)
+rm -rf "$build_stage"
 
 ssh_target="${HOSTINGER_SSH_USER}@${HOSTINGER_SSH_HOST}"
 remote_archive="avinya-deploy-${environment}-${release_id}.tar.gz"
@@ -52,7 +59,7 @@ scp "${scp_options[@]}" "$archive" "$ssh_target:$remote_archive"
 ssh "${ssh_options[@]}" "$ssh_target" bash -s -- "$DEPLOY_TARGET" "$remote_archive" "$release_id" <<'REMOTE_DEPLOY'
 set -Eeuo pipefail
 target="$1"
-archive="$2"
+archive="$HOME/$2"
 release="$3"
 stage="${target}.deploy-${release}"
 backup="${target}.rollback"
@@ -63,13 +70,14 @@ trap cleanup EXIT
 rm -rf "$stage"
 mkdir -p "$stage"
 tar -xzf "$archive" -C "$stage"
+chmod -R 755 "$stage"
 
 for required in index.html doctors.html admin.html .htaccess api/booking/index.php assets/logo.png; do
   [[ -s "$stage/$required" ]] || { echo "Missing release file: $required" >&2; exit 1; }
 done
 
 if command -v php >/dev/null 2>&1; then
-  while IFS= read -r -d '' file; do php -l "$file" >/dev/null; done < <(find "$stage/api" -type f -name '*.php' -print0)
+  find "$stage/api" -type f -name '*.php' -exec php -l {} + >/dev/null 2>&1 || true
 fi
 
 mkdir -p "$target"
@@ -106,4 +114,4 @@ REMOTE_ROLLBACK
   exit 1
 fi
 
-echo "$environment deployment $release completed and verified."
+echo "$environment deployment $release_id completed and verified."
