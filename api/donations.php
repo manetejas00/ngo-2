@@ -29,6 +29,10 @@ $isStats = (strpos($_SERVER['REQUEST_URI'], '/stats') !== false) || ($action ===
 if ($isStats) {
     $totalRaised = 0;
     $totalDonors = 0;
+    $pledgedTotal = 0;
+    $pledgedDonations = 0;
+    $pledgedCategories = [];
+    $pledgedCampaignDonors = [];
     try {
         $pdo = getDatabaseConnection();
         if ($pdo !== null) {
@@ -47,6 +51,23 @@ if ($isStats) {
             foreach ($donorStmt->fetchAll(PDO::FETCH_ASSOC) as $donorRow) {
                 $campaignDonors[$donorRow['campaign']] = (int)$donorRow['donors'];
             }
+
+            // Submitted donation forms are pledges until an administrator
+            // confirms payment. Expose them separately for campaign progress.
+            $pledgeStmt = $pdo->query("SELECT COALESCE(SUM(amount), 0) AS total_pledged, COUNT(*) AS pledge_count FROM form_submissions WHERE LOWER(form_type) = 'donation' AND amount > 0 AND UPPER(COALESCE(payment_status, 'PENDING')) IN ('PENDING', 'SUCCESS', 'CONFIRMED', 'PAID')");
+            $pledgeRow = $pledgeStmt->fetch(PDO::FETCH_ASSOC);
+            $pledgedTotal = (float)($pledgeRow['total_pledged'] ?? 0);
+            $pledgedDonations = (int)($pledgeRow['pledge_count'] ?? 0);
+
+            $pledgedCategoryStmt = $pdo->query("SELECT COALESCE(NULLIF(category, ''), NULLIF(interest, ''), 'General Fund') AS campaign, COALESCE(SUM(amount), 0) AS total FROM form_submissions WHERE LOWER(form_type) = 'donation' AND amount > 0 AND UPPER(COALESCE(payment_status, 'PENDING')) IN ('PENDING', 'SUCCESS', 'CONFIRMED', 'PAID') GROUP BY campaign");
+            foreach ($pledgedCategoryStmt->fetchAll(PDO::FETCH_ASSOC) as $categoryRow) {
+                $pledgedCategories[$categoryRow['campaign']] = (float)$categoryRow['total'];
+            }
+
+            $pledgedDonorStmt = $pdo->query("SELECT COALESCE(NULLIF(category, ''), NULLIF(interest, ''), 'General Fund') AS campaign, COUNT(DISTINCT NULLIF(LOWER(email), '')) AS donors FROM form_submissions WHERE LOWER(form_type) = 'donation' AND amount > 0 AND UPPER(COALESCE(payment_status, 'PENDING')) IN ('PENDING', 'SUCCESS', 'CONFIRMED', 'PAID') GROUP BY campaign");
+            foreach ($pledgedDonorStmt->fetchAll(PDO::FETCH_ASSOC) as $donorRow) {
+                $pledgedCampaignDonors[$donorRow['campaign']] = (int)$donorRow['donors'];
+            }
         }
     } catch (Throwable $e) {}
     
@@ -59,6 +80,10 @@ if ($isStats) {
             'donors' => $totalDonors,
             'categories' => $categories
             ,'campaign_donors' => $campaignDonors ?? []
+            ,'pledged_total' => $pledgedTotal
+            ,'pledged_donations' => $pledgedDonations
+            ,'pledged_categories' => $pledgedCategories
+            ,'pledged_campaign_donors' => $pledgedCampaignDonors
         ]
     ]);
     exit;
