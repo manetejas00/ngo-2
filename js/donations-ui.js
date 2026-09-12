@@ -13,21 +13,21 @@
     text('[data-unique-donor-count]', String(stats.unique_donors || stats.donors || 0));
     document.querySelectorAll('.cf-progress-container[data-campaign-category]').forEach(container => {
       const campaign = container.dataset.campaignCategory;
-      const raised = Number(stats.categories?.[campaign] || 0);
+      const pledged = Number(stats.pledged_categories?.[campaign] || 0);
       const goal = Number(container.dataset.goal || 0);
-      const percent = goal > 0 ? Math.round((raised / goal) * 100) : 0;
+      const percent = goal > 0 ? Math.round((pledged / goal) * 100) : 0;
       const raisedEl = container.querySelector('.cf-progress-raised');
       const percentEl = container.querySelector('.cf-progress-percent');
       const fillEl = container.querySelector('.cf-progress-bar-fill');
       const donorsEl = container.querySelector('.cf-progress-donor-count');
-      if (raisedEl) raisedEl.textContent = money(raised);
+      if (raisedEl) raisedEl.textContent = money(pledged);
       if (percentEl) percentEl.textContent = `${percent}%`;
       if (fillEl) {
         const visiblePercent = Math.max(0, Math.min(100, percent));
         fillEl.dataset.progress = String(visiblePercent);
         if (container.dataset.animated) fillEl.style.width = `${visiblePercent}%`;
       }
-      if (donorsEl) donorsEl.textContent = String(stats.campaign_donors?.[campaign] || 0);
+      if (donorsEl) donorsEl.textContent = String(stats.pledged_campaign_donors?.[campaign] || 0);
     });
   }
 

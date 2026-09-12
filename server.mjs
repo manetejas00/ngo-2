@@ -669,6 +669,10 @@ function calculateDonationStats(records) {
     donors: 0,
     categories: {},
     campaign_donors: {},
+    pledged_total: 0,
+    pledged_donations: 0,
+    pledged_categories: {},
+    pledged_campaign_donors: {},
     pending_total: 0,
     pending_donations: 0,
     failed_total: 0,
@@ -676,6 +680,7 @@ function calculateDonationStats(records) {
   };
   const donorKeys = new Set();
   const campaignDonorKeys = new Map();
+  const pledgedCampaignDonorKeys = new Map();
   const seenTransactions = new Set();
 
   for (const record of records || []) {
@@ -688,8 +693,18 @@ function calculateDonationStats(records) {
 
     const amount = Number(record.amount);
     const status = getPaymentStatus(record);
+    const category = getSubmissionCategory(record) || 'General Fund';
+
+    // Submitted forms are visible as pledges immediately. They remain
+    // separate from verified aid until payment is confirmed.
+    if (status === 'PENDING' || isSuccessfulDonation(record)) {
+      stats.pledged_total += amount;
+      stats.pledged_donations += 1;
+      stats.pledged_categories[category] = (stats.pledged_categories[category] || 0) + amount;
+      if (!pledgedCampaignDonorKeys.has(category)) pledgedCampaignDonorKeys.set(category, new Set());
+      if (record.email) pledgedCampaignDonorKeys.get(category).add(String(record.email).trim().toLowerCase());
+    }
     if (isSuccessfulDonation(record)) {
-      const category = getSubmissionCategory(record) || 'General Fund';
       stats.total += amount;
       stats.total_donations += 1;
       stats.categories[category] = (stats.categories[category] || 0) + amount;
@@ -708,6 +723,7 @@ function calculateDonationStats(records) {
   stats.unique_donors = donorKeys.size;
   stats.donors = stats.unique_donors;
   for (const [category, donors] of campaignDonorKeys) stats.campaign_donors[category] = donors.size;
+  for (const [category, donors] of pledgedCampaignDonorKeys) stats.pledged_campaign_donors[category] = donors.size;
   return stats;
 }
 
@@ -767,6 +783,27 @@ async function getFormSubmissions() {
   } catch (e) {
     return [];
   }
+}
+
+async function updateDonationPaymentStatus(submissionId, paymentStatus, verifiedBy) {
+  const allowedStatuses = new Set(['PENDING', 'CONFIRMED', 'PAID', 'FAILED']);
+  const normalizedId = String(submissionId || '').trim();
+  const normalizedStatus = String(paymentStatus || '').trim().toUpperCase();
+  if (!normalizedId || !allowedStatuses.has(normalizedStatus)) throw new Error('Invalid donation payment status update.');
+
+  const raw = await readFile(SUBMISSIONS_FILE, 'utf-8');
+  const submissions = JSON.parse(raw);
+  if (!Array.isArray(submissions)) throw new Error('Donation records are unavailable.');
+  const record = submissions.find(item => String(item.submissionId || item.id || item.submission_id || '').trim() === normalizedId
+    && String(item.formType || item.form_type || '').toLowerCase() === 'donation');
+  if (!record) throw new Error('Donation record was not found.');
+
+  record.paymentStatus = normalizedStatus;
+  record.payment_status = normalizedStatus;
+  record.paymentVerifiedBy = String(verifiedBy || 'admin').slice(0, 120);
+  record.paymentVerifiedAt = getFormattedISTTimestamp();
+  await writeFile(SUBMISSIONS_FILE, JSON.stringify(submissions, null, 2), 'utf-8');
+  return record;
 }
 
 function getFormattedISTTimestamp() {
@@ -1599,6 +1636,22 @@ const server = createServer(async (req, res) => {
           await updateTestBookingStatus(id, newStatus, sessionUser.name);
           return sendJson(200, { status: 'ok', message: `Diagnostic booking ${id} updated to ${newStatus}.` });
         }
+      }
+
+      if (action === 'update_donation_payment_status') {
+        if (sessionUser.role !== 'admin') {
+          return sendJson(403, { status: 'error', message: 'Administrator permissions are required to change payment status.' });
+        }
+        const updated = await updateDonationPaymentStatus(
+          payload.id || payload.submissionId,
+          payload.paymentStatus || payload.payment_status,
+          sessionUser.email || sessionUser.name || 'admin'
+        );
+        return sendJson(200, {
+          status: 'ok',
+          message: `Donation ${updated.submissionId || updated.id} marked ${updated.paymentStatus}.`,
+          donation: updated
+        });
       }
 
       // Action: Save Doctor (with photo upload support)

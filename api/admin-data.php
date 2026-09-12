@@ -172,6 +172,37 @@ if ($action === 'update_status') {
     }
 }
 
+// Action: administrator-only donation payment verification.
+if ($action === 'update_donation_payment_status') {
+    if ($userRole !== 'admin') {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Administrator permissions are required to change payment status.']);
+        exit(0);
+    }
+    $submissionId = validResourceId(trim((string) ($data['id'] ?? $data['submissionId'] ?? '')), 'submission ID');
+    $paymentStatus = strtoupper(trim((string) ($data['paymentStatus'] ?? $data['payment_status'] ?? '')));
+    if (!in_array($paymentStatus, ['PENDING', 'CONFIRMED', 'PAID', 'FAILED'], true)) {
+        http_response_code(422);
+        echo json_encode(['status' => 'error', 'message' => 'Invalid payment status.']);
+        exit(0);
+    }
+    if ($pdo === null) {
+        http_response_code(503);
+        echo json_encode(['status' => 'error', 'message' => 'Donation storage is unavailable.']);
+        exit(0);
+    }
+    $stmt = $pdo->prepare("UPDATE `form_submissions` SET `payment_status` = :payment_status WHERE `submission_id` = :submission_id AND LOWER(`form_type`) = 'donation'");
+    $stmt->execute([':payment_status' => $paymentStatus, ':submission_id' => $submissionId]);
+    if ($stmt->rowCount() !== 1) {
+        http_response_code(404);
+        echo json_encode(['status' => 'error', 'message' => 'Donation record was not found.']);
+        exit(0);
+    }
+    logActivity('DONATION_PAYMENT_STATUS_UPDATE', 'admin', $_SESSION['admin_email'] ?? 'admin', "Updated donation {$submissionId} payment status to {$paymentStatus}", ['submissionId' => $submissionId, 'paymentStatus' => $paymentStatus]);
+    echo json_encode(['status' => 'ok', 'message' => "Donation {$submissionId} marked {$paymentStatus}."]);
+    exit(0);
+}
+
 // Enforce Admin role for management actions
 if (in_array($action, ['save_doctor', 'delete_doctor', 'save_test', 'delete_test', 'save_user', 'delete_user', 'seed_catalog'], true)) {
     if ($userRole !== 'admin') {

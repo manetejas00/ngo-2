@@ -2927,12 +2927,19 @@
           <td><a href="mailto:${item.email}" style="color:#60A5FA">${escapeHtml(item.email)}</a></td>
           <td>${escapeHtml(item.phone || '-')}</td>
           <td><span style="color:#E2E8F0; font-weight: 500;">${escapeHtml(item.category || item.interest || '-')}</span></td>
-          <td>${item.form_type === 'donation' ? '<strong style="color:#34D399">₹' + item.amount + ' (' + (item.pan ? 'PAN: ' + item.pan : '80G') + ')</strong>' : escapeHtml((item.message || item.skills || item.organization || '').substring(0, 30))}</td>
+          <td>${item.form_type === 'donation' ? '<strong style="color:#34D399">₹' + item.amount + ' (' + (item.pan ? 'PAN: ' + item.pan : '80G') + ')</strong><br><span class="badge ' + (['PAID', 'CONFIRMED'].includes(String(item.payment_status || '').toUpperCase()) ? 'badge-success' : (String(item.payment_status || '').toUpperCase() === 'FAILED' ? 'badge-danger' : 'badge-warning')) + '" style="margin-top:5px">' + escapeHtml(String(item.payment_status || 'PENDING').toUpperCase()) + '</span>' : escapeHtml((item.message || item.skills || item.organization || '').substring(0, 30))}</td>
           <td><span class="badge ${item.delivery_status === 'SENT' ? 'badge-success' : 'badge-danger'}">${item.delivery_status || 'SENT'}</span></td>
           <td style="color:var(--text-muted);font-size:12px">${item.created_at || '-'}</td>
           <td>
             <div style="display:flex;gap:6px">
               <button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="viewDetail('form', '${item.submission_id}')">View</button>
+              ${item.form_type === 'donation' && currentUser?.role === 'admin' ? `
+                <select class="select-control" aria-label="Payment status" style="padding:4px 6px;font-size:12px" onchange="updateDonationPaymentStatus('${item.submission_id || item.id}', this.value, this)">
+                  <option value="PENDING" ${String(item.payment_status || 'PENDING').toUpperCase() === 'PENDING' ? 'selected' : ''}>Pending</option>
+                  <option value="CONFIRMED" ${String(item.payment_status || '').toUpperCase() === 'CONFIRMED' ? 'selected' : ''}>Confirmed</option>
+                  <option value="PAID" ${String(item.payment_status || '').toUpperCase() === 'PAID' ? 'selected' : ''}>Paid</option>
+                  <option value="FAILED" ${String(item.payment_status || '').toUpperCase() === 'FAILED' ? 'selected' : ''}>Failed</option>
+                </select>` : ''}
               ${item.form_type === 'donation' ? `
                 <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;color:#34D399;border-color:#34D399" onclick="window.AvinyaPdf.generateDonationReceiptPDF({
                   name: '${(item.name || '').replace(/'/g, "\\'")}',
@@ -2949,6 +2956,33 @@
           </td>
         </tr>
       `).join('');
+    }
+
+    async function updateDonationPaymentStatus(id, paymentStatus, select) {
+      const record = (rawData.formSubmissions || []).find(item => (item.submission_id || item.id) === id);
+      const priorStatus = String(record?.payment_status || 'PENDING').toUpperCase();
+      const nextStatus = String(paymentStatus || '').toUpperCase();
+      if (priorStatus === nextStatus) return;
+      if (!confirm(`Mark donation ${id} as ${nextStatus}? Confirmed and paid donations are included in the public verified total.`)) {
+        select.value = priorStatus;
+        return;
+      }
+      select.disabled = true;
+      try {
+        const response = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'update_donation_payment_status', id, paymentStatus: nextStatus })
+        });
+        const data = await response.json();
+        if (!response.ok || data.status !== 'ok') throw new Error(data.message || 'Unable to update payment status.');
+        await fetchAdminData(true);
+      } catch (error) {
+        alert(error.message || 'Unable to update payment status.');
+        select.value = priorStatus;
+      } finally {
+        select.disabled = false;
+      }
     }
 
     function renderDoctorBookings(items) {
