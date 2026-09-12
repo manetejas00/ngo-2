@@ -853,7 +853,23 @@ class HealthcarePlatform {
             </div>
           </div>
 
-          <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+          <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+            <button class="hc-btn-primary" style="background: #087F73;" onclick="window.AvinyaPdf.generateDoctorAppointmentPDF(window.HealthcareApp.bookingState.confirmedAppointment || {
+              id: '${apt.id}',
+              doctorName: '${(apt.doctorName || '').replace(/'/g, "\\'")}',
+              doctorSpeciality: '${(apt.doctorSpeciality || '').replace(/'/g, "\\'")}',
+              hospitalName: '${(apt.location || '').replace(/'/g, "\\'")}',
+              patientName: '${(apt.patientName || '').replace(/'/g, "\\'")}',
+              patientAge: '${apt.patientAge || ''}',
+              patientGender: '${apt.patientGender || ''}',
+              patientPhone: '${apt.patientPhone || ''}',
+              patientEmail: '${apt.patientEmail || ''}',
+              date: '${apt.date}',
+              time: '${apt.time}',
+              fee: ${apt.fee || 0}
+            })">
+              <span>📄 Download Consultation Slip (PDF)</span>
+            </button>
             <button class="hc-btn-primary" onclick="window.HealthcareApp.downloadCalendarInvite('${apt.id}')">
               <span>📅 Add to Calendar (.ics)</span>
             </button>
@@ -1280,9 +1296,27 @@ class HealthcarePlatform {
               <div><strong>Date & Slot:</strong> ${booking.date} (${booking.timeSlot})</div>
               <div><strong>Collection:</strong> ${booking.collectionMethod === 'home_collection' ? 'Home Sample Collection' : 'Centre Visit'}</div>
             </div>
-            <button class="hc-btn-primary" onclick="window.HealthcareApp.closeModals(); window.HealthcareApp.openHealthcarePlatform('dashboard');">
-              <span>View in Dashboard →</span>
-            </button>
+            <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+              <button class="hc-btn-primary" style="background: #087F73;" onclick="window.AvinyaPdf.generateDiagnosticBookingPDF({
+                id: '${booking.id}',
+                testName: '${(booking.testName || '').replace(/'/g, "\\'")}',
+                price: ${booking.price || 0},
+                date: '${booking.date}',
+                timeSlot: '${booking.timeSlot}',
+                collectionMethod: '${booking.collectionMethod}',
+                patientName: '${(payload.patientName || '').replace(/'/g, "\\'")}',
+                patientAge: '${payload.patientAge || ''}',
+                patientGender: '${payload.patientGender || ''}',
+                patientPhone: '${payload.patientPhone || ''}',
+                homeAddress: '${(payload.homeAddress || '').replace(/'/g, "\\'")}',
+                pincode: '${payload.pincode || ''}'
+              })">
+                <span>📄 Download Lab Order Slip (PDF)</span>
+              </button>
+              <button class="hc-btn-primary" onclick="window.HealthcareApp.closeModals(); window.HealthcareApp.openHealthcarePlatform('dashboard');">
+                <span>View in Dashboard →</span>
+              </button>
+            </div>
           </div>
         `;
         this.loadDashboardData();
@@ -1359,6 +1393,20 @@ class HealthcarePlatform {
                 </div>
               </div>
               <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="hc-btn-view-profile" style="color: #087F73; border-color: #087F73; font-weight: 700;" onclick="window.AvinyaPdf.generateDoctorAppointmentPDF({
+                  id: '${apt.id}',
+                  doctorName: '${(apt.doctorName || '').replace(/'/g, "\\'")}',
+                  doctorSpeciality: '${(apt.doctorSpeciality || '').replace(/'/g, "\\'")}',
+                  hospitalName: '${(apt.location || '').replace(/'/g, "\\'")}',
+                  patientName: '${(apt.patientName || '').replace(/'/g, "\\'")}',
+                  patientAge: '${apt.patientAge || ''}',
+                  patientGender: '${apt.patientGender || ''}',
+                  patientPhone: '${apt.patientPhone || ''}',
+                  patientEmail: '${apt.patientEmail || ''}',
+                  date: '${apt.date}',
+                  time: '${apt.time}',
+                  fee: ${apt.fee || 0}
+                })">📄 Slip (PDF)</button>
                 <button class="hc-btn-view-profile" onclick="window.HealthcareApp.downloadCalendarInvite('${apt.id}')">📅 Add Calendar</button>
                 ${apt.status === 'confirmed' ? `
                   <button class="hc-btn-view-profile" style="color: var(--hc-danger); border-color: var(--hc-danger-bg);" onclick="window.HealthcareApp.cancelAppointment('${apt.id}')">Cancel</button>
@@ -1385,8 +1433,19 @@ class HealthcarePlatform {
                   📅 <strong>${t.date}</strong> (${t.timeSlot}) • ${t.collectionMethod === 'home_collection' ? '🏠 Home Sample' : `🔬 ${t.centreName}`}
                 </div>
               </div>
-              <div>
+              <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                 <strong style="font-size: 1.1rem; color: var(--hc-text-main);">₹${t.price}</strong>
+                <button class="hc-btn-view-profile" style="color: #087F73; border-color: #087F73; font-weight: 700;" onclick="window.AvinyaPdf.generateDiagnosticBookingPDF({
+                  id: '${t.id}',
+                  testName: '${(t.testName || '').replace(/'/g, "\\'")}',
+                  price: ${t.price || 0},
+                  date: '${t.date}',
+                  timeSlot: '${t.timeSlot}',
+                  collectionMethod: '${t.collectionMethod}',
+                  patientName: '${(t.patientName || '').replace(/'/g, "\\'")}',
+                  patientPhone: '${t.patientPhone || ''}',
+                  address: '${(t.address || '').replace(/'/g, "\\'")}'
+                })">📄 Pass (PDF)</button>
               </div>
             </div>
           `).join('');

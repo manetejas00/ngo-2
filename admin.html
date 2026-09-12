@@ -10,6 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <!-- Chart.js CDN for Interactive Graphs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- html2pdf.js & Avinya PDF Service -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="js/services/pdf-service.js?v=2.5"></script>
   <style>
     :root {
       --primary: #087F73;
@@ -1314,6 +1317,7 @@
               <button class="btn btn-outline" id="reseedCatalogBtn" style="display:none;" onclick="reseedCatalog()">🔄 Re-Seed Catalog</button>
 
               <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
+              <button class="btn btn-outline" style="color: #5EEAD4; border-color: rgba(94, 234, 212, 0.4);" onclick="exportPDF()">📄 Export PDF Report</button>
             </div>
           </div>
 
@@ -1472,6 +1476,12 @@
         <button class="close-btn" onclick="closeModal()">✕</button>
       </div>
       <div id="modalBody"></div>
+      <div style="padding: 14px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; background: rgba(0,0,0,0.25);">
+        <button type="button" class="btn btn-teal" id="detailPdfBtn" onclick="downloadCurrentRecordPDF()">
+          <span>📄 Download Official PDF (with Letterhead)</span>
+        </button>
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Close</button>
+      </div>
     </div>
   </div>
 
@@ -2880,7 +2890,23 @@
           <td>${item.form_type === 'donation' ? '<strong style="color:#34D399">₹' + item.amount + ' (' + (item.pan ? 'PAN: ' + item.pan : '80G') + ')</strong>' : escapeHtml((item.message || item.skills || item.organization || '').substring(0, 30))}</td>
           <td><span class="badge ${item.delivery_status === 'SENT' ? 'badge-success' : 'badge-danger'}">${item.delivery_status || 'SENT'}</span></td>
           <td style="color:var(--text-muted);font-size:12px">${item.created_at || '-'}</td>
-          <td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="viewDetail('form', '${item.submission_id}')">View</button></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="viewDetail('form', '${item.submission_id}')">View</button>
+              ${item.form_type === 'donation' ? `
+                <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;color:#34D399;border-color:#34D399" onclick="window.AvinyaPdf.generateDonationReceiptPDF({
+                  name: '${(item.name || '').replace(/'/g, "\\'")}',
+                  email: '${(item.email || '').replace(/'/g, "\\'")}',
+                  phone: '${(item.phone || '').replace(/'/g, "\\'")}',
+                  pan: '${(item.pan || '').replace(/'/g, "\\'")}',
+                  amount: ${item.amount || 1000},
+                  transaction_id: '${item.transaction_id || item.submission_id}',
+                  receiptNo: '${item.submission_id}',
+                  date: '${item.created_at || ''}'
+                })">📄 80G PDF</button>
+              ` : ''}
+            </div>
+          </td>
         </tr>
       `).join('');
     }
@@ -2907,7 +2933,23 @@
             </select>
           </td>
           <td style="color:var(--text-muted);font-size:12px">${item.created_at || item.createdAt || '-'}</td>
-          <td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="viewDetail('doctor', '${item.booking_id || item.id}')">View</button></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px" onclick="viewDetail('doctor', '${item.booking_id || item.id}')">View</button>
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;color:#5EEAD4;border-color:rgba(94,234,212,0.4)" onclick="window.AvinyaPdf.generateDoctorAppointmentPDF({
+                id: '${item.booking_id || item.id}',
+                doctorName: '${(item.doctor_name || item.doctorName || '').replace(/'/g, "\\'")}',
+                doctorSpeciality: '${(item.doctor_speciality || item.doctorSpeciality || '').replace(/'/g, "\\'")}',
+                patientName: '${(item.patient_name || item.patientName || '').replace(/'/g, "\\'")}',
+                patientAge: '${item.patient_age || item.patientAge || ''}',
+                patientGender: '${item.patient_gender || item.patientGender || ''}',
+                patientPhone: '${item.patient_phone || item.patientPhone || ''}',
+                patientEmail: '${item.patient_email || item.patientEmail || ''}',
+                date: '${item.booking_date || item.date || ''}',
+                time: '${item.booking_time || item.time || ''}'
+              })">📄 Slip</button>
+            </div>
+          </td>
         </tr>
       `).join('');
     }
@@ -2933,7 +2975,22 @@
               <option value="cancelled" ${(item.status || '') === 'cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>
           </td>
-          <td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="viewDetail('diagnostic', '${item.booking_id || item.id}')">View</button></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px" onclick="viewDetail('diagnostic', '${item.booking_id || item.id}')">View</button>
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;color:#5EEAD4;border-color:rgba(94,234,212,0.4)" onclick="window.AvinyaPdf.generateDiagnosticBookingPDF({
+                id: '${item.booking_id || item.id}',
+                testName: '${(item.test_name || item.testName || '').replace(/'/g, "\\'")}',
+                price: ${item.price || 0},
+                patientName: '${(item.patient_name || item.patientName || '').replace(/'/g, "\\'")}',
+                patientPhone: '${item.patient_phone || item.patientPhone || ''}',
+                date: '${item.booking_date || item.date || ''}',
+                timeSlot: '${item.time_slot || item.timeSlot || ''}',
+                collectionMethod: '${item.collection_method || 'home_collection'}',
+                address: '${(item.city || 'Mumbai').replace(/'/g, "\\'")}'
+              })">📄 Pass</button>
+            </div>
+          </td>
         </tr>
       `).join('');
     }
@@ -3550,6 +3607,8 @@
       }
     }
 
+    let currentViewedRecord = null;
+
     function viewDetail(category, id) {
       const modal = document.getElementById('detailModal');
       const body = document.getElementById('modalBody');
@@ -3562,6 +3621,7 @@
       else if (category === 'user') item = rawData.usersCatalog.find(i => (i.user_id || i.id) === id);
 
       if (!item) return;
+      currentViewedRecord = { category, id, item };
 
       document.getElementById('modalTitle').innerText = `${category.toUpperCase()} Record: ${id}`;
       body.innerHTML = Object.entries(item).map(([k, v]) => `
@@ -3574,8 +3634,45 @@
       modal.style.display = 'flex';
     }
 
+    function downloadCurrentRecordPDF() {
+      if (!currentViewedRecord || !window.AvinyaPdf) {
+        alert('No record selected to download.');
+        return;
+      }
+      window.AvinyaPdf.generateRecordPDF(currentViewedRecord.category, currentViewedRecord.item);
+    }
+
     function closeModal() {
       document.getElementById('detailModal').style.display = 'none';
+      currentViewedRecord = null;
+    }
+
+    function exportPDF() {
+      let data = [];
+      const title = `Avinya Care Foundation - ${currentTab.toUpperCase()} Official Report`;
+
+      if (currentTab.startsWith('forms')) {
+        data = rawData.formSubmissions || [];
+        if (currentTab !== 'forms_all') {
+          const targetType = currentTab.replace('forms_', '');
+          data = data.filter(i => (i.form_type || 'contact').toLowerCase() === targetType);
+        }
+      } else if (currentTab === 'doctor') data = rawData.doctorBookings || [];
+      else if (currentTab === 'diagnostic') data = rawData.diagnosticBookings || [];
+      else if (currentTab === 'email') data = rawData.emailLogs || [];
+      else if (currentTab === 'activity') data = rawData.activityLogs || [];
+      else if (currentTab === 'doctorsCatalog') data = rawData.doctorsCatalog || [];
+      else if (currentTab === 'testsCatalog') data = rawData.diagnosticTestsCatalog || [];
+      else if (currentTab === 'usersCatalog') data = rawData.usersCatalog || [];
+
+      if (!data || data.length === 0) {
+        alert('No data available in current view to export as PDF.');
+        return;
+      }
+
+      const columns = Object.keys(data[0]).slice(0, 6);
+      const rows = data.map(row => columns.map(col => String(row[col] ?? '-')));
+      window.AvinyaPdf.generateReportPDF(title, columns, rows);
     }
 
     function exportCSV() {

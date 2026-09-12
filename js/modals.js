@@ -258,7 +258,31 @@ class ModalManager {
               </div>
             </div>
 
-            <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="width: 100%; justify-content: center;">
+            <!-- PDF Download Action for Donations / Guides -->
+            ${formType === 'donation' ? `
+              <div style="margin-bottom: 1.25rem;">
+                <button class="btn-primary" onclick="window.AvinyaPdf.generateDonationReceiptPDF({
+                  name: '${(payload.name || '').replace(/'/g, "\\'")}',
+                  email: '${(payload.email || '').replace(/'/g, "\\'")}',
+                  phone: '${(payload.phone || '').replace(/'/g, "\\'")}',
+                  pan: '${(payload.pan || '').replace(/'/g, "\\'")}',
+                  amount: ${payload.amount || 1000},
+                  transaction_id: '${payload.transaction_id || resData.submissionId}',
+                  receiptNo: '${resData.submissionId}'
+                })" style="width: 100%; justify-content: center; background: #087F73; margin-bottom: 0.5rem;">
+                  <span>📄 Download Official 80G Tax Receipt (PDF)</span>
+                </button>
+                <div style="font-size: 0.8rem; color: #166534; font-weight: 600;">✓ Form 10BE compliant official letterhead receipt</div>
+              </div>
+            ` : formType === 'guide' ? `
+              <div style="margin-bottom: 1.25rem;">
+                <button class="btn-primary" onclick="window.AvinyaPdf.generateAwarenessGuidePDF()" style="width: 100%; justify-content: center; background: #087F73;">
+                  <span>📄 Download Cancer Awareness Toolkit PDF</span>
+                </button>
+              </div>
+            ` : ''}
+
+            <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="width: 100%; justify-content: center; ${formType === 'donation' ? 'background: #475569;' : ''}">
               Return to Website
             </button>
           </div>
@@ -468,7 +492,7 @@ class ModalManager {
               <li><strong>Colorectal Screening:</strong> Stool test (FIT) / Colonoscopy screening starting at age 45.</li>
             </ul>
           </div>
-          <button class="btn-primary" onclick="alert('Awareness PDF Guide downloaded successfully.')">
+          <button class="btn-primary" onclick="window.AvinyaPdf.generateAwarenessGuidePDF('${topic.replace(/'/g, "\\'")}')">
             Download Printable PDF Guide 📄
           </button>
         </div>
