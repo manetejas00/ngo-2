@@ -667,8 +667,10 @@ async function getFormSubmissions() {
       email: item.email || '',
       phone: item.phone || '',
       organization: item.organization || '',
+      interest: item.interest || '',
       message: item.message || '',
       amount: item.amount || null,
+      payment_status: item.paymentStatus || item.payment_status || 'SUCCESS',
       delivery_status: item.deliveryStatus || item.delivery_status || 'SENT',
       created_at: item.timestampIST || item.created_at || new Date().toISOString()
     }));
@@ -772,6 +774,16 @@ const server = createServer(async (req, res) => {
 
   // Rate Limiting Check on Every Route
   if (!checkRateLimit(req, res)) {
+    return;
+  }
+
+  // Optional external redirect if explicitly configured via environment variable
+  if ((urlPath === '/crowdfunding' || urlPath === '/crowdfunding/') && process.env.CROWDFUNDING_REDIRECT_URL && process.env.CROWDFUNDING_REDIRECT_URL.startsWith('http')) {
+    res.writeHead(301, {
+      'Location': process.env.CROWDFUNDING_REDIRECT_URL,
+      'Cache-Control': 'public, max-age=31536000'
+    });
+    res.end();
     return;
   }
 
@@ -928,6 +940,53 @@ const server = createServer(async (req, res) => {
         message: 'Internal server error processing form submission',
         errorMessage: err.message
       }));
+      return;
+    }
+  }
+
+  // API Endpoint: /api/donations/recent & /api/donations (Serves real donations sorted latest first, without timestamps)
+  if ((urlPath === '/api/donations/recent' || urlPath === '/api/donations') && req.method === 'GET') {
+    try {
+      const submissions = await getFormSubmissions();
+      // Filter donation records with positive amounts (sorted latest first)
+      const realDonations = submissions
+        .filter(s => s.form_type === 'donation' && parseFloat(s.amount) > 0)
+        .map(d => {
+          let displayName = (d.name || 'Anonymous Supporter').trim();
+          const parts = displayName.split(/\s+/);
+          if (parts.length > 1 && !displayName.toLowerCase().includes('supporter') && !displayName.toLowerCase().includes('anonymous')) {
+            displayName = `${parts[0]} ${parts[parts.length - 1][0].toUpperCase()}.`;
+          }
+
+          let cause = (d.interest || d.message || '').trim();
+          if (!cause) {
+            cause = 'Emergency Medical Relief';
+          }
+
+          const amt = parseFloat(d.amount);
+          return {
+            id: d.id || d.submission_id,
+            name: displayName,
+            amount: amt,
+            formattedAmount: '₹' + new Intl.NumberFormat('en-IN').format(amt),
+            cause
+          };
+        });
+
+      res.writeHead(200, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'Access-Control-Allow-Origin': '*'
+      });
+      res.end(JSON.stringify({
+        status: 'ok',
+        count: realDonations.length,
+        donations: realDonations
+      }));
+      return;
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({ status: 'error', message: 'Failed to retrieve donations', detail: err.message }));
       return;
     }
   }
@@ -1335,6 +1394,34 @@ const server = createServer(async (req, res) => {
       } else {
         return sendJson(400, { status: 'error', message: 'Invalid admin auth action.' });
       }
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
+  // --- NEW ENDPOINT: /api/donations/stats ---
+  if (req.method === 'GET' && urlPath === '/api/donations/stats') {
+    try {
+      const submissions = await getFormSubmissions();
+      const stats = {
+        total: 0,
+        categories: {}
+      };
+      
+      submissions.forEach(s => {
+        if (s.form_type === 'donation' && parseFloat(s.amount) > 0) {
+          const amt = parseFloat(s.amount);
+          stats.total += amt;
+          
+          let cat = (s.interest || s.category || 'General Fund').trim();
+          stats.categories[cat] = (stats.categories[cat] || 0) + amt;
+        }
+      });
+
+      return sendJson(200, {
+        status: 'ok',
+        stats
+      });
     } catch (err) {
       return sendJson(500, { status: 'error', message: err.message });
     }
@@ -1958,7 +2045,10 @@ const server = createServer(async (req, res) => {
 
   // Static File Serving
   let targetFile = decodeURIComponent(urlPath === '/' ? 'index.html' : urlPath);
-  if (targetFile === '/doctors' || targetFile === 'doctors') targetFile = '/doctors.html';
+  const normalizedPath = targetFile.replace(/\/+$/, '').toLowerCase();
+  if (normalizedPath === '/doctors' || normalizedPath === 'doctors') targetFile = '/doctors.html';
+  if (normalizedPath === '/crowdfunding' || normalizedPath === 'crowdfunding') targetFile = '/crowdfunding.html';
+  if (normalizedPath === '/admin' || normalizedPath === 'admin') targetFile = '/admin.html';
   let filePath = join(__dirname, targetFile.startsWith('/') ? targetFile.slice(1) : targetFile);
 
   // Security Shield: Block direct static serving of PHP script source code, .env files, and storage directories

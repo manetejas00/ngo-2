@@ -184,6 +184,21 @@ class AvinyaPdfService {
     return (res.trim() + ' Rupees Only');
   }
 
+  getLetterheadDataHtml() {
+    return `
+      <div style="margin-top: -65px; text-align: center; font-size: 11px; color: #475569; margin-bottom: 20px; line-height: 1.5;">
+        <div style="font-weight: 700; color: #087F73;">Reg. Public Charitable Trust • NITI Aayog NGO Darpan Verified</div>
+        <div>12 Yehsubal Apt, Narangi Phata, Virar East, Palghar, Maharashtra - 401303</div>
+        <div style="margin-top: 3px;">
+          <span style="display: inline-block; margin-right: 12px;">📞 +91 744744116</span>
+          <span style="display: inline-block; margin-right: 12px;">✉️ avinyacarefoundation@gmail.com</span>
+          <span style="display: inline-block;">🌐 www.avinyacarefoundation.org</span>
+        </div>
+      </div>
+    `;
+  }
+
+
   showPreviewModal(sheetHtml, filename) {
     let modal = document.getElementById('avinya-pdf-modal');
     if (!modal) {
@@ -275,6 +290,7 @@ class AvinyaPdfService {
   generateAwarenessGuidePDF(topic = "Comprehensive Cancer Awareness & Screening Checklist") {
     const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
     const sheetHtml = `
+      ${this.getLetterheadDataHtml()}
       <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #E2E8F0; padding-bottom: 12px; margin-bottom: 16px;">
         <div>
           <span style="font-size: 10px; font-weight: 800; color: #087F73; text-transform: uppercase; letter-spacing: 1px; background: #E6F4F1; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 4px;">Public Health Initiative • Free Community Resource</span>
@@ -379,6 +395,7 @@ class AvinyaPdfService {
     const txnId = data.transaction_id || data.txn_id || `TXN-${Date.now().toString().slice(-8)}`;
 
     const sheetHtml = `
+      ${this.getLetterheadDataHtml()}
       <div style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid #087F73; padding-bottom: 8px;">
         <span style="background: #087F73; color: white; font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: 1px;">Official Tax Exemption Receipt</span>
         <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 4px 0 2px 0;">DONATION RECEIPT UNDER SECTION 80G</h1>
@@ -461,6 +478,7 @@ class AvinyaPdfService {
     const type = apt.consultationType || 'in-clinic';
 
     const sheetHtml = `
+      ${this.getLetterheadDataHtml()}
       <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #087F73; padding-bottom: 10px; margin-bottom: 14px;">
         <div>
           <span style="font-size: 10px; font-weight: 800; color: #087F73; text-transform: uppercase; background: #E6F4F1; padding: 2px 8px; border-radius: 4px;">Outpatient Consultation Pass</span>
@@ -534,6 +552,7 @@ class AvinyaPdfService {
     const pincode = booking.pincode || '400050';
 
     const sheetHtml = `
+      ${this.getLetterheadDataHtml()}
       <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #087F73; padding-bottom: 10px; margin-bottom: 14px;">
         <div>
           <span style="font-size: 10px; font-weight: 800; color: #087F73; text-transform: uppercase; background: #E6F4F1; padding: 2px 8px; border-radius: 4px;">Diagnostic Investigation Pass</span>
@@ -599,6 +618,7 @@ class AvinyaPdfService {
   generateReportPDF(title = 'Avinya Care Platform Report', columns = [], rows = []) {
     const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
     const sheetHtml = `
+      ${this.getLetterheadDataHtml()}
       <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #087F73; padding-bottom: 10px; margin-bottom: 14px;">
         <div>
           <span style="font-size: 10px; font-weight: 800; color: #087F73; text-transform: uppercase; background: #E6F4F1; padding: 2px 8px; border-radius: 4px;">Executive Administration Record</span>
@@ -658,6 +678,7 @@ class AvinyaPdfService {
     const entries = Object.entries(item).filter(([k, v]) => typeof v !== 'object');
 
     const sheetHtml = `
+      ${this.getLetterheadDataHtml()}
       <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #087F73; padding-bottom: 10px; margin-bottom: 14px;">
         <div>
           <span style="font-size: 10px; font-weight: 800; color: #087F73; text-transform: uppercase; background: #E6F4F1; padding: 2px 8px; border-radius: 4px;">Official System Record</span>

@@ -96,8 +96,10 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             `pan` VARCHAR(50) DEFAULT NULL,
             `transaction_id` VARCHAR(100) DEFAULT NULL,
             `organization` VARCHAR(255) DEFAULT NULL,
+            `category` VARCHAR(100) DEFAULT NULL,
             `interest` VARCHAR(255) DEFAULT NULL,
             `message` TEXT DEFAULT NULL,
+            `payment_status` VARCHAR(50) DEFAULT 'PENDING',
             `user_email_sent` TINYINT(1) DEFAULT 0,
             `admin_email_sent` TINYINT(1) DEFAULT 0,
             `delivery_status` VARCHAR(50) DEFAULT 'UNKNOWN',
@@ -309,6 +311,14 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
     }
 
     try {
+        $colsForms = $pdo->query("SHOW COLUMNS FROM `form_submissions`")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('category', $colsForms, true)) {
+            $pdo->exec("ALTER TABLE `form_submissions` ADD COLUMN `category` VARCHAR(100) DEFAULT NULL AFTER `organization`");
+        }
+        if (!in_array('payment_status', $colsForms, true)) {
+            $pdo->exec("ALTER TABLE `form_submissions` ADD COLUMN `payment_status` VARCHAR(50) DEFAULT 'PENDING' AFTER `message`");
+        }
+        
         $colsTests = $pdo->query("SHOW COLUMNS FROM `diagnostic_tests`")->fetchAll(PDO::FETCH_COLUMN);
         if (!in_array('sample_type', $colsTests, true)) {
             $pdo->exec("ALTER TABLE `diagnostic_tests` ADD COLUMN `sample_type` VARCHAR(100) DEFAULT 'Blood / Serum Sample' AFTER `report_turnaround`");

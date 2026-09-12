@@ -398,8 +398,8 @@ try {
     $pdo = getDatabaseConnection();
     if ($pdo !== null) {
         $stmt = $pdo->prepare("INSERT INTO `form_submissions` 
-            (`submission_id`, `form_type`, `name`, `email`, `phone`, `amount`, `frequency`, `pan`, `transaction_id`, `organization`, `interest`, `message`, `user_email_sent`, `admin_email_sent`, `delivery_status`, `raw_payload`) 
-            VALUES (:sub_id, :ftype, :name, :email, :phone, :amount, :freq, :pan, :tx_id, :org, :interest, :msg, :u_sent, :a_sent, :status, :payload)");
+            (`submission_id`, `form_type`, `name`, `email`, `phone`, `amount`, `frequency`, `pan`, `transaction_id`, `organization`, `category`, `interest`, `message`, `payment_status`, `user_email_sent`, `admin_email_sent`, `delivery_status`, `raw_payload`) 
+            VALUES (:sub_id, :ftype, :name, :email, :phone, :amount, :freq, :pan, :tx_id, :org, :category, :interest, :msg, :pay_stat, :u_sent, :a_sent, :status, :payload)");
         
         $stmt->execute([
             ':sub_id' => $submissionId,
@@ -412,8 +412,10 @@ try {
             ':pan' => $pan,
             ':tx_id' => $transactionId,
             ':org' => $organization,
+            ':category' => $data['category'] ?? null,
             ':interest' => $interest,
             ':msg' => $message,
+            ':pay_stat' => $data['payment_status'] ?? 'PENDING',
             ':u_sent' => $userEmailSent ? 1 : 0,
             ':a_sent' => $adminEmailSent ? 1 : 0,
             ':status' => $deliveryStatus,

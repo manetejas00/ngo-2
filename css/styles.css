@@ -2655,6 +2655,9 @@ button {
   font-weight: 700;
   font-size: 0.9rem;
   color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
   transition: all var(--transition-fast);
 }
 
@@ -2679,6 +2682,7 @@ button {
   font-weight: 700;
   font-size: 0.95rem;
   color: var(--gray-900);
+  cursor: pointer;
   transition: all var(--transition-fast);
 }
 
@@ -2703,26 +2707,65 @@ button {
   border: 1px solid var(--gray-200);
 }
 
-/* Form Controls */
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="number"],
-select,
-textarea {
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(244, 117, 40, 0.1);
+  color: var(--brand);
+  border: 1px solid rgba(244, 117, 40, 0.25);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  margin-bottom: 0.5rem;
+}
+
+/* Modal Typography & Form Controls */
+.modal-container h2,
+.modal-container h3,
+.modal-container h4 {
+  color: var(--gray-900) !important;
+}
+
+.modal-container p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.modal-container form input,
+.modal-container form select,
+.modal-container form textarea {
   font-family: var(--font-primary);
   font-size: 0.95rem;
-  color: var(--gray-900);
-  background: var(--white);
+  color: #111817 !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid var(--gray-200) !important;
+  border-radius: 10px !important;
+  padding: 0.85rem 1.1rem !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
   outline: none;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+.modal-container form input:focus,
+.modal-container form select:focus,
+.modal-container form textarea:focus {
   border-color: var(--brand) !important;
   box-shadow: 0 0 0 4px var(--brand-light) !important;
+}
+
+.modal-container form input::placeholder,
+.modal-container form textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+.modal-container form button[type="submit"] {
+  cursor: pointer;
+  border: none;
 }
 
 /* Responsive Breakpoints */

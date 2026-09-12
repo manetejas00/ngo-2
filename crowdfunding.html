@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Crowdfunding & Emergency Relief | Avinya Care Foundation</title>
+  <meta name="description" content="Direct, verified medical crowdfunding with 0% platform fee. Donate to urgent surgeries, child cancer treatments, and ICU care with instant 80G tax exemption.">
+  <meta name="keywords" content="medical crowdfunding India, cancer donation, child surgery fundraiser, 80G tax benefit donation, emergency ICU crowdfunding, Avinya Care Foundation">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="alternate icon" href="favicon.ico">
+
+  <!-- Google Fonts: Inter & Manrope -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/styles.css?v=2.5">
+  <link rel="stylesheet" href="css/crowdfunding.css?v=1.0">
+</head>
+
+<body class="cf-page">
+
+  <!-- 1. FLOATING NAVIGATION BAR -->
+  <header class="navbar-wrapper">
+    <nav class="navbar scrolled-dark" aria-label="Main Navigation">
+      <a href="index.html" class="nav-brand" aria-label="Avinya Care Foundation Home">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Foundation Logo" class="brand-logo-img">
+        <div class="brand-text">
+          <span class="brand-name">Avinya Care</span>
+          <span class="brand-tag">Foundation</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="index.html#hero" class="nav-link">About</a></li>
+        <li><a href="index.html#what-we-do" class="nav-link">What We Do</a></li>
+        <li><a href="doctors.html" class="nav-link nav-link-healthcare" id="nav-doctors-tests">Doctors & Tests</a></li>
+        <li><a href="crowdfunding.html" class="nav-link active">Crowdfunding</a></li>
+        <li><a href="index.html#stories" class="nav-link">Stories</a></li>
+        <li><a href="index.html#impact" class="nav-link">Impact</a></li>
+        <li><a href="index.html#news" class="nav-link">News</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="btn-primary" onclick="window.AvinyaModals.openDonateModal(1000)">
+          <span>Donate Now</span>
+          <span class="arrow">→</span>
+        </button>
+        <button class="mobile-toggle" aria-label="Toggle Mobile Navigation" aria-expanded="false">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-nav-overlay" id="mobile-nav-overlay" style="display: none;">
+    <button class="modal-close-btn" style="top: 2rem; right: 2rem; color: white; background: rgba(255,255,255,0.1);" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none';">✕</button>
+    <div class="mobile-nav-brand-header">
+      <img src="assets/logo-white.png" alt="Avinya Care Foundation" class="mobile-nav-logo">
+      <div class="mobile-nav-title">Avinya Care Foundation</div>
+      <div class="mobile-nav-tagline">No one should face a health crisis alone</div>
+    </div>
+    <ul class="mobile-nav-menu">
+      <li><a href="index.html#hero" class="mobile-nav-link">About</a></li>
+      <li><a href="index.html#what-we-do" class="mobile-nav-link">What We Do</a></li>
+      <li><a href="doctors.html" class="mobile-nav-link" style="color: var(--brand); font-weight: 700;">Doctors & Tests</a></li>
+      <li><a href="crowdfunding.html" class="mobile-nav-link" style="color: #FFA466; font-weight: 700;">Crowdfunding</a></li>
+      <li><a href="index.html#stories" class="mobile-nav-link">Stories</a></li>
+      <li><a href="index.html#impact" class="mobile-nav-link">Impact</a></li>
+      <li><a href="index.html#news" class="mobile-nav-link">News</a></li>
+    </ul>
+    <div style="margin-top: 2.5rem;">
+      <button class="btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; window.AvinyaModals.openDonateModal(1000);">
+        <span>Donate Now →</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. HERO SECTION -->
+  <section class="cf-hero">
+    <div class="cf-hero-inner">
+      <div class="cf-hero-badge">
+        <span>🎗️</span> 100% Direct Hospital Settlement • 0% Platform Fee
+      </div>
+
+      <h1 class="cf-hero-title">
+        No Life Lost Due to <span class="accent-orange">Lack of Funds</span>.<br>
+        Direct <span class="accent-teal">Medical Crowdfunding</span>.
+      </h1>
+
+      <p class="cf-hero-subtitle">
+        Every rupee you donate is wired directly to verified hospital accounts for life-saving surgeries, chemotherapy, and pediatric ICU treatments. Get instant 50% tax deduction under Section 80G.
+      </p>
+
+      <div class="cf-hero-actions">
+        <a href="#urgent-spotlight" class="cf-btn-primary">
+          <span>Explore Urgent Cases</span>
+          <span>↓</span>
+        </a>
+        <button class="cf-btn-secondary" onclick="window.AvinyaModals.openModal('support-modal')">
+          <span>Start a Fundraiser / Seek Help</span>
+          <span>→</span>
+        </button>
+      </div>
+
+      <!-- Live Trust Metrics Bar -->
+      <div class="cf-stats-grid">
+        <div class="cf-stat-card">
+          <div class="cf-stat-number" id="global-total-raised">₹0</div>
+          <div class="cf-stat-label">Direct Healthcare Aid Disbursed</div>
+        </div>
+        <div class="cf-stat-card">
+          <div class="cf-stat-number">1,240+</div>
+          <div class="cf-stat-label">Critical Surgeries Funded</div>
+        </div>
+        <div class="cf-stat-card">
+          <div class="cf-stat-number">100%</div>
+          <div class="cf-stat-label">Direct Hospital Transfer (0% Fee)</div>
+        </div>
+        <div class="cf-stat-card">
+          <div class="cf-stat-number">50%</div>
+          <div class="cf-stat-label">80G Tax Exemption (Instant Receipt)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. LIVE DONATIONS TICKER -->
+  <div class="cf-ticker-wrapper">
+    <div class="cf-ticker-inner">
+      <div class="cf-ticker-badge">
+        <span class="cf-ticker-pulse"></span>
+        Live Activity
+      </div>
+      <div class="cf-ticker-mask" style="overflow: hidden; flex: 1; display: flex; align-items: center;">
+        <div class="cf-ticker-content" id="cf-ticker-stream">
+          <!-- Live donation items will be injected here from the DB -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. URGENT SPOTLIGHT CAMPAIGN -->
+  <section class="cf-spotlight-section" id="urgent-spotlight">
+    <div class="cf-section-header">
+      <div class="cf-section-tag">🚑 NGO Infrastructure • High Impact Project</div>
+      <h2 class="cf-section-title">Urgent NGO Infrastructure Spotlight</h2>
+    </div>
+
+    <div class="cf-spotlight-card">
+      <div class="cf-spotlight-media">
+        <img src="assets/mobile_ambulance_clinic.jpg" alt="Mobile Medical Ambulance Clinic for Rural Areas">
+        <div class="cf-spotlight-tag-urgent">
+          <span>⏱️</span> Target: Next 30 Days
+        </div>
+        <div class="cf-spotlight-tag-verified">
+          <span>✓</span> Avinya Care Foundation Official Project
+        </div>
+      </div>
+
+      <div class="cf-spotlight-content">
+        <div>
+          <h3 class="cf-spotlight-title">Deploying a fully-equipped Mobile Medical Ambulance for 50+ Rural Villages</h3>
+          <div class="cf-spotlight-hospital">
+            <span>📍 Region:</span>
+            <span class="hosp-name">Rural Maharashtra</span>
+            <span>• Healthcare Access Initiative</span>
+          </div>
+          <p class="cf-spotlight-desc">
+            To combat the lack of healthcare infrastructure in remote villages, we are funding a state-of-the-art Mobile Medical Clinic. This ambulance will be equipped with diagnostic tools, emergency care equipment, and a pharmacy to serve over 10,000 underprivileged residents monthly.
+          </p>
+        </div>
+
+        <div>
+          <div class="cf-progress-container" data-campaign-category="Mobile Medical Ambulance" data-goal="2500000">
+            <div class="cf-progress-header">
+              <div>
+                <span class="cf-progress-raised">₹0</span>
+                <span class="cf-progress-goal">raised of ₹25,00,000 goal</span>
+              </div>
+              <span class="cf-progress-percent" style="color: #FFA466; font-weight: 800; font-size: 1.1rem;">0%</span>
+            </div>
+            <div class="cf-progress-bar-bg">
+              <div class="cf-progress-bar-fill" style="width: 0%;"></div>
+            </div>
+            <div class="cf-progress-stats">
+              <span>🏢 14 Corporate & Community Donors</span>
+              <span>🛡️ 80G Tax Exempt Eligible</span>
+            </div>
+          </div>
+
+          <div class="cf-spotlight-actions">
+            <button class="cf-btn-primary" style="flex: 1; justify-content: center;" onclick="window.AvinyaModals.openDonateModal(5000, 'Mobile Medical Ambulance')">
+              <span>Fund the Ambulance</span>
+              <span>→</span>
+            </button>
+            <button class="cf-btn-secondary" style="padding: 0.95rem 1.25rem;" onclick="shareOnWhatsApp('Help Avinya Care Foundation deploy a Mobile Medical Ambulance for remote villages. Donate directly with 80G tax benefit: ' + window.location.href)">
+              <span>📱 Share on WhatsApp</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. ACTIVE CAMPAIGNS GRID -->
+  <section class="cf-campaigns-section" id="active-campaigns">
+    <div class="cf-section-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <div class="cf-section-tag">🏗️ NGO Healthcare Infrastructure</div>
+        <h2 class="cf-section-title">Active Healthcare Expansion Projects</h2>
+      </div>
+      <div style="font-size: 0.9rem; color: #38BDF8; font-weight: 600;">
+        ✓ Direct Impact • Fully Audited • 100% Transparent
+      </div>
+    </div>
+
+    <!-- Category Filter Bar -->
+    <div class="cf-filter-bar">
+      <button class="cf-filter-btn active" data-filter="all">All Projects (3)</button>
+      <button class="cf-filter-btn" data-filter="infrastructure">🏗️ Hospital Construction</button>
+      <button class="cf-filter-btn" data-filter="equipment">🩺 Medical Equipment</button>
+      <button class="cf-filter-btn" data-filter="camps">🏥 Rural Health Camps</button>
+    </div>
+
+    <!-- Campaigns Grid -->
+    <div class="cf-grid" id="cf-grid-container">
+
+      <!-- Campaign 1: Eye Hospital Construction -->
+      <div class="cf-card" data-category="infrastructure">
+        <div class="cf-card-media">
+          <img src="assets/eye_hospital_construction.jpg" alt="Rural Eye Hospital Construction">
+          <div class="cf-card-category">Infrastructure</div>
+          <div class="cf-card-tax">80G Tax Saver</div>
+        </div>
+        <div class="cf-card-body">
+          <h3 class="cf-card-title">Construction of 50-Bed Rural Eye Care Hospital</h3>
+          <div class="cf-card-meta">
+            <span>📍</span>
+            <span class="hospital">Rajasthan Rural Belt</span>
+          </div>
+          <p class="cf-card-desc">
+            Building a dedicated eye care facility to provide free cataract surgeries and vision correction to underserved communities.
+          </p>
+          <div class="cf-card-footer">
+            <div class="cf-progress-container" style="margin-bottom: 0.75rem;" data-campaign-category="Rural Eye Hospital" data-goal="5000000">
+              <div class="cf-progress-header">
+                <span class="cf-progress-raised" style="font-weight: 700; color: #FFA466;">₹0</span>
+                <span class="cf-progress-goal">of ₹50,00,000 (<span class="cf-progress-percent">0%</span>)</span>
+              </div>
+              <div class="cf-progress-bar-bg">
+                <div class="cf-progress-bar-fill" style="width: 0%;"></div>
+              </div>
+              <div class="cf-progress-stats" style="margin-top: 0.35rem;">
+                <span>👥 320 Donors</span>
+                <span>⏱️ Phase 1 Active</span>
+              </div>
+            </div>
+            <div class="cf-card-actions">
+              <button class="cf-btn-donate" onclick="window.AvinyaModals.openDonateModal(5000, 'Rural Eye Hospital')">
+                <span>Donate ₹5,000</span>
+                <span>→</span>
+              </button>
+              <button class="cf-btn-share" title="Share on WhatsApp" onclick="shareOnWhatsApp('Support the construction of a free Rural Eye Hospital: ' + window.location.href)">
+                <span>💬</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Campaign 2: Pediatric Ward Setup -->
+      <div class="cf-card" data-category="equipment">
+        <div class="cf-card-media">
+          <img src="assets/pediatric_ward_setup.jpg" alt="Pediatric Ward Equipment Setup">
+          <div class="cf-card-category">Medical Equipment</div>
+          <div class="cf-card-tax">80G Tax Saver</div>
+        </div>
+        <div class="cf-card-body">
+          <h3 class="cf-card-title">Equipping New NGO Pediatric & Neonatal Ward</h3>
+          <div class="cf-card-meta">
+            <span>🏥</span>
+            <span class="hospital">Avinya Charitable Hospital</span>
+          </div>
+          <p class="cf-card-desc">
+            Funding state-of-the-art incubators, ventilators, and pediatric beds to upgrade our neonatal intensive care unit (NICU).
+          </p>
+          <div class="cf-card-footer">
+            <div class="cf-progress-container" style="margin-bottom: 0.75rem;" data-campaign-category="Pediatric NICU Ward" data-goal="1500000">
+              <div class="cf-progress-header">
+                <span class="cf-progress-raised" style="font-weight: 700; color: #FFA466;">₹0</span>
+                <span class="cf-progress-goal">of ₹15,00,000 (<span class="cf-progress-percent">0%</span>)</span>
+              </div>
+              <div class="cf-progress-bar-bg">
+                <div class="cf-progress-bar-fill" style="width: 0%;"></div>
+              </div>
+              <div class="cf-progress-stats" style="margin-top: 0.35rem;">
+                <span>👥 145 Donors</span>
+                <span>⏱️ Need met soon</span>
+              </div>
+            </div>
+            <div class="cf-card-actions">
+              <button class="cf-btn-donate" onclick="window.AvinyaModals.openDonateModal(2500, 'Pediatric NICU Ward')">
+                <span>Donate ₹2,500</span>
+                <span>→</span>
+              </button>
+              <button class="cf-btn-share" title="Share on WhatsApp" onclick="shareOnWhatsApp('Help equip our new pediatric and NICU ward: ' + window.location.href)">
+                <span>💬</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Campaign 3: Dialysis Center -->
+      <div class="cf-card" data-category="equipment">
+        <div class="cf-card-media">
+          <img src="assets/dialysis_center_setup.jpg" alt="Free Dialysis Center Setup">
+          <div class="cf-card-category">Medical Equipment</div>
+          <div class="cf-card-tax">80G Tax Saver</div>
+        </div>
+        <div class="cf-card-body">
+          <h3 class="cf-card-title">Setting up a 10-Bed Free Dialysis Center</h3>
+          <div class="cf-card-meta">
+            <span>🏥</span>
+            <span class="hospital">Community Care Center</span>
+          </div>
+          <p class="cf-card-desc">
+            Purchasing 10 new hemodialysis machines to provide free, life-saving dialysis sessions for low-income patients.
+          </p>
+          <div class="cf-card-footer">
+            <div class="cf-progress-container" style="margin-bottom: 0.75rem;" data-campaign-category="Free Dialysis Center" data-goal="3000000">
+              <div class="cf-progress-header">
+                <span class="cf-progress-raised" style="font-weight: 700; color: #FFA466;">₹0</span>
+                <span class="cf-progress-goal">of ₹30,00,000 (<span class="cf-progress-percent">0%</span>)</span>
+              </div>
+              <div class="cf-progress-bar-bg">
+                <div class="cf-progress-bar-fill" style="width: 0%;"></div>
+              </div>
+              <div class="cf-progress-stats" style="margin-top: 0.35rem;">
+                <span>👥 210 Donors</span>
+                <span>⏱️ 15 Days Left</span>
+              </div>
+            </div>
+            <div class="cf-card-actions">
+              <button class="cf-btn-donate" onclick="window.AvinyaModals.openDonateModal(10000, 'Free Dialysis Center')">
+                <span>Donate ₹10,000</span>
+                <span>→</span>
+              </button>
+              <button class="cf-btn-share" title="Share on WhatsApp" onclick="shareOnWhatsApp('Fund a free dialysis center for underprivileged patients: ' + window.location.href)">
+                <span>💬</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Campaign 4: Rural Medical Camp -->
+      <div class="cf-card" data-category="camps">
+        <div class="cf-card-media">
+          <img src="assets/rural_medical_camp.jpg" alt="Large Rural Medical Camp">
+          <div class="cf-card-category">Rural Camps</div>
+          <div class="cf-card-tax">80G Tax Saver</div>
+        </div>
+        <div class="cf-card-body">
+          <h3 class="cf-card-title">Mega Free Health & Diagnostics Camp for 5,000 Villagers</h3>
+          <div class="cf-card-meta">
+            <span>📍</span>
+            <span class="hospital">Palghar Tribal Belt</span>
+          </div>
+          <p class="cf-card-desc">
+            Organizing a massive 3-day health camp with 20 specialist doctors, free medicine distribution, and on-site diagnostics.
+          </p>
+          <div class="cf-card-footer">
+            <div class="cf-progress-container" style="margin-bottom: 0.75rem;" data-campaign-category="Mega Health Camp" data-goal="500000">
+              <div class="cf-progress-header">
+                <span class="cf-progress-raised" style="font-weight: 700; color: #FFA466;">₹0</span>
+                <span class="cf-progress-goal">of ₹5,00,000 (<span class="cf-progress-percent">0%</span>)</span>
+              </div>
+              <div class="cf-progress-bar-bg">
+                <div class="cf-progress-bar-fill" style="width: 0%;"></div>
+              </div>
+              <div class="cf-progress-stats" style="margin-top: 0.35rem;">
+                <span>👥 189 Donors</span>
+                <span>⏱️ 5 Days to Camp</span>
+              </div>
+            </div>
+            <div class="cf-card-actions">
+              <button class="cf-btn-donate" onclick="window.AvinyaModals.openDonateModal(1000, 'Mega Health Camp')">
+                <span>Donate ₹1,000</span>
+                <span>→</span>
+              </button>
+              <button class="cf-btn-share" title="Share on WhatsApp" onclick="shareOnWhatsApp('Support our mega free health camp in Palghar: ' + window.location.href)">
+                <span>💬</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 6. INTERACTIVE 80G TAX CALCULATOR -->
+  <section class="cf-calculator-section" id="tax-calculator">
+    <div class="cf-section-header" style="text-align: center; max-width: 800px; margin: 0 auto 3rem;">
+      <div class="cf-section-tag">💰 Tax Optimization & Real-World Impact</div>
+      <h2 class="cf-section-title">Calculate Your 80G Tax Benefit</h2>
+      <p style="color: var(--cf-text-muted); font-size: 1rem; margin-top: 0.5rem;">
+        Under Section 80G of the Indian Income Tax Act, 1961, 50% of your total donation amount is fully deductible from your taxable income.
+      </p>
+    </div>
+
+    <div class="cf-calculator-card">
+      <div>
+        <label style="font-size: 0.95rem; font-weight: 700; color: #FFFFFF; display: block; margin-bottom: 0.5rem;">
+          Select or Enter Your Donation Amount:
+        </label>
+
+        <!-- Preset Pills -->
+        <div class="cf-preset-pills">
+          <div class="cf-preset-pill" onclick="setCalcAmount(1000)">₹1,000</div>
+          <div class="cf-preset-pill active" onclick="setCalcAmount(2500)">₹2,500</div>
+          <div class="cf-preset-pill" onclick="setCalcAmount(5000)">₹5,000</div>
+          <div class="cf-preset-pill" onclick="setCalcAmount(10000)">₹10,000</div>
+          <div class="cf-preset-pill" onclick="setCalcAmount(25000)">₹25,000</div>
+          <div class="cf-preset-pill" onclick="setCalcAmount(50000)">₹50,000</div>
+        </div>
+
+        <div class="cf-custom-input-group">
+          <span class="currency">₹</span>
+          <input type="number" id="calc-input" class="cf-custom-input" value="2500" min="100" step="100" oninput="updateCalculator(this.value)">
+        </div>
+
+        <p style="font-size: 0.82rem; color: #94A3B8;">
+          💡 Receipts and Form 10BE certificates are generated automatically and emailed within 60 seconds of donation.
+        </p>
+      </div>
+
+      <!-- Results Panel -->
+      <div class="cf-calc-results">
+        <div>
+          <div class="cf-calc-result-item">
+            <div class="cf-calc-result-label">Your Taxable Income Deduction (Sec 80G)</div>
+            <div class="cf-calc-result-val tax-save" id="calc-tax-deduction">₹1,250</div>
+          </div>
+
+          <div class="cf-calc-result-item">
+            <div class="cf-calc-result-label">Approximate Tax Saved (30% Bracket)</div>
+            <div class="cf-calc-result-val" id="calc-tax-saved">₹390</div>
+          </div>
+
+          <div class="cf-calc-result-item" style="margin-bottom: 0;">
+            <div class="cf-calc-result-label">Direct Patient Impact</div>
+            <div class="cf-calc-result-val impact-text" id="calc-impact-text">
+              ✨ Sponsors 1 complete diagnostic ultrasound + 1 week of post-op antibiotic medications.
+            </div>
+          </div>
+        </div>
+
+        <button class="cf-btn-primary" style="margin-top: 1.5rem; justify-content: center;" onclick="triggerCalcDonation()">
+          <span>Proceed with <span id="calc-btn-amount">₹2,500</span> Donation →</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. 4-PILLAR TRUST & TRANSPARENCY PROMISE -->
+  <section class="cf-trust-section">
+    <div class="cf-section-header" style="text-align: center; max-width: 800px; margin: 0 auto;">
+      <div class="cf-section-tag">🛡️ Trust & Governance Guarantee</div>
+      <h2 class="cf-section-title">Why Avinya Care Crowdfunding is 100% Reliable</h2>
+      <p style="color: var(--cf-text-muted); font-size: 1rem; margin-top: 0.5rem;">
+        Complete fiduciary transparency backed by statutory public trust registration.
+      </p>
+    </div>
+
+    <div class="cf-trust-grid">
+      <div class="cf-trust-card">
+        <div class="cf-trust-icon">🏥</div>
+        <h3 class="cf-trust-title">100% Direct Hospital Pay</h3>
+        <p class="cf-trust-desc">
+          Funds are transferred strictly into verified hospital accounts against valid medical estimates and bills.
+        </p>
+      </div>
+
+      <div class="cf-trust-card">
+        <div class="cf-trust-icon">✨</div>
+        <h3 class="cf-trust-title">0% Platform Fee</h3>
+        <p class="cf-trust-desc">
+          We charge zero cut on patient donations. 100% of your funds go directly toward the patient's medical relief.
+        </p>
+      </div>
+
+      <div class="cf-trust-card">
+        <div class="cf-trust-icon">🩺</div>
+        <h3 class="cf-trust-title">Doctor-Verified Cases</h3>
+        <p class="cf-trust-desc">
+          Every diagnosis, biopsy, and surgery estimate is cross-checked by on-panel medical professionals before going live.
+        </p>
+      </div>
+
+      <div class="cf-trust-card">
+        <div class="cf-trust-icon">🏛️</div>
+        <h3 class="cf-trust-title">Statutory Compliance</h3>
+        <p class="cf-trust-desc">
+          Registered under 80G, 12A, MCA CSR-1, and NITI Aayog NGO Darpan. Annually audited by certified Chartered Accountants.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. START A FUNDRAISER / NEED MEDICAL HELP CTA -->
+  <div class="cf-cta-banner">
+    <div class="cf-cta-content">
+      <h2>Facing an Urgent Medical Crisis?</h2>
+      <p>
+        If your family or a loved one needs immediate financial support for cancer treatments, organ surgeries, or ICU care, submit your hospital estimation sheet. Our team verifies cases in under 4 hours.
+      </p>
+    </div>
+    <div style="flex-shrink: 0;">
+      <button class="cf-btn-primary" style="padding: 1.1rem 2.2rem; font-size: 1.05rem;" onclick="window.AvinyaModals.openModal('support-modal')">
+        <span>Request Financial Aid</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 9. FREQUENTLY ASKED QUESTIONS -->
+  <section class="cf-faq-section">
+    <div class="cf-section-header" style="text-align: center; margin-bottom: 2.5rem;">
+      <div class="cf-section-tag">❓ Clarity & Answers</div>
+      <h2 class="cf-section-title">Frequently Asked Questions</h2>
+    </div>
+
+    <div class="cf-faq-item active">
+      <button class="cf-faq-question" onclick="toggleFaq(this)">
+        <span>How do I get my Section 80G Tax Exemption Certificate?</span>
+        <span class="cf-faq-icon">+</span>
+      </button>
+      <div class="cf-faq-answer">
+        Immediately after your donation is completed, our system automatically generates your 80G Tax Exemption Receipt and emails it to your registered email ID. At the end of the financial year, Form 10BE certificate is also dispatched for effortless tax filing.
+      </div>
+    </div>
+
+    <div class="cf-faq-item">
+      <button class="cf-faq-question" onclick="toggleFaq(this)">
+        <span>Are donations paid directly to the patient or the hospital?</span>
+        <span class="cf-faq-icon">+</span>
+      </button>
+      <div class="cf-faq-answer">
+        To prevent any misuse and ensure total transparency, all funds raised on Avinya Care are disbursed directly to the designated hospital or diagnostic centre's billing account upon receipt of genuine medical discharge summaries and bills.
+      </div>
+    </div>
+
+    <div class="cf-faq-item">
+      <button class="cf-faq-question" onclick="toggleFaq(this)">
+        <span>What payment methods can I use to donate?</span>
+        <span class="cf-faq-icon">+</span>
+      </button>
+      <div class="cf-faq-answer">
+        We support all major Indian and international payment methods including UPI (Google Pay, PhonePe, Paytm, BHIM), Debit/Credit Cards (Visa, MasterCard, RuPay), Net Banking (all major banks), and Direct NEFT/RTGS Bank Transfers.
+      </div>
+    </div>
+
+    <div class="cf-faq-item">
+      <button class="cf-faq-question" onclick="toggleFaq(this)">
+        <span>How can a patient or hospital apply for medical crowdfunding?</span>
+        <span class="cf-faq-icon">+</span>
+      </button>
+      <div class="cf-faq-answer">
+        Click on "Request Financial Aid" or "Start a Fundraiser", provide the patient's basic medical details, and attach the hospital estimation sheet. Our medical verification team will review the case within 4 hours and launch the campaign.
+      </div>
+    </div>
+
+    <div class="cf-faq-item">
+      <button class="cf-faq-question" onclick="toggleFaq(this)">
+        <span>Does Avinya Care Foundation charge any commission or platform fees?</span>
+        <span class="cf-faq-icon">+</span>
+      </button>
+      <div class="cf-faq-answer">
+        No. Avinya Care Foundation operates with 0% platform fee. All operational costs are covered separately through institutional grants, so 100% of your contributions go straight to medical relief.
+      </div>
+    </div>
+  </section>
+
+  <!-- 14. NESTJS-INSPIRED MINIMAL FOOTER (DEEP BLACK #0A0A0A) -->
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="footer-brand-col">
+        <div class="footer-brand-badge">
+          <img src="assets/logo-white.png" alt="Avinya Care Foundation" class="footer-brand-logo">
+          <div>
+            <div class="footer-brand">Avinya Care Foundation</div>
+            <p class="footer-tagline">No one should face a health crisis alone.</p>
+          </div>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--text-light-sub); line-height: 1.6;">
+          Registered Non-Profit Indian Humanitarian Organization.<br>
+          80G • 12A • CSR-1 • NITI Aayog Darpan Registered.<br>
+          Location: Mumbai-Virar, Maharashtra
+        </p>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">Explore</h4>
+        <ul class="footer-links">
+          <li><a href="index.html#hero" class="footer-link">About</a></li>
+          <li><a href="doctors.html" class="footer-link" style="color: var(--brand); font-weight: 700;">Doctors &amp; Tests</a></li>
+          <li><a href="crowdfunding.html" class="footer-link" style="color: var(--brand); font-weight: 700;">Crowdfunding</a></li>
+          <li><a href="index.html#what-we-do" class="footer-link">What We Do</a></li>
+          <li><a href="index.html#stories" class="footer-link">Stories</a></li>
+          <li><a href="index.html#impact" class="footer-link">Impact</a></li>
+          <li><a href="index.html#news" class="footer-link">News</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">Get Involved</h4>
+        <ul class="footer-links">
+          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openDonateModal(1000)">Make a Difference</a></li>
+          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openVolunteerModal()">Volunteer</a></li>
+          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openCSRModal()">CSR Partnerships</a></li>
+          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openSupportModal()">Request Medical Aid</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">Contact &amp; Support</h4>
+        <ul class="footer-links">
+          <li><a href="tel:+917447441116" class="footer-link">Helpline: +91 74474 41116</a></li>
+          <li><a href="mailto:info@avinyacarefoundation.com" class="footer-link">Email: info@avinyacarefoundation.com</a></li>
+          <li><a href="https://wa.me/917447441116" target="_blank" class="footer-link">WhatsApp: wa.me/917447441116</a></li>
+          <li><span class="footer-link" style="opacity: 0.85;">Mumbai-Virar, Maharashtra</span></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">Legal &amp; Compliance</h4>
+        <ul class="footer-links">
+          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openPrivacyModal(); return false;">Privacy Policy</a></li>
+          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openTermsModal(); return false;">Terms of Service</a></li>
+          <li><a href="javascript:void(0)" class="footer-link" onclick="window.AvinyaModals.openComplianceModal(); return false;">80G • 12A • CSR-1 • Darpan</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Avinya Care Foundation. All rights reserved. | Mumbai-Virar, Maharashtra</div>
+      <div>Confidential Helpline: <a href="tel:+917447441116" style="color: #FFFFFF; font-weight: 700;">+91 74474 41116</a> | Email: <a href="mailto:info@avinyacarefoundation.com" style="color: #FFFFFF;">info@avinyacarefoundation.com</a></div>
+    </div>
+  </footer>
+
+  <!-- Floating WhatsApp Support Button -->
+  <a href="https://wa.me/917447441116" target="_blank" class="whatsapp-float-btn" aria-label="Chat with Support on WhatsApp">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-0.999 3.648 3.742-.981z"/>
+    </svg>
+    <span>Need support? Chat on WhatsApp</span>
+  </a>
+
+  <!-- ==========================================================================
+     15. APPLE-STYLE 9 MODAL DIALOGS
+     ========================================================================== -->
+  <!-- 1. Donate Modal -->
+  <div id="donate-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">MAKE A DIFFERENCE</div>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; color: #111817;">Sponsor Care & Early Detection</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.25rem;">Choose an amount to support health awareness, screening drives, and patient care across the region.</p>
+
+      <div class="donation-toggle">
+        <button id="toggle-one-time" class="toggle-option active" onclick="window.AvinyaModals.setDonationType('one-time')">One-Time</button>
+        <button id="toggle-monthly" class="toggle-option" onclick="window.AvinyaModals.setDonationType('monthly')">Monthly</button>
+      </div>
+
+      <div class="amount-grid">
+        <button type="button" class="amount-btn" onclick="window.AvinyaModals.selectAmount(500)">₹500</button>
+        <button type="button" class="amount-btn active" onclick="window.AvinyaModals.selectAmount(1000)">₹1,000</button>
+        <button type="button" class="amount-btn" onclick="window.AvinyaModals.selectAmount(2500)">₹2,500</button>
+        <button type="button" class="amount-btn" onclick="window.AvinyaModals.selectAmount(5000)">₹5,000</button>
+        <button type="button" class="amount-btn" onclick="window.AvinyaModals.selectAmount(10000)">₹10k</button>
+        <button type="button" class="amount-btn" id="custom-amount-btn" onclick="window.AvinyaModals.selectCustom()">Custom</button>
+      </div>
+
+      <div id="custom-amount-container" style="display: none; margin-bottom: 1.25rem;">
+        <div style="position: relative; display: flex; align-items: center;">
+          <span style="position: absolute; left: 1rem; font-weight: 700; color: var(--gray-900); font-size: 1.05rem;">₹</span>
+          <input type="number" id="custom-amount-input" min="100" step="50" placeholder="Enter amount (₹)" oninput="window.AvinyaModals.handleCustomAmountInput(this.value)" style="padding: 0.8rem 1rem 0.8rem 2.2rem; border-radius: 8px; border: 1.5px solid var(--brand); width: 100%; font-size: 1rem; font-weight: 600; outline: none; box-sizing: border-box; color: var(--gray-900);">
+        </div>
+      </div>
+
+      <div id="impact-calculator-statement" class="impact-calculator-box">
+        ✨ <strong>Impact:</strong> ₹1,000 provides diagnostic screening guidance and local travel assistance for 2 individuals.
+      </div>
+
+      <form onsubmit="window.AvinyaModals.submitDonation(event)">
+        <div style="margin-bottom: 1rem;">
+          <select id="donor-category" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; font-size: 0.95rem; background-color: #fff; box-sizing: border-box;">
+            <option value="">Select Project to Fund *</option>
+            <option value="Mobile Medical Ambulance">🚑 Mobile Medical Ambulance</option>
+            <option value="Rural Eye Hospital">🏗️ Rural Eye Hospital Construction</option>
+            <option value="Pediatric NICU Ward">👶 Pediatric NICU Ward Equipment</option>
+            <option value="Free Dialysis Center">💉 Free Dialysis Center</option>
+            <option value="Mega Health Camp">🏥 Mega Health & Diagnostics Camp</option>
+            <option value="General Fund">🌟 General NGO Fund (Where needed most)</option>
+          </select>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <input type="text" id="donor-name" placeholder="Full Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; box-sizing: border-box; font-size: 0.95rem; color: #111817; background: #FFFFFF;">
+          <input type="email" id="donor-email" placeholder="Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; box-sizing: border-box; font-size: 0.95rem; color: #111817; background: #FFFFFF;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <input type="tel" id="donor-phone" placeholder="Phone (For 80G Receipt) *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; box-sizing: border-box; font-size: 0.95rem; color: #111817; background: #FFFFFF;">
+          <input type="text" id="donor-pan" placeholder="PAN Card (Optional 80G Tax)" style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; box-sizing: border-box; font-size: 0.95rem; color: #111817; background: #FFFFFF; text-transform: uppercase;">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem; background: #f8f8f8; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--gray-200);">
+          <img src="assets/docs/WhatsApp Image 2026-09-12 at 8.42.58 PM.jpeg" alt="80G Certificate" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; filter: grayscale(100%) contrast(1.2);">
+          <p style="margin: 0; font-size: 0.85rem; color: var(--muted); line-height: 1.4;">
+            <strong style="color: var(--gray-900);">100% Secure & Tax Exempt</strong><br>
+            Donations are eligible for tax deduction under Section 80G of the Indian IT Act.
+          </p>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1rem; border-radius: 9999px;">
+          <span>Proceed to Payment (UPI / Cards / NetBanking) →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Story Reader Modal -->
+  <div id="story-modal" class="modal-backdrop">
+    <div class="modal-container" style="width: min(750px, 100%);">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <img id="modal-story-img" src="" alt="Story Cover" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover;">
+        <div>
+          <div class="modal-header-brand" style="margin-bottom: 0.25rem;">
+            <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+            <span id="modal-story-role" class="category-tag" style="margin-bottom: 0;">STORY</span>
+          </div>
+          <h3 id="modal-story-author" style="font-size: 1.8rem; font-weight: 800;">Author Name</h3>
+        </div>
+      </div>
+      <p id="modal-story-quote" style="font-size: 1.2rem; font-style: italic; color: var(--brand); margin-bottom: 1.25rem; font-weight: 600;"></p>
+      <p id="modal-story-body" style="font-size: 1rem; color: var(--muted); line-height: 1.7;"></p>
+    </div>
+  </div>
+
+  <!-- 3. Volunteer Application Modal -->
+  <div id="volunteer-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">JOIN OUR COMMUNITY</div>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Volunteer Application</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Join our care navigation team or assist in community screening drives.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Volunteer Application')">
+        <input type="text" placeholder="Full Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="email" placeholder="Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="tel" placeholder="Phone Number *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <select required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.5rem;">
+          <option value="">Select Volunteer Role</option>
+          <option value="Care Companion">Care Companion / Patient Helper</option>
+          <option value="Medical Specialist">Medical Specialist / Doctor</option>
+          <option value="Community Organizer">Community Screening Organizer</option>
+          <option value="Event Helper">Event & Logistics Helper</option>
+        </select>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Submit Volunteer Profile →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Guide & Toolkit Modal -->
+  <div id="guide-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">KNOWLEDGE RESOURCE</div>
+      </div>
+      <h3 id="modal-guide-title" style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Health Awareness Toolkit</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Enter your email to receive our comprehensive health screening checklist & multi-lingual guide PDF.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Guide Download')">
+        <input type="email" placeholder="Your Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.25rem;">
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Download Free Toolkit PDF →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Confidential Support Modal -->
+  <div id="support-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">CONFIDENTIAL HELPLINE</div>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Request Patient Navigation Support</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Our care navigators provide free, confidential support for patients, caregivers, and families.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Support Request')">
+        <input type="text" placeholder="Patient or Caregiver Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="tel" placeholder="Phone Number (For Call / WhatsApp) *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <textarea placeholder="How can our care navigators support you? (e.g., screening guidance, hospital navigation, counseling)" rows="3" style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.5rem;"></textarea>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Request Confidential Callback →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. General Contact Modal -->
+  <div id="contact-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">GET IN TOUCH</div>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Contact Avinya Care</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Send us a message and our team will get back to you within 24 hours.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Contact Message')">
+        <input type="text" placeholder="Your Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="email" placeholder="Your Email *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <textarea placeholder="Your Message *" rows="3" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.5rem;"></textarea>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Send Message →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. CSR Partnership Modal -->
+  <div id="csr-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">CORPORATE PARTNERSHIP</div>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">CSR & Corporate Collaboration</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Partner with Avinya Care Foundation for employee wellness drives, mobile screening vans, and community health initiatives.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'CSR Inquiry')">
+        <input type="text" placeholder="Organization / Company Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem; box-sizing: border-box; font-size: 0.95rem; color: #111817; background: #FFFFFF;">
+        <input type="text" placeholder="Contact Person Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem; box-sizing: border-box; font-size: 0.95rem; color: #111817; background: #FFFFFF;">
+        <input type="email" placeholder="Work Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.5rem; box-sizing: border-box; font-size: 0.95rem; color: #111817; background: #FFFFFF;">
+
+        <div style="display: flex; align-items: center; gap: 1rem; background: #f8f8f8; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--gray-200);">
+          <img src="assets/docs/WhatsApp Image 2026-09-12 at 8.42.20 PM.jpeg" alt="CSR Registration" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; filter: grayscale(100%) contrast(1.2);">
+          <p style="margin: 0; font-size: 0.85rem; color: var(--muted); line-height: 1.4;">
+            <strong style="color: var(--gray-900);">Approved CSR Entity</strong><br>
+            Officially registered for CSR implementation (CSR00100988).
+          </p>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Request CSR Proposal →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. Newsletter Modal -->
+  <div id="newsletter-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">HEALTH JOURNAL</div>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Subscribe to Health Insights</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Receive monthly healthcare updates, screening tips, and patient stories delivered to your inbox.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Newsletter Subscription')">
+        <input type="email" placeholder="Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.25rem;">
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Subscribe Now →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 9. Feedback Modal -->
+  <div id="feedback-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">YOUR FEEDBACK</div>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Share Your Experience</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Help us improve our community programs and patient support services.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Feedback Submission')">
+        <textarea placeholder="Your thoughts or suggestions..." rows="3" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.5rem;"></textarea>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Submit Feedback →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 10. Privacy Policy Modal -->
+  <div id="privacy-modal" class="modal-backdrop">
+    <div class="modal-container" style="width: min(720px, 100%); max-height: 85vh;">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close Privacy Policy Modal">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <span class="category-tag" style="margin-bottom: 0;">DATA PROTECTION &amp; PRIVACY</span>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; color: #111817;">Privacy Policy</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+        Avinya Care Foundation is committed to absolute patient confidentiality, donor data security, and transparent governance in accordance with the <strong>Digital Personal Data Protection (DPDP) Act 2023</strong> and healthcare ethics standards.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 1.25rem; font-size: 0.92rem; color: #374151; line-height: 1.6;">
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>🛡️</span> Zero Commercial Monetization
+          </h4>
+          <p style="margin: 0; color: #475569;">
+            We do not sell, rent, lease, or monetize user, patient, or donor personal data to any commercial advertisers, third-party marketing brokers, or pharmaceutical marketing entities.
+          </p>
+        </div>
+
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>🩺</span> Patient &amp; Medical Data Confidentiality
+          </h4>
+          <p style="margin: 0; color: #475569;">
+            Information submitted via helpline intake forms, diagnostic requests, or medical support channels is strictly confidential. Medical summaries and screening inquiries are accessible only to authorized clinical coordinators and registered volunteer doctors for triage and navigation assistance.
+          </p>
+        </div>
+
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>💳</span> Donor Security &amp; 80G Statutory Records
+          </h4>
+          <p style="margin: 0; color: #475569;">
+            Payment transactions (UPI, NetBanking, Credit/Debit cards) are processed via RBI-licensed, 256-bit SSL encrypted payment gateways. PAN and contact details collected for Form 10BE / 80G tax receipts are securely retained exclusively for Income Tax Department statutory filing and direct receipt delivery.
+          </p>
+        </div>
+
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>📋</span> Data Subject Rights &amp; Grievance Contact
+          </h4>
+          <p style="margin: 0; color: #475569;">
+            Supporters and beneficiaries may request review, modification, or erasure of their records at any time. For privacy inquiries or grievances, contact our Data Protection Coordinator at <a href="mailto:info@avinyacarefoundation.com" style="color: var(--brand); font-weight: 600;">info@avinyacarefoundation.com</a> or Helpline <a href="tel:+917447441116" style="color: var(--brand); font-weight: 600;">+91 74474 41116</a>.
+          </p>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.75rem; text-align: right;">
+        <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="padding: 0.75rem 1.75rem; font-size: 0.95rem;">
+          <span>Understood &amp; Close</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. Terms of Service Modal -->
+  <div id="terms-modal" class="modal-backdrop">
+    <div class="modal-container" style="width: min(720px, 100%); max-height: 85vh;">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close Terms of Service Modal">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <span class="category-tag" style="margin-bottom: 0;">TERMS &amp; CONDITIONS</span>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; color: #111817;">Terms of Service</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+        Welcome to Avinya Care Foundation. By accessing our platform, helpline, or community programs, you agree to the following terms and humanitarian service guidelines.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 1.25rem; font-size: 0.92rem; color: #374151; line-height: 1.6;">
+        <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 1.1rem 1.25rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; color: #92400E; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>⚠️</span> Healthcare Navigation Disclaimer (Non-Emergency)
+          </h4>
+          <p style="margin: 0; color: #78350F;">
+            Avinya Care Foundation is a registered humanitarian NGO providing awareness, screening coordination, caregiver guidance, and healthcare navigation. <strong>We are not an emergency hospital or emergency rescue unit.</strong> For critical emergencies, please immediately visit the nearest emergency room or dial national emergency helplines (112 / 108).
+          </p>
+        </div>
+
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>🩺</span> Clinical Advice &amp; Medical Consultation
+          </h4>
+          <p style="margin: 0; color: #475569;">
+            All clinical consultations and diagnostic screenings are conducted by licensed independent clinicians and accredited diagnostic pathology centers. Information published on our awareness portals is for educational literacy only and does not substitute for a formal clinical diagnosis by a registered medical practitioner.
+          </p>
+        </div>
+
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>🤝</span> Voluntary Contributions &amp; 80G Tax Policy
+          </h4>
+          <p style="margin: 0; color: #475569;">
+            All donations made to Avinya Care Foundation are voluntary charitable contributions utilized directly for community health drives, patient care kits, and diagnostic subsidies. Donations are eligible for 50% tax exemption under Section 80G of the Indian Income Tax Act.
+          </p>
+        </div>
+
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>⚖️</span> Governing Law &amp; Jurisdiction
+          </h4>
+          <p style="margin: 0; color: #475569;">
+            These terms are governed by the laws of India. Any disputes arising out of the foundation's services shall be subject to the exclusive jurisdiction of the competent courts in the Mumbai / Vasai-Virar Judicial District, Maharashtra.
+          </p>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.75rem; text-align: right;">
+        <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="padding: 0.75rem 1.75rem; font-size: 0.95rem;">
+          <span>Accept &amp; Close</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. Legal & Statutory Compliance Modal -->
+  <div id="compliance-modal" class="modal-backdrop">
+    <div class="modal-container" style="width: min(760px, 100%); max-height: 85vh;">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close Compliance Modal">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <span class="category-tag" style="margin-bottom: 0;">STATUTORY ACCREDITATION &amp; TRANSPARENCY</span>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; color: #111817;">Legal &amp; Regulatory Compliance</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+        Avinya Care Foundation is fully certified, audited, and registered under Indian law with complete non-profit statutory accountability.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <!-- 80G Tax Exemption -->
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="font-weight: 800; color: #087F73; font-size: 1.05rem;">Section 80G (IT Act)</span>
+            <span style="background: #E6F4F1; color: #087F73; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">50% Tax Deduction</span>
+          </div>
+          <p style="font-size: 0.88rem; color: #475569; margin: 0; line-height: 1.5;">
+            Registered under Section 80G of the Indian Income Tax Act, 1961. Donors receive instant 80G receipts and annual Form 10BE certificates for claiming tax deductions.
+          </p>
+        </div>
+
+        <!-- 12A Registration -->
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="font-weight: 800; color: #087F73; font-size: 1.05rem;">Section 12A (IT Act)</span>
+            <span style="background: #E6F4F1; color: #087F73; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Tax-Exempt Entity</span>
+          </div>
+          <p style="font-size: 0.88rem; color: #475569; margin: 0; line-height: 1.5;">
+            Granted non-profit charitable status under Section 12A of the Income Tax Department, ensuring all incoming donations are dedicated 100% to charitable purposes.
+          </p>
+        </div>
+
+        <!-- CSR-1 Certification -->
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="font-weight: 800; color: #087F73; font-size: 1.05rem;">MCA CSR-1 Registered</span>
+            <span style="background: #E6F4F1; color: #087F73; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Corporate Grants</span>
+          </div>
+          <p style="font-size: 0.88rem; color: #475569; margin: 0; line-height: 1.5;">
+            Registered with the Ministry of Corporate Affairs (MCA) under Form CSR-1 to execute corporate social responsibility healthcare and diagnostic screening mandates under Companies Act, 2013.
+          </p>
+        </div>
+
+        <!-- NITI Aayog NGO Darpan -->
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="font-weight: 800; color: #087F73; font-size: 1.05rem;">NITI Aayog NGO Darpan</span>
+            <span style="background: #E6F4F1; color: #087F73; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Govt. Verified</span>
+          </div>
+          <p style="font-size: 0.88rem; color: #475569; margin: 0; line-height: 1.5;">
+            Verified and listed on the Government of India's central NGO Darpan portal for transparent public tracking, regulatory compliance, and institutional collaboration.
+          </p>
+        </div>
+      </div>
+
+      <!-- Governance & Trust Info Banner -->
+      <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 1rem 1.25rem; font-size: 0.88rem; color: #166534; line-height: 1.6; margin-bottom: 1.5rem;">
+        <strong>🏛️ Public Charitable Trust Registration &amp; Statutory Audits:</strong><br>
+        Registered under the Maharashtra Public Trusts Act (Mumbai-Virar-Palghar Region, Maharashtra, PIN: 401305). Accounts are annually audited by certified independent Chartered Accountants (CA) and submitted to the Charity Commissioner and Income Tax Department.
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div style="font-size: 0.85rem; color: var(--muted);">
+          Questions or verification requests? Contact <a href="mailto:info@avinyacarefoundation.com" style="color: var(--brand); font-weight: 600;">info@avinyacarefoundation.com</a>
+        </div>
+        <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="padding: 0.75rem 1.75rem; font-size: 0.95rem;">
+          <span>Close Compliance Details</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JavaScript Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="js/services/pdf-service.js?v=2.5"></script>
+  <script src="js/modals.js?v=2.5"></script>
+  <script src="js/components/navbar-gsap.js?v=2.4"></script>
+
+  <!-- Crowdfunding Interactive Controller -->
+  <script>
+    // 1. WhatsApp Share Helper
+    function shareOnWhatsApp(text) {
+      const url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(text);
+      window.open(url, "_blank");
+    }
+
+    // 2. FAQ Accordion Toggle
+    function toggleFaq(button) {
+      const item = button.closest(".cf-faq-item");
+      const wasActive = item.classList.contains("active");
+      document.querySelectorAll(".cf-faq-item").forEach(i => i.classList.remove("active"));
+      if (!wasActive) {
+        item.classList.add("active");
+      }
+    }
+
+    // 3. Category Filter
+    document.querySelectorAll(".cf-filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".cf-filter-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const filter = btn.getAttribute("data-filter");
+
+        document.querySelectorAll("#cf-grid-container .cf-card").forEach(card => {
+          if (filter === "all" || card.getAttribute("data-category") === filter) {
+            card.style.display = "flex";
+          } else {
+            card.style.display = "none";
+          }
+        });
+      });
+    });
+
+    // 4. 80G Tax Exemption Calculator
+    let currentCalcAmount = 2500;
+
+    function setCalcAmount(amt) {
+      currentCalcAmount = amt;
+      const input = document.getElementById("calc-input");
+      if (input) input.value = amt;
+
+      document.querySelectorAll(".cf-preset-pill").forEach(pill => {
+        const pText = pill.textContent.replace(/[^\d]/g, '');
+        pill.classList.toggle("active", parseInt(pText, 10) === amt);
+      });
+
+      updateCalculator(amt);
+    }
+
+    function updateCalculator(value) {
+      const amt = parseInt(value, 10) || 0;
+      currentCalcAmount = amt;
+
+      const deduction = Math.round(amt * 0.5);
+      const taxSaved = Math.round(deduction * 0.312); // ~31.2% tax bracket with cess
+
+      document.getElementById("calc-tax-deduction").textContent = "₹" + new Intl.NumberFormat('en-IN').format(deduction);
+      document.getElementById("calc-tax-saved").textContent = "₹" + new Intl.NumberFormat('en-IN').format(taxSaved);
+      document.getElementById("calc-btn-amount").textContent = "₹" + new Intl.NumberFormat('en-IN').format(amt);
+
+      // Impact description
+      let impact = "✨ Provides diagnostic test assistance and local patient travel support.";
+      if (amt >= 50000) {
+        impact = "✨ Fully funds 1 comprehensive cancer chemotherapy cycle or major emergency ICU stabilization.";
+      } else if (amt >= 25000) {
+        impact = "✨ Sponsors 3 specialized oncology diagnostic scans (PET-CT/MRI) + 2 post-op support visits.";
+      } else if (amt >= 10000) {
+        impact = "✨ Fully covers 2 targeted chemotherapy sessions + 1 month of vital cardiac medications.";
+      } else if (amt >= 5000) {
+        impact = "✨ Sponsors 2 full sets of diagnostic blood work and essential pediatric ICU antibiotics.";
+      } else if (amt >= 2500) {
+        impact = "✨ Sponsors 1 complete diagnostic ultrasound + 1 week of post-op antibiotic medications.";
+      } else if (amt >= 1000) {
+        impact = "✨ Provides essential diagnostic screening guidance and nutritional supplements for 2 patients.";
+      }
+      document.getElementById("calc-impact-text").textContent = impact;
+    }
+
+    function triggerCalcDonation() {
+      if (window.AvinyaModals) {
+        window.AvinyaModals.openDonateModal(currentCalcAmount || 2500);
+      }
+    }
+
+    // 5. Mobile Navigation Toggle
+    const mobileToggle = document.querySelector(".mobile-toggle");
+    const mobileOverlay = document.getElementById("mobile-nav-overlay");
+    if (mobileToggle && mobileOverlay) {
+      mobileToggle.addEventListener("click", () => {
+        const isOpened = mobileOverlay.classList.toggle("active");
+        mobileOverlay.style.display = isOpened ? "flex" : "none";
+        mobileToggle.setAttribute("aria-expanded", isOpened);
+      });
+    }
+
+    // 6. Real-Time Live Donations Ticker (DB Integration - Latest First, No Timestamps)
+    let liveDonationsList = [];
+
+    function renderTickerItems(donations) {
+      const container = document.getElementById("cf-ticker-stream");
+      if (!container || !donations || !donations.length) return;
+
+      // Build ticker items without any timestamp or time display
+      const itemsHtml = donations.map(d => {
+        const name = d.name || 'Anonymous Supporter';
+        const formattedAmount = d.formattedAmount || ('₹' + new Intl.NumberFormat('en-IN').format(d.amount || 1000));
+        const cause = d.cause || 'Emergency Medical Relief';
+        return `<div class="cf-ticker-item"><strong>${name}</strong> donated <span class="amount">${formattedAmount}</span> for ${cause}</div><div class="cf-ticker-item">•</div>`;
+      }).join('');
+
+      // Duplicate content to achieve seamless continuous -50% CSS keyframe loop
+      container.innerHTML = itemsHtml + itemsHtml;
+    }
+
+    async function fetchLiveDonations() {
+      try {
+        const res = await fetch('/api/donations/recent');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.donations) && data.donations.length > 0) {
+            liveDonationsList = data.donations;
+            renderTickerItems(liveDonationsList);
+          }
+        }
+      } catch (err) {
+        console.warn('[Live Ticker Fetch Notice]', err.message);
+      }
+    }
+
+    // Listen for live donation submissions in current session to immediately prepend
+    window.addEventListener('avinya:donation_success', (e) => {
+      if (e.detail) {
+        const d = e.detail;
+        const nameParts = (d.name || 'Anonymous Supporter').trim().split(/\s+/);
+        let displayName = d.name || 'Anonymous Supporter';
+        if (nameParts.length > 1 && !displayName.toLowerCase().includes('supporter') && !displayName.toLowerCase().includes('anonymous')) {
+          displayName = `${nameParts[0]} ${nameParts[nameParts.length - 1][0].toUpperCase()}.`;
+        }
+
+        const amt = parseFloat(d.amount || 1000);
+        const newDonation = {
+          id: d.id || ('live-' + Date.now()),
+          name: displayName,
+          amount: amt,
+          formattedAmount: '₹' + new Intl.NumberFormat('en-IN').format(amt),
+          cause: d.cause || 'Emergency Medical Relief'
+        };
+
+        // Prepend to top of list (latest first)
+        liveDonationsList.unshift(newDonation);
+        renderTickerItems(liveDonationsList);
+      }
+    });
+
+    async function fetchDonationStats() {
+      try {
+        const response = await fetch('/api/donations/stats');
+        const data = await response.json();
+        if (data && data.status === 'ok' && data.stats) {
+          // Update global total
+          const globalTotalEl = document.getElementById('global-total-raised');
+          if (globalTotalEl) {
+            globalTotalEl.textContent = '₹' + data.stats.total.toLocaleString();
+          }
+
+          // Update individual campaign cards based on data-campaign-category
+          document.querySelectorAll('.cf-progress-container').forEach(container => {
+            const categoryAttr = container.getAttribute('data-campaign-category');
+            if (categoryAttr) {
+              const raisedAmount = data.stats.categories[categoryAttr] || 0;
+              const goalAmount = parseInt(container.getAttribute('data-goal'), 10) || 1;
+              const percent = Math.min(100, Math.round((raisedAmount / goalAmount) * 100));
+
+              const raisedEl = container.querySelector('.cf-progress-raised');
+              const fillEl = container.querySelector('.cf-progress-bar-fill');
+              const pctEl = container.querySelector('.cf-progress-percent');
+
+              if (raisedEl) raisedEl.textContent = '₹' + raisedAmount.toLocaleString();
+              if (fillEl) fillEl.style.width = percent + '%';
+              if (pctEl) pctEl.textContent = percent + '%';
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch donation stats:', err);
+      }
+    }
+
+    // Initialize real DB ticker on DOM load and poll every 60s
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchLiveDonations();
+      fetchDonationStats();
+      setInterval(() => {
+        fetchLiveDonations();
+        fetchDonationStats();
+      }, 60000);
+    });
+
+    // Instantly update stats when a new donation is successfully made without refreshing page
+    window.addEventListener('avinya:donation_success', () => {
+      fetchDonationStats();
+      fetchLiveDonations();
+    });
+  </script>
+</body>
+</html>

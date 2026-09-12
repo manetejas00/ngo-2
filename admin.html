@@ -2795,6 +2795,7 @@
           <th>Name</th>
           <th>Email</th>
           <th>Phone</th>
+          <th>Category</th>
           <th>Details</th>
           <th>Delivery</th>
           <th>Timestamp</th>
@@ -2877,7 +2878,7 @@
     function renderForms(items) {
       const tbody = document.getElementById('tableBody');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No matching form submissions found for this view.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="empty-state">No matching form submissions found for this view.</td></tr>`;
         return;
       }
       tbody.innerHTML = items.map(item => `
@@ -2887,6 +2888,7 @@
           <td><div style="display:flex;align-items:center;gap:10px"><div class="user-avatar" style="width:36px;height:36px;font-size:10px;overflow:hidden">${item.avatar && /^https?:\/\//i.test(item.avatar) ? `<img src="${escapeHtml(item.avatar)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent='${userInitials(item)}'">` : userInitials(item)}</div><div><strong>${escapeHtml(item.name)}</strong>${item.phone ? `<br><small style="color:var(--text-muted)">${escapeHtml(item.phone)}</small>` : ''}</div></div></td>
           <td><a href="mailto:${item.email}" style="color:#60A5FA">${escapeHtml(item.email)}</a></td>
           <td>${escapeHtml(item.phone || '-')}</td>
+          <td><span style="color:#E2E8F0; font-weight: 500;">${escapeHtml(item.category || item.interest || '-')}</span></td>
           <td>${item.form_type === 'donation' ? '<strong style="color:#34D399">₹' + item.amount + ' (' + (item.pan ? 'PAN: ' + item.pan : '80G') + ')</strong>' : escapeHtml((item.message || item.skills || item.organization || '').substring(0, 30))}</td>
           <td><span class="badge ${item.delivery_status === 'SENT' ? 'badge-success' : 'badge-danger'}">${item.delivery_status || 'SENT'}</span></td>
           <td style="color:var(--text-muted);font-size:12px">${item.created_at || '-'}</td>

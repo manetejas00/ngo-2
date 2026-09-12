@@ -29,6 +29,11 @@ Options -Indexes
   RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+  # Route Clean Page URLs
+  RewriteRule ^crowdfunding/?$ crowdfunding.html [L,NC]
+  RewriteRule ^doctors/?$ doctors.html [L,NC]
+  RewriteRule ^admin/?$ admin.html [L,NC]
+
   # Serve existing static files and PHP scripts directly from LiteSpeed/Apache disk
   RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule \.(html|htm|css|js|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot|php)$ - [L]
@@ -36,6 +41,7 @@ Options -Indexes
   # Route /api/submit-form to submit-form.php on Apache/PHP hosts
   RewriteRule ^api/submit-form/?$ api/submit-form.php [L,NC]
   RewriteRule ^api/security-health/?$ api/security-health.php [L,NC]
+  RewriteRule ^api/donations(/recent)?/?$ api/donations.php [L,NC]
 
   # Persistent file-ledger booking API
   RewriteRule ^api/booking/whatsapp-webhook/?$ api/booking/index.php?action=whatsapp_webhook [QSA,L,NC]

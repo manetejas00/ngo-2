@@ -8,6 +8,7 @@ const root = resolve(__dirname, '..');
 const requiredFiles = [
   'index.html',
   'doctors.html',
+  'crowdfunding.html',
   'admin.html',
   '.htaccess',
   'api/submit-form.php',

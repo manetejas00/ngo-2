@@ -209,6 +209,20 @@ class ModalManager {
         const delivery = resData.emailDelivery || {};
         const isAI = resData.isAIGenerated;
 
+        // Dispatch real-time donation event for live activity ticker
+        if (formType === 'donation') {
+          try {
+            window.dispatchEvent(new CustomEvent('avinya:donation_success', {
+              detail: {
+                id: resData.submissionId,
+                name: payload.name || payload.fullName || 'Anonymous Supporter',
+                amount: parseFloat(payload.amount || 1000),
+                cause: payload.interest || payload.category || payload.message || 'Medical Emergency Relief'
+              }
+            }));
+          } catch (_) {}
+        }
+
         const isUserSent = delivery.userEmailSent !== false;
         const isAdminSent = delivery.adminEmailSent !== false;
         const hasDeliveryWarning = delivery.status === 'FAILED' || delivery.status === 'PARTIAL' || Boolean(delivery.errorMessage);
@@ -307,9 +321,16 @@ class ModalManager {
   }
 
   // --- DONATION MODAL ---
-  openDonateModal(defaultAmount = 1000) {
+  openDonateModal(defaultAmount = 1000, category = null) {
     this.openModal('donate-modal');
     this.selectAmount(defaultAmount);
+    
+    if (category) {
+      const select = document.querySelector('#donate-modal #donor-category');
+      if (select) {
+        select.value = category;
+      }
+    }
   }
 
   // --- VOLUNTEER MODAL ---
@@ -364,6 +385,7 @@ class ModalManager {
   submitDonation(e) {
     e.preventDefault();
     const form = e.target;
+    const category = form.querySelector('#donor-category')?.value || '';
     const name = form.querySelector('#donor-name')?.value || '';
     const email = form.querySelector('#donor-email')?.value || '';
     const phone = form.querySelector('#donor-phone')?.value || '';
@@ -384,6 +406,8 @@ class ModalManager {
       phone,
       pan,
       amount,
+      category,
+      interest: category,
       frequency: this.isMonthly ? 'monthly' : 'one-time',
       payment_status: 'SUCCESS',
       transaction_id: `TXN-${Date.now().toString().slice(-8)}`
