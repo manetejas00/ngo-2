@@ -1,0 +1,1295 @@
+/* ==========================================================================
+   Avinya Care Foundation — Crowdfunding & Medical Relief Platform
+   Modern High-Conversion Design System, Live Stats, Campaign Grids & 80G Tax UI
+   ========================================================================== */
+
+:root {
+  --cf-bg: #0A0F17;
+  --cf-surface: #111A24;
+  --cf-surface-card: #152230;
+  --cf-surface-hover: #1A2B3D;
+  --cf-border: rgba(255, 255, 255, 0.08);
+  --cf-border-hover: rgba(244, 117, 40, 0.4);
+  --cf-border-teal: rgba(8, 127, 115, 0.35);
+
+  --cf-brand: #F47528;
+  --cf-brand-hover: #E06318;
+  --cf-brand-light: rgba(244, 117, 40, 0.12);
+  --cf-brand-glow: rgba(244, 117, 40, 0.25);
+
+  --cf-teal: #087F73;
+  --cf-teal-light: #E6F6F4;
+  --cf-teal-glow: rgba(8, 127, 115, 0.25);
+
+  --cf-text-main: #FFFFFF;
+  --cf-text-muted: #94A3B8;
+  --cf-text-dark: #0F172A;
+
+  --cf-radius-sm: 8px;
+  --cf-radius-md: 16px;
+  --cf-radius-lg: 24px;
+  --cf-radius-full: 9999px;
+
+  --cf-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.5);
+  --cf-shadow-glow: 0 0 35px rgba(244, 117, 40, 0.15);
+  --cf-content-width: 1200px;
+}
+
+.cf-page {
+  background-color: var(--cf-bg);
+  color: var(--cf-text-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   1. HERO & LIVE METRICS
+   ========================================================================== */
+.cf-hero {
+  position: relative;
+  padding: 9.25rem 1.5rem 5.25rem;
+  background: radial-gradient(circle at 50% 15%, rgba(244, 117, 40, 0.09) 0%, rgba(8, 127, 115, 0.05) 45%, transparent 75%),
+              linear-gradient(180deg, #070B10 0%, var(--cf-bg) 100%);
+  border-bottom: 1px solid var(--cf-border);
+}
+
+.cf-hero-inner {
+  max-width: var(--cf-content-width);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.cf-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 1.1rem;
+  background: rgba(244, 117, 40, 0.12);
+  border: 1px solid rgba(244, 117, 40, 0.3);
+  border-radius: var(--cf-radius-full);
+  color: #FFA466;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 0 1px rgba(244, 117, 40, 0.04), 0 10px 30px rgba(0, 0, 0, 0.16);
+}
+
+@keyframes cfPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(244, 117, 40, 0.2); }
+  50% { box-shadow: 0 0 0 10px rgba(244, 117, 40, 0); }
+}
+
+.cf-hero-title {
+  font-size: clamp(2.4rem, 5.2vw, 4.2rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: #FFFFFF;
+  margin-bottom: 1.25rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cf-hero-title span.accent-orange {
+  background: linear-gradient(135deg, #FF9A52 0%, #F47528 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cf-hero-title span.accent-teal {
+  background: linear-gradient(135deg, #48D1B7 0%, #087F73 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cf-hero-subtitle {
+  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+  color: var(--cf-text-muted);
+  max-width: 720px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.65;
+}
+
+.cf-hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 3.5rem;
+}
+
+.cf-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: linear-gradient(135deg, #F47528 0%, #E06318 100%);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.95rem 2.2rem;
+  border-radius: var(--cf-radius-full);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(244, 117, 40, 0.35);
+  transition: all 0.25s ease;
+  min-height: 44px;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.cf-btn-primary:active,
+.cf-btn-secondary:active,
+.cf-btn-donate:active,
+.cf-btn-share:active,
+.cf-filter-btn:active,
+.cf-preset-pill:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+.cf-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(244, 117, 40, 0.5);
+  background: linear-gradient(135deg, #FF843D 0%, #F47528 100%);
+}
+
+.cf-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.95rem 2rem;
+  border-radius: var(--cf-radius-full);
+  text-decoration: none;
+  border: 1px solid var(--cf-border);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+  min-height: 44px;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.cf-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.cf-stat-card:hover {
+  transform: translateY(-3px);
+}
+}
+
+/* Live Stats Bar */
+.cf-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.cf-stat-card {
+  background: rgba(17, 26, 36, 0.7);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-md);
+  padding: 1.4rem 1.2rem;
+  backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.cf-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--cf-brand);
+  opacity: 0.7;
+}
+
+.cf-stat-card:nth-child(2)::before { background: #087F73; }
+.cf-stat-card:nth-child(3)::before { background: #3B82F6; }
+.cf-stat-card:nth-child(4)::before { background: #10B981; }
+
+.cf-stat-card:hover {
+  border-color: var(--cf-border-hover);
+  background: rgba(21, 34, 48, 0.85);
+}
+
+.cf-stat-number {
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 0.3rem;
+  letter-spacing: -0.02em;
+}
+
+.cf-stat-label {
+  font-size: 0.85rem;
+  color: var(--cf-text-muted);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   2. LIVE DONATION TICKER
+   ========================================================================== */
+.cf-ticker-wrapper {
+  background: #0D141E;
+  border-bottom: 1px solid var(--cf-border);
+  padding: 0.85rem 1.5rem;
+  overflow: hidden;
+}
+
+.cf-ticker-inner {
+  max-width: none;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.cf-ticker-mask {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cf-ticker-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34D399;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--cf-radius-full);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.cf-ticker-pulse {
+  width: 7px;
+  height: 7px;
+  background: #10B981;
+  border-radius: 50%;
+  display: inline-block;
+  animation: cfDotPulse 1.4s infinite;
+}
+
+@keyframes cfDotPulse {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+.cf-ticker-content {
+  color: #CBD5E1;
+  font-size: 0.88rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: nowrap;
+  width: max-content;
+  white-space: nowrap;
+  animation: cfTickerScroll 42s linear infinite;
+  will-change: transform;
+}
+
+.cf-ticker-content:hover {
+  animation-play-state: paused;
+}
+
+.cf-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  min-height: 32px;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.cf-ticker-item strong {
+  color: #FFFFFF;
+}
+
+.cf-ticker-item span.amount {
+  color: #FFA466;
+  font-weight: 700;
+}
+
+.cf-ticker-cause {
+  color: #94A3B8;
+}
+
+.cf-ticker-separator {
+  color: #94A3B8;
+  flex: 0 0 auto;
+}
+
+@keyframes cfTickerScroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@media (max-width: 680px) {
+  .cf-ticker-wrapper {
+    padding: 0.8rem 1rem;
+  }
+
+  .cf-ticker-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .cf-ticker-mask {
+    width: 100%;
+  }
+
+  .cf-ticker-content {
+    gap: 1rem;
+    animation-duration: 34s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-ticker-mask {
+    overflow-x: auto;
+  }
+
+  .cf-ticker-content {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   3. URGENT SPOTLIGHT CAMPAIGN
+   ========================================================================== */
+.cf-spotlight-section {
+  padding: 4.5rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.cf-section-header {
+  margin-bottom: 2.5rem;
+}
+
+.cf-section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #FFA466;
+  margin-bottom: 0.5rem;
+}
+
+.cf-section-title {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+}
+
+.cf-spotlight-card {
+  background: linear-gradient(145deg, #131E2B 0%, #0F1722 100%);
+  border: 1px solid rgba(244, 117, 40, 0.35);
+  border-radius: var(--cf-radius-lg);
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  overflow: hidden;
+  box-shadow: var(--cf-shadow), var(--cf-shadow-glow);
+  position: relative;
+}
+
+.cf-spotlight-media {
+  position: relative;
+  min-height: 380px;
+  background: #0B1118;
+}
+
+.cf-spotlight-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cf-spotlight-tag-urgent {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  background: rgba(220, 38, 38, 0.9);
+  color: #FFFFFF;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--cf-radius-full);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.cf-spotlight-tag-verified {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  background: rgba(8, 127, 115, 0.9);
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--cf-radius-full);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  backdrop-filter: blur(6px);
+}
+
+.cf-spotlight-content {
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cf-spotlight-title {
+  font-size: clamp(1.4rem, 2vw, 1.85rem);
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.25;
+  margin-bottom: 0.75rem;
+}
+
+.cf-spotlight-hospital {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: #94A3B8;
+  margin-bottom: 1.25rem;
+}
+
+.cf-spotlight-hospital span.hosp-name {
+  color: #38BDF8;
+  font-weight: 600;
+}
+
+.cf-spotlight-desc {
+  font-size: 0.95rem;
+  color: #CBD5E1;
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
+}
+
+/* Progress bar */
+.cf-progress-container {
+  margin-bottom: 1.75rem;
+}
+
+.cf-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 0.6rem;
+}
+
+.cf-progress-raised {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #FFA466;
+}
+
+.cf-progress-goal {
+  font-size: 0.88rem;
+  color: var(--cf-text-muted);
+}
+
+.cf-progress-bar-bg {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--cf-radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.cf-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #F47528 0%, #FFA466 100%);
+  border-radius: var(--cf-radius-full);
+  transition: width 700ms var(--ease-out);
+  will-change: width;
+}
+
+.cf-progress-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--cf-text-muted);
+}
+
+.cf-spotlight-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   4. CAMPAIGN EXPLORER & CATEGORIES
+   ========================================================================== */
+.cf-campaigns-section {
+  padding: 4rem 1.5rem 6rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.cf-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  margin-bottom: 2.5rem;
+  scrollbar-width: none;
+}
+
+.cf-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.cf-filter-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--cf-border);
+  color: var(--cf-text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--cf-radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+.cf-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+}
+
+.cf-filter-btn.active {
+  background: var(--cf-brand);
+  border-color: var(--cf-brand);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(244, 117, 40, 0.35);
+}
+
+.cf-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+}
+
+.cf-card {
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--cf-shadow);
+}
+
+@media (hover: hover) and (pointer: fine) {
+.cf-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--cf-border-hover);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 25px rgba(244, 117, 40, 0.12);
+}
+
+.cf-card-media {
+  position: relative;
+  height: 210px;
+  overflow: hidden;
+  background: #000;
+}
+
+.cf-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.cf-card:hover .cf-card-media img {
+  transform: scale(1.05);
+}
+}
+
+.cf-card-category {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(10, 15, 23, 0.85);
+  color: #FFA466;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--cf-radius-full);
+  border: 1px solid rgba(244, 117, 40, 0.3);
+  backdrop-filter: blur(6px);
+}
+
+.cf-card-tax {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(8, 127, 115, 0.9);
+  color: #FFFFFF;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--cf-radius-full);
+  backdrop-filter: blur(6px);
+}
+
+.cf-card-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.cf-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.35;
+  margin-bottom: 0.45rem;
+  min-height: 3rem;
+}
+
+.cf-card-meta {
+  font-size: 0.82rem;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.cf-card-meta span.hospital {
+  color: #38BDF8;
+}
+
+.cf-card-desc {
+  font-size: 0.88rem;
+  color: #CBD5E1;
+  line-height: 1.55;
+  margin-bottom: 1.25rem;
+  flex: 1;
+}
+
+.cf-card-footer {
+  border-top: 1px solid var(--cf-border);
+  padding-top: 1.25rem;
+  margin-top: auto;
+}
+
+.cf-card-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  min-width: 0;
+}
+
+.cf-btn-donate {
+  background: var(--cf-brand);
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.7rem 1rem;
+  border-radius: var(--cf-radius-sm);
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 42px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  transition: all 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+.cf-btn-donate:hover {
+  background: var(--cf-brand-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 117, 40, 0.4);
+}
+
+.cf-btn-share {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--cf-border);
+  color: #FFFFFF;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--cf-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  min-width: 42px;
+  min-height: 42px;
+  box-sizing: border-box;
+}
+
+.cf-btn-share:hover {
+  background: #25D366;
+  border-color: #25D366;
+  color: #FFFFFF;
+}
+}
+
+/* ==========================================================================
+   5. 80G TAX CALCULATOR & IMPACT MATRIX
+   ========================================================================== */
+.cf-calculator-section {
+  padding: 5rem 1.5rem;
+  background: linear-gradient(180deg, var(--cf-bg) 0%, #0E1722 50%, var(--cf-bg) 100%);
+  border-top: 1px solid var(--cf-border);
+  border-bottom: 1px solid var(--cf-border);
+}
+
+.cf-calculator-card {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: var(--cf-surface);
+  border: 1px solid rgba(8, 127, 115, 0.35);
+  border-radius: var(--cf-radius-lg);
+  padding: 3rem;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 3rem;
+  box-shadow: var(--cf-shadow), 0 0 35px rgba(8, 127, 115, 0.12);
+}
+
+.cf-preset-pills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.cf-preset-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--cf-border);
+  color: #FFFFFF;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.8rem 0.5rem;
+  border-radius: var(--cf-radius-sm);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.cf-preset-pill:hover,
+.cf-preset-pill.active {
+  background: var(--cf-brand);
+  border-color: var(--cf-brand);
+  box-shadow: 0 4px 14px rgba(244, 117, 40, 0.35);
+}
+
+.cf-custom-input-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.cf-custom-input-group span.currency {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #FFA466;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.cf-custom-input {
+  width: 100%;
+  padding: 1rem 1.25rem 1rem 2.8rem;
+  background: #090E14;
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-sm);
+  color: #FFFFFF;
+  font-size: 1.2rem;
+  font-weight: 700;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.cf-custom-input:focus {
+  border-color: var(--cf-brand);
+}
+
+.cf-calc-results {
+  background: #08111A;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--cf-radius-md);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cf-calc-result-item {
+  margin-bottom: 1.25rem;
+}
+
+.cf-calc-result-label {
+  font-size: 0.82rem;
+  color: var(--cf-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+}
+
+.cf-calc-result-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.cf-calc-result-val.tax-save {
+  color: #34D399;
+}
+
+.cf-calc-result-val.impact-text {
+  font-size: 1.05rem;
+  color: #FFA466;
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   6. TRUST & TRANSPARENCY PROMISE
+   ========================================================================== */
+.cf-trust-section {
+  padding: 5rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.cf-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 2.75rem;
+}
+
+.cf-trust-card {
+  background: linear-gradient(150deg, rgba(21, 34, 48, 0.96), rgba(12, 20, 29, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  padding: 1.75rem 1.35rem;
+  text-align: left;
+  min-height: 250px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 160ms var(--ease-out), border-color 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+.cf-trust-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(72, 209, 183, 0.5);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.28);
+}
+}
+
+.cf-trust-card::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  background: linear-gradient(90deg, #087F73, #48D1B7);
+  opacity: 0.95;
+}
+
+.cf-trust-card:nth-child(2)::after { background: linear-gradient(90deg, #F47528, #FFA466); }
+.cf-trust-card:nth-child(3)::after { background: linear-gradient(90deg, #38BDF8, #7DD3FC); }
+.cf-trust-card:nth-child(4)::after { background: linear-gradient(90deg, #A78BFA, #C4B5FD); }
+
+.cf-trust-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(8, 127, 115, 0.14);
+  border: 1px solid rgba(72, 209, 183, 0.24);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  margin: 0 0 1.4rem;
+}
+
+.cf-trust-card:nth-child(2) .cf-trust-icon { background: rgba(244, 117, 40, 0.12); border-color: rgba(244, 117, 40, 0.25); }
+.cf-trust-card:nth-child(3) .cf-trust-icon { background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.24); }
+.cf-trust-card:nth-child(4) .cf-trust-icon { background: rgba(167, 139, 250, 0.12); border-color: rgba(167, 139, 250, 0.24); }
+
+.cf-trust-title {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 0.6rem;
+}
+
+.cf-trust-desc {
+  font-size: 0.9rem;
+  color: #A9B7C8;
+  line-height: 1.62;
+}
+
+/* ==========================================================================
+   7. START A FUNDRAISER / NEED HELP CTA
+   ========================================================================== */
+.cf-cta-banner {
+  margin: 4rem auto;
+  max-width: 1100px;
+  padding: 3.5rem 2.5rem;
+  background: radial-gradient(circle at 80% 20%, rgba(244, 117, 40, 0.18) 0%, transparent 60%),
+              linear-gradient(135deg, #131E2A 0%, #0A1118 100%);
+  border: 1px solid rgba(244, 117, 40, 0.35);
+  border-radius: var(--cf-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  box-shadow: var(--cf-shadow);
+}
+
+.cf-cta-content h2 {
+  font-size: clamp(1.8rem, 2.5vw, 2.3rem);
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 0.6rem;
+}
+
+.cf-cta-content p {
+  font-size: 1rem;
+  color: #CBD5E1;
+  max-width: 600px;
+  line-height: 1.55;
+}
+
+/* ==========================================================================
+   8. FAQ ACCORDION
+   ========================================================================== */
+.cf-faq-section {
+  padding: 4rem 1.5rem 6rem;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.cf-faq-item {
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-sm);
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.cf-faq-item.active {
+  border-color: rgba(244, 117, 40, 0.4);
+}
+
+.cf-faq-question {
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.cf-faq-icon {
+  font-size: 1.25rem;
+  color: #FFA466;
+  transition: transform 0.25s ease;
+}
+
+.cf-faq-item.active .cf-faq-icon {
+  transform: rotate(45deg);
+}
+
+.cf-faq-answer {
+  padding: 0 1.5rem 1.25rem;
+  color: #CBD5E1;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  display: none;
+}
+
+.cf-faq-item.active .cf-faq-answer {
+  display: block;
+}
+
+.cf-card[hidden] {
+  display: none;
+}
+
+.cf-filtered-in {
+  animation: cfFilterIn 240ms var(--ease-out) both;
+}
+
+@keyframes cfFilterIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cf-btn-primary:focus-visible,
+.cf-btn-secondary:focus-visible,
+.cf-btn-donate:focus-visible,
+.cf-btn-share:focus-visible,
+.cf-filter-btn:focus-visible,
+.cf-preset-pill:focus-visible,
+.cf-faq-question:focus-visible,
+.cf-custom-input:focus-visible {
+  outline: 3px solid rgba(255, 164, 102, 0.9);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   9. RESPONSIVE BREAKPOINTS (Mobile-First Polish)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .cf-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .cf-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+  .cf-trust-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+  .cf-spotlight-card {
+    grid-template-columns: 1fr;
+  }
+  .cf-spotlight-media {
+    min-height: 280px;
+  }
+  .cf-calculator-card {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2rem 1.5rem;
+  }
+  .cf-cta-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+  }
+  .cf-cta-content p {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .cf-hero {
+    padding: 7rem 1rem 3rem;
+  }
+  .cf-spotlight-section,
+  .cf-campaigns-section,
+  .cf-calculator-section,
+  .cf-trust-section,
+  .cf-faq-section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .cf-hero-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+  .cf-btn-primary,
+  .cf-btn-secondary {
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+  .cf-spotlight-content {
+    padding: 1.5rem;
+  }
+  .cf-spotlight-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .cf-spotlight-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .cf-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .cf-grid {
+    grid-template-columns: 1fr;
+  }
+  .cf-trust-grid {
+    grid-template-columns: 1fr;
+  }
+  .cf-preset-pills {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cf-card-media {
+    height: 190px;
+  }
+  .cf-card-body {
+    padding: 1.25rem;
+  }
+  .cf-calc-results {
+    padding: 1.25rem;
+  }
+  .cf-faq-question {
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+  }
+  .cf-faq-answer {
+    padding: 0 1.25rem 1rem;
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cf-hero-title {
+    font-size: 2rem;
+  }
+  .cf-hero-subtitle {
+    font-size: 0.95rem;
+  }
+  .cf-hero-badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.85rem;
+  }
+  .cf-spotlight-tag-urgent,
+  .cf-spotlight-tag-verified {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.6rem;
+  }
+  .cf-stat-number {
+    font-size: 1.5rem;
+  }
+}
+
+/* Responsive button audit: cards and long CTAs retain readable labels. */
+.cf-btn-primary,
+.cf-btn-secondary,
+.cf-filter-btn,
+.cf-preset-pill,
+.cf-btn-donate,
+.cf-btn-share,
+.cf-faq-question {
+  box-sizing: border-box;
+  max-width: 100%;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.cf-filter-btn,
+.cf-preset-pill {
+  min-height: 40px;
+}
+
+.cf-faq-question {
+  min-height: 52px;
+  gap: 0.75rem;
+}
+
+.cf-faq-icon {
+  flex: 0 0 auto;
+}
+
+.cf-btn-primary > :is(svg, img, .icon),
+.cf-btn-secondary > :is(svg, img, .icon),
+.cf-btn-donate > :is(svg, img, .icon) {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 480px) {
+  .cf-btn-primary,
+  .cf-btn-secondary {
+    padding: 0.8rem 1rem;
+    font-size: clamp(0.88rem, 4vw, 1rem);
+  }
+
+  .cf-card-actions {
+    grid-template-columns: minmax(0, 1fr) 42px;
+  }
+
+  .cf-btn-donate {
+    padding-inline: 0.8rem;
+  }
+
+  .cf-faq-question {
+    align-items: flex-start;
+    padding: 1rem;
+  }
+}

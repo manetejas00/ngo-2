@@ -5,6 +5,13 @@
 
 import { escapeHTML } from '../email/emailTemplate.mjs';
 
+const CONTACT = Object.freeze({
+  name: 'Avinya Care Foundation',
+  phone: '+91 74474 41116',
+  email: 'info@avinyacarefoundation.com',
+  website: 'www.avinyacarefoundation.org'
+});
+
 function renderEmailLayout(title, preheader, contentHtml) {
   // Always use the embedded image. Remote logo URLs are commonly blocked by
   // mail clients and a stale LOGO_URL caused the broken image seen in Gmail.
@@ -34,7 +41,7 @@ function renderEmailLayout(title, preheader, contentHtml) {
                   </td>
                 </tr>
               </table>
-              <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Avinya Care Healthcare Platform</div>
+              <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">${CONTACT.name}</div>
               <h1 style="color: #FFFFFF; font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">${escapeHTML(title)}</h1>
             </td>
           </tr>
@@ -54,7 +61,7 @@ function renderEmailLayout(title, preheader, contentHtml) {
                   <td>
                     <div style="font-size: 13px; font-weight: 700; color: #166534; margin-bottom: 2px;">📞 Need Immediate Assistance or Rescheduling?</div>
                     <div style="font-size: 12px; color: #15803D; line-height: 1.5;">
-                      Call our 24/7 patient helpline at <strong>+91 98765 43210</strong> or email <a href="mailto:support@avinyacarefoundation.org" style="color: #166534; font-weight: 600;">support@avinyacarefoundation.org</a>.
+                      Call our patient support desk at <strong>${CONTACT.phone}</strong> or email <a href="mailto:${CONTACT.email}" style="color: #166534; font-weight: 600;">${CONTACT.email}</a>.
                     </div>
                   </td>
                 </tr>
@@ -65,13 +72,13 @@ function renderEmailLayout(title, preheader, contentHtml) {
           <!-- Footer -->
           <tr>
             <td style="background-color: #0A0A0A; padding: 24px 32px; text-align: center; border-top: 1px solid #262626;">
-              <p style="margin: 0 0 6px 0; color: #FFFFFF; font-size: 13px; font-weight: 600;">Avinya Care Foundation</p>
+              <p style="margin: 0 0 6px 0; color: #FFFFFF; font-size: 13px; font-weight: 600;">${CONTACT.name}</p>
               <p style="margin: 0 0 12px 0; color: #A3A3A3; font-size: 11px; line-height: 1.5;">
                 A humanitarian oncology and healthcare initiative.<br>
                 80G & 12A Tax Exempted under the Indian IT Act.
               </p>
               <div style="font-size: 10px; color: #737373;">
-                © 2026 Avinya Care Foundation. All healthcare records strictly confidential.
+                ${CONTACT.website}<br>© 2026 ${CONTACT.name}. All healthcare records strictly confidential.
               </div>
             </td>
           </tr>
@@ -166,7 +173,7 @@ Patient: ${apt.patientName} (${apt.patientPhone})
 Fee: ₹${apt.doctorFee}
 Reason: ${apt.reason || 'Consultation'}
 
-Helpline: +91 98765 43210`;
+Helpline: ${CONTACT.phone}`;
 
   return {
     subject,

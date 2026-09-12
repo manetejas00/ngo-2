@@ -20,18 +20,26 @@ enforcePhpRateLimit(15, 60);
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/activity-logger.php';
 
+$brandName = 'Avinya Care Foundation';
+$brandEmail = 'info@avinyacarefoundation.com';
+$brandPhone = '+91 74474 41116';
+$brandWebsite = 'www.avinyacarefoundation.org';
 
 $rawInput = file_get_contents('php://input');
+$maxPayloadBytes = 64 * 1024;
+if ($rawInput === false || strlen($rawInput) > $maxPayloadBytes) {
+    http_response_code(413); echo json_encode(['status' => 'error', 'message' => 'Submission is too large.']); exit(0);
+}
 $data = json_decode($rawInput, true) ?: $_POST;
 
 $formType = isset($data['form_type']) ? strtolower(trim($data['form_type'])) : (isset($data['formType']) ? strtolower(trim($data['formType'])) : 'contact');
-$name = isset($data['name']) ? htmlspecialchars(trim($data['name'])) : (isset($data['fullName']) ? htmlspecialchars(trim($data['fullName'])) : 'Valued Supporter');
-$email = isset($data['email']) ? filter_var(trim($data['email']), FILTER_SANITIZE_EMAIL) : '';
+$name = isset($data['name']) ? htmlspecialchars(trim($data['name']), ENT_QUOTES, 'UTF-8') : (isset($data['fullName']) ? htmlspecialchars(trim($data['fullName']), ENT_QUOTES, 'UTF-8') : '');
+$email = isset($data['email']) ? strtolower(trim((string)$data['email'])) : '';
 $phone = isset($data['phone']) ? htmlspecialchars(trim($data['phone'])) : (isset($data['mobile']) ? htmlspecialchars(trim($data['mobile'])) : '');
-$amount = isset($data['amount']) ? floatval($data['amount']) : 0;
+$amount = isset($data['amount']) ? (float)$data['amount'] : 0;
 $frequency = isset($data['frequency']) ? htmlspecialchars(trim($data['frequency'])) : 'one-time';
 $pan = isset($data['pan']) ? htmlspecialchars(trim($data['pan'])) : '';
-$transactionId = isset($data['transaction_id']) ? htmlspecialchars(trim($data['transaction_id'])) : ('TXN-' . time());
+$transactionId = isset($data['transaction_id']) ? htmlspecialchars(trim($data['transaction_id'])) : '';
 $organization = isset($data['organization']) ? htmlspecialchars(trim($data['organization'])) : (isset($data['company']) ? htmlspecialchars(trim($data['company'])) : '');
 $interest = isset($data['interest']) ? htmlspecialchars(trim($data['interest'])) : (isset($data['subject']) ? htmlspecialchars(trim($data['subject'])) : '');
 $message = isset($data['message']) ? htmlspecialchars(trim($data['message'])) : (isset($data['feedback']) ? htmlspecialchars(trim($data['feedback'])) : '');
@@ -40,13 +48,26 @@ $submissionId = 'SUB-' . time() . '-' . strtoupper(substr(md5(uniqid()), 0, 5));
 date_default_timezone_set('Asia/Kolkata');
 $timestampIST = date('d F Y, g:i A \I\S\T');
 
-if (empty($email)) {
-    http_response_code(400);
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Please provide a valid email address.'
-    ]);
-    exit(0);
+$allowedFormTypes = ['donation', 'volunteer', 'support', 'contact', 'partnership', 'newsletter', 'feedback', 'guide'];
+$errors = [];
+if (!in_array($formType, $allowedFormTypes, true)) $errors['form_type'] = ['Unsupported form type.'];
+if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) $errors['email'] = ['Please provide a valid email address.'];
+if (in_array($formType, ['donation', 'volunteer', 'support', 'contact', 'partnership'], true) && $name === '') $errors['name'] = ['Please enter your name.'];
+$normalizedPhone = preg_replace('/[\s()\-]/', '', $phone);
+if (in_array($formType, ['donation', 'volunteer', 'support'], true) && !preg_match('/^(?:\+91)?[6-9]\d{9}$/', $normalizedPhone)) $errors['phone'] = ['Enter a valid Indian mobile number.'];
+if ($formType === 'partnership' && $organization === '') $errors['organization'] = ['Organization name is required.'];
+if (in_array($formType, ['feedback', 'contact', 'support'], true) && $message === '') $errors['message'] = ['Please enter a message.'];
+if ($errors) { http_response_code(422); echo json_encode(['status' => 'error', 'message' => reset($errors)[0], 'errors' => $errors]); exit(0); }
+
+if ($formType === 'donation') {
+    $amountText = trim((string)($data['amount'] ?? ''));
+    if (!preg_match('/^\d+(?:\.\d{1,2})?$/', $amountText) || !is_finite($amount) || $amount < 100 || $amount > 10000000) {
+        http_response_code(422);
+        echo json_encode(['status' => 'error', 'message' => 'Donation amount must be between ₹100 and ₹1,00,00,000.']);
+        exit(0);
+    }
+    // Payment success is set exclusively by an authenticated gateway webhook/verification route.
+    $data['payment_status'] = 'PENDING';
 }
 
 /**
@@ -143,11 +164,13 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
 // Form-Specific Content Generation (Donations, Volunteer, Support, etc.)
 // -------------------------------------------------------------
 $formattedAmount = number_format($amount);
+$paymentStatus = strtoupper((string)($data['payment_status'] ?? 'PENDING'));
+$isConfirmedPayment = in_array($paymentStatus, ['SUCCESS', 'CONFIRMED', 'PAID'], true);
 
 if ($formType === 'donation') {
-    $userSubject = "Thank You for Your Generous Support of ₹{$formattedAmount} — Avinya Care Foundation";
+    $userSubject = $isConfirmedPayment ? "Thank You for Your Generous Support of ₹{$formattedAmount} — Avinya Care Foundation" : "Donation Payment Verification Pending — Avinya Care Foundation";
     $greeting = "Dear {$name},";
-    $bodyText = "Dhanyawad for your generous contribution of <strong>₹{$formattedAmount}</strong> ({$frequency}) towards Avinya Care Foundation. Your compassionate gift directly funds our life-saving mobile cancer screening camps, diagnostic navigation, and vital clinical nutrition for patients across underserved communities in India.";
+    $bodyText = $isConfirmedPayment ? "Dhanyawad for your generous contribution of <strong>₹{$formattedAmount}</strong> ({$frequency}) towards Avinya Care Foundation. Your compassionate gift directly funds our life-saving mobile cancer screening camps, diagnostic navigation, and vital clinical nutrition for patients across underserved communities in India." : "We have recorded your donation pledge of <strong>₹{$formattedAmount}</strong>. It will not be counted or receipted until the payment provider verifies the transaction.";
     $adminSubject = "[Avinya Care] New Donation Received — {$name} (₹{$formattedAmount})";
 } elseif ($formType === 'volunteer') {
     $userSubject = "Thank You for Wanting to Volunteer with Avinya Care — Avinya Care Foundation";
@@ -185,7 +208,7 @@ $closingText = "With deepest gratitude and care,<br><strong>Avinya Care Foundati
 
 // Build User Email HTML Template
 $donationBoxHtml = '';
-if ($formType === 'donation') {
+if ($formType === 'donation' && $isConfirmedPayment) {
     $donationBoxHtml = '
     <div style="background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
         <div style="font-size: 13px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Official Donation Receipt Details</div>
@@ -216,7 +239,7 @@ $userHtmlContent = '<!DOCTYPE html>
           <tr>
             <td style="background-color: #0A0A0A; padding: 28px 32px; text-align: center; border-bottom: 3px solid #F47528;">
               <div style="display: inline-block; background: #FFFFFF; border-radius: 50%; padding: 6px; margin-bottom: 12px;"><img src="cid:avinya-logo" alt="Avinya Care Foundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;"></div>
-              <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">Avinya Care Healthcare Platform</div>
+              <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">' . $brandName . '</div>
               <h1 style="color: #FFFFFF; font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">Healthcare Dignity & Cancer Awareness</h1>
             </td>
           </tr>
@@ -255,8 +278,8 @@ $userHtmlContent = '<!DOCTYPE html>
                 Cancer Awareness • Support • Care • Community
               </p>
               <p style="margin: 0 0 12px 0;">
-                Avinya Care Foundation • Reg. NGO 80G / 12A Tax Exempted<br>
-                Email: <a href="mailto:info@test.avinyacarefoundation.org" style="color: #F58220; text-decoration: none; font-weight: 600;">info@test.avinyacarefoundation.org</a> | Helpline: <a href="tel:+919876543210" style="color: #F58220; text-decoration: none; font-weight: 600;">+91 98765 43210</a>
+                ' . $brandName . ' • Registered Public Charitable Trust<br>
+                Email: <a href="mailto:' . $brandEmail . '" style="color: #F58220; text-decoration: none; font-weight: 600;">' . $brandEmail . '</a> | Helpline: <a href="tel:+917447441116" style="color: #F58220; text-decoration: none; font-weight: 600;">' . $brandPhone . '</a><br>' . $brandWebsite . '
               </p>
               <p style="margin: 0; font-size: 11px; color: #737373; border-top: 1px dashed #404040; padding-top: 12px;">
                 <strong>Medical & Legal Disclaimer:</strong> Avinya Care Foundation communications provide general health awareness and screening navigation. We do not provide medical prescriptions, diagnoses, or direct clinical medical advice.
@@ -398,8 +421,8 @@ try {
     $pdo = getDatabaseConnection();
     if ($pdo !== null) {
         $stmt = $pdo->prepare("INSERT INTO `form_submissions` 
-            (`submission_id`, `form_type`, `name`, `email`, `phone`, `amount`, `frequency`, `pan`, `transaction_id`, `organization`, `interest`, `message`, `user_email_sent`, `admin_email_sent`, `delivery_status`, `raw_payload`) 
-            VALUES (:sub_id, :ftype, :name, :email, :phone, :amount, :freq, :pan, :tx_id, :org, :interest, :msg, :u_sent, :a_sent, :status, :payload)");
+            (`submission_id`, `form_type`, `name`, `email`, `phone`, `amount`, `frequency`, `pan`, `transaction_id`, `organization`, `category`, `interest`, `message`, `payment_status`, `is_anonymous`, `user_email_sent`, `admin_email_sent`, `delivery_status`, `raw_payload`)
+            VALUES (:sub_id, :ftype, :name, :email, :phone, :amount, :freq, :pan, :tx_id, :org, :category, :interest, :msg, :pay_stat, :anonymous, :u_sent, :a_sent, :status, :payload)");
         
         $stmt->execute([
             ':sub_id' => $submissionId,
@@ -412,8 +435,11 @@ try {
             ':pan' => $pan,
             ':tx_id' => $transactionId,
             ':org' => $organization,
+            ':category' => $data['category'] ?? null,
             ':interest' => $interest,
             ':msg' => $message,
+            ':pay_stat' => $data['payment_status'] ?? 'PENDING',
+            ':anonymous' => !empty($data['is_anonymous']) ? 1 : 0,
             ':u_sent' => $userEmailSent ? 1 : 0,
             ':a_sent' => $adminEmailSent ? 1 : 0,
             ':status' => $deliveryStatus,
@@ -494,6 +520,7 @@ echo json_encode([
     'status' => 'ok',
     'submissionId' => $submissionId,
     'formType' => $formType,
+    'paymentStatus' => $paymentStatus,
     'isAIGenerated' => false,
     'timestampIST' => $timestampIST,
     'emailDelivery' => [

@@ -7,7 +7,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { hashPassword, verifyPassword, validatePasswordStrength, generateResetToken } from './healthcareAuthService.mjs';
+import { hashPassword, verifyPassword, validatePasswordStrength, generateResetToken, generateTokenHash } from './healthcareAuthService.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -820,16 +820,23 @@ const SEED_TEST_BOOKINGS = [
 ];
 
 export function buildUsersCatalog(doctors = DEFAULT_DOCTORS, providers = DEFAULT_DIAGNOSTIC_PROVIDERS) {
-  const defaultHash = hashPassword('Admin@1230');
+  // First-run access is explicitly provisioned by deployment configuration.
+  // No demonstration or default accounts are created by application code.
+  const bootstrapEmail = (process.env.BOOTSTRAP_ADMIN_EMAIL || '').trim().toLowerCase();
+  const bootstrapPassword = process.env.BOOTSTRAP_ADMIN_PASSWORD || '';
+  if (!/^\S+@\S+\.\S+$/.test(bootstrapEmail) || !validatePasswordStrength(bootstrapPassword).valid) {
+    return [];
+  }
+  const bootstrapHash = hashPassword(bootstrapPassword);
   const users = [
     {
       id: 'usr-admin-01',
       user_id: 'usr-admin-01',
       name: 'Super Admin',
-      email: 'admin@gmail.com',
+      email: bootstrapEmail,
       phone: '+91 98765 00000',
       avatar: '',
-      password_hash: defaultHash,
+      password_hash: bootstrapHash,
       role: 'admin',
       subtitle: 'System Administrator',
       doctorId: null,
@@ -838,61 +845,7 @@ export function buildUsersCatalog(doctors = DEFAULT_DOCTORS, providers = DEFAULT
       must_change_password: true,
       password_changed_at: null
     },
-    {
-      id: 'usr-2',
-      user_id: 'usr-2',
-      name: 'Healthcare Coordinator',
-      email: 'health@avinyacarefoundation.org',
-      phone: '+91 98765 00002',
-      avatar: '',
-      password_hash: defaultHash,
-      role: 'manager',
-      subtitle: 'Healthcare Coordinator & Ops Manager',
-      doctorId: null,
-      providerId: null,
-      status: 'active',
-      must_change_password: true,
-      password_changed_at: null
-    }
   ];
-
-  (doctors || []).forEach(doc => {
-    users.push({
-      id: `usr-doc-${doc.id}`,
-      user_id: `usr-doc-${doc.id}`,
-      name: doc.name,
-      email: `doctor.${doc.id}@avinyacarefoundation.org`,
-      phone: '+91 98200 11223',
-      avatar: doc.avatar || '',
-      password_hash: defaultHash,
-      role: 'doctor',
-      subtitle: doc.specialityName || 'Medical Specialist',
-      doctorId: doc.id,
-      providerId: null,
-      status: 'active',
-      must_change_password: true,
-      password_changed_at: null
-    });
-  });
-
-  (providers || []).forEach(prov => {
-    users.push({
-      id: `usr-prov-${prov.id}`,
-      user_id: `usr-prov-${prov.id}`,
-      name: prov.name,
-      email: prov.email,
-      phone: prov.phone || '+91 98765 43210',
-      avatar: '',
-      password_hash: defaultHash,
-      role: 'diagnostic_provider',
-      subtitle: `${prov.city} Diagnostic Center`,
-      doctorId: null,
-      providerId: prov.id,
-      status: 'active',
-      must_change_password: true,
-      password_changed_at: null
-    });
-  });
 
   return users;
 }
@@ -1044,24 +997,8 @@ export async function addDoctor(doctorData) {
 
   db.doctors.push(newDoctor);
 
-  // Link user account
-  const defaultHash = hashPassword('Admin@1230');
-  db.users.push({
-    id: `usr-doc-${newId}`,
-    user_id: `usr-doc-${newId}`,
-    name: newDoctor.name,
-    email: doctorData.email || `doctor.${newId}@avinyacarefoundation.org`,
-    phone: doctorData.phone || '+91 98200 11223',
-    avatar: newDoctor.avatar,
-    password_hash: defaultHash,
-    role: 'doctor',
-    subtitle: newDoctor.specialityName,
-    doctorId: newId,
-    providerId: null,
-    status: 'active',
-    must_change_password: true,
-    password_changed_at: null
-  });
+  // A doctor profile does not automatically become a login account. An
+  // administrator must separately create and link that account.
 
   await persistDb();
   return newDoctor;
@@ -1639,8 +1576,7 @@ export async function authenticateCredentials(emailOrUsername, password) {
     return { success: false, error: 'Your account is currently unavailable. Please contact the administrator.' };
   }
 
-  const defaultHash = hashPassword('Admin@1230');
-  const userHash = user.password_hash || defaultHash;
+  const userHash = user.password_hash || '';
   const isMatch = verifyPassword(password, userHash);
 
   if (!isMatch) {
@@ -1675,8 +1611,7 @@ export async function updateUserPassword(userId, currentPassword, newPassword, i
     return { success: false, error: 'User account not found.' };
   }
 
-  const defaultHash = hashPassword('Admin@1230');
-  const userHash = user.password_hash || defaultHash;
+  const userHash = user.password_hash || '';
 
   if (currentPassword) {
     const isMatch = verifyPassword(currentPassword, userHash);
@@ -1720,7 +1655,7 @@ export async function createPasswordResetToken(email) {
     email: user.email,
     user_id: user.user_id || user.id,
     user_name: user.name,
-    token: token,
+    token_hash: generateTokenHash(token),
     expires_at: expiresAt,
     used: false,
     created_at: new Date().toISOString()
@@ -1734,7 +1669,8 @@ export async function resetPasswordWithToken(token, newPassword) {
   const db = await getDb();
   if (!db.passwordResets) db.passwordResets = [];
 
-  const record = db.passwordResets.find(r => r.token === token && !r.used);
+  const tokenHash = generateTokenHash(token);
+  const record = db.passwordResets.find(r => r.token_hash === tokenHash && !r.used);
   if (!record) {
     return { success: false, error: 'Invalid or expired password reset link.' };
   }
@@ -1822,12 +1758,14 @@ export async function adminResetUserPassword(targetUserId) {
   const user = db.users.find(u => (u.user_id || u.id) === targetUserId);
   if (!user) return { success: false, error: 'User account not found.' };
 
-  user.password_hash = hashPassword('Admin@1230');
+  // Do not create or disclose a reusable default password. The account holder
+  // must complete the existing reset-link flow to establish a new credential.
+  user.password_hash = null;
   user.must_change_password = true;
   user.password_changed_at = null;
   await persistDb();
 
-  return { success: true, message: `Password for ${user.name} reset to Admin@1230. User will be required to change password upon next login.` };
+  return { success: true, message: `Password access for ${user.name} was revoked. Send the user a password-reset link to set a new password.` };
 }
 
 export async function addDiagnosticTest(testData) {
@@ -1891,7 +1829,11 @@ export async function saveUserAccount(userData) {
   const userId = userData.id || userData.user_id || `usr-${Date.now()}`;
   const index = db.users.findIndex(u => (u.user_id || u.id) === userId);
   
-  const defaultHash = hashPassword('Admin@1230');
+  const isNewUser = index === -1;
+  const requestedPassword = typeof userData.password === 'string' ? userData.password : '';
+  if (isNewUser && !validatePasswordStrength(requestedPassword).valid) {
+    return { success: false, error: 'A strong temporary password is required for a new user.' };
+  }
   const record = {
     id: userId,
     user_id: userId,
@@ -1899,14 +1841,14 @@ export async function saveUserAccount(userData) {
     email: (userData.email || '').toLowerCase().trim(),
     phone: userData.phone || '',
     avatar: userData.avatar || '',
-    password_hash: userData.password ? hashPassword(userData.password) : (index !== -1 ? db.users[index].password_hash : defaultHash),
+    password_hash: requestedPassword ? hashPassword(requestedPassword) : (index !== -1 ? db.users[index].password_hash : null),
     role: userData.role || 'manager',
     subtitle: userData.subtitle || (userData.role === 'admin' ? 'System Administrator' : 'Staff Member'),
     doctorId: userData.doctorId || null,
     providerId: userData.providerId || null,
     status: userData.status || 'active',
-    must_change_password: false,
-    password_changed_at: new Date().toISOString()
+    must_change_password: isNewUser || Boolean(requestedPassword),
+    password_changed_at: requestedPassword ? null : (index !== -1 ? db.users[index].password_changed_at : null)
   };
 
   if (index !== -1) {
@@ -1939,5 +1881,3 @@ export async function adminToggleUserStatus(targetUserId, status) {
 
   return { success: true, message: `User ${user.name} account status set to ${user.status}.` };
 }
-
-

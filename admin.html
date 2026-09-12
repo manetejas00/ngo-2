@@ -10,6 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <!-- Chart.js CDN for Interactive Graphs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- html2pdf.js & Avinya PDF Service -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="js/services/pdf-service.js?v=2.5"></script>
   <style>
     :root {
       --primary: #087F73;
@@ -333,8 +336,16 @@
       transition: all 0.2s ease;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
       text-decoration: none;
+      min-height: 40px;
+      max-width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      line-height: 1.2;
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
 
     .btn-primary {
@@ -920,6 +931,51 @@
       .workspace-body {
         padding: 20px 16px;
       }
+
+      .table-toolbar,
+      .filter-group {
+        align-items: stretch;
+      }
+
+      .search-box {
+        min-width: min(280px, 100%);
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .top-header {
+        padding: 14px 16px;
+        gap: 12px;
+      }
+
+      .header-right {
+        min-width: 0;
+      }
+
+      .admin-status-pill,
+      #roleUserPill {
+        max-width: 100%;
+      }
+
+      .table-toolbar,
+      .filter-group {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .filter-group .btn,
+      .modal-card form > div[style*="justify-content"] .btn {
+        width: 100%;
+      }
+
+      .modal-card form > div[style*="justify-content"] {
+        flex-wrap: wrap;
+      }
+
+      .modal-card {
+        padding: 16px;
+      }
     }
   </style>
 </head>
@@ -964,16 +1020,6 @@
         </button>
       </form>
 
-      <!-- Initial Test Credentials Reference -->
-      <div style="margin-top: 22px; padding: 14px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; text-align: left; font-size: 12px; color: #94A3B8;">
-        <div style="font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">💡 Default Initial Login Credentials (Password: <code style="color:#5EEAD4">Admin@1230</code>):</div>
-        <div style="display: grid; gap: 4px;">
-          <div>• <strong>Super Admin:</strong> <code style="color:#38BDF8">admin@gmail.com</code></div>
-          <div>• <strong>Coordinator:</strong> <code style="color:#38BDF8">health@avinyacarefoundation.org</code></div>
-          <div>• <strong>Doctor:</strong> <code style="color:#38BDF8">doctor.doc-1@avinyacarefoundation.org</code></div>
-          <div>• <strong>Diagnostic Lab:</strong> <code style="color:#38BDF8">lab.mumbai@avinyacarefoundation.org</code></div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1009,7 +1055,7 @@
         <h3 style="font-size: 18px; font-weight: 700; color: #F8FAFC; margin: 0;">Change Your Password</h3>
       </div>
       <p style="font-size: 13px; color: #FCD34D; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); padding: 10px 12px; border-radius: 8px; margin-bottom: 18px;">
-        ⚠️ <strong>Security Action Required:</strong> You are using an initial account password (<code>Admin@1230</code>). Please set a strong custom password before accessing the dashboard.
+        ⚠️ <strong>Security Action Required:</strong> You are using a temporary password. Please set a strong custom password before accessing the dashboard.
       </p>
 
       <div id="forceError" class="login-error" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #FCA5A5; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
@@ -1018,7 +1064,7 @@
         <div class="form-group" style="margin-bottom: 14px; text-align: left;">
           <label style="font-weight: 600; font-size: 13px; color: #CBD5E1; margin-bottom: 4px; display: block;">Current Password *</label>
           <div style="position: relative;">
-            <input type="password" id="forceCurrentPassword" class="form-control" placeholder="Admin@1230" required style="width: 100%; height: 42px; font-size: 14px; background: #1E293B; border: 1px solid rgba(255, 255, 255, 0.15); color: #F8FAFC; border-radius: 8px; padding: 0 40px 0 12px;">
+            <input type="password" id="forceCurrentPassword" class="form-control" autocomplete="current-password" required style="width: 100%; height: 42px; font-size: 14px; background: #1E293B; border: 1px solid rgba(255, 255, 255, 0.15); color: #F8FAFC; border-radius: 8px; padding: 0 40px 0 12px;">
             <button type="button" onclick="togglePasswordVisibility('forceCurrentPassword', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94A3B8; cursor: pointer; font-size: 16px; padding: 4px;" title="Show/Hide Password">👁️</button>
           </div>
         </div>
@@ -1314,6 +1360,7 @@
               <button class="btn btn-outline" id="reseedCatalogBtn" style="display:none;" onclick="reseedCatalog()">🔄 Re-Seed Catalog</button>
 
               <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
+              <button class="btn btn-outline" style="color: #5EEAD4; border-color: rgba(94, 234, 212, 0.4);" onclick="exportPDF()">📄 Export PDF Report</button>
             </div>
           </div>
 
@@ -1472,6 +1519,12 @@
         <button class="close-btn" onclick="closeModal()">✕</button>
       </div>
       <div id="modalBody"></div>
+      <div style="padding: 14px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; background: rgba(0,0,0,0.25);">
+        <button type="button" class="btn btn-teal" id="detailPdfBtn" onclick="downloadCurrentRecordPDF()">
+          <span>📄 Download Official PDF (with Letterhead)</span>
+        </button>
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Close</button>
+      </div>
     </div>
   </div>
 
@@ -1814,10 +1867,12 @@
   </div>
 
   <script>
-    let adminToken = localStorage.getItem('avinya_admin_token') || sessionStorage.getItem('avinya_admin_token') || '';
+    // Keep credentials only for this tab; persistent localStorage tokens are
+    // unnecessarily exposed to script injection.
+    let adminToken = sessionStorage.getItem('avinya_admin_token') || '';
     let currentUser = null;
     try {
-      currentUser = JSON.parse(localStorage.getItem('avinya_user_obj') || sessionStorage.getItem('avinya_user_obj') || 'null');
+      currentUser = JSON.parse(sessionStorage.getItem('avinya_user_obj') || 'null');
     } catch(e) {}
 
     function getInitialTab() {
@@ -2031,7 +2086,7 @@
         const data = await res.json();
         if (!res.ok || data.status !== 'ok') throw new Error(data.message || 'Profile update failed.');
         currentUser = { ...currentUser, ...data.user };
-        localStorage.setItem('avinya_user_obj', JSON.stringify(currentUser)); sessionStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
+        sessionStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
         syncCurrentUserChrome();
         message.textContent = 'Profile saved successfully.'; message.style.cssText = 'display:block;padding:10px;border-radius:8px;font-size:13px;background:rgba(16,185,129,.15);color:#6EE7B7';
       } catch (error) {
@@ -2042,7 +2097,7 @@
     async function handleLogin(event) {
       event.preventDefault();
       const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value.trim();
+      const password = document.getElementById('loginPassword').value;
       const remember = document.getElementById('loginRemember') ? document.getElementById('loginRemember').checked : false;
       const errorDiv = document.getElementById('loginError');
       const btn = document.getElementById('loginBtn');
@@ -2069,15 +2124,10 @@
           adminToken = data.token;
           currentUser = data.user || { role: 'admin', name: 'User' };
 
-          if (remember) {
-            localStorage.setItem('avinya_admin_token', adminToken);
-            localStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
-          } else {
-            sessionStorage.setItem('avinya_admin_token', adminToken);
-            sessionStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
-            localStorage.setItem('avinya_admin_token', adminToken);
-            localStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
-          }
+          // Persistent login requires an HttpOnly cookie, which this bearer-token
+          // transport does not provide. Keep the session scoped to this browser tab.
+          sessionStorage.setItem('avinya_admin_token', adminToken);
+          sessionStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
 
           if (currentUser.must_change_password) {
             document.getElementById('loginOverlay').style.display = 'none';
@@ -2106,9 +2156,9 @@
 
     async function handleForcePasswordSubmit(event) {
       event.preventDefault();
-      const currentPassword = document.getElementById('forceCurrentPassword').value.trim();
-      const newPassword = document.getElementById('forceNewPassword').value.trim();
-      const confirmPassword = document.getElementById('forceConfirmPassword').value.trim();
+      const currentPassword = document.getElementById('forceCurrentPassword').value;
+      const newPassword = document.getElementById('forceNewPassword').value;
+      const confirmPassword = document.getElementById('forceConfirmPassword').value;
       const errorDiv = document.getElementById('forceError');
       const btn = document.getElementById('forceSubmitBtn');
 
@@ -2136,7 +2186,7 @@
         if (response.ok && data.status === 'ok') {
           alert('✅ Password changed successfully! Welcome to your dashboard.');
           if (currentUser) currentUser.must_change_password = false;
-          localStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
+          sessionStorage.setItem('avinya_user_obj', JSON.stringify(currentUser));
           document.getElementById('forcePasswordModal').style.display = 'none';
           resetStateAndTables();
           applyRolePermissions();
@@ -2244,7 +2294,7 @@
     }
 
     async function adminResetPassword(userId, userName) {
-      if (!confirm(`Are you sure you want to reset password for ${userName} (${userId}) to Admin@1230?\nThe user will be forced to create a new password upon next login.`)) {
+      if (!confirm(`Revoke password access for ${userName} (${userId})? The user will need a secure password-reset link to set a new password.`)) {
         return;
       }
 
@@ -2291,8 +2341,6 @@
         body: JSON.stringify({ action: 'logout' })
       }).catch(() => {});
 
-      localStorage.removeItem('avinya_admin_token');
-      localStorage.removeItem('avinya_user_obj');
       sessionStorage.removeItem('avinya_admin_token');
       sessionStorage.removeItem('avinya_user_obj');
       adminToken = '';
@@ -2303,7 +2351,7 @@
 
     async function fetchAdminData(isSilent = false) {
       if (!adminToken) {
-        adminToken = localStorage.getItem('avinya_admin_token') || sessionStorage.getItem('avinya_admin_token') || '';
+        adminToken = sessionStorage.getItem('avinya_admin_token') || '';
       }
       if (!adminToken) return;
 
@@ -2785,6 +2833,7 @@
           <th>Name</th>
           <th>Email</th>
           <th>Phone</th>
+          <th>Category</th>
           <th>Details</th>
           <th>Delivery</th>
           <th>Timestamp</th>
@@ -2867,7 +2916,7 @@
     function renderForms(items) {
       const tbody = document.getElementById('tableBody');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No matching form submissions found for this view.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="empty-state">No matching form submissions found for this view.</td></tr>`;
         return;
       }
       tbody.innerHTML = items.map(item => `
@@ -2877,12 +2926,63 @@
           <td><div style="display:flex;align-items:center;gap:10px"><div class="user-avatar" style="width:36px;height:36px;font-size:10px;overflow:hidden">${item.avatar && /^https?:\/\//i.test(item.avatar) ? `<img src="${escapeHtml(item.avatar)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent='${userInitials(item)}'">` : userInitials(item)}</div><div><strong>${escapeHtml(item.name)}</strong>${item.phone ? `<br><small style="color:var(--text-muted)">${escapeHtml(item.phone)}</small>` : ''}</div></div></td>
           <td><a href="mailto:${item.email}" style="color:#60A5FA">${escapeHtml(item.email)}</a></td>
           <td>${escapeHtml(item.phone || '-')}</td>
-          <td>${item.form_type === 'donation' ? '<strong style="color:#34D399">₹' + item.amount + ' (' + (item.pan ? 'PAN: ' + item.pan : '80G') + ')</strong>' : escapeHtml((item.message || item.skills || item.organization || '').substring(0, 30))}</td>
+          <td><span style="color:#E2E8F0; font-weight: 500;">${escapeHtml(item.category || item.interest || '-')}</span></td>
+          <td>${item.form_type === 'donation' ? '<strong style="color:#34D399">₹' + item.amount + ' (' + (item.pan ? 'PAN: ' + item.pan : '80G') + ')</strong><br><span class="badge ' + (['PAID', 'CONFIRMED'].includes(String(item.payment_status || '').toUpperCase()) ? 'badge-success' : (String(item.payment_status || '').toUpperCase() === 'FAILED' ? 'badge-danger' : 'badge-warning')) + '" style="margin-top:5px">' + escapeHtml(String(item.payment_status || 'PENDING').toUpperCase()) + '</span>' : escapeHtml((item.message || item.skills || item.organization || '').substring(0, 30))}</td>
           <td><span class="badge ${item.delivery_status === 'SENT' ? 'badge-success' : 'badge-danger'}">${item.delivery_status || 'SENT'}</span></td>
           <td style="color:var(--text-muted);font-size:12px">${item.created_at || '-'}</td>
-          <td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="viewDetail('form', '${item.submission_id}')">View</button></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="viewDetail('form', '${item.submission_id}')">View</button>
+              ${item.form_type === 'donation' && currentUser?.role === 'admin' ? `
+                <select class="select-control" aria-label="Payment status" style="padding:4px 6px;font-size:12px" onchange="updateDonationPaymentStatus('${item.submission_id || item.id}', this.value, this)">
+                  <option value="PENDING" ${String(item.payment_status || 'PENDING').toUpperCase() === 'PENDING' ? 'selected' : ''}>Pending</option>
+                  <option value="CONFIRMED" ${String(item.payment_status || '').toUpperCase() === 'CONFIRMED' ? 'selected' : ''}>Confirmed</option>
+                  <option value="PAID" ${String(item.payment_status || '').toUpperCase() === 'PAID' ? 'selected' : ''}>Paid</option>
+                  <option value="FAILED" ${String(item.payment_status || '').toUpperCase() === 'FAILED' ? 'selected' : ''}>Failed</option>
+                </select>` : ''}
+              ${item.form_type === 'donation' ? `
+                <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;color:#34D399;border-color:#34D399" onclick="window.AvinyaPdf.generateDonationReceiptPDF({
+                  name: '${(item.name || '').replace(/'/g, "\\'")}',
+                  email: '${(item.email || '').replace(/'/g, "\\'")}',
+                  phone: '${(item.phone || '').replace(/'/g, "\\'")}',
+                  pan: '${(item.pan || '').replace(/'/g, "\\'")}',
+                  amount: ${item.amount || 1000},
+                  transaction_id: '${item.transaction_id || item.submission_id}',
+                  receiptNo: '${item.submission_id}',
+                  date: '${item.created_at || ''}'
+                })">📄 80G PDF</button>
+              ` : ''}
+            </div>
+          </td>
         </tr>
       `).join('');
+    }
+
+    async function updateDonationPaymentStatus(id, paymentStatus, select) {
+      const record = (rawData.formSubmissions || []).find(item => (item.submission_id || item.id) === id);
+      const priorStatus = String(record?.payment_status || 'PENDING').toUpperCase();
+      const nextStatus = String(paymentStatus || '').toUpperCase();
+      if (priorStatus === nextStatus) return;
+      if (!confirm(`Mark donation ${id} as ${nextStatus}? Confirmed and paid donations are included in the public verified total.`)) {
+        select.value = priorStatus;
+        return;
+      }
+      select.disabled = true;
+      try {
+        const response = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'update_donation_payment_status', id, paymentStatus: nextStatus })
+        });
+        const data = await response.json();
+        if (!response.ok || data.status !== 'ok') throw new Error(data.message || 'Unable to update payment status.');
+        await fetchAdminData(true);
+      } catch (error) {
+        alert(error.message || 'Unable to update payment status.');
+        select.value = priorStatus;
+      } finally {
+        select.disabled = false;
+      }
     }
 
     function renderDoctorBookings(items) {
@@ -2907,7 +3007,23 @@
             </select>
           </td>
           <td style="color:var(--text-muted);font-size:12px">${item.created_at || item.createdAt || '-'}</td>
-          <td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="viewDetail('doctor', '${item.booking_id || item.id}')">View</button></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px" onclick="viewDetail('doctor', '${item.booking_id || item.id}')">View</button>
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;color:#5EEAD4;border-color:rgba(94,234,212,0.4)" onclick="window.AvinyaPdf.generateDoctorAppointmentPDF({
+                id: '${item.booking_id || item.id}',
+                doctorName: '${(item.doctor_name || item.doctorName || '').replace(/'/g, "\\'")}',
+                doctorSpeciality: '${(item.doctor_speciality || item.doctorSpeciality || '').replace(/'/g, "\\'")}',
+                patientName: '${(item.patient_name || item.patientName || '').replace(/'/g, "\\'")}',
+                patientAge: '${item.patient_age || item.patientAge || ''}',
+                patientGender: '${item.patient_gender || item.patientGender || ''}',
+                patientPhone: '${item.patient_phone || item.patientPhone || ''}',
+                patientEmail: '${item.patient_email || item.patientEmail || ''}',
+                date: '${item.booking_date || item.date || ''}',
+                time: '${item.booking_time || item.time || ''}'
+              })">📄 Slip</button>
+            </div>
+          </td>
         </tr>
       `).join('');
     }
@@ -2933,7 +3049,22 @@
               <option value="cancelled" ${(item.status || '') === 'cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>
           </td>
-          <td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="viewDetail('diagnostic', '${item.booking_id || item.id}')">View</button></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px" onclick="viewDetail('diagnostic', '${item.booking_id || item.id}')">View</button>
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;color:#5EEAD4;border-color:rgba(94,234,212,0.4)" onclick="window.AvinyaPdf.generateDiagnosticBookingPDF({
+                id: '${item.booking_id || item.id}',
+                testName: '${(item.test_name || item.testName || '').replace(/'/g, "\\'")}',
+                price: ${item.price || 0},
+                patientName: '${(item.patient_name || item.patientName || '').replace(/'/g, "\\'")}',
+                patientPhone: '${item.patient_phone || item.patientPhone || ''}',
+                date: '${item.booking_date || item.date || ''}',
+                timeSlot: '${item.time_slot || item.timeSlot || ''}',
+                collectionMethod: '${item.collection_method || 'home_collection'}',
+                address: '${(item.city || 'Mumbai').replace(/'/g, "\\'")}'
+              })">📄 Pass</button>
+            </div>
+          </td>
         </tr>
       `).join('');
     }
@@ -3550,6 +3681,8 @@
       }
     }
 
+    let currentViewedRecord = null;
+
     function viewDetail(category, id) {
       const modal = document.getElementById('detailModal');
       const body = document.getElementById('modalBody');
@@ -3562,6 +3695,7 @@
       else if (category === 'user') item = rawData.usersCatalog.find(i => (i.user_id || i.id) === id);
 
       if (!item) return;
+      currentViewedRecord = { category, id, item };
 
       document.getElementById('modalTitle').innerText = `${category.toUpperCase()} Record: ${id}`;
       body.innerHTML = Object.entries(item).map(([k, v]) => `
@@ -3574,8 +3708,45 @@
       modal.style.display = 'flex';
     }
 
+    function downloadCurrentRecordPDF() {
+      if (!currentViewedRecord || !window.AvinyaPdf) {
+        alert('No record selected to download.');
+        return;
+      }
+      window.AvinyaPdf.generateRecordPDF(currentViewedRecord.category, currentViewedRecord.item);
+    }
+
     function closeModal() {
       document.getElementById('detailModal').style.display = 'none';
+      currentViewedRecord = null;
+    }
+
+    function exportPDF() {
+      let data = [];
+      const title = `Avinya Care Foundation - ${currentTab.toUpperCase()} Official Report`;
+
+      if (currentTab.startsWith('forms')) {
+        data = rawData.formSubmissions || [];
+        if (currentTab !== 'forms_all') {
+          const targetType = currentTab.replace('forms_', '');
+          data = data.filter(i => (i.form_type || 'contact').toLowerCase() === targetType);
+        }
+      } else if (currentTab === 'doctor') data = rawData.doctorBookings || [];
+      else if (currentTab === 'diagnostic') data = rawData.diagnosticBookings || [];
+      else if (currentTab === 'email') data = rawData.emailLogs || [];
+      else if (currentTab === 'activity') data = rawData.activityLogs || [];
+      else if (currentTab === 'doctorsCatalog') data = rawData.doctorsCatalog || [];
+      else if (currentTab === 'testsCatalog') data = rawData.diagnosticTestsCatalog || [];
+      else if (currentTab === 'usersCatalog') data = rawData.usersCatalog || [];
+
+      if (!data || data.length === 0) {
+        alert('No data available in current view to export as PDF.');
+        return;
+      }
+
+      const columns = Object.keys(data[0]).slice(0, 6);
+      const rows = data.map(row => columns.map(col => String(row[col] ?? '-')));
+      window.AvinyaPdf.generateReportPDF(title, columns, rows);
     }
 
     function exportCSV() {

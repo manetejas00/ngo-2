@@ -22,10 +22,42 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="css/styles.css?v=2.3">
-  <link rel="stylesheet" href="css/healthcare.css?v=1.1">
+  <link rel="stylesheet" href="css/styles.css?v=2.7">
+  <link rel="stylesheet" href="css/healthcare.css?v=1.2">
+  <link rel="stylesheet" href="css/preloader.css?v=1.0">
 </head>
 <body class="healthcare-page-body" style="background-color: var(--hc-bg); color: var(--hc-text-main);">
+  <!-- ==========================================
+       AVINYA CARE FOUNDATION — HEALTHCARE PRELOADER
+       ========================================== -->
+  <div id="avinya-preloader" aria-live="polite" aria-label="Loading Avinya Care Foundation Doctors & Tests Platform">
+    <div class="preloader-ambient-glow"></div>
+    <div class="preloader-content">
+      <div class="preloader-emblem-cluster">
+        <div class="preloader-pulse-ring ring-1"></div>
+        <div class="preloader-pulse-ring ring-2"></div>
+        <div class="preloader-pulse-ring ring-3"></div>
+        <div class="preloader-emblem-wrap">
+          <img src="assets/logo-emblem.png" alt="Avinya Care Foundation Emblem" class="preloader-logo-img">
+        </div>
+      </div>
+      <div class="preloader-typography">
+        <div class="preloader-brand-title">
+          <span>Avinya Care</span>
+          <span class="brand-accent">Foundation</span>
+        </div>
+        <p class="preloader-tagline">No one should face a health crisis alone</p>
+      </div>
+      <div class="preloader-progress-wrap">
+        <div class="preloader-progress-track">
+          <div class="preloader-progress-fill"></div>
+        </div>
+        <span class="preloader-status-text">Connecting</span>
+      </div>
+    </div>
+  </div>
+  <script src="js/components/preloader.js?v=1.0"></script>
+
   <div id="doctors-tests-platform">
 
   <!-- 1. UNIFIED LUXURY FLOATING HEALTHCARE NAVIGATION DOCK -->
@@ -49,6 +81,7 @@
         <li><a href="#hc-doctors-anchor" class="nav-link active" onclick="document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'})">Specialists</a></li>
         <li><a href="#hc-tests-anchor" class="nav-link" onclick="document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">Diagnostic Tests</a></li>
         <li><a href="#hc-cancer-priority-anchor" class="nav-link" onclick="document.getElementById('hc-cancer-priority-anchor').scrollIntoView({behavior: 'smooth'})">🎗️ Cancer Care</a></li>
+        <li><a href="/crowdfunding" class="nav-link">Crowdfunding</a></li>
       </ul>
 
       <!-- Right Actions: Book CTA -->
@@ -82,6 +115,7 @@
       <li><a href="#hc-doctors-anchor" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'});">Specialists</a></li>
       <li><a href="#hc-tests-anchor" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'});">Diagnostic Tests</a></li>
       <li><a href="#hc-cancer-priority-anchor" class="mobile-nav-link" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-cancer-priority-anchor').scrollIntoView({behavior: 'smooth'});">🎗️ Cancer Care</a></li>
+      <li><a href="/crowdfunding" class="mobile-nav-link">Crowdfunding</a></li>
     </ul>
     <div style="margin-top: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1.25rem;">
       <button class="btn-primary" style="padding: 0.95rem 2.5rem; font-size: 1.05rem;" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; document.getElementById('hc-doctors-anchor').scrollIntoView({behavior: 'smooth'});">
@@ -786,11 +820,13 @@
   </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="js/doctors-canvas.js?v=2.0"></script>
   <script src="js/components/navbar-gsap.js?v=2.4"></script>
-  <script src="js/modals.js?v=2.3"></script>
-  <script src="js/healthcare/healthcare-app.js?v=2.0"></script>
+  <script src="js/services/pdf-service.js?v=2.5"></script>
+  <script src="js/modals.js?v=2.5"></script>
+  <script src="js/healthcare/healthcare-app.js?v=2.5"></script>
   <script>
     // Robust mobile drawer controller for doctors.html
     (function() {

@@ -164,7 +164,7 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
   const smtpHost = process.env.SMTP_HOST || 'smtp.hostinger.com';
   const smtpPort = parseInt(process.env.SMTP_PORT || '465', 10);
   const smtpUser = process.env.SMTP_USER || 'info@test.avinyacarefoundation.org';
-  const smtpPass = process.env.SMTP_PASS || '@qLVTyL|J5';
+  const smtpPass = process.env.SMTP_PASS || '';
   const smtpSecure = process.env.SMTP_SECURE === 'true' || smtpPort === 465;
 
   let userEmailSent = !recipientUser;

@@ -96,8 +96,11 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             `pan` VARCHAR(50) DEFAULT NULL,
             `transaction_id` VARCHAR(100) DEFAULT NULL,
             `organization` VARCHAR(255) DEFAULT NULL,
+            `category` VARCHAR(100) DEFAULT NULL,
             `interest` VARCHAR(255) DEFAULT NULL,
             `message` TEXT DEFAULT NULL,
+            `payment_status` VARCHAR(50) DEFAULT 'PENDING',
+            `is_anonymous` TINYINT(1) DEFAULT 0,
             `user_email_sent` TINYINT(1) DEFAULT 0,
             `admin_email_sent` TINYINT(1) DEFAULT 0,
             `delivery_status` VARCHAR(50) DEFAULT 'UNKNOWN',
@@ -106,6 +109,9 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             INDEX `idx_form_type` (`form_type`),
             INDEX `idx_email` (`email`),
             INDEX `idx_submission_id` (`submission_id`)
+            ,INDEX `idx_donation_status_created` (`form_type`, `payment_status`, `created_at`)
+            ,INDEX `idx_donation_campaign` (`category`)
+            ,UNIQUE KEY `uq_transaction_id` (`transaction_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
 
         // 2. Doctor Appointment Bookings Table
@@ -309,6 +315,17 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
     }
 
     try {
+        $colsForms = $pdo->query("SHOW COLUMNS FROM `form_submissions`")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('category', $colsForms, true)) {
+            $pdo->exec("ALTER TABLE `form_submissions` ADD COLUMN `category` VARCHAR(100) DEFAULT NULL AFTER `organization`");
+        }
+        if (!in_array('payment_status', $colsForms, true)) {
+            $pdo->exec("ALTER TABLE `form_submissions` ADD COLUMN `payment_status` VARCHAR(50) DEFAULT 'PENDING' AFTER `message`");
+        }
+        if (!in_array('is_anonymous', $colsForms, true)) {
+            $pdo->exec("ALTER TABLE `form_submissions` ADD COLUMN `is_anonymous` TINYINT(1) DEFAULT 0 AFTER `payment_status`");
+        }
+        
         $colsTests = $pdo->query("SHOW COLUMNS FROM `diagnostic_tests`")->fetchAll(PDO::FETCH_COLUMN);
         if (!in_array('sample_type', $colsTests, true)) {
             $pdo->exec("ALTER TABLE `diagnostic_tests` ADD COLUMN `sample_type` VARCHAR(100) DEFAULT 'Blood / Serum Sample' AFTER `report_turnaround`");
@@ -492,6 +509,14 @@ function seedDiagnosticProviders(PDO $pdo, bool $force = false): int {
 }
 
 function seedDefaultUsers(PDO $pdo, bool $force = false): int {
+    // Accounts are never provisioned with a repository-default password. A
+    // one-time deployment bootstrap is allowed only when both secrets are set
+    // in the server environment; thereafter administrators create all users.
+    $bootstrapEmail = strtolower(getDbEnv('BOOTSTRAP_ADMIN_EMAIL'));
+    $bootstrapPassword = getDbEnv('BOOTSTRAP_ADMIN_PASSWORD');
+    if (!filter_var($bootstrapEmail, FILTER_VALIDATE_EMAIL) || strlen($bootstrapPassword) < 12) {
+        return 0;
+    }
     $seeded = 0;
     try {
         $stmt = $pdo->prepare("INSERT INTO `users`
@@ -500,13 +525,13 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
             ON DUPLICATE KEY UPDATE
             `name` = VALUES(`name`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`)");
 
-        $defaultPassHash = password_hash('Admin@1230', PASSWORD_DEFAULT);
+        $defaultPassHash = password_hash($bootstrapPassword, PASSWORD_DEFAULT);
 
         // 1. Seed Super Admin
         $stmt->execute([
             ':u_id' => 'usr-admin-01',
             ':name' => 'Super Admin',
-            ':email' => 'admin@gmail.com',
+            ':email' => $bootstrapEmail,
             ':pass_hash' => $defaultPassHash,
             ':role' => 'admin',
             ':doc_id' => null,

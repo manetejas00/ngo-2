@@ -1,65 +1,65 @@
 {
-  "timestamp": 1788689548257,
+  "timestamp": 1789219741083,
   "articles": [
     {
-      "id": "gemini-ai-topic-1788689557001-2-yqdf",
-      "title": "Structured Anti-Inflammatory Nutrition & Mindfulness Protocol Reduces Chemotherapy Fatigue by 40%",
-      "description": "Clinical studies across tertiary oncology centers highlight that personalized plant-based anti-inflammatory nutrition paired with supervised light exercise significantly accelerates post-chemotherapy recovery.",
-      "category": "Care",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T09:42:37.001Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788689557001-3-ir84",
-      "title": "Liquid Biopsy Multi-Cancer Early Detection Blood Panels Approved for Clinical Pilot Studies",
-      "description": "High-throughput sequencing analyzing cell-free circulating tumor DNA (ctDNA) achieves over 92% specificity across 12 common solid cancer types before physical symptoms emerge.",
+      "id": "gemini-ai-topic-1789219742303-2-m49k",
+      "title": "AI-Enhanced Ultrasound Triaging Identifies Suspicious Breast Masses with 98% Clinical Concordance",
+      "description": "Point-of-care ultrasound devices integrated with real-time deep learning neural networks assist primary care physicians in differentiating benign cysts from malignant lesions instantly.",
       "category": "Early Detection",
       "source": "Gemini AI Medical Engine",
       "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T09:12:37.001Z",
+      "publishedAt": "2026-09-12T12:59:02.303Z",
       "isAIGenerated": true,
       "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
+      "urlToImage": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80"
     },
     {
-      "id": "gemini-ai-topic-1788689557001-4-1hu4",
+      "id": "gemini-ai-topic-1789219742303-3-51gq",
       "title": "Grassroots Caregiver Navigation Network Drastically Shortens Time-to-Treatment in Mumbai–Virar",
       "description": "Community caregiver navigators guide newly diagnosed patients through biopsy confirmation, government financial schemes, and specialist appointments within 10 days of first consultation.",
       "category": "Care",
       "source": "Gemini AI Medical Engine",
       "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T08:42:37.001Z",
+      "publishedAt": "2026-09-12T12:29:02.303Z",
       "isAIGenerated": true,
       "url": "#",
       "urlToImage": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
     },
     {
-      "id": "gemini-ai-topic-1788689557001-5-6zif",
-      "title": "Digital Palliative & Tele-Oncology Clinics Connect Homebound Patients with Oncology Specialists",
-      "description": "24/7 tele-oncology support platforms provide symptom management, dosage adjustments, and psychosocial counseling directly into patients' living rooms across Maharashtra.",
-      "category": "Care",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T08:12:37.001Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1788689557001-1-6vt9",
+      "id": "gemini-ai-topic-1789219742303-4-5yaw",
       "title": "National Cervical Cancer Elimination Drive Introduces Single-Dose HPV Vaccination Protocol",
       "description": "Public health authorities and partner clinics adopt streamlined single-dose immunization schedules for adolescent girls, establishing robust lifelong immunity against high-risk oncogenic HPV strains.",
       "category": "Prevention",
       "source": "Gemini AI Medical Engine",
       "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-06T10:12:37.001Z",
+      "publishedAt": "2026-09-12T11:59:02.303Z",
       "isAIGenerated": true,
       "url": "#",
       "urlToImage": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "gemini-ai-topic-1789219742303-5-7xs4",
+      "title": "Mobile AI Diagnostic Vans Expand Early Oral & Cervical Screening Across Maharashtra",
+      "description": "Avinya Care Foundation and regional health networks deploy solar-powered diagnostic vans equipped with portable colposcopy and AI-assisted oral visual examination tools for underserved rural communities.",
+      "category": "Early Detection",
+      "source": "Gemini AI Medical Engine",
+      "apiProvider": "Gemini AI Engine",
+      "publishedAt": "2026-09-12T11:29:02.303Z",
+      "isAIGenerated": true,
+      "url": "#",
+      "urlToImage": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "gemini-ai-topic-1789219742303-1-ld19",
+      "title": "Next-Generation CAR-T Cell Immunotherapy Achieves Complete Remission in Refractory Lymphoma Trials",
+      "description": "Indigenous cellular engineering and targeted T-cell receptors demonstrate unprecedented success rates in halting aggressive hematologic malignancies while minimizing systemic toxicity.",
+      "category": "Treatment",
+      "source": "Gemini AI Medical Engine",
+      "apiProvider": "Gemini AI Engine",
+      "publishedAt": "2026-09-12T13:29:02.303Z",
+      "isAIGenerated": true,
+      "url": "#",
+      "urlToImage": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80"
     },
     {
       "id": "cancer-news-1",
@@ -67,7 +67,7 @@
       "description": "New clinical research demonstrates how targeted immunotherapy approaches can significantly enhance survival outcomes and minimize side effects for early-stage oncology patients.",
       "category": "Cancer Research",
       "source": "National Cancer Institute",
-      "publishedAt": "2026-09-06T08:07:36.382Z",
+      "publishedAt": "2026-09-12T11:29:00.062Z",
       "url": "https://www.cancer.gov/news-events",
       "urlToImage": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
@@ -78,7 +78,7 @@
       "description": "Community health initiatives and mobile diagnostic clinics reach underserved populations, empowering individuals to take proactive steps in routine breast and colorectal screenings.",
       "category": "Awareness & Detection",
       "source": "World Health Organization",
-      "publishedAt": "2026-09-06T05:07:36.384Z",
+      "publishedAt": "2026-09-12T08:29:00.062Z",
       "url": "https://www.who.int/health-topics/cancer",
       "urlToImage": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
@@ -89,7 +89,7 @@
       "description": "Liquid biopsy technology shows high accuracy in detecting circulating tumor DNA across multiple cancer types, offering hope for earlier clinical diagnosis.",
       "category": "Early Detection",
       "source": "American Cancer Society",
-      "publishedAt": "2026-09-05T20:07:36.384Z",
+      "publishedAt": "2026-09-11T23:29:00.063Z",
       "url": "https://www.cancer.org/research",
       "urlToImage": "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
@@ -100,7 +100,7 @@
       "description": "Integrative health guidelines emphasize tailored physical activity and clinical nutrition plans to enhance energy levels and reduce recurrence risk post-treatment.",
       "category": "Survivorship",
       "source": "Harvard Health Publishing",
-      "publishedAt": "2026-09-05T10:07:36.384Z",
+      "publishedAt": "2026-09-11T13:29:00.063Z",
       "url": "https://www.health.harvard.edu",
       "urlToImage": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
@@ -111,13 +111,37 @@
       "description": "Non-profit partnerships deploy portable ultrasound and digital mammography units to ensure geographic location does not limit life-saving early detection.",
       "category": "Healthcare Policy",
       "source": "Global Health Journal",
-      "publishedAt": "2026-09-05T04:07:36.384Z",
+      "publishedAt": "2026-09-11T07:29:00.063Z",
       "url": "https://www.sciencedirect.com/journal/global-health-journal",
       "urlToImage": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
     },
     {
-      "id": "api-news-49hvd-0",
+      "id": "api-news-54l1r-2",
+      "title": "Crew Studies Medicine and Physics, Works on Spacesuits and Earth Photo Gear",
+      "description": "Vein scans, ultra-hot physics, and Earth observations were the main research activities aboard the International Space Station on Wednesday. The Expedition 75 crew members rounded out their mid-week shift and swapped out spacesuit components and serviced life support gear.",
+      "category": "Global Health",
+      "source": "🌐 Global Healthcare Media",
+      "apiProvider": "🌐 Global Healthcare Media",
+      "publishedAt": "2026-09-09T17:38:23Z",
+      "url": "https://www.nasa.gov/blogs/spacestation/2026/09/09/crew-studies-medicine-and-physics-works-on-spacesuits-and-earth-photo-gear/",
+      "urlToImage": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80",
+      "isAIGenerated": false
+    },
+    {
+      "id": "api-news-rvwm9-3",
+      "title": "Astronaut Health, Lunar and Earth Photography Fill Crew’s Research Schedule",
+      "description": "Exploring astronaut health and photographing the Moon and Earth topped the research schedule for the Expedition 75 crew aboard the International Space Station on Tuesday. The orbital residents also kept up life support maintenance following the departure of cargo spacecraft the day before.",
+      "category": "Global Health",
+      "source": "🌐 Global Healthcare Media",
+      "apiProvider": "🌐 Global Healthcare Media",
+      "publishedAt": "2026-09-08T17:42:32Z",
+      "url": "https://www.nasa.gov/blogs/spacestation/2026/09/08/astronaut-health-lunar-and-earth-photography-fill-crews-research-schedule/",
+      "urlToImage": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80",
+      "isAIGenerated": false
+    },
+    {
+      "id": "api-news-gsdd9-0",
       "title": "Long Covid More Severe In Women Than Men, Suggests Study",
       "description": "The study found that 91% of patients, who were followed up for five months on average, continued to experience Covid-19 symptoms. Breathlessness was the most common symptom of long Covid-19, followed by fatigue",
       "category": "Global Health",
@@ -129,7 +153,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-p07b6-2",
+      "id": "api-news-yxwzg-2",
       "title": "Why We Can't 'Boost' Our Way Out of the COVID-19 Pandemic in the Long Term – The Wire Science",
       "description": "While current vaccines are effective at preventing severe disease, the next phase of vaccine development will need to focus on triggering long-lived antibody response.",
       "category": "Global Health",
@@ -141,7 +165,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-wg6qm-3",
+      "id": "api-news-jfxzl-3",
       "title": "Let's manage pain, learn about 'Pain Medicine'",
       "description": "Pain Medicine is a relatively new medical specialty that deals with the comprehensive management of chronic pain. Chronic pain refers to any pain condition that lasts more than 3 months.",
       "category": "Global Health",
@@ -153,7 +177,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-r3pyx-5",
+      "id": "api-news-ksw0d-5",
       "title": "Good HDL cholesterol may keep Alzheimer's away: study",
       "description": "Having good cholesterol or high-density lipoprotein (HDL) in the body is essential to health as it may protect the brain and keep Alzheimer's disease at bay, according to a recent study. Researchers from University of Southern California's (USC) Keck School o…",
       "category": "Global Health",
@@ -165,7 +189,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-8flr9-6",
+      "id": "api-news-7fim6-6",
       "title": "CDC confirms 4 Americans got Coronavirus from Mink; here is all you need to know about the first animal-to-human transmission of COVID virus",
       "description": "The US health agency recently revealed that a variant of COVID witnessed majorly in mink in 2020 had infected at least four Americans.",
       "category": "Global Health",
@@ -177,7 +201,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-szlvu-1",
+      "id": "api-news-csk5t-1",
       "title": "Study evaluates the use of a diagnostic code for Long COVID",
       "description": "Researchers evaluated the use of U09.9, a CD-10-CM code described as 'Post coronavirus disease 2019 (COVID-19) condition, unspecified' for post-acute COVID-19 sequelae (long COVID).",
       "category": "Global Health",
@@ -189,7 +213,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-tvxj7-8",
+      "id": "api-news-i13dg-8",
       "title": "Johns Hopkins University: Mediterranean-Style Diet Further Linked to Reduced Risk of Preeclampsia in Pregnant Women of All Races",
       "description": "A new Johns Hopkins Medicine study that surveyed a racially diverse group of more than 8,000 women has added to evidence that following a Mediterranean-style diet could lower the risk of preeclampsia by at least 20%.Preeclampsia is a potentially leth",
       "category": "Prevention",
@@ -201,7 +225,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-55cn7-9",
+      "id": "api-news-kbwwn-9",
       "title": "Johns Hopkins University: Lab Grown, Self-Sustainable Muscle Cells Repair Muscle Injury and Disease, Mouse Study Shows",
       "description": "In proof-of-concept experiments, Johns Hopkins Medicine scientists say they have successfully cultivated human muscle stem cells capable of renewing themselves and repairing muscle tissue damage in mice, potentially advancing efforts to treat muscle",
       "category": "Global Health",
@@ -213,7 +237,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-mrucy-11",
+      "id": "api-news-52jco-11",
       "title": "Bacteria in urine may signal aggressive prostate cancer: Study",
       "description": "Researchers in the UK have identified five types of bacteria in urine which may be linked to aggressive prostate cancer. The findings, published in the journal European Urology Oncology, could help pave the way for treatments that could target these particula…",
       "category": "Cancer Research",
@@ -225,7 +249,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-h256n-12",
+      "id": "api-news-8po53-12",
       "title": "Genetically modified mosquitoes for controlling vector-borne diseases? Successful trial gives hope",
       "description": "The findings were achieved after a decade of fight for public acceptance, regulatory approvals",
       "category": "Global Health",
@@ -237,7 +261,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-3r07r-4",
+      "id": "api-news-k2uaw-4",
       "title": "newsGP",
       "description": "People using antidepressants to treat depression have similar outcomes to those who do not, new research suggests.",
       "category": "Global Health",
@@ -249,7 +273,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-fxm1a-15",
+      "id": "api-news-yuyug-15",
       "title": "Intermittent fasting is not for all, experts list health problems that could worsen on this diet",
       "description": "Intermittent fasting decreases glucose concentration and increases fatty acid oxidation which helps the body break down stored fats.",
       "category": "Prevention",
@@ -258,30 +282,6 @@
       "publishedAt": "2022-04-21T06:50:00Z",
       "url": "https://www.timesnownews.com/health/intermittent-fasting-is-not-for-all-experts-list-health-problems-that-could-worsen-on-this-diet-article-90974386",
       "urlToImage": "https://static.tnn.in/thumb/msid-90974386,imgsize-100,width-1280,height-720,resizemode-75/90974386.jpg",
-      "isAIGenerated": false
-    },
-    {
-      "id": "api-news-cgqb8-16",
-      "title": "Worried About Your Family’s Health Due to White Sugar? Here Are Some Amazing Healthy Alternatives",
-      "description": "To help you make better diet choices and yet continue enjoying the same sweetness, here are 5 healthy substitutes to processed sugar that not only make your food tasty but also have their own health benefits.",
-      "category": "Global Health",
-      "source": "News18",
-      "apiProvider": "🇮🇳 India Health Desk",
-      "publishedAt": "2022-04-21T06:36:36Z",
-      "url": "https://www.news18.com/news/lifestyle/worried-about-your-familys-health-due-to-white-sugar-here-are-some-amazing-healthy-alternatives-5021071.html",
-      "urlToImage": "https://images.news18.com/ibnlive/uploads/2021/12/sugar-2-164088097016x9.jpg",
-      "isAIGenerated": false
-    },
-    {
-      "id": "api-news-6yzeh-17",
-      "title": "Liver cancer is increasing because of unhealthy lifestyle – Mysuru Today",
-      "description": "Prime News, National, Karnataka, Health, Disease, Mysuru, April 21:- Liver cancer is rising because of an unhealthy lifestyle, said Dr M S Vishveshwara, Chief Radiation Oncologist and Medical Superint",
-      "category": "Cancer Research",
-      "source": "Citytoday.news",
-      "apiProvider": "🇮🇳 India Health Desk",
-      "publishedAt": "2022-04-21T05:41:53Z",
-      "url": "https://citytoday.news/liver-cancer-is-increasing-because-of-unhealthy-lifestyle/",
-      "urlToImage": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80",
       "isAIGenerated": false
     }
   ]

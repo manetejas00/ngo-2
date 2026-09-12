@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 ini_set('session.use_strict_mode', '1');
-session_set_cookie_params(['secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly' => true, 'samesite' => 'Strict', 'path' => '/']);
+session_set_cookie_params(['lifetime' => 1800, 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly' => true, 'samesite' => 'Strict', 'path' => '/']);
 session_start();
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/activity-logger.php';
@@ -31,15 +31,13 @@ if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
 
 $rawInput = file_get_contents('php://input');
 $data = json_decode((string) $rawInput, true) ?: $_POST;
-if (!$token) {
-    $token = trim((string) ($data['token'] ?? $_GET['token'] ?? ''));
-}
+if (!$token) $token = trim((string) ($data['token'] ?? ''));
 
 $userRole = $_SESSION['user_role'] ?? '';
 $userDocId = $_SESSION['user_doc_id'] ?? null;
 $userProvId = $_SESSION['user_prov_id'] ?? null;
 
-$isAuthenticated = !empty($_SESSION['admin_token']) && $token !== '' && hash_equals((string) $_SESSION['admin_token'], $token);
+$isAuthenticated = !empty($_SESSION['admin_token']) && !empty($_SESSION['auth_started_at']) && (time() - (int) $_SESSION['auth_started_at']) <= 1800 && $token !== '' && hash_equals((string) $_SESSION['admin_token'], $token);
 
 if (!$isAuthenticated) {
     http_response_code(401);
@@ -53,6 +51,30 @@ if (!$isAuthenticated) {
 $action = strtolower(trim((string) ($data['action'] ?? $_GET['action'] ?? 'all')));
 
 $pdo = getDatabaseConnection();
+if ($pdo !== null && !empty($_SESSION['user_id'])) {
+    $accountCheck = $pdo->prepare('SELECT status FROM users WHERE user_id = :uid LIMIT 1');
+    $accountCheck->execute([':uid' => (string) $_SESSION['user_id']]);
+    if (strtolower((string) $accountCheck->fetchColumn()) !== 'active') {
+        $_SESSION = [];
+        session_destroy();
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'Your session is no longer active.']);
+        exit(0);
+    }
+}
+
+function validResourceId(string $value, string $label): string {
+    if ($value === '' || !preg_match('/^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/', $value)) {
+        http_response_code(422); echo json_encode(['status' => 'error', 'message' => "Invalid {$label}."]); exit(0);
+    }
+    return $value;
+}
+function validMoney($value, string $label): float {
+    if (!is_numeric($value) || !is_finite((float) $value) || (float) $value < 0 || (float) $value > 10000000) {
+        http_response_code(422); echo json_encode(['status' => 'error', 'message' => "{$label} must be between 0 and 1,00,00,000."]); exit(0);
+    }
+    return round((float) $value, 2);
+}
 
 // Action: Update Status for Doctor or Diagnostic Booking
 if ($action === 'update_status') {
@@ -150,6 +172,37 @@ if ($action === 'update_status') {
     }
 }
 
+// Action: administrator-only donation payment verification.
+if ($action === 'update_donation_payment_status') {
+    if ($userRole !== 'admin') {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Administrator permissions are required to change payment status.']);
+        exit(0);
+    }
+    $submissionId = validResourceId(trim((string) ($data['id'] ?? $data['submissionId'] ?? '')), 'submission ID');
+    $paymentStatus = strtoupper(trim((string) ($data['paymentStatus'] ?? $data['payment_status'] ?? '')));
+    if (!in_array($paymentStatus, ['PENDING', 'CONFIRMED', 'PAID', 'FAILED'], true)) {
+        http_response_code(422);
+        echo json_encode(['status' => 'error', 'message' => 'Invalid payment status.']);
+        exit(0);
+    }
+    if ($pdo === null) {
+        http_response_code(503);
+        echo json_encode(['status' => 'error', 'message' => 'Donation storage is unavailable.']);
+        exit(0);
+    }
+    $stmt = $pdo->prepare("UPDATE `form_submissions` SET `payment_status` = :payment_status WHERE `submission_id` = :submission_id AND LOWER(`form_type`) = 'donation'");
+    $stmt->execute([':payment_status' => $paymentStatus, ':submission_id' => $submissionId]);
+    if ($stmt->rowCount() !== 1) {
+        http_response_code(404);
+        echo json_encode(['status' => 'error', 'message' => 'Donation record was not found.']);
+        exit(0);
+    }
+    logActivity('DONATION_PAYMENT_STATUS_UPDATE', 'admin', $_SESSION['admin_email'] ?? 'admin', "Updated donation {$submissionId} payment status to {$paymentStatus}", ['submissionId' => $submissionId, 'paymentStatus' => $paymentStatus]);
+    echo json_encode(['status' => 'ok', 'message' => "Donation {$submissionId} marked {$paymentStatus}."]);
+    exit(0);
+}
+
 // Enforce Admin role for management actions
 if (in_array($action, ['save_doctor', 'delete_doctor', 'save_test', 'delete_test', 'save_user', 'delete_user', 'seed_catalog'], true)) {
     if ($userRole !== 'admin') {
@@ -162,7 +215,7 @@ if (in_array($action, ['save_doctor', 'delete_doctor', 'save_test', 'delete_test
 // Action: Save Doctor (Create or Update)
 if ($action === 'save_doctor') {
     $doc = $data['doctor'] ?? $data;
-    $docId = trim((string) ($doc['id'] ?? $doc['doctor_id'] ?? ('doc-' . date('Ymd') . '-' . bin2hex(random_bytes(2)))));
+    $docId = validResourceId(trim((string) ($doc['id'] ?? $doc['doctor_id'] ?? ('doc-' . date('Ymd') . '-' . bin2hex(random_bytes(2))))), 'doctor ID');
     $name = trim((string) ($doc['name'] ?? ''));
     if ($name === '') {
         http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'Doctor name is required.']); exit(0);
@@ -171,10 +224,11 @@ if ($action === 'save_doctor') {
     $specName = $doc['speciality_name'] ?? $doc['specialityName'] ?? 'Medical Oncology & Cancer Immunotherapy';
     $qual = $doc['qualification'] ?? 'MBBS, MD';
     $exp = (int) ($doc['experience_years'] ?? $doc['experienceYears'] ?? 10);
+    if ($exp < 0 || $exp > 80) { http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Experience must be between 0 and 80 years.']); exit(0); }
     $hId = $doc['hospital_id'] ?? $doc['hospitalId'] ?? 'tmh-mumbai';
     $hName = $doc['hospital_name'] ?? $doc['hospitalName'] ?? 'Avinya Partner Hospital';
     $loc = $doc['location'] ?? 'Mumbai';
-    $fee = (float) ($doc['consultation_fee'] ?? $doc['consultationFee'] ?? 0);
+    $fee = validMoney($doc['consultation_fee'] ?? $doc['consultationFee'] ?? 0, 'Consultation fee');
     $feeDisp = $doc['fee_display'] ?? $doc['feeDisplay'] ?? ($fee > 0 ? "₹{$fee}" : "₹0 (Avinya Supported / Free)");
     $types = is_array($doc['consultationTypes'] ?? null) ? $doc['consultationTypes'] : (is_string($doc['consultation_types'] ?? null) ? json_decode($doc['consultation_types'], true) : ['in-clinic', 'online']);
     $rating = (float) ($doc['rating'] ?? 4.95);
@@ -189,16 +243,19 @@ if ($action === 'save_doctor') {
         if (!is_dir($doctorDir)) {
             @mkdir($doctorDir, 0755, true);
         }
-        if (preg_match('/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/', $photoData, $matches)) {
+        if (strlen($photoData) > 8 * 1024 * 1024 || !preg_match('/^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+\/\r\n=]+)$/', $photoData, $matches)) {
+            http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Photo must be a JPEG, PNG, or WebP image smaller than 6 MB.']); exit(0);
+        }
+        {
             $ext = $matches[1] === 'jpeg' ? 'jpg' : $matches[1];
-            $decoded = base64_decode($matches[2]);
-            if ($decoded !== false) {
+            $decoded = base64_decode($matches[2], true);
+            if ($decoded !== false && strlen($decoded) <= 6 * 1024 * 1024 && @getimagesizefromstring($decoded) !== false) {
                 $safeFilename = 'doc_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $docId) . '_' . time() . '.' . $ext;
                 $targetPath = $doctorDir . '/' . $safeFilename;
                 if (file_put_contents($targetPath, $decoded) !== false) {
                     $avatar = '/assets/doctors/' . $safeFilename;
                 }
-            }
+            } else { http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Uploaded image is invalid or exceeds 6 MB.']); exit(0); }
         }
     }
     
@@ -261,7 +318,7 @@ if ($action === 'delete_doctor') {
 // Action: Save Diagnostic Test Package
 if ($action === 'save_test') {
     $t = $data['test'] ?? $data;
-    $tId = trim((string) ($t['id'] ?? $t['test_id'] ?? ('test-' . date('Ymd') . '-' . bin2hex(random_bytes(2)))));
+    $tId = validResourceId(trim((string) ($t['id'] ?? $t['test_id'] ?? ('test-' . date('Ymd') . '-' . bin2hex(random_bytes(2))))), 'test ID');
     $name = trim((string) ($t['name'] ?? ''));
     if ($name === '') {
         http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'Test package name is required.']); exit(0);
@@ -269,8 +326,9 @@ if ($action === 'save_test') {
     $cat = $t['category'] ?? 'Cancer Screening';
     $tagline = $t['tagline'] ?? '';
     $descr = $t['description'] ?? '';
-    $price = (float) ($t['price'] ?? 0);
-    $origPrice = (float) ($t['original_price'] ?? $t['originalPrice'] ?? 0);
+    $price = validMoney($t['price'] ?? 0, 'Test price');
+    $origPrice = validMoney($t['original_price'] ?? $t['originalPrice'] ?? 0, 'Original price');
+    if ($price <= 0 || ($origPrice > 0 && $origPrice < $price)) { http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Test price must be positive and cannot exceed the original price.']); exit(0); }
     $subsidy = $t['avinya_subsidy'] ?? $t['avinyaSubsidy'] ?? '';
     $included = is_array($t['testsIncluded'] ?? null) ? $t['testsIncluded'] : (is_string($t['tests_included'] ?? null) ? json_decode($t['tests_included'], true) : []);
     $prep = $t['preparation'] ?? '';
@@ -319,7 +377,7 @@ if ($action === 'delete_test') {
 // Action: Save System User (Create or Update)
 if ($action === 'save_user') {
     $usr = $data['user'] ?? $data;
-    $uId = trim((string) ($usr['id'] ?? $usr['user_id'] ?? ('usr-' . date('Ymd') . '-' . bin2hex(random_bytes(2)))));
+    $uId = validResourceId(trim((string) ($usr['id'] ?? $usr['user_id'] ?? ('usr-' . date('Ymd') . '-' . bin2hex(random_bytes(2))))), 'user ID');
     $name = trim((string) ($usr['name'] ?? ''));
     $email = strtolower(trim((string) ($usr['email'] ?? '')));
     $role = strtolower(trim((string) ($usr['role'] ?? 'admin')));
@@ -339,7 +397,7 @@ if ($action === 'save_user') {
     if (!in_array($role, ['admin', 'manager', 'doctor', 'diagnostic_provider'], true) || !in_array($status, ['active', 'inactive', 'disabled', 'suspended'], true)) {
         http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Invalid role or account status.']); exit(0);
     }
-    if ($phone !== '' && !preg_match('/^[0-9+() .-]{7,20}$/', $phone)) {
+    if ($phone !== '' && !preg_match('/^(?:\+91)?[6-9]\d{9}$/', preg_replace('/[\s()-]/', '', $phone))) {
         http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Enter a valid phone number.']); exit(0);
     }
     if ($avatar !== '' && (!filter_var($avatar, FILTER_VALIDATE_URL) || !preg_match('#^https?://#i', $avatar))) {
@@ -367,10 +425,10 @@ if ($action === 'save_user') {
         if ($password !== '') {
             $passHash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO `users`
-                (`user_id`, `name`, `email`, `phone`, `avatar`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`)
-                VALUES (:u_id, :name, :email, :phone, :avatar, :pass_hash, :role, :doctor_id, :provider_id, :status)
+                (`user_id`, `name`, `email`, `phone`, `avatar`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`, `must_change_password`, `password_changed_at`)
+                VALUES (:u_id, :name, :email, :phone, :avatar, :pass_hash, :role, :doctor_id, :provider_id, :status, 1, NULL)
                 ON DUPLICATE KEY UPDATE
-                `name` = VALUES(`name`), `email` = VALUES(`email`), `phone` = VALUES(`phone`), `avatar` = VALUES(`avatar`), `password_hash` = VALUES(`password_hash`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = VALUES(`status`)");
+                `name` = VALUES(`name`), `email` = VALUES(`email`), `phone` = VALUES(`phone`), `avatar` = VALUES(`avatar`), `password_hash` = VALUES(`password_hash`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = VALUES(`status`), `must_change_password` = 1, `password_changed_at` = NULL");
             $stmt->execute([
                 ':u_id' => $uId,
                 ':name' => $name,
@@ -491,7 +549,7 @@ $formCountsByType = [];
 foreach ($formSubmissions as $fs) {
     $ft = strtolower((string) ($fs['form_type'] ?? 'contact'));
     $formCountsByType[$ft] = ($formCountsByType[$ft] ?? 0) + 1;
-    if ($ft === 'donation') {
+    if ($ft === 'donation' && in_array(strtoupper((string)($fs['payment_status'] ?? 'PENDING')), ['SUCCESS', 'CONFIRMED', 'PAID'], true)) {
         $totalDonationsCount++;
         $totalDonationsAmount += floatval($fs['amount'] ?? 0);
     }

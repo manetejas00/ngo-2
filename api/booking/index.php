@@ -304,8 +304,10 @@ function createBooking(array $data): array {
         foreach ($required as $field) {
             if (!isset($data[$field]) || trim((string) $data[$field]) === '') throw new InvalidArgumentException("Missing required field: {$field}");
         }
-        if (!validDate((string) $data['date'])) throw new InvalidArgumentException('Date must use YYYY-MM-DD format.');
-        if (!filter_var($data['patientEmail'], FILTER_VALIDATE_EMAIL)) throw new InvalidArgumentException('A valid email address is required.');
+        $today = (new DateTimeImmutable('today', new DateTimeZone('Asia/Kolkata')))->format('Y-m-d');
+        if (!validDate((string) $data['date']) || (string) $data['date'] < $today) throw new InvalidArgumentException('Appointment date must be today or later and use YYYY-MM-DD format.');
+        if (!filter_var(trim((string) $data['patientEmail']), FILTER_VALIDATE_EMAIL)) throw new InvalidArgumentException('A valid email address is required.');
+        if (mb_strlen(trim((string) $data['patientName'])) > 120) throw new InvalidArgumentException('Patient name is too long.');
         $whatsappPhone = normalizeWhatsAppPhone((string) $data['patientPhone']);
         if ($whatsappPhone === null) throw new InvalidArgumentException('A valid mobile number with country code is required.');
 
@@ -329,11 +331,11 @@ function createBooking(array $data): array {
             'doctorFee' => (float) ($doctor['consultationFee'] ?? 0),
             'patientName' => trim((string) $data['patientName']),
             'patientEmail' => strtolower(trim((string) $data['patientEmail'])),
-            'patientPhone' => trim((string) $data['patientPhone']),
+            'patientPhone' => $whatsappPhone,
             'patientWhatsAppPhone' => $whatsappPhone,
-            'patientAge' => (int) ($data['patientAge'] ?? 0),
-            'patientGender' => (string) ($data['patientGender'] ?? 'Unspecified'),
-            'consultationType' => (string) ($data['consultationType'] ?? 'in-clinic'),
+            'patientAge' => max(0, min(120, (int) ($data['patientAge'] ?? 0))),
+            'patientGender' => in_array((string) ($data['patientGender'] ?? 'Unspecified'), ['Male', 'Female', 'Other', 'Unspecified'], true) ? (string) ($data['patientGender'] ?? 'Unspecified') : 'Unspecified',
+            'consultationType' => in_array((string) ($data['consultationType'] ?? 'in-clinic'), (array) ($doctor['consultationTypes'] ?? ['in-clinic', 'online']), true) ? (string) ($data['consultationType'] ?? 'in-clinic') : throw new InvalidArgumentException('Invalid consultation type.'),
             'originalDate' => (string) $data['date'],
             'originalSlot' => $slot,
             'date' => (string) $data['date'],
@@ -777,8 +779,17 @@ try {
         ]);
     }
     if ($method === 'POST' && $action === 'whatsapp_resend') {
+        $authUser = getAuthSessionUser();
+        if (!$authUser || !in_array($authUser['role'], ['admin', 'manager', 'doctor'], true)) {
+            respondJson(403, ['success' => false, 'status' => 'error', 'message' => 'Only authorized staff can resend WhatsApp confirmations.']);
+        }
         $data = requestBody();
         $id = trim((string) ($_GET['id'] ?? $data['id'] ?? ''));
+        $existing = findBooking($id);
+        if (!$existing) respondJson(404, ['success' => false, 'status' => 'error', 'message' => 'Booking not found.']);
+        if ($authUser['role'] === 'doctor' && ($existing['doctorId'] ?? '') !== $authUser['doctorId']) {
+            respondJson(403, ['success' => false, 'status' => 'error', 'message' => 'You can only resend confirmations for your own appointments.']);
+        }
         $notification = sendWhatsAppConfirmation($id, true);
         $notificationStatus = (string) ($notification['event']['status'] ?? 'failed');
         $sent = $notificationStatus === 'sent' || $notificationStatus === 'already_sent';

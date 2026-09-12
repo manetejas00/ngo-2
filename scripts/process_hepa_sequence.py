@@ -4,8 +4,9 @@ import sys
 import numpy as np
 
 def process_sequence():
-    video_path = '/Users/tejasmane/Documents/ngo/assets/make_it_video_k_and_best_vide.mp4'
-    output_dir = '/Users/tejasmane/Documents/ngo/hero-sequence'
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    video_path = os.path.join(base_dir, 'assets', 'Create_a_premium_–_second_c (1).mp4')
+    output_dir = os.path.join(base_dir, 'hero-sequence')
 
     if not os.path.exists(video_path):
         print(f"Error: Video file not found at {video_path}")

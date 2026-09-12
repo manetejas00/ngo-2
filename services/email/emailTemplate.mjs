@@ -18,6 +18,22 @@ export function escapeHTML(str) {
     .replace(/'/g, '&#039;');
 }
 
+const BRAND = Object.freeze({
+  name: 'Avinya Care Foundation',
+  trust: 'Registered Public Charitable Trust',
+  email: 'info@avinyacarefoundation.com',
+  phone: '+91 74474 41116',
+  website: 'www.avinyacarefoundation.org'
+});
+
+function renderDonationSummary(formData, formType) {
+  if (String(formType).toLowerCase() !== 'donation') return '';
+  const amount = Number(formData.amount);
+  const displayAmount = Number.isFinite(amount) && amount > 0 ? `₹${amount.toLocaleString('en-IN')}` : 'Not specified';
+  const status = escapeHTML(String(formData.payment_status || formData.status || 'PENDING').toUpperCase());
+  return `<table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 20px 0 4px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px;"><tr><td style="padding: 14px 16px; font-size: 14px; line-height: 1.55; color: #166534;"><strong>Donation summary</strong><br>Amount: ${escapeHTML(displayAmount)}<br>Payment verification status: ${status}<br><span style="color: #475569; font-size: 12px;">An 80G receipt is issued only after payment verification is complete.</span></td></tr></table>`;
+}
+
 /**
  * Formats multi-line plain text into safe HTML paragraphs.
  * @param {string} text - Raw text content
@@ -46,6 +62,7 @@ export function renderUserEmail(emailContent, formData, formType) {
   const greeting = escapeHTML(emailContent.greeting || `Hello ${formData.name || 'Friend'},`);
   const bodyHTML = formatBodyParagraphs(emailContent.body);
   const closingHTML = formatBodyParagraphs(emailContent.closing || 'With care,\nAvinya Care Foundation');
+  const donationSummaryHTML = renderDonationSummary(formData, formType);
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -72,8 +89,8 @@ export function renderUserEmail(emailContent, formData, formType) {
                   </td>
                 </tr>
               </table>
-              <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Avinya Care Foundation</div>
-              <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">No One Should Face Cancer Alone</h1>
+              <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">${BRAND.name}</div>
+              <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">Care, dignity, and support</h1>
             </td>
           </tr>
 
@@ -84,6 +101,7 @@ export function renderUserEmail(emailContent, formData, formType) {
               
               <div style="font-size: 15px; color: #111817; line-height: 1.65;">
                 ${bodyHTML}
+                ${donationSummaryHTML}
               </div>
 
               <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #F6F4EF; color: #5F6865; font-size: 14px; font-weight: 500;">
@@ -99,8 +117,8 @@ export function renderUserEmail(emailContent, formData, formType) {
                 Cancer Awareness • Support • Care • Community
               </p>
               <p style="margin: 0 0 12px 0;">
-                Avinya Care Foundation • Reg. NGO 80G / 12A Tax Exempted<br>
-                Email: <a href="mailto:care@avinyacare.org" style="color: #F58220; text-decoration: none; font-weight: 500;">care@avinyacare.org</a> | Helpline: <a href="tel:+919876543210" style="color: #F58220; text-decoration: none; font-weight: 500;">+91 98765 43210</a>
+                ${BRAND.name} • ${BRAND.trust}<br>
+                Email: <a href="mailto:${BRAND.email}" style="color: #F58220; text-decoration: none; font-weight: 500;">${BRAND.email}</a> | Helpline: <a href="tel:${BRAND.phone.replace(/\s/g, '')}" style="color: #F58220; text-decoration: none; font-weight: 500;">${BRAND.phone}</a><br>${BRAND.website}
               </p>
               <p style="margin: 0; font-size: 11px; color: #737373; border-top: 1px dashed #404040; padding-top: 10px;">
                 <strong>Medical & Legal Disclaimer:</strong> Avinya Care Foundation communications provide general cancer awareness and support navigation. We do not provide medical diagnoses, treatment prescriptions, or clinical medical advice. Please consult a registered medical oncologist for health concerns.
@@ -126,8 +144,8 @@ ${emailContent.closing || 'With care,\nAvinya Care Foundation'}
 
 ------------------------------------------------
 Cancer Awareness • Support • Care • Community
-Avinya Care Foundation • Reg. NGO 80G / 12A Tax Exempted
-Email: care@avinyacare.org | Helpline: +91 98765 43210
+${BRAND.name} • ${BRAND.trust}
+Email: ${BRAND.email} | Helpline: ${BRAND.phone}
 Medical Disclaimer: General cancer awareness and support navigation only. Not medical advice.`;
 
   return {
@@ -179,7 +197,7 @@ export function renderAdminEmail(emailContent, formData, formType, submissionId,
                     </div>
                   </td>
                   <td valign="middle" style="padding-left: 12px;">
-                    <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">Avinya Care Internal Operations</div>
+                    <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">${BRAND.name} · Internal Operations</div>
                     <h2 style="color: #FFFFFF; font-size: 19px; font-weight: 700; margin: 2px 0 0 0;">New Form Submission: ${escapeHTML(formType.toUpperCase())}</h2>
                   </td>
                 </tr>
@@ -221,7 +239,7 @@ export function renderAdminEmail(emailContent, formData, formType, submissionId,
           <!-- Footer -->
           <tr>
             <td style="background-color: #0A0A0A; padding: 20px 32px; text-align: center; color: #A3A3A3; font-size: 11px; border-top: 1px solid #262626;">
-              Avinya Care Automated Dispatch System • Confidential Internal Operations Notice
+              ${BRAND.name} Automated Dispatch System • Confidential Internal Operations Notice
             </td>
           </tr>
 

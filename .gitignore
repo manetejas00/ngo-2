@@ -1,6 +1,10 @@
 # Node.js dependencies
 node_modules/
 npm-debug.log*
+.env
+.env.*
+!.env.example
+live_admin_credentials.txt
 
 # Server runtime cache & logs
 cache/
@@ -12,6 +16,5 @@ dist/
 # System / OS
 # Archives
 *.zip
-
 
 

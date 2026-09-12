@@ -7,7 +7,7 @@
 import { createServer } from 'node:http';
 import { randomBytes } from 'node:crypto';
 import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
-import { join, extname, dirname } from 'node:path';
+import { join, extname, dirname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import https from 'node:https';
 import { generateFormEmails } from './services/ai/emailGenerator.mjs';
@@ -66,10 +66,14 @@ const PORT = typeof rawPort === 'string' && /^\d+$/.test(rawPort) ? parseInt(raw
 const CACHE_DIR = join(__dirname, 'cache');
 const CACHE_FILE = join(CACHE_DIR, 'news_cache.json');
 const CACHE_TTL_MS = 24 * 3600 * 1000; // 24 hours (Daily automated refresh cycle)
+const AUTH_SESSION_TTL_MS = 30 * 60 * 1000;
+const loginAttempts = new Map();
 
-// Load environment variables from .env file if available
+// Use the verified production mail identity for the normal production start,
+// while preserving the separate test configuration for local development.
 try {
-  const envPath = join(__dirname, '.env');
+  const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env';
+  const envPath = join(__dirname, envFile);
   const envContent = await readFile(envPath, 'utf-8');
   for (const line of envContent.split('\n')) {
     const trimmed = line.trim();
@@ -634,6 +638,98 @@ async function refreshNewsCache(force = false) {
 }
 
 const SUBMISSIONS_FILE = join(CACHE_DIR, 'submissions.json');
+const SUCCESSFUL_PAYMENT_STATUSES = new Set(['SUCCESS', 'CONFIRMED', 'PAID']);
+
+function getSubmissionCategory(record) {
+  return String(record?.category || record?.interest || '').trim();
+}
+
+function isSuccessfulDonation(record) {
+  return record.form_type === 'donation'
+    && Number.isFinite(Number(record.amount))
+    && Number(record.amount) > 0
+    && SUCCESSFUL_PAYMENT_STATUSES.has(String(record.payment_status || '').toUpperCase());
+}
+
+function getPaymentStatus(record) {
+  return String(record.payment_status || record.paymentStatus || 'PENDING').trim().toUpperCase();
+}
+
+function isDonationPledge(record) {
+  return record.form_type === 'donation'
+    && Number.isFinite(Number(record.amount))
+    && Number(record.amount) > 0;
+}
+
+function calculateDonationStats(records) {
+  const stats = {
+    total: 0,
+    total_donations: 0,
+    unique_donors: 0,
+    donors: 0,
+    categories: {},
+    campaign_donors: {},
+    pledged_total: 0,
+    pledged_donations: 0,
+    pledged_categories: {},
+    pledged_campaign_donors: {},
+    pending_total: 0,
+    pending_donations: 0,
+    failed_total: 0,
+    failed_donations: 0
+  };
+  const donorKeys = new Set();
+  const campaignDonorKeys = new Map();
+  const pledgedCampaignDonorKeys = new Map();
+  const seenTransactions = new Set();
+
+  for (const record of records || []) {
+    if (!isDonationPledge(record)) continue;
+    const transactionId = String(record.transaction_id || record.transactionId || '').trim();
+    if (transactionId) {
+      if (seenTransactions.has(transactionId)) continue;
+      seenTransactions.add(transactionId);
+    }
+
+    const amount = Number(record.amount);
+    const status = getPaymentStatus(record);
+    const category = getSubmissionCategory(record) || 'General Fund';
+
+    // Submitted forms are visible as pledges immediately. They remain
+    // separate from verified aid until payment is confirmed.
+    if (status === 'PENDING' || isSuccessfulDonation(record)) {
+      stats.pledged_total += amount;
+      stats.pledged_donations += 1;
+      stats.pledged_categories[category] = (stats.pledged_categories[category] || 0) + amount;
+      if (!pledgedCampaignDonorKeys.has(category)) pledgedCampaignDonorKeys.set(category, new Set());
+      if (record.email) pledgedCampaignDonorKeys.get(category).add(String(record.email).trim().toLowerCase());
+    }
+    if (isSuccessfulDonation(record)) {
+      stats.total += amount;
+      stats.total_donations += 1;
+      stats.categories[category] = (stats.categories[category] || 0) + amount;
+      if (record.email) donorKeys.add(String(record.email).trim().toLowerCase());
+      if (!campaignDonorKeys.has(category)) campaignDonorKeys.set(category, new Set());
+      if (record.email) campaignDonorKeys.get(category).add(String(record.email).trim().toLowerCase());
+    } else if (status === 'PENDING') {
+      stats.pending_total += amount;
+      stats.pending_donations += 1;
+    } else {
+      stats.failed_total += amount;
+      stats.failed_donations += 1;
+    }
+  }
+
+  stats.unique_donors = donorKeys.size;
+  stats.donors = stats.unique_donors;
+  for (const [category, donors] of campaignDonorKeys) stats.campaign_donors[category] = donors.size;
+  for (const [category, donors] of pledgedCampaignDonorKeys) stats.pledged_campaign_donors[category] = donors.size;
+  return stats;
+}
+
+function formatINR(amount) {
+  return `₹${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(Number(amount) || 0)}`;
+}
 
 async function saveSubmission(submissionRecord) {
   try {
@@ -646,7 +742,14 @@ async function saveSubmission(submissionRecord) {
     } catch (e) {
       submissions = [];
     }
-    submissions.unshift(submissionRecord);
+    // Keep the project selection under both names while older records are still
+    // read through `interest`. This makes the admin Category column reliable.
+    const category = getSubmissionCategory(submissionRecord);
+    submissions.unshift({
+      ...submissionRecord,
+      category,
+      interest: category || submissionRecord.interest || ''
+    });
     if (submissions.length > 500) submissions = submissions.slice(0, 500);
     await writeFile(SUBMISSIONS_FILE, JSON.stringify(submissions, null, 2), 'utf-8');
   } catch (err) {
@@ -669,12 +772,38 @@ async function getFormSubmissions() {
       organization: item.organization || '',
       message: item.message || '',
       amount: item.amount || null,
+      payment_status: item.paymentStatus || item.payment_status || 'PENDING',
+      transaction_id: item.transactionId || item.transaction_id || '',
+      category: getSubmissionCategory(item),
+      interest: getSubmissionCategory(item),
+      is_anonymous: Boolean(item.isAnonymous || item.is_anonymous),
       delivery_status: item.deliveryStatus || item.delivery_status || 'SENT',
       created_at: item.timestampIST || item.created_at || new Date().toISOString()
     }));
   } catch (e) {
     return [];
   }
+}
+
+async function updateDonationPaymentStatus(submissionId, paymentStatus, verifiedBy) {
+  const allowedStatuses = new Set(['PENDING', 'CONFIRMED', 'PAID', 'FAILED']);
+  const normalizedId = String(submissionId || '').trim();
+  const normalizedStatus = String(paymentStatus || '').trim().toUpperCase();
+  if (!normalizedId || !allowedStatuses.has(normalizedStatus)) throw new Error('Invalid donation payment status update.');
+
+  const raw = await readFile(SUBMISSIONS_FILE, 'utf-8');
+  const submissions = JSON.parse(raw);
+  if (!Array.isArray(submissions)) throw new Error('Donation records are unavailable.');
+  const record = submissions.find(item => String(item.submissionId || item.id || item.submission_id || '').trim() === normalizedId
+    && String(item.formType || item.form_type || '').toLowerCase() === 'donation');
+  if (!record) throw new Error('Donation record was not found.');
+
+  record.paymentStatus = normalizedStatus;
+  record.payment_status = normalizedStatus;
+  record.paymentVerifiedBy = String(verifiedBy || 'admin').slice(0, 120);
+  record.paymentVerifiedAt = getFormattedISTTimestamp();
+  await writeFile(SUBMISSIONS_FILE, JSON.stringify(submissions, null, 2), 'utf-8');
+  return record;
 }
 
 function getFormattedISTTimestamp() {
@@ -775,6 +904,16 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  // Optional external redirect if explicitly configured via environment variable
+  if ((urlPath === '/crowdfunding' || urlPath === '/crowdfunding/') && process.env.CROWDFUNDING_REDIRECT_URL && process.env.CROWDFUNDING_REDIRECT_URL.startsWith('http')) {
+    res.writeHead(301, {
+      'Location': process.env.CROWDFUNDING_REDIRECT_URL,
+      'Cache-Control': 'public, max-age=31536000'
+    });
+    res.end();
+    return;
+  }
+
   // Security Monitoring & Health Status API: /api/security-health
   if (urlPath === '/api/security-health') {
     res.writeHead(200, {
@@ -803,11 +942,25 @@ const server = createServer(async (req, res) => {
   if (urlPath === '/api/submit-form' && req.method === 'POST') {
     try {
       let bodyStr = '';
-      req.on('data', chunk => { bodyStr += chunk; });
+      const maxBodyBytes = 64 * 1024;
+      let bodyTooLarge = false;
+      req.on('data', chunk => {
+        if (bodyStr.length + chunk.length > maxBodyBytes) {
+          bodyTooLarge = true;
+          return;
+        }
+        bodyStr += chunk;
+      });
       await new Promise((resolve, reject) => {
         req.on('end', resolve);
         req.on('error', reject);
       });
+
+      if (bodyTooLarge) {
+        res.writeHead(413, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        res.end(JSON.stringify({ status: 'error', message: 'Submission is too large.' }));
+        return;
+      }
 
       let payload = {};
       try {
@@ -818,26 +971,39 @@ const server = createServer(async (req, res) => {
         return;
       }
 
-      const formType = (payload.form_type || payload.formType || 'contact').toLowerCase();
-      const email = (payload.email || '').trim();
-      const name = (payload.name || payload.fullName || `${payload.firstName || ''} ${payload.lastName || ''}`).trim() || 'Valued Supporter';
+      const allowedFormTypes = new Set(['donation', 'volunteer', 'support', 'contact', 'partnership', 'newsletter', 'feedback', 'guide']);
+      const formType = String(payload.form_type || payload.formType || 'contact').trim().toLowerCase();
+      const text = (value, max = 500) => String(value ?? '').trim().replace(/\s+/g, ' ').slice(0, max);
+      const errors = {};
+      const addError = (field, message) => { errors[field] = [message]; };
+      const email = text(payload.email, 254).toLowerCase();
+      const name = text(payload.name || payload.fullName || `${payload.firstName || ''} ${payload.lastName || ''}`, 120);
+      const phoneRaw = text(payload.phone || payload.mobile, 20);
+      const indianPhone = /^(?:\+91)?[6-9]\d{9}$/;
+      const normalizedPhone = phoneRaw.replace(/[\s()-]/g, '');
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,63}$/;
 
-      // Server-Side Validation per Form Type
-      if (!email || !email.includes('@')) {
-        res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-        res.end(JSON.stringify({ status: 'error', message: 'A valid email address is required' }));
-        return;
+      if (!allowedFormTypes.has(formType)) addError('form_type', 'Unsupported form type.');
+      if (!emailPattern.test(email)) addError('email', 'Enter a valid email address.');
+      if (['donation', 'volunteer', 'support', 'contact', 'partnership'].includes(formType) && !name) addError('name', 'Enter your name.');
+      if (['donation', 'volunteer', 'support'].includes(formType) && !indianPhone.test(normalizedPhone)) addError('phone', 'Enter a valid Indian mobile number.');
+
+      const organization = text(payload.organization || payload.company, 160);
+      const message = text(payload.message || payload.feedback, 3000);
+      if (formType === 'partnership' && !organization) addError('organization', 'Organization name is required.');
+      if (['feedback', 'contact', 'support'].includes(formType) && !message) addError('message', 'Please enter a message.');
+
+      let donationAmount = null;
+      let paymentStatus = 'PENDING';
+      if (formType === 'donation') {
+        const amountText = String(payload.amount ?? '').trim();
+        donationAmount = Number(amountText);
+        if (!/^\d+(?:\.\d{1,2})?$/.test(amountText) || !Number.isFinite(donationAmount) || donationAmount < 100 || donationAmount > 10000000) addError('amount', 'Donation amount must be between ₹100 and ₹1,00,00,000.');
+        // A browser request is never payment proof. Gateway/webhook verification owns success.
       }
-
-      if (formType === 'partnership' && !payload.organization && !payload.company) {
-        res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-        res.end(JSON.stringify({ status: 'error', message: 'Organization name is required for partnership inquiries' }));
-        return;
-      }
-
-      if ((formType === 'feedback' || formType === 'contact') && !payload.message && !payload.feedback) {
-        res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-        res.end(JSON.stringify({ status: 'error', message: 'Message content is required' }));
+      if (Object.keys(errors).length) {
+        res.writeHead(422, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        res.end(JSON.stringify({ status: 'error', message: Object.values(errors)[0][0], errors }));
         return;
       }
 
@@ -857,12 +1023,15 @@ const server = createServer(async (req, res) => {
         formType,
         name,
         email,
-        phone: payload.phone || payload.mobile || '',
-        organization: payload.organization || payload.company || '',
+        phone: normalizedPhone,
+        organization,
         interest: payload.interest || payload.category || payload.subject || '',
-        message: payload.message || payload.feedback || '',
-        amount: payload.amount || null,
-        paymentStatus: payload.payment_status || 'SUCCESS',
+        message,
+        amount: donationAmount,
+        paymentStatus,
+        transactionId: payload.transaction_id || '',
+        category: payload.category || payload.interest || '',
+        isAnonymous: Boolean(payload.is_anonymous),
         isSensitive: payload.is_sensitive || false,
         timestampIST
       });
@@ -878,6 +1047,7 @@ const server = createServer(async (req, res) => {
       const dispatchResult = await sendFormEmails(userEmailPayload, adminEmailPayload, {
         submissionId,
         formType,
+        paymentStatus,
         userEmail: email,
         isAIGenerated: generatedEmails.isAIGenerated,
         timestampIST
@@ -891,6 +1061,7 @@ const server = createServer(async (req, res) => {
         status: 'ok',
         submissionId,
         formType,
+        paymentStatus,
         isAIGenerated: generatedEmails.isAIGenerated,
         timestampIST,
         emailDelivery: {
@@ -916,7 +1087,9 @@ const server = createServer(async (req, res) => {
           summary: generatedEmails.admin.summary,
           recommendedAction: generatedEmails.admin.recommendedAction
         },
-        message: `Thank you, ${name}. Your ${formType} submission has been received and confirmed via email.`
+        message: formType === 'donation'
+          ? `Thank you, ${name}. Your donation pledge is recorded and awaits payment verification.`
+          : `Thank you, ${name}. Your ${formType} submission has been received and confirmed via email.`
       }));
       return;
 
@@ -928,6 +1101,54 @@ const server = createServer(async (req, res) => {
         message: 'Internal server error processing form submission',
         errorMessage: err.message
       }));
+      return;
+    }
+  }
+
+  // API Endpoint: /api/donations/recent & /api/donations (Serves real donations sorted latest first, without timestamps)
+  if ((urlPath === '/api/donations/recent' || urlPath === '/api/donations') && req.method === 'GET') {
+    try {
+      const submissions = await getFormSubmissions();
+      // The public activity feed reflects all recorded donation pledges, not
+      // only the subset whose payment has subsequently been confirmed.
+      const realDonations = submissions
+        .filter(isDonationPledge)
+        .map(d => {
+          let displayName = d.is_anonymous ? 'Anonymous Donor' : (d.name || 'Anonymous Donor').trim();
+          const parts = displayName.split(/\s+/);
+          if (parts.length > 1 && !displayName.toLowerCase().includes('supporter') && !displayName.toLowerCase().includes('anonymous')) {
+            displayName = `${parts[0]} ${parts[parts.length - 1][0].toUpperCase()}.`;
+          }
+
+          let cause = (d.interest || d.message || '').trim();
+          if (!cause) {
+            cause = 'Emergency Medical Relief';
+          }
+
+          const amt = parseFloat(d.amount);
+          return {
+            id: d.id || d.submission_id,
+            name: displayName,
+            amount: amt,
+            formattedAmount: formatINR(amt),
+            cause
+          };
+        });
+
+      res.writeHead(200, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'Access-Control-Allow-Origin': '*'
+      });
+      res.end(JSON.stringify({
+        status: 'ok',
+        count: realDonations.length,
+        donations: realDonations
+      }));
+      return;
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({ status: 'error', message: 'Failed to retrieve donations', detail: err.message }));
       return;
     }
   }
@@ -1080,6 +1301,15 @@ const server = createServer(async (req, res) => {
 
   // IN-MEMORY SESSION STORE FOR NODE BACKEND
   const nodeSessionStore = global.nodeSessionStore || (global.nodeSessionStore = new Map());
+  const getSessionUser = (token) => {
+    const session = nodeSessionStore.get(token);
+    if (!session || !session.expiresAt || session.expiresAt <= Date.now()) {
+      if (token) nodeSessionStore.delete(token);
+      return null;
+    }
+    return session;
+  };
+  const requestIp = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
 
   // ADMIN AUTHENTICATION ENDPOINT: /api/admin-auth.php
   if (urlPath === '/api/admin-auth.php' || urlPath === '/api/admin-auth') {
@@ -1089,10 +1319,11 @@ const server = createServer(async (req, res) => {
       const queryAction = urlObj.searchParams.get('action');
       const action = (payload.action || queryAction || 'login').toLowerCase().trim();
 
-      const validEmails = ['admin@gmail.com', 'admin@gamil.com'];
-      const validPassword = 'Admin@1230';
-
       if (action === 'get_temp_users' || action === 'temp_users') {
+        const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
+        const sessionUser = getSessionUser(token);
+        if (!sessionUser) return sendJson(401, { status: 'error', message: 'Authentication required.' });
+        if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', message: 'Forbidden.' });
         const usersCatalog = await getUsersCatalog();
         return sendJson(200, {
           status: 'ok',
@@ -1119,30 +1350,35 @@ const server = createServer(async (req, res) => {
           return sendJson(400, { status: 'error', message: 'Password is required.' });
         }
 
+        const throttleKey = `${requestIp}:${emailOrUsername.toLowerCase()}`;
+        const previousAttempt = loginAttempts.get(throttleKey);
+        if (previousAttempt?.lockedUntil > Date.now()) {
+          return sendJson(429, { status: 'error', message: 'Too many login attempts. Please try again later.' });
+        }
         const authResult = await authenticateCredentials(emailOrUsername, password);
         if (!authResult.success) {
-          return sendJson(401, { status: 'error', message: authResult.error });
+          const failures = (previousAttempt?.failures || 0) + 1;
+          loginAttempts.set(throttleKey, { failures, lockedUntil: failures >= 5 ? Date.now() + 15 * 60 * 1000 : 0 });
+          return sendJson(401, { status: 'error', message: 'Invalid email or password.' });
         }
+        loginAttempts.delete(throttleKey);
 
         const token = 'AVG-SESS-' + randomBytes(24).toString('hex');
-        const sessionUser = authResult.user;
+        const sessionUser = { ...authResult.user, expiresAt: Date.now() + AUTH_SESSION_TTL_MS };
         nodeSessionStore.set(token, sessionUser);
 
         return sendJson(200, {
           status: 'ok',
           message: 'Authentication successful.',
           token,
-          user: sessionUser
+          user: authResult.user
         });
       } else if (action === 'change_password' || action === 'force_change_password') {
         const authHeader = req.headers['authorization'] || '';
         const tokenMatch = authHeader.match(/Bearer\s+(.*)$/i);
         const token = tokenMatch ? tokenMatch[1].trim() : (payload.token || '').trim();
 
-        let sessionUser = nodeSessionStore.get(token);
-        if (!sessionUser && (token.startsWith('AVG-ADM-') || token.startsWith('AVG-SESS-'))) {
-          sessionUser = { userId: 'usr-admin-01', name: 'Super Admin', email: 'admin@gmail.com', role: 'admin' };
-        }
+        let sessionUser = getSessionUser(token);
 
         if (!sessionUser) {
           return sendJson(401, { status: 'error', message: 'Unauthorized. Active session required.' });
@@ -1231,10 +1467,7 @@ const server = createServer(async (req, res) => {
         const tokenMatch = authHeader.match(/Bearer\s+(.*)$/i);
         const token = tokenMatch ? tokenMatch[1].trim() : (payload.token || '').trim();
 
-        let sessionUser = nodeSessionStore.get(token);
-        if (!sessionUser && (token.startsWith('AVG-ADM-') || token.startsWith('AVG-SESS-'))) {
-          sessionUser = { userId: 'usr-admin-01', name: 'Super Admin', email: 'admin@gmail.com', role: 'admin' };
-        }
+        let sessionUser = getSessionUser(token);
 
         if (!sessionUser) {
           return sendJson(401, { status: 'error', message: 'Unauthorized session.' });
@@ -1249,10 +1482,7 @@ const server = createServer(async (req, res) => {
         const tokenMatch = authHeader.match(/Bearer\s+(.*)$/i);
         const token = tokenMatch ? tokenMatch[1].trim() : (payload.token || '').trim();
 
-        let sessionUser = nodeSessionStore.get(token);
-        if (!sessionUser && (token.startsWith('AVG-ADM-') || token.startsWith('AVG-SESS-'))) {
-          sessionUser = { userId: 'usr-admin-01', name: 'Super Admin', email: 'admin@gmail.com', role: 'admin' };
-        }
+        let sessionUser = getSessionUser(token);
 
         if (!sessionUser) {
           return sendJson(401, { status: 'error', message: 'Unauthorized session.' });
@@ -1273,10 +1503,7 @@ const server = createServer(async (req, res) => {
         const tokenMatch = authHeader.match(/Bearer\s+(.*)$/i);
         const token = tokenMatch ? tokenMatch[1].trim() : (payload.token || '').trim();
 
-        let sessionUser = nodeSessionStore.get(token);
-        if (!sessionUser && (token.startsWith('AVG-ADM-') || token.startsWith('AVG-SESS-'))) {
-          sessionUser = { userId: 'usr-admin-01', name: 'Super Admin', email: 'admin@gmail.com', role: 'admin' };
-        }
+        let sessionUser = getSessionUser(token);
 
         if (!sessionUser || (sessionUser.role !== 'admin' && sessionUser.role !== 'manager')) {
           return sendJson(403, { status: 'error', message: 'Forbidden. Administrator permissions required.' });
@@ -1291,6 +1518,11 @@ const server = createServer(async (req, res) => {
         } else if (subAction === 'toggle_status') {
           const status = (payload.status || 'active').trim();
           const res = await adminToggleUserStatus(targetUserId, status);
+          if (res.success && status !== 'active') {
+            for (const [activeToken, activeSession] of nodeSessionStore.entries()) {
+              if (activeSession.userId === targetUserId) nodeSessionStore.delete(activeToken);
+            }
+          }
           return sendJson(res.success ? 200 : 400, { status: res.success ? 'ok' : 'error', message: res.message || res.error });
         }
 
@@ -1300,23 +1532,14 @@ const server = createServer(async (req, res) => {
         const tokenMatch = authHeader.match(/Bearer\s+(.*)$/i);
         const token = tokenMatch ? tokenMatch[1].trim() : (payload.token || '').trim();
 
-        let sessionUser = nodeSessionStore.get(token);
-        if (!sessionUser && (token.startsWith('AVG-ADM-') || token.startsWith('AVG-SESS-'))) {
-          sessionUser = {
-            userId: 'usr-admin-01',
-            name: 'Super Admin',
-            email: 'admin@gmail.com',
-            role: 'admin',
-            doctorId: null,
-            providerId: null
-          };
-        }
+        let sessionUser = getSessionUser(token);
 
         if (sessionUser) {
+          const { expiresAt, ...safeUser } = sessionUser;
           return sendJson(200, {
             status: 'ok',
             authenticated: true,
-            user: sessionUser
+            user: safeUser
           });
         } else {
           return sendJson(401, {
@@ -1336,7 +1559,24 @@ const server = createServer(async (req, res) => {
         return sendJson(400, { status: 'error', message: 'Invalid admin auth action.' });
       }
     } catch (err) {
-      return sendJson(500, { status: 'error', message: err.message });
+      console.error('Admin authentication failure:', err);
+      return sendJson(500, { status: 'error', message: 'Unable to process this request.' });
+    }
+  }
+
+  // --- NEW ENDPOINT: /api/donations/stats ---
+  if (req.method === 'GET' && urlPath === '/api/donations/stats') {
+    try {
+      const submissions = await getFormSubmissions();
+      const stats = calculateDonationStats(submissions);
+
+      return sendJson(200, {
+        status: 'ok',
+        stats
+      });
+    } catch (err) {
+      console.error('Admin data failure:', err);
+      return sendJson(500, { status: 'error', message: 'Unable to process this request.' });
     }
   }
 
@@ -1348,23 +1588,16 @@ const server = createServer(async (req, res) => {
       const tokenMatch = authHeader.match(/Bearer\s+(.*)$/i);
       const token = tokenMatch ? tokenMatch[1].trim() : (payload.token || '').trim();
 
-      let sessionUser = nodeSessionStore.get(token);
-      if (!sessionUser && (token.startsWith('AVG-ADM-') || token.startsWith('AVG-SESS-'))) {
-        sessionUser = {
-          userId: 'usr-admin-01',
-          name: 'Super Admin',
-          email: 'admin@gmail.com',
-          role: 'admin',
-          doctorId: null,
-          providerId: null
-        };
-      }
+      let sessionUser = getSessionUser(token);
 
       if (!sessionUser) {
         return sendJson(401, {
           status: 'error',
           message: 'Unauthorized access. Valid admin session token required.'
         });
+      }
+      if (!['admin', 'manager', 'doctor', 'diagnostic_provider'].includes(sessionUser.role)) {
+        return sendJson(403, { status: 'error', message: 'Forbidden.' });
       }
 
       const action = (payload.action || 'all').toLowerCase().trim();
@@ -1405,8 +1638,25 @@ const server = createServer(async (req, res) => {
         }
       }
 
+      if (action === 'update_donation_payment_status') {
+        if (sessionUser.role !== 'admin') {
+          return sendJson(403, { status: 'error', message: 'Administrator permissions are required to change payment status.' });
+        }
+        const updated = await updateDonationPaymentStatus(
+          payload.id || payload.submissionId,
+          payload.paymentStatus || payload.payment_status,
+          sessionUser.email || sessionUser.name || 'admin'
+        );
+        return sendJson(200, {
+          status: 'ok',
+          message: `Donation ${updated.submissionId || updated.id} marked ${updated.paymentStatus}.`,
+          donation: updated
+        });
+      }
+
       // Action: Save Doctor (with photo upload support)
       if (action === 'save_doctor') {
+        if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', message: 'Forbidden.' });
         const doc = payload.doctor || payload;
         const name = (doc.name || '').trim();
         if (!name) {
@@ -1440,6 +1690,7 @@ const server = createServer(async (req, res) => {
 
       // Action: Delete Doctor
       if (action === 'delete_doctor') {
+        if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', message: 'Forbidden.' });
         const docId = (payload.id || payload.doctorId || '').trim();
         if (!docId) {
           return sendJson(400, { status: 'error', message: 'Doctor ID is required.' });
@@ -1450,6 +1701,7 @@ const server = createServer(async (req, res) => {
 
       // Action: Save Diagnostic Test Package
       if (action === 'save_test') {
+        if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', message: 'Forbidden.' });
         const t = payload.test || payload;
         const name = (t.name || '').trim();
         if (!name) {
@@ -1469,6 +1721,7 @@ const server = createServer(async (req, res) => {
 
       // Action: Delete Diagnostic Test Package
       if (action === 'delete_test') {
+        if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', message: 'Forbidden.' });
         const testId = (payload.id || payload.testId || '').trim();
         if (!testId) {
           return sendJson(400, { status: 'error', message: 'Test package ID is required.' });
@@ -1479,17 +1732,20 @@ const server = createServer(async (req, res) => {
 
       // Action: Save System User
       if (action === 'save_user') {
+        if (sessionUser.role !== 'admin') return sendJson(403, { status: 'error', message: 'Forbidden. Administrator permissions required.' });
         const u = payload.user || payload;
         const name = (u.name || '').trim();
         if (!name) {
           return sendJson(400, { status: 'error', message: 'User name is required.' });
         }
         const savedUser = await saveUserAccount(u);
+        if (!savedUser.success && savedUser.error) return sendJson(422, { status: 'error', message: savedUser.error });
         return sendJson(200, { status: 'ok', message: `User ${name} saved successfully.`, user: savedUser });
       }
 
       // Action: Delete System User
       if (action === 'delete_user') {
+        if (sessionUser.role !== 'admin') return sendJson(403, { status: 'error', message: 'Forbidden. Administrator permissions required.' });
         const userId = (payload.id || payload.userId || '').trim();
         if (!userId) {
           return sendJson(400, { status: 'error', message: 'User ID is required.' });
@@ -1546,16 +1802,11 @@ const server = createServer(async (req, res) => {
         }
 
         const formCountsByType = {};
-        let totalDonationsAmount = 0;
-        let totalDonationsCount = 0;
+        const donationStats = calculateDonationStats(formSubmissions);
 
         (formSubmissions || []).forEach(fs => {
           const ft = (fs.form_type || 'contact').toLowerCase();
           formCountsByType[ft] = (formCountsByType[ft] || 0) + 1;
-          if (ft === 'donation') {
-            totalDonationsCount++;
-            totalDonationsAmount += parseFloat(fs.amount || 0) || 0;
-          }
         });
 
         const doctorStatusCounts = {};
@@ -1582,8 +1833,11 @@ const server = createServer(async (req, res) => {
             totalDoctors: filteredDoctors.length,
             totalDiagnosticTests: filteredTests.length,
             totalUsers: filteredUsers.length,
-            totalDonationsAmount,
-            totalDonationsCount,
+            totalDonationsAmount: donationStats.total,
+            totalDonationsCount: donationStats.total_donations,
+            uniqueDonors: donationStats.unique_donors,
+            pendingDonationsCount: donationStats.pending_donations,
+            failedDonationsCount: donationStats.failed_donations,
             formCountsByType,
             doctorStatusCounts,
             diagStatusCounts
@@ -1957,9 +2211,26 @@ const server = createServer(async (req, res) => {
   }
 
   // Static File Serving
-  let targetFile = decodeURIComponent(urlPath === '/' ? 'index.html' : urlPath);
-  if (targetFile === '/doctors' || targetFile === 'doctors') targetFile = '/doctors.html';
-  let filePath = join(__dirname, targetFile.startsWith('/') ? targetFile.slice(1) : targetFile);
+  let targetFile;
+  try {
+    targetFile = decodeURIComponent(urlPath === '/' ? 'index.html' : urlPath);
+  } catch {
+    res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify({ status: 'error', message: 'Invalid request path.' }));
+  }
+  const normalizedPath = targetFile.replace(/\/+$/, '').toLowerCase();
+  if (normalizedPath === '/doctors' || normalizedPath === 'doctors') targetFile = '/doctors.html';
+  if (normalizedPath === '/crowdfunding' || normalizedPath === 'crowdfunding') targetFile = '/crowdfunding.html';
+  if (normalizedPath === '/admin' || normalizedPath === 'admin') targetFile = '/admin.html';
+  const requestedFile = targetFile.startsWith('/') ? targetFile.slice(1) : targetFile;
+  let filePath = resolve(__dirname, requestedFile);
+
+  // `resolve` normalizes dot segments. Reject anything that would escape the public root
+  // before reading it, including URL-encoded traversal attempts.
+  if (filePath !== __dirname && !filePath.startsWith(`${__dirname}${sep}`)) {
+    res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify({ status: 'error', message: 'Forbidden.' }));
+  }
 
   // Security Shield: Block direct static serving of PHP script source code, .env files, and storage directories
   const lowerPath = targetFile.toLowerCase();

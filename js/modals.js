@@ -9,6 +9,8 @@ class ModalManager {
     this.activeModal = null;
     this.selectedAmount = 1000;
     this.isMonthly = false;
+    this.refreshDonationStatsOnClose = false;
+    this.submittingForms = new WeakSet();
     
     // Store original modal HTML templates for reliable re-opening
     this.templates = {};
@@ -84,6 +86,13 @@ class ModalManager {
 
     document.body.style.overflow = '';
     this.activeModal = null;
+
+    // A donation confirmation can stay open while the visitor reads it. Refresh
+    // campaign progress when they close it, rather than changing the page behind it.
+    if (this.refreshDonationStatsOnClose) {
+      this.refreshDonationStatsOnClose = false;
+      window.dispatchEvent(new CustomEvent('avinya:donation_submitted'));
+    }
   }
 
   closeAllModals() {
@@ -208,6 +217,28 @@ class ModalManager {
         const userEmail = resData.userEmail || {};
         const delivery = resData.emailDelivery || {};
         const isAI = resData.isAIGenerated;
+        const isConfirmedDonation = formType === 'donation' && String(resData.paymentStatus || '').toUpperCase() === 'SUCCESS';
+
+        // Defer the pledge-progress refresh until the donor closes the
+        // confirmation modal. The confirmed-only event below still updates the
+        // public donation ticker immediately.
+        if (formType === 'donation') {
+          this.refreshDonationStatsOnClose = true;
+        }
+
+        // Dispatch real-time donation event for live activity ticker
+        if (formType === 'donation' && String(resData.paymentStatus || '').toUpperCase() === 'SUCCESS') {
+          try {
+            window.dispatchEvent(new CustomEvent('avinya:donation_success', {
+              detail: {
+                id: resData.submissionId,
+                name: payload.is_anonymous ? 'Anonymous Donor' : (payload.name || payload.fullName || 'Anonymous Supporter'),
+                amount: parseFloat(payload.amount || 1000),
+                cause: payload.interest || payload.category || payload.message || 'Medical Emergency Relief'
+              }
+            }));
+          } catch (_) {}
+        }
 
         const isUserSent = delivery.userEmailSent !== false;
         const isAdminSent = delivery.adminEmailSent !== false;
@@ -258,7 +289,35 @@ class ModalManager {
               </div>
             </div>
 
-            <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="width: 100%; justify-content: center;">
+            <!-- PDF Download Action for Donations / Guides -->
+            ${isConfirmedDonation ? `
+              <div style="margin-bottom: 1.25rem;">
+                <button class="btn-primary" onclick="window.AvinyaPdf.generateDonationReceiptPDF({
+                  name: '${(payload.name || '').replace(/'/g, "\\'")}',
+                  email: '${(payload.email || '').replace(/'/g, "\\'")}',
+                  phone: '${(payload.phone || '').replace(/'/g, "\\'")}',
+                  pan: '${(payload.pan || '').replace(/'/g, "\\'")}',
+                  amount: ${payload.amount || 1000},
+                  transaction_id: '${payload.transaction_id || resData.submissionId}',
+                  receiptNo: '${resData.submissionId}'
+                })" style="width: 100%; justify-content: center; background: #087F73; margin-bottom: 0.5rem;">
+                  <span>📄 Download Official 80G Tax Receipt (PDF)</span>
+                </button>
+                <div style="font-size: 0.8rem; color: #166534; font-weight: 600;">✓ Form 10BE compliant official letterhead receipt</div>
+              </div>
+            ` : formType === 'donation' ? `
+              <div style="margin-bottom: 1.25rem; background:#FFF7ED; border:1px solid #FED7AA; color:#9A3412; border-radius:10px; padding:0.9rem; font-size:0.88rem; line-height:1.45;">
+                Your donation is pending payment verification. An official receipt will be available only after the payment provider confirms it.
+              </div>
+            ` : formType === 'guide' ? `
+              <div style="margin-bottom: 1.25rem;">
+                <button class="btn-primary" onclick="window.AvinyaPdf.generateAwarenessGuidePDF()" style="width: 100%; justify-content: center; background: #087F73;">
+                  <span>📄 Download Cancer Awareness Toolkit PDF</span>
+                </button>
+              </div>
+            ` : ''}
+
+            <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="width: 100%; justify-content: center; ${formType === 'donation' ? 'background: #475569;' : ''}">
               Return to Website
             </button>
           </div>
@@ -283,9 +342,16 @@ class ModalManager {
   }
 
   // --- DONATION MODAL ---
-  openDonateModal(defaultAmount = 1000) {
+  openDonateModal(defaultAmount = 1000, category = null) {
     this.openModal('donate-modal');
     this.selectAmount(defaultAmount);
+    
+    if (category) {
+      const select = document.querySelector('#donate-modal #donor-category');
+      if (select) {
+        select.value = category;
+      }
+    }
   }
 
   // --- VOLUNTEER MODAL ---
@@ -340,6 +406,8 @@ class ModalManager {
   submitDonation(e) {
     e.preventDefault();
     const form = e.target;
+    if (this.submittingForms.has(form)) return;
+    const category = form.querySelector('#donor-category')?.value || '';
     const name = form.querySelector('#donor-name')?.value || '';
     const email = form.querySelector('#donor-email')?.value || '';
     const phone = form.querySelector('#donor-phone')?.value || '';
@@ -355,23 +423,30 @@ class ModalManager {
     }
 
     const payload = {
-      name,
-      email,
-      phone,
-      pan,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      phone: phone.trim(),
+      pan: pan.trim().toUpperCase(),
       amount,
+      category,
+      interest: category,
       frequency: this.isMonthly ? 'monthly' : 'one-time',
-      payment_status: 'SUCCESS',
-      transaction_id: `TXN-${Date.now().toString().slice(-8)}`
+      payment_status: 'PENDING',
+      is_anonymous: Boolean(form.querySelector('#donor-anonymous')?.checked)
     };
-
-    this.submitFormToAPI('donation', payload, '#donate-modal .modal-container', 'Dhanyawad for Your Compassion!');
+    const errors = this.validatePayload('donation', payload);
+    if (!this.showFormErrors(form, errors)) return;
+    this.submittingForms.add(form);
+    this.setFormBusy(form, true);
+    this.submitFormToAPI('donation', payload, '#donate-modal .modal-container', 'Dhanyawad for Your Compassion!')
+      .finally(() => { this.submittingForms.delete(form); this.setFormBusy(form, false); });
   }
 
   // Generic form handler for all modals (volunteer, support, contact, csr, newsletter, feedback, guide)
   submitForm(e, formTitle) {
     e.preventDefault();
     const form = e.target;
+    if (this.submittingForms.has(form)) return;
     const modal = form.closest('.modal-backdrop');
     const modalId = modal ? modal.id : 'form-modal';
     
@@ -405,13 +480,58 @@ class ModalManager {
       }
     });
 
-    if (!payload.name) payload.name = 'Valued Supporter';
+    if (!payload.name && !['newsletter', 'guide', 'feedback'].includes(formType)) payload.name = 'Valued Supporter';
     if (!payload.email) {
       const emailInput = inputs.find(i => i.type === 'email' || i.placeholder?.toLowerCase().includes('email'));
       if (emailInput) payload.email = emailInput.value;
     }
 
-    this.submitFormToAPI(formType, payload, `#${modalId} .modal-container`, formTitle || 'Submission Received');
+    const errors = this.validatePayload(formType, payload);
+    if (!this.showFormErrors(form, errors)) return;
+    this.submittingForms.add(form);
+    this.setFormBusy(form, true);
+    this.submitFormToAPI(formType, payload, `#${modalId} .modal-container`, formTitle || 'Submission Received')
+      .finally(() => { this.submittingForms.delete(form); this.setFormBusy(form, false); });
+  }
+
+  validatePayload(formType, payload) {
+    const errors = {};
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,63}$/.test(String(payload.email || '').trim());
+    const phoneOk = /^(?:\+91)?[6-9]\d{9}$/.test(String(payload.phone || '').replace(/[\s()-]/g, ''));
+    if (!emailOk) errors.email = 'Please enter a valid email address.';
+    if (['donation', 'volunteer', 'support', 'contact', 'partnership'].includes(formType) && !String(payload.name || '').trim()) errors.name = 'Please enter your name.';
+    if (['donation', 'volunteer', 'support'].includes(formType) && !phoneOk) errors.phone = 'Enter a valid 10-digit Indian mobile number.';
+    if (formType === 'donation' && (!Number.isFinite(Number(payload.amount)) || Number(payload.amount) < 100 || Number(payload.amount) > 10000000)) errors.amount = 'Donation amount must be between ₹100 and ₹1,00,00,000.';
+    if (formType === 'partnership' && !String(payload.organization || '').trim()) errors.organization = 'Please enter your organization name.';
+    if (['contact', 'support', 'feedback'].includes(formType) && !String(payload.message || '').trim()) errors.message = 'Please enter a message.';
+    return errors;
+  }
+
+  showFormErrors(form, errors) {
+    form.querySelectorAll('[data-validation-error]').forEach(node => node.remove());
+    form.querySelectorAll('[aria-invalid="true"]').forEach(node => node.removeAttribute('aria-invalid'));
+    const messages = Object.values(errors);
+    if (!messages.length) return true;
+    for (const [field, message] of Object.entries(errors)) {
+      const input = field === 'amount' ? form.querySelector('#custom-amount-input') : Array.from(form.querySelectorAll('input, textarea, select')).find(el => (field === 'email' && (el.type === 'email' || /email/i.test(el.placeholder))) || (field === 'phone' && (el.type === 'tel' || /phone/i.test(el.placeholder))) || (field === 'name' && /name/i.test(el.placeholder)) || (field === 'organization' && /org|company/i.test(el.placeholder)) || (field === 'message' && el.tagName === 'TEXTAREA'));
+      if (input) {
+        input.setAttribute('aria-invalid', 'true');
+        const node = document.createElement('div');
+        node.dataset.validationError = 'true'; node.setAttribute('role', 'alert'); node.style.cssText = 'color:#B91C1C;font-size:.82rem;margin:.35rem 0 .65rem;'; node.textContent = message;
+        input.insertAdjacentElement('afterend', node);
+      }
+    }
+    const first = form.querySelector('[aria-invalid="true"]');
+    first?.focus();
+    return false;
+  }
+
+  setFormBusy(form, busy) {
+    const button = form.querySelector('button[type="submit"], input[type="submit"]');
+    if (!button) return;
+    button.disabled = busy; button.setAttribute('aria-busy', String(busy));
+    if (busy) { button.dataset.originalText = button.textContent; button.textContent = 'Submitting…'; }
+    else if (button.dataset.originalText) button.textContent = button.dataset.originalText;
   }
 
   // --- STORY READER MODAL ---
@@ -468,7 +588,7 @@ class ModalManager {
               <li><strong>Colorectal Screening:</strong> Stool test (FIT) / Colonoscopy screening starting at age 45.</li>
             </ul>
           </div>
-          <button class="btn-primary" onclick="alert('Awareness PDF Guide downloaded successfully.')">
+          <button class="btn-primary" onclick="window.AvinyaPdf.generateAwarenessGuidePDF('${topic.replace(/'/g, "\\'")}')">
             Download Printable PDF Guide 📄
           </button>
         </div>

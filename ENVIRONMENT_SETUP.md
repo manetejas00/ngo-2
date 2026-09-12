@@ -57,12 +57,12 @@ git push origin main
 
 ## 🔐 Credentials & API Parameters Summary
 
-- **Database Password (Staging & Production)**: `@qLVTyL|J5`
-- **Hostinger SMTP Email Server**: `smtp.hostinger.com` (Port 465 SSL)
-- **Admin Dashboard Credentials**:
-  - URL: `https://test.avinyacarefoundation.org/admin.html`
-  - Email: `admin@gmail.com`
-  - Password: `Admin@1230`
+Keep all database, SMTP, bootstrap-admin, and third-party credentials only in
+the host's environment configuration. Do not add them to this document, test
+fixtures, source files, or deployment archives. The first administrator is
+provisioned with `BOOTSTRAP_ADMIN_EMAIL` and
+`BOOTSTRAP_ADMIN_PASSWORD`; after provisioning, remove those values and use
+the admin-only user-management screen for every new account.
 
 ---
 
