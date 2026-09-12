@@ -41,6 +41,7 @@ Options -Indexes
   # Route /api/submit-form to submit-form.php on Apache/PHP hosts
   RewriteRule ^api/submit-form/?$ api/submit-form.php [L,NC]
   RewriteRule ^api/security-health/?$ api/security-health.php [L,NC]
+  RewriteRule ^api/donations/stats/?$ api/donations.php?action=stats [QSA,L,NC]
   RewriteRule ^api/donations(/recent)?/?$ api/donations.php [L,NC]
 
   # Persistent file-ledger booking API
