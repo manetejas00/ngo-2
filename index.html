@@ -28,7 +28,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=2.2">
+  <link rel="stylesheet" href="css/styles.css?v=2.8">
   <link rel="stylesheet" href="css/preloader.css?v=1.0">
 </head>
 
@@ -1600,6 +1600,11 @@
           <input type="text" id="donor-pan" placeholder="PAN Card (Optional 80G Tax)"
             style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
         </div>
+        <label class="anonymous-donation-option">
+          <input type="checkbox" id="donor-anonymous">
+          <span class="anonymous-donation-icon" aria-hidden="true">◉</span>
+          <span><strong>Donate anonymously</strong><small>Your name stays private on public donor updates.</small></span>
+        </label>
 
         <div style="display: flex; align-items: center; gap: 1rem; background: #f8f8f8; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--gray-200);">
           <img src="assets/docs/WhatsApp Image 2026-09-12 at 8.42.58 PM.jpeg" alt="80G Certificate" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; filter: grayscale(100%) contrast(1.2);">
@@ -2083,7 +2088,8 @@
   <script src="js/timeline.js?v=2.3"></script>
   <script src="js/counters.js?v=2.3"></script>
   <script src="js/services/pdf-service.js?v=2.5"></script>
-  <script src="js/modals.js?v=2.5"></script>
+  <script src="js/modals.js?v=2.7"></script>
+  <script src="js/donations-ui.js?v=1.4"></script>
   <script src="js/services/newsService.js?v=2.3"></script>
   <script src="js/components/news-ui.js?v=2.3"></script>
   <script src="js/components/nestjs-cards.js?v=2.3"></script>

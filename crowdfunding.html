@@ -17,8 +17,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/styles.css?v=2.5">
-  <link rel="stylesheet" href="css/crowdfunding.css?v=1.0">
+  <link rel="stylesheet" href="css/styles.css?v=2.8">
+  <link rel="stylesheet" href="css/crowdfunding.css?v=1.4">
 </head>
 
 <body class="cf-page">
@@ -114,7 +114,7 @@
       <!-- Live Trust Metrics Bar -->
       <div class="cf-stats-grid">
         <div class="cf-stat-card">
-          <div class="cf-stat-number" id="global-total-raised">₹0</div>
+          <div class="cf-stat-number" id="global-total-raised" data-donation-total>₹0</div>
           <div class="cf-stat-label">Direct Healthcare Aid Disbursed</div>
         </div>
         <div class="cf-stat-card">
@@ -140,7 +140,7 @@
         <span class="cf-ticker-pulse"></span>
         Live Activity
       </div>
-      <div class="cf-ticker-mask" style="overflow: hidden; flex: 1; display: flex; align-items: center;">
+      <div class="cf-ticker-mask">
         <div class="cf-ticker-content" id="cf-ticker-stream">
           <!-- Live donation items will be injected here from the DB -->
         </div>
@@ -192,7 +192,7 @@
               <div class="cf-progress-bar-fill" style="width: 0%;"></div>
             </div>
             <div class="cf-progress-stats">
-              <span>🏢 14 Corporate & Community Donors</span>
+                <span>🏢 <span class="cf-progress-donor-count">0</span> Corporate &amp; Community Donors</span>
               <span>🛡️ 80G Tax Exempt Eligible</span>
             </div>
           </div>
@@ -225,10 +225,10 @@
 
     <!-- Category Filter Bar -->
     <div class="cf-filter-bar">
-      <button class="cf-filter-btn active" data-filter="all">All Projects (3)</button>
-      <button class="cf-filter-btn" data-filter="infrastructure">🏗️ Hospital Construction</button>
-      <button class="cf-filter-btn" data-filter="equipment">🩺 Medical Equipment</button>
-      <button class="cf-filter-btn" data-filter="camps">🏥 Rural Health Camps</button>
+      <button class="cf-filter-btn active" data-filter="all" aria-pressed="true">All Projects (4)</button>
+      <button class="cf-filter-btn" data-filter="infrastructure" aria-pressed="false">🏗️ Hospital Construction</button>
+      <button class="cf-filter-btn" data-filter="equipment" aria-pressed="false">🩺 Medical Equipment</button>
+      <button class="cf-filter-btn" data-filter="camps" aria-pressed="false">🏥 Rural Health Camps</button>
     </div>
 
     <!-- Campaigns Grid -->
@@ -260,7 +260,7 @@
                 <div class="cf-progress-bar-fill" style="width: 0%;"></div>
               </div>
               <div class="cf-progress-stats" style="margin-top: 0.35rem;">
-                <span>👥 320 Donors</span>
+                <span>👥 <span class="cf-progress-donor-count">0</span> Donors</span>
                 <span>⏱️ Phase 1 Active</span>
               </div>
             </div>
@@ -303,7 +303,7 @@
                 <div class="cf-progress-bar-fill" style="width: 0%;"></div>
               </div>
               <div class="cf-progress-stats" style="margin-top: 0.35rem;">
-                <span>👥 145 Donors</span>
+                <span>👥 <span class="cf-progress-donor-count">0</span> Donors</span>
                 <span>⏱️ Need met soon</span>
               </div>
             </div>
@@ -346,7 +346,7 @@
                 <div class="cf-progress-bar-fill" style="width: 0%;"></div>
               </div>
               <div class="cf-progress-stats" style="margin-top: 0.35rem;">
-                <span>👥 210 Donors</span>
+                <span>👥 <span class="cf-progress-donor-count">0</span> Donors</span>
                 <span>⏱️ 15 Days Left</span>
               </div>
             </div>
@@ -389,7 +389,7 @@
                 <div class="cf-progress-bar-fill" style="width: 0%;"></div>
               </div>
               <div class="cf-progress-stats" style="margin-top: 0.35rem;">
-                <span>👥 189 Donors</span>
+                <span>👥 <span class="cf-progress-donor-count">0</span> Donors</span>
                 <span>⏱️ 5 Days to Camp</span>
               </div>
             </div>
@@ -427,12 +427,12 @@
 
         <!-- Preset Pills -->
         <div class="cf-preset-pills">
-          <div class="cf-preset-pill" onclick="setCalcAmount(1000)">₹1,000</div>
-          <div class="cf-preset-pill active" onclick="setCalcAmount(2500)">₹2,500</div>
-          <div class="cf-preset-pill" onclick="setCalcAmount(5000)">₹5,000</div>
-          <div class="cf-preset-pill" onclick="setCalcAmount(10000)">₹10,000</div>
-          <div class="cf-preset-pill" onclick="setCalcAmount(25000)">₹25,000</div>
-          <div class="cf-preset-pill" onclick="setCalcAmount(50000)">₹50,000</div>
+          <button type="button" class="cf-preset-pill" onclick="setCalcAmount(1000)">₹1,000</button>
+          <button type="button" class="cf-preset-pill active" onclick="setCalcAmount(2500)">₹2,500</button>
+          <button type="button" class="cf-preset-pill" onclick="setCalcAmount(5000)">₹5,000</button>
+          <button type="button" class="cf-preset-pill" onclick="setCalcAmount(10000)">₹10,000</button>
+          <button type="button" class="cf-preset-pill" onclick="setCalcAmount(25000)">₹25,000</button>
+          <button type="button" class="cf-preset-pill" onclick="setCalcAmount(50000)">₹50,000</button>
         </div>
 
         <div class="cf-custom-input-group">
@@ -441,7 +441,7 @@
         </div>
 
         <p style="font-size: 0.82rem; color: #94A3B8;">
-          💡 Receipts and Form 10BE certificates are generated automatically and emailed within 60 seconds of donation.
+          💡 Payment-confirmed donations receive an 80G receipt by email after verification. Form 10BE is issued in line with applicable statutory filing requirements.
         </p>
       </div>
 
@@ -547,7 +547,7 @@
         <span class="cf-faq-icon">+</span>
       </button>
       <div class="cf-faq-answer">
-        Immediately after your donation is completed, our system automatically generates your 80G Tax Exemption Receipt and emails it to your registered email ID. At the end of the financial year, Form 10BE certificate is also dispatched for effortless tax filing.
+        After your payment is verified, your 80G Tax Exemption Receipt is generated and emailed to your registered email ID. Form 10BE is issued in line with applicable statutory filing requirements.
       </div>
     </div>
 
@@ -726,6 +726,11 @@
           <input type="tel" id="donor-phone" placeholder="Phone (For 80G Receipt) *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; box-sizing: border-box; font-size: 0.95rem; color: #111817; background: #FFFFFF;">
           <input type="text" id="donor-pan" placeholder="PAN Card (Optional 80G Tax)" style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; box-sizing: border-box; font-size: 0.95rem; color: #111817; background: #FFFFFF; text-transform: uppercase;">
         </div>
+        <label class="anonymous-donation-option">
+          <input type="checkbox" id="donor-anonymous">
+          <span class="anonymous-donation-icon" aria-hidden="true">◉</span>
+          <span><strong>Donate anonymously</strong><small>Your name stays private on public donor updates.</small></span>
+        </label>
 
         <div style="display: flex; align-items: center; gap: 1rem; background: #f8f8f8; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--gray-200);">
           <img src="assets/docs/WhatsApp Image 2026-09-12 at 8.42.58 PM.jpeg" alt="80G Certificate" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; filter: grayscale(100%) contrast(1.2);">
@@ -1117,11 +1122,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="js/services/pdf-service.js?v=2.5"></script>
-  <script src="js/modals.js?v=2.5"></script>
+  <script src="js/modals.js?v=2.7"></script>
   <script src="js/components/navbar-gsap.js?v=2.4"></script>
 
   <!-- Crowdfunding Interactive Controller -->
-  <script>
+  <script src="js/donations-ui.js?v=1.5"></script>
+  <script src="js/crowdfunding-page.js?v=1.2"></script>
+  <!--
     // 1. WhatsApp Share Helper
     function shareOnWhatsApp(text) {
       const url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(text);
@@ -1224,15 +1231,14 @@
       const container = document.getElementById("cf-ticker-stream");
       if (!container || !donations || !donations.length) return;
 
-      // Build ticker items without any timestamp or time display
+      // Build one continuous, fully visible activity line without timestamps.
       const itemsHtml = donations.map(d => {
-        const name = d.name || 'Anonymous Supporter';
+        const name = d.name || 'Anonymous Donor';
         const formattedAmount = d.formattedAmount || ('₹' + new Intl.NumberFormat('en-IN').format(d.amount || 1000));
         const cause = d.cause || 'Emergency Medical Relief';
-        return `<div class="cf-ticker-item"><strong>${name}</strong> donated <span class="amount">${formattedAmount}</span> for ${cause}</div><div class="cf-ticker-item">•</div>`;
+        return `<div class="cf-ticker-item"><strong>${name}</strong> pledged <span class="amount">${formattedAmount}</span> <span class="cf-ticker-cause">for ${cause}</span></div><span class="cf-ticker-separator" aria-hidden="true">•</span>`;
       }).join('');
 
-      // Duplicate content to achieve seamless continuous -50% CSS keyframe loop
       container.innerHTML = itemsHtml + itemsHtml;
     }
 
@@ -1255,8 +1261,8 @@
     window.addEventListener('avinya:donation_success', (e) => {
       if (e.detail) {
         const d = e.detail;
-        const nameParts = (d.name || 'Anonymous Supporter').trim().split(/\s+/);
-        let displayName = d.name || 'Anonymous Supporter';
+        const nameParts = (d.name || 'Anonymous Donor').trim().split(/\s+/);
+        let displayName = d.name || 'Anonymous Donor';
         if (nameParts.length > 1 && !displayName.toLowerCase().includes('supporter') && !displayName.toLowerCase().includes('anonymous')) {
           displayName = `${nameParts[0]} ${nameParts[nameParts.length - 1][0].toUpperCase()}.`;
         }
@@ -1298,10 +1304,12 @@
               const raisedEl = container.querySelector('.cf-progress-raised');
               const fillEl = container.querySelector('.cf-progress-bar-fill');
               const pctEl = container.querySelector('.cf-progress-percent');
+              const donorsEl = container.querySelector('.cf-progress-donor-count');
 
-              if (raisedEl) raisedEl.textContent = '₹' + raisedAmount.toLocaleString();
+              if (raisedEl) raisedEl.textContent = '₹' + raisedAmount.toLocaleString('en-IN');
               if (fillEl) fillEl.style.width = percent + '%';
               if (pctEl) pctEl.textContent = percent + '%';
+              if (donorsEl) donorsEl.textContent = String((data.stats.campaign_donors || {})[categoryAttr] || 0);
             }
           });
         }
@@ -1310,21 +1318,7 @@
       }
     }
 
-    // Initialize real DB ticker on DOM load and poll every 60s
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchLiveDonations();
-      fetchDonationStats();
-      setInterval(() => {
-        fetchLiveDonations();
-        fetchDonationStats();
-      }, 60000);
-    });
-
-    // Instantly update stats when a new donation is successfully made without refreshing page
-    window.addEventListener('avinya:donation_success', () => {
-      fetchDonationStats();
-      fetchLiveDonations();
-    });
-  </script>
+    // Shared updater owns the initial fetch, cross-component refresh, retry, and polling.
+  -->
 </body>
 </html>

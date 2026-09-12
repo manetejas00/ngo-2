@@ -32,32 +32,33 @@ if ($isStats) {
     try {
         $pdo = getDatabaseConnection();
         if ($pdo !== null) {
-            $stmt = $pdo->query("SELECT SUM(amount) as total_raised, COUNT(id) as total_donors FROM form_submissions WHERE LOWER(form_type) = 'donation' AND amount > 0");
+            $stmt = $pdo->query("SELECT COALESCE(SUM(amount), 0) as total_raised, COUNT(*) as total_donations, COUNT(DISTINCT NULLIF(LOWER(email), '')) as unique_donors FROM form_submissions WHERE LOWER(form_type) = 'donation' AND amount > 0 AND UPPER(payment_status) IN ('SUCCESS', 'CONFIRMED', 'PAID')");
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             $totalRaised = (float)($row['total_raised'] ?? 0);
-            $totalDonors = (int)($row['total_donors'] ?? 0);
+            $totalDonors = (int)($row['unique_donors'] ?? 0);
+            $totalDonations = (int)($row['total_donations'] ?? 0);
+            $categories = [];
+            $campaignDonors = [];
+            $categoryStmt = $pdo->query("SELECT COALESCE(NULLIF(category, ''), NULLIF(interest, ''), 'General Fund') AS campaign, COALESCE(SUM(amount), 0) AS total FROM form_submissions WHERE LOWER(form_type) = 'donation' AND amount > 0 AND UPPER(payment_status) IN ('SUCCESS', 'CONFIRMED', 'PAID') GROUP BY campaign");
+            foreach ($categoryStmt->fetchAll(PDO::FETCH_ASSOC) as $categoryRow) {
+                $categories[$categoryRow['campaign']] = (float)$categoryRow['total'];
+            }
+            $donorStmt = $pdo->query("SELECT COALESCE(NULLIF(category, ''), NULLIF(interest, ''), 'General Fund') AS campaign, COUNT(DISTINCT NULLIF(LOWER(email), '')) AS donors FROM form_submissions WHERE LOWER(form_type) = 'donation' AND amount > 0 AND UPPER(payment_status) IN ('SUCCESS', 'CONFIRMED', 'PAID') GROUP BY campaign");
+            foreach ($donorStmt->fetchAll(PDO::FETCH_ASSOC) as $donorRow) {
+                $campaignDonors[$donorRow['campaign']] = (int)$donorRow['donors'];
+            }
         }
     } catch (Throwable $e) {}
     
-    // Add seed data to stats
-    $seedAmount = 5000 + 15000 + 2500 + 10000 + 1000 + 7500 + 3000;
-    $seedDonors = 7;
-    
-    // Hardcoded seed category distribution for UX visual progress
-    $categories = [
-      'Mobile Medical Ambulance' => 300000,
-      'Rural Eye Hospital' => 850000,
-      'Pediatric NICU Ward' => 200000,
-      'Free Dialysis Center' => 500000,
-      'Mega Health Camp' => 75000
-    ];
-
     echo json_encode([
         'status' => 'ok',
         'stats' => [
-            'total' => $totalRaised + $seedAmount + array_sum($categories),
-            'donors' => $totalDonors + $seedDonors + 342,
+            'total' => $totalRaised,
+            'total_donations' => $totalDonations ?? 0,
+            'unique_donors' => $totalDonors,
+            'donors' => $totalDonors,
             'categories' => $categories
+            ,'campaign_donors' => $campaignDonors ?? []
         ]
     ]);
     exit;
@@ -70,9 +71,9 @@ try {
     $pdo = getDatabaseConnection();
     if ($pdo !== null) {
         $stmt = $pdo->prepare("
-            SELECT id, submission_id, name, amount, interest, message, created_at 
+            SELECT id, submission_id, name, amount, interest, message, is_anonymous, created_at
             FROM form_submissions 
-            WHERE LOWER(form_type) = 'donation' AND amount > 0 
+            WHERE LOWER(form_type) = 'donation' AND amount > 0
             ORDER BY id DESC 
             LIMIT 25
         ");
@@ -80,7 +81,7 @@ try {
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($rows as $row) {
-            $rawName = trim((string)($row['name'] ?? 'Anonymous Supporter'));
+            $rawName = !empty($row['is_anonymous']) ? 'Anonymous Donor' : trim((string)($row['name'] ?? 'Anonymous Donor'));
             $nameParts = preg_split('/\s+/', $rawName);
             $displayName = $rawName;
             if (count($nameParts) > 1 && stripos($rawName, 'supporter') === false && stripos($rawName, 'anonymous') === false) {
@@ -116,8 +117,11 @@ if (empty($donations)) {
             foreach ($submissions as $sub) {
                 $ft = strtolower((string)($sub['formType'] ?? $sub['form_type'] ?? ''));
                 $amt = (float)($sub['amount'] ?? 0);
+                $paymentStatus = strtoupper((string)($sub['paymentStatus'] ?? $sub['payment_status'] ?? 'PENDING'));
                 if ($ft === 'donation' && $amt > 0) {
-                    $rawName = trim((string)($sub['name'] ?? 'Anonymous Supporter'));
+                    $rawName = !empty($sub['isAnonymous']) || !empty($sub['is_anonymous'])
+                        ? 'Anonymous Donor'
+                        : trim((string)($sub['name'] ?? 'Anonymous Supporter'));
                     $nameParts = preg_split('/\s+/', $rawName);
                     $displayName = $rawName;
                     if (count($nameParts) > 1 && stripos($rawName, 'supporter') === false && stripos($rawName, 'anonymous') === false) {
@@ -142,32 +146,7 @@ if (empty($donations)) {
     }
 }
 
-// 3. Guaranteed High-Trust Seed Fallbacks if fewer than 5 donations
-$seedDonations = [
-    ['id' => 'seed-1', 'name' => 'Rahul S.', 'amount' => 5000, 'formattedAmount' => '₹5,000', 'cause' => "Master Aarav's Bone Marrow Transplant"],
-    ['id' => 'seed-2', 'name' => 'Dr. Kulkarni', 'amount' => 15000, 'formattedAmount' => '₹15,000', 'cause' => 'Cancer Immunotherapy Support'],
-    ['id' => 'seed-3', 'name' => 'Ananya P.', 'amount' => 2500, 'formattedAmount' => '₹2,500', 'cause' => "Baby Ananya's Heart Surgery"],
-    ['id' => 'seed-4', 'name' => 'Anonymous Supporter', 'amount' => 10000, 'formattedAmount' => '₹10,000', 'cause' => 'Emergency ICU Care'],
-    ['id' => 'seed-5', 'name' => 'Vikram M.', 'amount' => 1000, 'formattedAmount' => '₹1,000', 'cause' => 'Rural Dialysis Aid'],
-    ['id' => 'seed-6', 'name' => 'Sunita D.', 'amount' => 7500, 'formattedAmount' => '₹7,500', 'cause' => 'Pediatric Oncology Surgery'],
-    ['id' => 'seed-7', 'name' => 'Rohan G.', 'amount' => 3000, 'formattedAmount' => '₹3,000', 'cause' => 'Chemotherapy Assistance Fund']
-];
-
-$merged = $donations;
-foreach ($seedDonations as $seed) {
-    $exists = false;
-    foreach ($merged as $m) {
-        if ($m['name'] === $seed['name'] && (float)$m['amount'] === (float)$seed['amount']) {
-            $exists = true;
-            break;
-        }
-    }
-    if (!$exists) {
-        $merged[] = $seed;
-    }
-}
-
-$finalList = array_slice($merged, 0, 25);
+$finalList = array_slice($donations, 0, 25);
 
 echo json_encode([
     'status' => 'ok',

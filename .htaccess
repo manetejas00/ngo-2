@@ -34,6 +34,10 @@ Options -Indexes
   RewriteRule ^doctors/?$ doctors.html [L,NC]
   RewriteRule ^admin/?$ admin.html [L,NC]
 
+  # Never serve repository, test, runtime, or credential material over HTTP.
+  RewriteRule ^(?:test|tests|scripts|storage|cache|docs|\.agents|\.git)(?:/|$) - [F,L,NC]
+  RewriteRule ^(?:live_admin_credentials\.txt|\.env(?:\..*)?)$ - [F,L,NC]
+
   # Serve existing static files and PHP scripts directly from LiteSpeed/Apache disk
   RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule \.(html|htm|css|js|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot|php)$ - [L]

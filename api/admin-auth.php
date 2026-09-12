@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 ini_set('session.use_strict_mode', '1');
-session_set_cookie_params(['secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly' => true, 'samesite' => 'Strict', 'path' => '/']);
+session_set_cookie_params(['lifetime' => 1800, 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly' => true, 'samesite' => 'Strict', 'path' => '/']);
 session_start();
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/activity-logger.php';
@@ -28,11 +28,21 @@ $action = strtolower(trim((string) ($_GET['action'] ?? $data['action'] ?? $_POST
 
 $pdo = getDatabaseConnection();
 
+if (!empty($_SESSION['auth_started_at']) && (time() - (int) $_SESSION['auth_started_at']) > 1800) {
+    $_SESSION = [];
+    session_destroy();
+}
+
 // Action: Get Temporary Dev Users list grouped by role
 if ($action === 'get_temp_users' || $action === 'temp_users') {
-    if (empty($_SESSION['admin_token']) || ($_SESSION['user_role'] ?? '') !== 'admin') {
+    if (empty($_SESSION['admin_token'])) {
         http_response_code(401);
         echo json_encode(['status' => 'error', 'message' => 'Authentication required.']);
+        exit(0);
+    }
+    if (($_SESSION['user_role'] ?? '') !== 'admin') {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Forbidden.']);
         exit(0);
     }
     $usersList = [];
@@ -61,7 +71,7 @@ if ($action === 'get_temp_users' || $action === 'temp_users') {
 // Action: Login
 if ($action === 'login' || $action === 'temp_login') {
     $identifier = strtolower(trim((string) ($data['email'] ?? $data['username'] ?? $data['user_id'] ?? $data['userId'] ?? '')));
-    $password = trim((string) ($data['password'] ?? ''));
+    $password = (string) ($data['password'] ?? '');
 
     if (!$identifier || !$password) {
         http_response_code(400);
@@ -113,6 +123,7 @@ if ($action === 'login' || $action === 'temp_login') {
     $_SESSION['user_role'] = strtolower($user['role']);
     $_SESSION['user_doc_id'] = $user['doctor_id'] ?? null;
     $_SESSION['user_prov_id'] = $user['provider_id'] ?? null;
+    $_SESSION['auth_started_at'] = time();
 
     logActivity('USER_LOGIN_SUCCESS', $user['role'], $user['email'], "Authenticated user {$user['name']} as {$user['role']}");
 
@@ -188,9 +199,13 @@ if ($action === 'get_profile' || $action === 'update_profile') {
 
 // Action: Force Change Password or Normal Password Change
 if ($action === 'change_password' || $action === 'force_change_password') {
-    $currentPass = trim((string) ($data['currentPassword'] ?? $data['current_password'] ?? ''));
-    $newPass = trim((string) ($data['newPassword'] ?? $data['new_password'] ?? ''));
-    $confirmPass = trim((string) ($data['confirmPassword'] ?? $data['confirm_password'] ?? ''));
+    $headers = getallheaders();
+    $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches);
+    $requestToken = trim((string) ($matches[1] ?? $data['token'] ?? ''));
+    $currentPass = (string) ($data['currentPassword'] ?? $data['current_password'] ?? '');
+    $newPass = (string) ($data['newPassword'] ?? $data['new_password'] ?? '');
+    $confirmPass = (string) ($data['confirmPassword'] ?? $data['confirm_password'] ?? '');
 
     if ($newPass !== $confirmPass) {
         http_response_code(400);
@@ -204,7 +219,7 @@ if ($action === 'change_password' || $action === 'force_change_password') {
     }
 
     $userId = (string) ($_SESSION['user_id'] ?? '');
-    if ($userId === '' || empty($_SESSION['admin_token'])) {
+    if ($userId === '' || empty($_SESSION['admin_token']) || $requestToken === '' || !hash_equals((string) $_SESSION['admin_token'], $requestToken)) {
         http_response_code(401);
         echo json_encode(['status' => 'error', 'message' => 'Authentication required.']);
         exit(0);
@@ -286,8 +301,8 @@ if ($action === 'forgot_password') {
 // Action: Reset Password with Token
 if ($action === 'reset_password') {
     $token = trim((string) ($data['token'] ?? ''));
-    $newPass = trim((string) ($data['newPassword'] ?? $data['new_password'] ?? ''));
-    $confirmPass = trim((string) ($data['confirmPassword'] ?? $data['confirm_password'] ?? ''));
+    $newPass = (string) ($data['newPassword'] ?? $data['new_password'] ?? '');
+    $confirmPass = (string) ($data['confirmPassword'] ?? $data['confirm_password'] ?? '');
 
     if (!$token) {
         http_response_code(400);
@@ -337,10 +352,10 @@ if ($action === 'verify') {
     if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
         $token = trim($matches[1]);
     } else {
-        $token = trim((string) ($data['token'] ?? $_GET['token'] ?? ''));
+        $token = trim((string) ($data['token'] ?? ''));
     }
 
-    $isValidToken = !empty($_SESSION['admin_token']) && hash_equals((string) $_SESSION['admin_token'], $token);
+    $isValidToken = !empty($_SESSION['admin_token']) && !empty($_SESSION['auth_started_at']) && (time() - (int) $_SESSION['auth_started_at']) <= 1800 && hash_equals((string) $_SESSION['admin_token'], $token);
 
     if ($isValidToken) {
         $userRole = $_SESSION['user_role'] ?? 'admin';

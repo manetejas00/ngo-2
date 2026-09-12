@@ -40,8 +40,9 @@ export function validatePasswordStrength(password) {
  */
 export function hashPassword(plainPassword) {
   const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.pbkdf2Sync(plainPassword, salt, 10000, 64, 'sha512').toString('hex');
-  return `pbkdf2:sha512:10000$${salt}$${hash}`;
+  const iterations = 600000;
+  const hash = crypto.pbkdf2Sync(plainPassword, salt, iterations, 64, 'sha512').toString('hex');
+  return `pbkdf2:sha512:${iterations}$${salt}$${hash}`;
 }
 
 /**
@@ -54,9 +55,11 @@ export function verifyPassword(plainPassword, storedHash) {
   if (typeof storedHash === 'string' && storedHash.startsWith('pbkdf2:sha512:')) {
     const parts = storedHash.split('$');
     if (parts.length !== 3) return false;
+    const iterations = Number(parts[0].split(':')[2]);
+    if (!Number.isSafeInteger(iterations) || iterations < 10000 || iterations > 2000000) return false;
     const salt = parts[1];
     const originalHash = parts[2];
-    const computedHash = crypto.pbkdf2Sync(plainPassword, salt, 10000, 64, 'sha512').toString('hex');
+    const computedHash = crypto.pbkdf2Sync(plainPassword, salt, iterations, 64, 'sha512').toString('hex');
     try {
       return crypto.timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(originalHash, 'hex'));
     } catch (e) {
@@ -64,12 +67,9 @@ export function verifyPassword(plainPassword, storedHash) {
     }
   }
 
-  // Default initial password fallback (if initial seed password is Admin@1230)
-  if (storedHash === 'Admin@1230' && plainPassword === 'Admin@1230') return true;
-
-  // Legacy SHA256 / plaintext fallback
-  const sha256Hash = crypto.createHash('sha256').update(plainPassword).digest('hex');
-  return storedHash === sha256Hash || storedHash === plainPassword;
+  // Plaintext and unsalted legacy hashes are deliberately rejected. Accounts using
+  // them must be reset by an administrator rather than silently remaining insecure.
+  return false;
 }
 
 /**

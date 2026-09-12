@@ -11,7 +11,20 @@
 
 class AvinyaPdfService {
   constructor() {
-    this.letterheadImg = 'assets/letterhead.png';
+    this.brand = {
+      name: 'Avinya Care Foundation',
+      trust: 'Registered Public Charitable Trust',
+      verification: 'NITI Aayog NGO Darpan Verified',
+      address: '12 Yehsubal Apt, Narangi Phata, Virar East, Palghar, Maharashtra – 401303',
+      phone: '+91 74474 41116',
+      email: 'info@avinyacarefoundation.com',
+      website: 'www.avinyacarefoundation.org',
+      pan: 'AABTA9988C',
+      reg12a: 'AAATA9988CE20214',
+      urn80g: 'AABTA9988CF20221',
+      csr: 'CSR00049281',
+      ngoId: 'MH/2023/0349811'
+    };
     this.initStyle();
   }
 
@@ -114,14 +127,11 @@ class AvinyaPdfService {
         justify-content: center;
       }
       .avinya-pdf-sheet {
-        width: 792px;
-        min-height: 1024px;
-        background-color: #ffffff;
-        background-image: url('assets/letterhead.png');
-        background-size: 100% 100%;
-        background-repeat: no-repeat;
+        width: 794px;
+        min-height: 1123px;
+        background: #ffffff;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        padding: 145px 50px 115px 50px;
+        padding: 42px 48px;
         box-sizing: border-box;
         color: #1e293b;
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -129,7 +139,16 @@ class AvinyaPdfService {
         font-size: 13.5px;
         line-height: 1.55;
       }
+      .avinya-document-header { border-bottom: 3px solid #087F73; padding-bottom: 14px; margin-bottom: 20px; }
+      .avinya-document-header table { width: 100%; border-collapse: collapse; }
+      .avinya-document-header .brand-mark { width: 74px; padding-right: 14px; vertical-align: middle; }
+      .avinya-document-header .brand-mark img { display: block; width: 64px; height: 64px; object-fit: contain; }
+      .avinya-document-header .brand-name { color: #0f172a; font-size: 20px; font-weight: 800; line-height: 1.15; }
+      .avinya-document-header .brand-meta { color: #475569; font-size: 10px; line-height: 1.45; padding-top: 4px; }
+      .avinya-document-header .brand-contact { color: #087F73; font-size: 9.5px; line-height: 1.45; padding-top: 4px; }
+      .avinya-document-footer { border-top: 1px solid #cbd5e1; color: #64748b; font-size: 9.5px; line-height: 1.45; margin-top: 20px; padding-top: 8px; }
       @media print {
+        @page { size: A4; margin: 0; }
         body * {
           visibility: hidden !important;
         }
@@ -140,11 +159,12 @@ class AvinyaPdfService {
           position: absolute !important;
           left: 0 !important;
           top: 0 !important;
-          width: 100% !important;
+          width: 794px !important;
+          min-height: 1123px !important;
           margin: 0 !important;
-          padding: 145px 50px 115px 50px !important;
+          padding: 42px 48px !important;
           box-shadow: none !important;
-          background-size: 100% 100% !important;
+          background: #ffffff !important;
         }
       }
     `;
@@ -184,18 +204,40 @@ class AvinyaPdfService {
     return (res.trim() + ' Rupees Only');
   }
 
+  escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  getFinancialYear(dateValue) {
+    const date = new Date(dateValue || Date.now());
+    const year = Number.isNaN(date.getTime()) ? new Date().getFullYear() : date.getFullYear();
+    const month = Number.isNaN(date.getTime()) ? new Date().getMonth() : date.getMonth();
+    const start = month >= 3 ? year : year - 1;
+    return `${start}–${start + 1}`;
+  }
+
   getLetterheadDataHtml() {
     return `
-      <div style="margin-top: -65px; text-align: center; font-size: 11px; color: #475569; margin-bottom: 20px; line-height: 1.5;">
-        <div style="font-weight: 700; color: #087F73;">Reg. Public Charitable Trust • NITI Aayog NGO Darpan Verified</div>
-        <div>12 Yehsubal Apt, Narangi Phata, Virar East, Palghar, Maharashtra - 401303</div>
-        <div style="margin-top: 3px;">
-          <span style="display: inline-block; margin-right: 12px;">📞 +91 744744116</span>
-          <span style="display: inline-block; margin-right: 12px;">✉️ avinyacarefoundation@gmail.com</span>
-          <span style="display: inline-block;">🌐 www.avinyacarefoundation.org</span>
-        </div>
+      <div class="avinya-document-header">
+        <table role="presentation"><tr>
+          <td class="brand-mark"><img src="assets/logo.png" alt="Avinya Care Foundation logo"></td>
+          <td>
+            <div class="brand-name">${this.brand.name}</div>
+            <div class="brand-meta">${this.brand.trust} · ${this.brand.verification}<br>${this.brand.address}</div>
+            <div class="brand-contact">${this.brand.phone} · ${this.brand.email} · ${this.brand.website}</div>
+          </td>
+        </tr></table>
       </div>
     `;
+  }
+
+  getDocumentFooterHtml(label = 'Official communication') {
+    return `<div class="avinya-document-footer">${this.brand.name} · ${this.brand.trust} · ${label}<br>${this.brand.phone} · ${this.brand.email} · ${this.brand.website}</div>`;
   }
 
 
@@ -260,7 +302,7 @@ class AvinyaPdfService {
         filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'px', format: [792, 1024], orientation: 'portrait' }
+        jsPDF: { unit: 'px', format: [794, 1123], orientation: 'portrait' }
       };
       try {
         const downloadBtn = document.getElementById('avinya-pdf-download-btn');
@@ -361,7 +403,7 @@ class AvinyaPdfService {
       <div style="background: #EFF6FF; border: 1.5px dashed #93C5FD; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;">
         <div style="font-weight: 800; color: #1E40AF; font-size: 12.5px; margin-bottom: 4px;">📞 Avinya Care Free Patient Navigation & Subsidized Screening Helpline:</div>
         <div style="font-size: 11.5px; color: #1E3A8A; line-height: 1.5;">
-          Need clinical consultation or subsidized diagnostic tests? Contact our Virar-Mumbai care desk at <strong>+91 744744116</strong> or email <strong>avinyacarefoundation@gmail.com</strong>.
+          Need clinical consultation or subsidized diagnostic tests? Contact our Virar-Mumbai care desk at <strong>${this.brand.phone}</strong> or email <strong>${this.brand.email}</strong>.
         </div>
       </div>
 
@@ -383,30 +425,35 @@ class AvinyaPdfService {
   // 2. OFFICIAL 80G TAX EXEMPTION DONATION RECEIPT PDF
   // -------------------------------------------------------------
   generateDonationReceiptPDF(data = {}) {
-    const receiptNo = data.receiptNo || data.transaction_id || `ACF-80G-${Date.now().toString().slice(-6)}`;
-    const dateStr = data.date || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-    const donorName = data.name || data.donor_name || 'Generous Supporter';
-    const donorEmail = data.email || data.donor_email || 'donor@example.com';
-    const donorPhone = data.phone || data.donor_phone || '-';
-    const donorPan = (data.pan || data.donor_pan || 'XXXXX0000X').toUpperCase();
-    const amount = Number(data.amount || 1000);
+    const receiptNo = this.escapeHtml(data.receiptNo || data.transaction_id || `ACF-80G-${Date.now().toString().slice(-6)}`);
+    const issueDate = data.date || data.paid_at || new Date();
+    const dateStr = this.escapeHtml(typeof issueDate === 'string' && !/^\d{4}-\d{2}-\d{2}/.test(issueDate)
+      ? issueDate
+      : new Date(issueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }));
+    const donorName = this.escapeHtml(data.name || data.donor_name || 'Anonymous Donor');
+    const donorEmail = this.escapeHtml(data.email || data.donor_email || 'Not provided');
+    const donorPhone = this.escapeHtml(data.phone || data.donor_phone || 'Not provided');
+    const donorPan = this.escapeHtml(String(data.pan || data.donor_pan || 'Not provided').toUpperCase());
+    const amount = Math.max(0, Number(data.amount) || 0);
     const amountInWords = this.numberToWordsIN(amount);
-    const paymentMode = data.payment_mode || 'UPI / NetBanking (Online Gateway)';
-    const txnId = data.transaction_id || data.txn_id || `TXN-${Date.now().toString().slice(-8)}`;
+    const paymentMode = this.escapeHtml(data.payment_mode || 'Online payment');
+    const txnId = this.escapeHtml(data.transaction_id || data.txn_id || 'Not provided');
+    const amountLabel = this.escapeHtml(amount.toLocaleString('en-IN'));
+    const wordsLabel = this.escapeHtml(amountInWords);
 
     const sheetHtml = `
       ${this.getLetterheadDataHtml()}
-      <div style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid #087F73; padding-bottom: 8px;">
+      <div style="text-align: center; margin-bottom: 16px; border-bottom: 2px solid #087F73; padding-bottom: 10px;">
         <span style="background: #087F73; color: white; font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: 1px;">Official Tax Exemption Receipt</span>
         <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 4px 0 2px 0;">DONATION RECEIPT UNDER SECTION 80G</h1>
         <div style="font-size: 11px; color: #475569; font-weight: 600;">Income Tax Act, 1961 • 50% Tax Exemption for Donors</div>
       </div>
 
-      <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 14px; background: #F8FAFC; padding: 8px 12px; border-radius: 6px; border: 1px solid #E2E8F0;">
-        <div><strong>Receipt No:</strong> <span style="font-family: monospace; color: #087F73; font-weight: 700;">${receiptNo}</span></div>
-        <div><strong>Date of Issue:</strong> ${dateStr}</div>
-        <div><strong>Financial Year:</strong> 2026–2027</div>
-      </div>
+      <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; margin-bottom: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px;"><tr>
+        <td style="padding: 9px 11px; width: 38%;"><strong>Receipt No.</strong><br><span style="font-family: monospace; color: #087F73; font-weight: 700; overflow-wrap: anywhere;">${receiptNo}</span></td>
+        <td style="padding: 9px 11px; width: 30%; border-left: 1px solid #E2E8F0;"><strong>Date of issue</strong><br>${dateStr}</td>
+        <td style="padding: 9px 11px; border-left: 1px solid #E2E8F0;"><strong>Financial year</strong><br>${this.getFinancialYear(issueDate)}</td>
+      </tr></table>
 
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 12px;">
         <tr style="border-bottom: 1px solid #E2E8F0;">
@@ -428,7 +475,7 @@ class AvinyaPdfService {
         <tr style="background: #F0FDF4;">
           <td style="padding: 10px 8px; color: #166534; font-weight: 800; font-size: 13px;">Donation Amount:</td>
           <td style="padding: 10px 8px; color: #166534; font-weight: 800; font-size: 16px;">
-            ₹${amount.toLocaleString('en-IN')} <span style="font-size: 12px; font-weight: 600; color: #15803D;">(${amountInWords})</span>
+            ₹${amountLabel} <span style="font-size: 12px; font-weight: 600; color: #15803D;">(${wordsLabel})</span>
           </td>
         </tr>
       </table>
@@ -442,9 +489,9 @@ class AvinyaPdfService {
       <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; margin-top: 10px; align-items: flex-end;">
         <div style="font-size: 10.5px; color: #64748B; line-height: 1.5;">
           <strong>Avinya Care Foundation Statutory Particulars:</strong><br>
-          • <strong>PAN:</strong> AABTA9988C | <strong>12A Reg:</strong> AAATA9988CE20214<br>
-          • <strong>80G URN:</strong> AABTA9988CF20221 | <strong>CSR-1 Reg:</strong> CSR00049281<br>
-          • <strong>NITI Aayog NGO Darpan ID:</strong> MH/2023/0349811
+          • <strong>PAN:</strong> ${this.brand.pan} | <strong>12A Reg:</strong> ${this.brand.reg12a}<br>
+          • <strong>80G URN:</strong> ${this.brand.urn80g} | <strong>CSR-1 Reg:</strong> ${this.brand.csr}<br>
+          • <strong>NITI Aayog NGO Darpan ID:</strong> ${this.brand.ngoId}
         </div>
         <div style="text-align: center; border-top: 1px solid #94A3B8; padding-top: 6px;">
           <div style="font-family: 'Brush Script MT', cursive, serif; font-size: 18px; color: #087F73; font-weight: bold; margin-bottom: 2px;">
@@ -454,7 +501,7 @@ class AvinyaPdfService {
           <div style="font-size: 9.5px; color: #64748B;">Avinya Care Foundation</div>
         </div>
       </div>
-    `;
+      ${this.getDocumentFooterHtml('Donation receipt')}`;
 
     this.showPreviewModal(sheetHtml, `AvinyaCare_80G_Receipt_${receiptNo}.pdf`);
   }
@@ -463,17 +510,17 @@ class AvinyaPdfService {
   // 3. DOCTOR CONSULTATION SLIP / APPOINTMENT PASS PDF
   // -------------------------------------------------------------
   generateDoctorAppointmentPDF(apt = {}) {
-    const aptId = apt.id || apt.booking_id || `APT-${Date.now().toString().slice(-6)}`;
-    const docName = apt.doctorName || apt.doctor_name || 'Dr. Specialist';
-    const docSpec = apt.doctorSpeciality || apt.doctor_speciality || 'Consultant Specialist';
-    const hospital = apt.hospitalName || apt.hospital_name || apt.location || 'Avinya Healthcare Partner Clinic, Mumbai';
-    const patName = apt.patientName || apt.patient_name || 'Patient';
-    const patAge = apt.patientAge || apt.patient_age || '-';
-    const patGender = apt.patientGender || apt.patient_gender || 'Male';
-    const patPhone = apt.patientPhone || apt.patient_phone || '-';
-    const patEmail = apt.patientEmail || apt.patient_email || '-';
-    const dateStr = apt.date || apt.booking_date || new Date().toISOString().split('T')[0];
-    const timeSlot = apt.time || apt.slot || apt.booking_time || '10:00 AM';
+    const aptId = this.escapeHtml(apt.id || apt.booking_id || `APT-${Date.now().toString().slice(-6)}`);
+    const docName = this.escapeHtml(apt.doctorName || apt.doctor_name || 'Dr. Specialist');
+    const docSpec = this.escapeHtml(apt.doctorSpeciality || apt.doctor_speciality || 'Consultant Specialist');
+    const hospital = this.escapeHtml(apt.hospitalName || apt.hospital_name || apt.location || 'Avinya Healthcare Partner Clinic, Mumbai');
+    const patName = this.escapeHtml(apt.patientName || apt.patient_name || 'Patient');
+    const patAge = this.escapeHtml(apt.patientAge || apt.patient_age || '-');
+    const patGender = this.escapeHtml(apt.patientGender || apt.patient_gender || 'Not specified');
+    const patPhone = this.escapeHtml(apt.patientPhone || apt.patient_phone || 'Not provided');
+    const patEmail = this.escapeHtml(apt.patientEmail || apt.patient_email || 'Not provided');
+    const dateStr = this.escapeHtml(apt.date || apt.booking_date || new Date().toISOString().split('T')[0]);
+    const timeSlot = this.escapeHtml(apt.time || apt.slot || apt.booking_time || '10:00 AM');
     const fee = apt.consultationFee ?? apt.fee ?? 0;
     const type = apt.consultationType || 'in-clinic';
 
@@ -522,7 +569,7 @@ class AvinyaPdfService {
         <strong>📋 Instructions for Consultation:</strong><br>
         1. Please arrive 15 minutes prior to the scheduled slot.<br>
         2. Bring all prior investigation reports, prescriptions, biopsy findings, and medical history documents.<br>
-        3. For assistance or rescheduling, contact Avinya Care Helpline at <strong>+91 744744116</strong>.
+        3. For assistance or rescheduling, contact Avinya Care Helpline at <strong>${this.brand.phone}</strong>.
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E2E8F0; padding-top: 8px; font-size: 10px; color: #64748B;">
@@ -538,18 +585,18 @@ class AvinyaPdfService {
   // 4. DIAGNOSTIC TEST / LAB ORDER PASS PDF
   // -------------------------------------------------------------
   generateDiagnosticBookingPDF(booking = {}) {
-    const orderId = booking.id || booking.booking_id || `LAB-${Date.now().toString().slice(-6)}`;
-    const testName = booking.testName || booking.test_name || 'Diagnostic Health Package';
+    const orderId = this.escapeHtml(booking.id || booking.booking_id || `LAB-${Date.now().toString().slice(-6)}`);
+    const testName = this.escapeHtml(booking.testName || booking.test_name || 'Diagnostic Health Package');
     const price = booking.price || 0;
-    const dateStr = booking.date || booking.booking_date || new Date().toISOString().split('T')[0];
-    const timeSlot = booking.timeSlot || booking.time_slot || '08:30 AM - 09:30 AM';
+    const dateStr = this.escapeHtml(booking.date || booking.booking_date || new Date().toISOString().split('T')[0]);
+    const timeSlot = this.escapeHtml(booking.timeSlot || booking.time_slot || '08:30 AM - 09:30 AM');
     const collection = booking.collectionMethod || 'home_collection';
-    const patName = booking.patientName || booking.patient_name || 'Patient';
-    const patAge = booking.patientAge || booking.patient_age || '-';
-    const patGender = booking.patientGender || booking.patient_gender || 'Male';
-    const patPhone = booking.patientPhone || booking.patient_phone || '-';
-    const address = booking.homeAddress || booking.address || 'Mumbai Region';
-    const pincode = booking.pincode || '400050';
+    const patName = this.escapeHtml(booking.patientName || booking.patient_name || 'Patient');
+    const patAge = this.escapeHtml(booking.patientAge || booking.patient_age || '-');
+    const patGender = this.escapeHtml(booking.patientGender || booking.patient_gender || 'Not specified');
+    const patPhone = this.escapeHtml(booking.patientPhone || booking.patient_phone || 'Not provided');
+    const address = this.escapeHtml(booking.homeAddress || booking.address || 'Not provided');
+    const pincode = this.escapeHtml(booking.pincode || 'Not provided');
 
     const sheetHtml = `
       ${this.getLetterheadDataHtml()}
@@ -622,7 +669,7 @@ class AvinyaPdfService {
       <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #087F73; padding-bottom: 10px; margin-bottom: 14px;">
         <div>
           <span style="font-size: 10px; font-weight: 800; color: #087F73; text-transform: uppercase; background: #E6F4F1; padding: 2px 8px; border-radius: 4px;">Executive Administration Record</span>
-          <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 4px 0 2px 0;">${title}</h1>
+          <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 4px 0 2px 0;">${this.escapeHtml(title)}</h1>
           <div style="font-size: 11px; color: #64748B;">Generated: ${dateStr} • Total Records: ${rows.length}</div>
         </div>
         <div style="text-align: right;">
@@ -635,13 +682,13 @@ class AvinyaPdfService {
         <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
           <thead>
             <tr style="background: #F1F5F9; border-bottom: 2px solid #CBD5E1;">
-              ${columns.map(c => `<th style="padding: 6px 8px; text-align: left; font-weight: 700; color: #334155;">${c}</th>`).join('')}
+              ${columns.map(c => `<th style="padding: 6px 8px; text-align: left; font-weight: 700; color: #334155; overflow-wrap: anywhere;">${this.escapeHtml(c)}</th>`).join('')}
             </tr>
           </thead>
           <tbody>
             ${rows.slice(0, 15).map((row, idx) => `
               <tr style="border-bottom: 1px solid #E2E8F0; background: ${idx % 2 === 0 ? '#FFFFFF' : '#F8FAFC'};">
-                ${row.map(val => `<td style="padding: 6px 8px; color: #1E293B;">${val}</td>`).join('')}
+                ${row.map(val => `<td style="padding: 6px 8px; color: #1E293B; overflow-wrap: anywhere;">${this.escapeHtml(val)}</td>`).join('')}
               </tr>
             `).join('')}
           </tbody>
@@ -665,7 +712,10 @@ class AvinyaPdfService {
     
     // Auto-route to specialized generators if available
     if (category === 'form' && (item.form_type === 'donation' || item.amount)) {
-      return this.generateDonationReceiptPDF(item);
+      const paymentStatus = String(item.payment_status || item.status || '').toUpperCase();
+      if (['SUCCESS', 'SUCCEEDED', 'PAID', 'COMPLETED', 'CONFIRMED'].includes(paymentStatus)) {
+        return this.generateDonationReceiptPDF(item);
+      }
     }
     if (category === 'doctor' || item.doctor_name || item.doctorName) {
       return this.generateDoctorAppointmentPDF(item);
@@ -674,7 +724,7 @@ class AvinyaPdfService {
       return this.generateDiagnosticBookingPDF(item);
     }
 
-    const title = `${category.toUpperCase()} Official Record: ${id}`;
+    const title = this.escapeHtml(`${category.toUpperCase()} Official Record: ${id}`);
     const entries = Object.entries(item).filter(([k, v]) => typeof v !== 'object');
 
     const sheetHtml = `
@@ -687,15 +737,15 @@ class AvinyaPdfService {
         </div>
         <div style="text-align: right;">
           <div style="font-size: 11px; font-weight: 700; color: #087F73;">REF ID</div>
-          <div style="font-family: monospace; font-size: 14px; font-weight: 800; color: #0f172a;">${id}</div>
+          <div style="font-family: monospace; font-size: 14px; font-weight: 800; color: #0f172a;">${this.escapeHtml(id)}</div>
         </div>
       </div>
 
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 12px;">
         ${entries.map(([k, v]) => `
           <tr style="border-bottom: 1px solid #E2E8F0;">
-            <td style="padding: 7px 10px; width: 35%; background: #F8FAFC; color: #475569; font-weight: 700; text-transform: capitalize;">${k.replace(/_/g, ' ')}</td>
-            <td style="padding: 7px 10px; color: #0f172a;">${String(v)}</td>
+            <td style="padding: 7px 10px; width: 35%; background: #F8FAFC; color: #475569; font-weight: 700; text-transform: capitalize;">${this.escapeHtml(k.replace(/_/g, ' '))}</td>
+            <td style="padding: 7px 10px; color: #0f172a; overflow-wrap: anywhere;">${this.escapeHtml(String(v))}</td>
           </tr>
         `).join('')}
       </table>
