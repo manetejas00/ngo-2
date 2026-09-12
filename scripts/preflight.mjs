@@ -24,8 +24,8 @@ for (const relative of requiredFiles) {
   if (!existsSync(path) || statSync(path).size === 0) failures.push(`Missing or empty: ${relative}`);
 }
 
-const tracked = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' })
-  .trim().split('\n').filter(Boolean);
+const tracked = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 })
+  .split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
 
 for (const relative of tracked) {
   const extension = extname(relative);
