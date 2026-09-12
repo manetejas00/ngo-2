@@ -576,12 +576,16 @@ button {
   left: 50%;
   transform: translate(-50%, -50%) scale(0.96);
   width: 100%;
-  max-width: 880px;
+  max-width: 960px;
   opacity: 0;
   visibility: hidden;
   will-change: opacity, transform;
   transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out), visibility 180ms;
   pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-narrative-card.active {
@@ -596,20 +600,18 @@ button {
   font-size: var(--hero-title-size);
   font-weight: 800;
   color: #FFFFFF;
-  line-height: 1.04;
-  letter-spacing: -0.045em;
-  margin-bottom: 1.25rem;
-  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  margin-bottom: clamp(1.8rem, 3vw, 2.75rem);
+  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+  text-wrap: balance;
 }
 
 .hero-subtitle {
-  font-size: clamp(1.15rem, 1.8vw, 1.45rem);
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.88);
-  line-height: 1.5;
-  max-width: 720px;
-  margin: 0 auto 2.2rem;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  display: none;
 }
 
 .hero-cta-group {
