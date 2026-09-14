@@ -2212,7 +2212,7 @@ const server = createServer(async (req, res) => {
   }
 
   // --- SEO ROUTES (robots.txt, sitemap.xml, dynamic doctor/test pages) ---
-  const BASE_URL = process.env.APP_URL || process.env.BASE_URL || 'https://avinyacare.org';
+  const BASE_URL = process.env.APP_URL || process.env.BASE_URL || 'https://www.avinyacarefoundation.org';
   
   if (urlPath === '/robots.txt') {
     const robotsTxt = `User-agent: *

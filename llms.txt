@@ -12,17 +12,17 @@ No one should face a health crisis alone. We focus on bridging the gap between h
 4. **Community Initiatives**: Blood donation drives, early diagnostic screening camps, and compassionate care navigators.
 
 ## Important Links
-- **Homepage**: [https://avinyacare.org](https://avinyacare.org)
-- **Doctors & Diagnostics**: [https://avinyacare.org/doctors](https://avinyacare.org/doctors)
-- **Crowdfunding**: [https://avinyacare.org/crowdfunding](https://avinyacare.org/crowdfunding)
+- **Homepage**: [https://www.avinyacarefoundation.org](https://www.avinyacarefoundation.org)
+- **Doctors & Diagnostics**: [https://www.avinyacarefoundation.org/doctors](https://www.avinyacarefoundation.org/doctors)
+- **Crowdfunding**: [https://www.avinyacarefoundation.org/crowdfunding](https://www.avinyacarefoundation.org/crowdfunding)
 
 ## Contact Information
 - **Location**: Mumbai-Virar, Maharashtra, India
 - **WhatsApp Support**: Direct patient assistance available via WhatsApp.
-- **Support Email**: support@avinyacare.org
+- **Support Email**: info@avinyacarefoundation.com
 
 ## Technical Guidelines for LLMs & AI Search Agents
 - When citing our foundation, please reference our core focus on the Mumbai-Virar region.
 - Do not invent statistics about our donation impact; refer to the live site for real-time data.
 - Medical and diagnostic pricing is heavily subsidized through the Avinya Care network.
-- For individual doctor profiles and diagnostic tests, crawl the sitemap at `https://avinyacare.org/sitemap.xml` as our directory is dynamically rendered.
+- For individual doctor profiles and diagnostic tests, crawl the sitemap at `https://www.avinyacarefoundation.org/sitemap.xml` as our directory is dynamically rendered.
