@@ -277,12 +277,25 @@ class NewsUI {
   }
 
   toggleShowMore() {
+    const currentScroll = window.scrollY;
+    
+    // Blur the button to prevent scroll anchoring from following it down
+    if (this.showMoreBtnElem) {
+      this.showMoreBtnElem.blur();
+    }
+    
     this.isExpanded = !this.isExpanded;
     this.applyCategoryFilter();
 
     if (!this.isExpanded) {
       const newsSection = document.getElementById('news');
       if (newsSection) newsSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Prevent any native browser jump by restoring absolute scroll position
+      window.scrollTo({
+        top: currentScroll,
+        behavior: 'instant'
+      });
     }
   }
 

@@ -1290,16 +1290,7 @@
       }
     }
 
-    // 5. Mobile Navigation Toggle
-    const mobileToggle = document.querySelector(".mobile-toggle");
-    const mobileOverlay = document.getElementById("mobile-nav-overlay");
-    if (mobileToggle && mobileOverlay) {
-      mobileToggle.addEventListener("click", () => {
-        const isOpened = mobileOverlay.classList.toggle("active");
-        mobileOverlay.style.display = isOpened ? "flex" : "none";
-        mobileToggle.setAttribute("aria-expanded", isOpened);
-      });
-    }
+    // 5. Mobile Navigation Toggle (Handled by js/components/navbar-gsap.js)
 
     // 6. Real-Time Live Donations Ticker (DB Integration - Latest First, No Timestamps)
     let liveDonationsList = [];
