@@ -145,6 +145,17 @@ class HealthcarePlatform {
       const subSection = hash.replace('#', '').replace('doctors-tests-', '');
       this.openHealthcarePlatform(subSection);
     }
+    
+    // Auto-open dynamic SSR modal if present
+    if (window.INITIAL_MODAL_ID) {
+      setTimeout(() => {
+        if (window.INITIAL_MODAL_TYPE === 'doctor') {
+          this.openDoctorProfile(window.INITIAL_MODAL_ID);
+        } else if (window.INITIAL_MODAL_TYPE === 'test') {
+          this.startTestBooking(window.INITIAL_MODAL_ID);
+        }
+      }, 500); // slight delay to ensure grid is rendered and fonts are loaded
+    }
   }
 
   openHealthcarePlatform(subSection = 'explore') {

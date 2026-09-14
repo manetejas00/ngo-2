@@ -2210,6 +2210,139 @@ const server = createServer(async (req, res) => {
     }
   }
 
+  // --- SEO ROUTES (robots.txt, sitemap.xml, dynamic doctor/test pages) ---
+  const BASE_URL = process.env.APP_URL || process.env.BASE_URL || 'https://avinyacare.org';
+  
+  if (urlPath === '/robots.txt') {
+    const robotsTxt = `User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: ${BASE_URL}/sitemap.xml`;
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    return res.end(robotsTxt);
+  }
+
+  if (urlPath === '/sitemap.xml') {
+    try {
+      const doctors = await getDoctors();
+      const tests = await getDiagnosticTests();
+      let urls = '';
+      
+      const staticPages = ['', '/doctors', '/crowdfunding'];
+      for (const page of staticPages) {
+        urls += `  <url>\n    <loc>${BASE_URL}${page}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${page === '' ? '1.0' : '0.8'}</priority>\n  </url>\n`;
+      }
+      
+      for (const doc of doctors) {
+        urls += `  <url>\n    <loc>${BASE_URL}/doctor/${doc.id}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+      }
+      for (const t of tests) {
+        urls += `  <url>\n    <loc>${BASE_URL}/test/${t.id}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+      }
+
+      const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}</urlset>`;
+      res.writeHead(200, { 'Content-Type': 'application/xml' });
+      return res.end(sitemap);
+    } catch (e) {
+      console.error('[Sitemap Error]', e);
+    }
+  }
+
+  if (urlPath.startsWith('/doctor/') && req.method === 'GET') {
+    const docId = urlPath.replace('/doctor/', '').trim();
+    try {
+      const docs = await getDoctors();
+      const doc = docs.find(d => d.id === docId);
+      if (doc) {
+        let html = await readFile(resolve(__dirname, 'doctors.html'), 'utf-8');
+        const title = `${doc.name} - ${doc.specialityName} | Avinya Care Foundation`;
+        const desc = `Book an appointment with ${doc.name}, ${doc.specialityName} at ${doc.hospitalName}.`;
+        const schema = {
+          "@context": "https://schema.org",
+          "@type": "Physician",
+          "name": doc.name,
+          "medicalSpecialty": doc.specialityName,
+          "image": `${BASE_URL}${doc.avatar}`,
+          "description": doc.about,
+          "url": `${BASE_URL}/doctor/${doc.id}`,
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": doc.location,
+            "addressCountry": "IN"
+          }
+        };
+        const seoTags = `
+          <title>${title}</title>
+          <meta name="description" content="${desc}">
+          <link rel="canonical" href="${BASE_URL}/doctor/${doc.id}">
+          <meta property="og:title" content="${title}">
+          <meta property="og:description" content="${desc}">
+          <meta property="og:url" content="${BASE_URL}/doctor/${doc.id}">
+          <meta property="og:image" content="${BASE_URL}${doc.avatar}">
+          <meta property="og:type" content="profile">
+          <meta name="twitter:card" content="summary_large_image">
+          <script type="application/ld+json">${JSON.stringify(schema)}</script>
+        `;
+        html = html.replace(/<title>.*?<\/title>/s, '');
+        html = html.replace(/<meta name="description".*?>/s, '');
+        html = html.replace(/<meta property="og:.*?>/gs, '');
+        html = html.replace(/<meta name="twitter:.*?>/gs, '');
+        html = html.replace(/<script type="application\/ld\+json">.*?<\/script>/s, '');
+        html = html.replace('<!-- Canonical URL -->', seoTags);
+        html = html.replace('</body>', `<script>window.INITIAL_MODAL_ID='${doc.id}'; window.INITIAL_MODAL_TYPE='doctor';</script></body>`);
+        
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        return res.end(html);
+      }
+    } catch (e) {
+      console.error('[Doctor SEO Error]', e);
+    }
+  }
+
+  if (urlPath.startsWith('/test/') && req.method === 'GET') {
+    const testId = urlPath.replace('/test/', '').trim();
+    try {
+      const tests = await getDiagnosticTests();
+      const test = tests.find(t => t.id === testId);
+      if (test) {
+        let html = await readFile(resolve(__dirname, 'doctors.html'), 'utf-8');
+        const title = `${test.name} | Diagnostic Tests | Avinya Care Foundation`;
+        const desc = test.description || `Book ${test.name} - ${test.tagline}`;
+        const schema = {
+          "@context": "https://schema.org",
+          "@type": "MedicalTest",
+          "name": test.name,
+          "description": test.description,
+          "url": `${BASE_URL}/test/${test.id}`
+        };
+        const seoTags = `
+          <title>${title}</title>
+          <meta name="description" content="${desc}">
+          <link rel="canonical" href="${BASE_URL}/test/${test.id}">
+          <meta property="og:title" content="${title}">
+          <meta property="og:description" content="${desc}">
+          <meta property="og:url" content="${BASE_URL}/test/${test.id}">
+          <meta property="og:type" content="website">
+          <script type="application/ld+json">${JSON.stringify(schema)}</script>
+        `;
+        html = html.replace(/<title>.*?<\/title>/s, '');
+        html = html.replace(/<meta name="description".*?>/s, '');
+        html = html.replace(/<meta property="og:.*?>/gs, '');
+        html = html.replace(/<meta name="twitter:.*?>/gs, '');
+        html = html.replace(/<script type="application\/ld\+json">.*?<\/script>/s, '');
+        html = html.replace('<!-- Canonical URL -->', seoTags);
+        html = html.replace('</body>', `<script>window.INITIAL_MODAL_ID='${test.id}'; window.INITIAL_MODAL_TYPE='test';</script></body>`);
+        
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        return res.end(html);
+      }
+    } catch (e) {
+      console.error('[Test SEO Error]', e);
+    }
+  }
+
   // Static File Serving
   let targetFile;
   try {
