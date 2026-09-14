@@ -13,7 +13,10 @@ class NewsUI {
     this.service = window.AvinyaNewsService;
     this.allArticles = [];
     this.currentCategory = 'all';
+    this.initialVisibleCount = 7;
+    this.visibleCount = 0;
     this.isExpanded = false;
+    this.isToggling = false;
     this.init();
   }
 
@@ -276,61 +279,152 @@ class NewsUI {
     this.applyCategoryFilter();
   }
 
-  toggleShowMore() {
-    const currentScroll = window.scrollY;
-    
-    // Blur the button to prevent scroll anchoring from following it down
-    if (this.showMoreBtnElem) {
-      this.showMoreBtnElem.blur();
-    }
-    
-    this.isExpanded = !this.isExpanded;
-    this.applyCategoryFilter();
+  toggleShowMore(event) {
+    // This control is not navigation. Keeping this here also protects the
+    // interaction if the newsroom is ever moved inside a form.
+    event?.preventDefault();
 
-    if (!this.isExpanded) {
-      const newsSection = document.getElementById('news');
-      if (newsSection) newsSection.scrollIntoView({ behavior: 'smooth' });
+    if (this.isToggling) return;
+
+    const filtered = this.getFilteredArticles();
+    const collapsedCount = Math.min(this.initialVisibleCount, filtered.length);
+    if (filtered.length <= collapsedCount) return;
+
+    // The action button is the visual anchor. New cards are inserted directly
+    // before it, so preserve its viewport offset only by the measured change.
+    const viewportAnchor = this.captureViewportAnchor(this.showMoreBtnElem);
+    this.isToggling = true;
+    this.updateExpandControl(filtered.length);
+
+    if (this.isExpanded) {
+      this.removeAppendedArticles();
+      this.visibleCount = collapsedCount;
+      this.isExpanded = false;
     } else {
-      // Prevent any native browser jump by restoring absolute scroll position
-      window.scrollTo({
-        top: currentScroll,
-        behavior: 'instant'
-      });
+      const newArticles = filtered.slice(this.visibleCount, filtered.length);
+      this.appendArticles(newArticles);
+      this.visibleCount = filtered.length;
+      this.isExpanded = true;
     }
+
+    this.updateExpandControl(filtered.length);
+    this.restoreViewportAnchor(viewportAnchor, () => {
+      this.isToggling = false;
+      this.updateExpandControl(filtered.length);
+    });
   }
 
   applyCategoryFilter() {
     if (!this.allArticles || this.allArticles.length === 0) return;
 
-    let filtered = this.allArticles;
-    if (this.currentCategory !== 'all') {
-      const cat = this.currentCategory.toLowerCase();
-      filtered = this.allArticles.filter(article => {
-        const articleCat = (article.category || '').toLowerCase();
-        const articleTitle = (article.title || '').toLowerCase();
-        const articleDesc = (article.description || '').toLowerCase();
-        return articleCat.includes(cat) || articleTitle.includes(cat) || articleDesc.includes(cat);
-      });
-    }
-
-    const limit = this.isExpanded ? filtered.length : Math.min(7, filtered.length);
+    const filtered = this.getFilteredArticles();
+    const limit = Math.min(this.initialVisibleCount, filtered.length);
     const visibleArticles = filtered.slice(0, limit);
 
+    this.isExpanded = false;
+    this.visibleCount = limit;
     this.renderArticles(visibleArticles);
+    this.updateExpandControl(filtered.length);
+  }
 
-    if (this.expandBarElem && this.showMoreBtnElem) {
-      if (filtered.length <= 7) {
-        this.expandBarElem.style.display = 'none';
-      } else {
-        this.expandBarElem.style.display = 'flex';
-        const remaining = filtered.length - 7;
-        if (this.isExpanded) {
-          this.showMoreBtnElem.innerHTML = `<span>Show Less Stories ↑</span>`;
-        } else {
-          this.showMoreBtnElem.innerHTML = `<span>Show More News Stories (${remaining} More) ↓</span>`;
-        }
-      }
+  getFilteredArticles() {
+    if (this.currentCategory === 'all') return this.allArticles;
+
+    const category = this.currentCategory.toLowerCase();
+    return this.allArticles.filter(article => {
+      const articleCategory = (article.category || '').toLowerCase();
+      const articleTitle = (article.title || '').toLowerCase();
+      const articleDescription = (article.description || '').toLowerCase();
+      return articleCategory.includes(category)
+        || articleTitle.includes(category)
+        || articleDescription.includes(category);
+    });
+  }
+
+  updateExpandControl(totalArticles) {
+    if (!this.expandBarElem || !this.showMoreBtnElem) return;
+
+    if (totalArticles <= this.initialVisibleCount) {
+      this.expandBarElem.style.display = 'none';
+      return;
     }
+
+    this.expandBarElem.style.display = 'flex';
+    this.showMoreBtnElem.disabled = this.isToggling;
+    this.showMoreBtnElem.setAttribute('aria-busy', String(this.isToggling));
+
+    if (this.isToggling) {
+      this.showMoreBtnElem.innerHTML = '<span>Updating stories…</span>';
+    } else if (this.isExpanded) {
+      this.showMoreBtnElem.innerHTML = '<span>Show Less Stories ↑</span>';
+    } else {
+      const remaining = totalArticles - this.initialVisibleCount;
+      this.showMoreBtnElem.innerHTML = `<span>Show More News Stories (${remaining} More) ↓</span>`;
+    }
+  }
+
+  captureViewportAnchor(element) {
+    if (!element) return null;
+    return { element, top: element.getBoundingClientRect().top };
+  }
+
+  restoreViewportAnchor(anchor, done) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (anchor?.element?.isConnected) {
+          const layoutShift = anchor.element.getBoundingClientRect().top - anchor.top;
+          if (Math.abs(layoutShift) > 1) {
+            const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+            const compensatedScroll = Math.max(0, Math.min(maxScroll, window.scrollY + layoutShift));
+            // This is an offset correction for the insertion/removal above,
+            // never a navigation to the top of the page or news section.
+            window.scrollTo({ top: compensatedScroll, behavior: 'instant' });
+          }
+        }
+        done?.();
+      });
+    });
+  }
+
+  removeAppendedArticles() {
+    this.container?.querySelectorAll('[data-news-appended="true"]').forEach(article => article.remove());
+  }
+
+  appendArticles(articles) {
+    if (!this.container || articles.length === 0) return;
+
+    const fallbackImg = 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80';
+    const html = articles.map(article => {
+      const formattedDate = new Date(article.publishedAt).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric'
+      });
+      const imageUrl = article.urlToImage || fallbackImg;
+      const badge = article.isAIGenerated
+        ? '<span class="ai-generated-badge">✦ AI INSIGHT</span>'
+        : `<span class="live-news-badge">${article.apiProvider || '🌐 GLOBAL HEALTH'}</span>`;
+
+      return `
+        <article class="news-card" data-news-appended="true" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
+          <div class="news-image-box">
+            <span class="news-category-badge" style="position: absolute; top: 1rem; left: 1rem; z-index: 2; background: rgba(10,10,10,0.85); color: white;">${article.category || 'Health'}</span>
+            <img src="${imageUrl}" alt="${article.title}" class="news-image" onerror="this.src='${fallbackImg}'" loading="lazy">
+          </div>
+          <div class="news-content">
+            <div>
+              <div style="margin-bottom: 0.6rem;">${badge}</div>
+              <h3 class="news-card-title">${article.title}</h3>
+              <p class="news-card-desc">${article.description}</p>
+            </div>
+            <div class="news-card-meta">
+              <span class="news-source-name">${article.source} · ${formattedDate}</span>
+              <span class="news-read-more">Read Story →</span>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    this.container.insertAdjacentHTML('beforeend', html);
   }
 
   renderArticles(articles) {

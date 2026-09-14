@@ -481,6 +481,16 @@ button {
   pointer-events: auto;
 }
 
+body.mobile-nav-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body.mobile-nav-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .mobile-nav-brand-header {
   display: flex;
   flex-direction: column;

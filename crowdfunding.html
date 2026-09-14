@@ -94,7 +94,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/styles.css?v=2.8">
+  <link rel="stylesheet" href="css/styles.css?v=2.9">
   <link rel="stylesheet" href="css/crowdfunding.css?v=1.4">
 </head>
 
@@ -139,7 +139,7 @@
 
   <!-- Mobile Navigation Drawer -->
   <div class="mobile-nav-overlay" id="mobile-nav-overlay" style="display: none;">
-    <button class="modal-close-btn" style="top: 2rem; right: 2rem; color: white; background: rgba(255,255,255,0.1);" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none';">✕</button>
+    <button class="modal-close-btn" style="top: 2rem; right: 2rem; color: white; background: rgba(255,255,255,0.1);">✕</button>
     <div class="mobile-nav-brand-header">
       <img src="assets/logo-white.png" alt="Avinya Care Foundation" class="mobile-nav-logo">
       <div class="mobile-nav-title">Avinya Care Foundation</div>
@@ -155,7 +155,7 @@
       <li><a href="index.html#news" class="mobile-nav-link">News</a></li>
     </ul>
     <div style="margin-top: 2.5rem;">
-      <button class="btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;" onclick="document.getElementById('mobile-nav-overlay').classList.remove('active'); document.getElementById('mobile-nav-overlay').style.display='none'; window.AvinyaModals.openDonateModal(1000);">
+      <button class="btn-primary mobile-nav-action" style="padding: 1rem 2.5rem; font-size: 1.1rem;" onclick="window.AvinyaModals.openDonateModal(1000);">
         <span>Donate Now →</span>
       </button>
     </div>
@@ -1200,7 +1200,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="js/services/pdf-service.js?v=2.5"></script>
   <script src="js/modals.js?v=2.7"></script>
-  <script src="js/components/navbar-gsap.js?v=2.4"></script>
+  <script src="js/components/navbar-gsap.js?v=2.5"></script>
 
   <!-- Crowdfunding Interactive Controller -->
   <script src="js/donations-ui.js?v=1.5"></script>

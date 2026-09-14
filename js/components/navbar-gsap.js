@@ -13,48 +13,48 @@ class AvinyaGsapNavbar {
 
     this.isOpen = false;
     this.tl = null;
+    this.focusableElements = this.mobileOverlay.querySelectorAll('.mobile-nav-link, button');
     this.init();
   }
 
   init() {
-    if (typeof gsap === 'undefined') return;
+    this.mobileOverlay.setAttribute('aria-hidden', 'true');
+    this.mobileToggleBtn.setAttribute('aria-controls', this.mobileOverlay.id);
+    this.focusableElements.forEach(element => element.setAttribute('tabindex', '-1'));
 
-    // Ensure initial overlay accessibility setup
-    gsap.set(this.mobileOverlay, { display: 'none', opacity: 0 });
-    const links = this.mobileOverlay.querySelectorAll('.mobile-nav-link, button');
+    // The controller remains functional when the animation library is unavailable.
+    // GSAP only enhances the shared drawer; it must not control its visibility state.
+    if (typeof gsap !== 'undefined') {
+      gsap.set(this.mobileOverlay, { display: 'none', opacity: 0 });
+      this.tl = gsap.timeline({ paused: true });
 
-    // Build Orchestrated GSAP Navigation Timeline
-    this.tl = gsap.timeline({ paused: true });
-
-    // 1. Fade & Blur Backdrop
-    this.tl.to(this.mobileOverlay, {
-      display: 'flex',
-      opacity: 1,
-      duration: 0.3,
-      ease: 'power2.out'
-    }, 0);
-
-    // 2. Animate Mobile Menu Container (Spring Scale Entrance & Snappy Reverse)
-    const menuContainer = this.mobileOverlay.querySelector('.mobile-nav-menu') || this.mobileOverlay;
-    if (menuContainer) {
-      this.tl.from(menuContainer, {
-        autoAlpha: 0,
-        y: -20,
-        scale: 0.92,
-        duration: 0.5,
-        ease: 'back.out(1.7)'
-      }, 0.05);
-    }
-
-    // 3. Staggered Link Item Reveal
-    if (links.length) {
-      this.tl.from(links, {
-        opacity: 0,
-        y: 12,
+      this.tl.to(this.mobileOverlay, {
+        display: 'flex',
+        opacity: 1,
         duration: 0.3,
-        ease: 'power2.out',
-        stagger: 0.04
-      }, 0.12);
+        ease: 'power2.out'
+      }, 0);
+
+      const menuContainer = this.mobileOverlay.querySelector('.mobile-nav-menu') || this.mobileOverlay;
+      if (menuContainer) {
+        this.tl.from(menuContainer, {
+          autoAlpha: 0,
+          y: -20,
+          scale: 0.92,
+          duration: 0.5,
+          ease: 'back.out(1.7)'
+        }, 0.05);
+      }
+
+      if (this.focusableElements.length) {
+        this.tl.from(this.focusableElements, {
+          opacity: 0,
+          y: 12,
+          duration: 0.3,
+          ease: 'power2.out',
+          stagger: 0.04
+        }, 0.12);
+      }
     }
 
     // Event Listeners
@@ -69,6 +69,14 @@ class AvinyaGsapNavbar {
     // Click outside or link click auto-close
     this.mobileOverlay.querySelectorAll('.mobile-nav-link').forEach(link => {
       link.addEventListener('click', () => this.close());
+    });
+
+    this.mobileOverlay.querySelectorAll('.mobile-nav-action').forEach(action => {
+      action.addEventListener('click', () => this.close());
+    });
+
+    this.mobileOverlay.addEventListener('click', (event) => {
+      if (event.target === this.mobileOverlay) this.close();
     });
 
     // Keyboard ESC & Tab Trap Handling
@@ -89,30 +97,42 @@ class AvinyaGsapNavbar {
   }
 
   open() {
-    if (!this.tl) return;
     this.isOpen = true;
     this.mobileToggleBtn.setAttribute('aria-expanded', 'true');
     this.mobileToggleBtn.setAttribute('aria-label', 'Close navigation menu');
-    
-    // Enable focusable elements inside overlay
-    const links = this.mobileOverlay.querySelectorAll('.mobile-nav-link, button');
-    links.forEach(l => l.setAttribute('tabindex', '0'));
+    this.mobileOverlay.setAttribute('aria-hidden', 'false');
+    this.mobileOverlay.classList.add('active');
+    this.mobileOverlay.style.display = 'flex';
+    document.body.classList.add('mobile-nav-open');
+    this.focusableElements.forEach(element => element.setAttribute('tabindex', '0'));
 
-    this.tl.timeScale(1).play();
+    if (this.tl) {
+      this.tl.eventCallback('onReverseComplete', null);
+      this.tl.timeScale(1).play();
+    }
   }
 
   close() {
-    if (!this.tl || !this.isOpen) return;
+    if (!this.isOpen && !this.mobileOverlay.classList.contains('active')) return;
     this.isOpen = false;
     this.mobileToggleBtn.setAttribute('aria-expanded', 'false');
     this.mobileToggleBtn.setAttribute('aria-label', 'Open navigation menu');
+    this.mobileOverlay.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('mobile-nav-open');
+    this.focusableElements.forEach(element => element.setAttribute('tabindex', '-1'));
 
-    // Disable tab index on close
-    const links = this.mobileOverlay.querySelectorAll('.mobile-nav-link');
-    links.forEach(l => l.setAttribute('tabindex', '-1'));
+    const finishClose = () => {
+      if (this.isOpen) return;
+      this.mobileOverlay.classList.remove('active');
+      this.mobileOverlay.style.display = 'none';
+    };
 
-    // Fast 1.4x reverse speed for snappy, non-lingering exit
-    this.tl.timeScale(1.4).reverse();
+    if (this.tl) {
+      this.tl.eventCallback('onReverseComplete', finishClose);
+      this.tl.timeScale(1.4).reverse();
+    } else {
+      finishClose();
+    }
   }
 }
 

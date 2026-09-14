@@ -148,34 +148,13 @@ document.addEventListener('DOMContentLoaded', () => {
           e.preventDefault();
           targetElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-          // Close mobile menu drawer if open
-          const mobileOverlay = document.getElementById('mobile-nav-overlay');
-          if (mobileOverlay) {
-            mobileOverlay.classList.remove('active');
-            mobileOverlay.style.display = 'none';
+          // The shared navbar owns the drawer state and its close animation.
+          if (window.AvinyaNavbarEngine?.close) {
+            window.AvinyaNavbarEngine.close();
           }
         }
       }
     });
   });
 
-  // 5. Mobile Drawer Toggle
-  const mobileToggleBtn = document.querySelector('.mobile-toggle');
-  const mobileOverlay = document.getElementById('mobile-nav-overlay');
-
-  if (mobileToggleBtn && mobileOverlay) {
-    mobileToggleBtn.addEventListener('click', () => {
-      const isOpened = mobileOverlay.classList.toggle('active');
-      mobileOverlay.style.display = isOpened ? 'flex' : 'none';
-      mobileToggleBtn.setAttribute('aria-expanded', isOpened);
-    });
-
-    mobileOverlay.querySelectorAll('.mobile-nav-link').forEach(link => {
-      link.addEventListener('click', () => {
-        mobileOverlay.classList.remove('active');
-        mobileOverlay.style.display = 'none';
-        mobileToggleBtn.setAttribute('aria-expanded', 'false');
-      });
-    });
-  }
 });
