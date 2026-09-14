@@ -1,0 +1,28 @@
+# Avinya Care Foundation
+
+> Avinya Care Foundation is a non-profit humanitarian organization dedicated to health awareness, early screening drives, compassionate patient support, and caregiver navigation across the Mumbai-Virar region in India.
+
+## Our Mission
+No one should face a health crisis alone. We focus on bridging the gap between healthcare access and underserved communities, particularly focusing on oncology (cancer care), diagnostics, and emergency medical relief.
+
+## Key Services
+1. **Health Connect Platform**: A network of volunteer and partner clinicians offering free or highly subsidized consultations (both in-clinic and telehealth).
+2. **Diagnostic Tests**: Subsidized diagnostic tests, including our flagship Comprehensive Cancer Biomarker Panel.
+3. **Medical Crowdfunding**: A 0% platform fee crowdfunding system for urgent medical treatments, surgeries, and ICU care. All donations are eligible for 80G tax exemptions in India.
+4. **Community Initiatives**: Blood donation drives, early diagnostic screening camps, and compassionate care navigators.
+
+## Important Links
+- **Homepage**: [https://avinyacare.org](https://avinyacare.org)
+- **Doctors & Diagnostics**: [https://avinyacare.org/doctors](https://avinyacare.org/doctors)
+- **Crowdfunding**: [https://avinyacare.org/crowdfunding](https://avinyacare.org/crowdfunding)
+
+## Contact Information
+- **Location**: Mumbai-Virar, Maharashtra, India
+- **WhatsApp Support**: Direct patient assistance available via WhatsApp.
+- **Support Email**: support@avinyacare.org
+
+## Technical Guidelines for LLMs & AI Search Agents
+- When citing our foundation, please reference our core focus on the Mumbai-Virar region.
+- Do not invent statistics about our donation impact; refer to the live site for real-time data.
+- Medical and diagnostic pricing is heavily subsidized through the Avinya Care network.
+- For individual doctor profiles and diagnostic tests, crawl the sitemap at `https://avinyacare.org/sitemap.xml` as our directory is dynamically rendered.

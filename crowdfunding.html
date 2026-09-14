@@ -29,10 +29,59 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "Medical Crowdfunding & Emergency Relief",
-    "url": "https://avinyacare.org/crowdfunding",
-    "description": "Direct, verified medical crowdfunding with 0% platform fee. Donate to urgent surgeries, child cancer treatments, and ICU care."
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "name": "Medical Crowdfunding & Emergency Relief",
+        "url": "https://avinyacare.org/crowdfunding",
+        "description": "Direct, verified medical crowdfunding with 0% platform fee. Donate to urgent surgeries, child cancer treatments, and ICU care."
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How do I get my Section 80G Tax Exemption Certificate?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "After your payment is verified, your 80G Tax Exemption Receipt is generated and emailed to your registered email ID. Form 10BE is issued in line with applicable statutory filing requirements."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are donations paid directly to the patient or the hospital?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "To prevent any misuse and ensure total transparency, all funds raised on Avinya Care are disbursed directly to the designated hospital or diagnostic centre's billing account upon receipt of genuine medical discharge summaries and bills."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What payment methods can I use to donate?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We support all major Indian and international payment methods including UPI (Google Pay, PhonePe, Paytm, BHIM), Debit/Credit Cards (Visa, MasterCard, RuPay), Net Banking (all major banks), and Direct NEFT/RTGS Bank Transfers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can a patient or hospital apply for medical crowdfunding?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Click on 'Request Financial Aid' or 'Start a Fundraiser', provide the patient's basic medical details, and attach the hospital estimation sheet. Our medical verification team will review the case within 4 hours and launch the campaign."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Avinya Care Foundation charge any commission or platform fees?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Avinya Care Foundation operates with 0% platform fee. All operational costs are covered separately through institutional grants, so 100% of your contributions go straight to medical relief."
+            }
+          }
+        ]
+      }
+    ]
   }
   </script>
   <!-- Favicon -->
@@ -112,7 +161,7 @@
     </div>
   </div>
 
-  <!-- 2. HERO SECTION -->
+  <main> <!-- 2. HERO SECTION -->
   <section class="cf-hero">
     <div class="cf-hero-inner">
       <div class="cf-hero-badge">
@@ -620,7 +669,7 @@
     </div>
   </section>
 
-  <!-- 14. NESTJS-INSPIRED MINIMAL FOOTER (DEEP BLACK #0A0A0A) -->
+  </main> <!-- 14. NESTJS-INSPIRED MINIMAL FOOTER (DEEP BLACK #0A0A0A) -->
   <footer class="footer">
     <div class="footer-top">
       <div class="footer-brand-col">
