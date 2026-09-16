@@ -1,0 +1,18 @@
+[
+  {
+    "id": "provider-1",
+    "name": "Avinya Central Diagnostics & Pathology",
+    "email": "lab.mumbai@avinyacarefoundation.org",
+    "phone": "+91 98765 43210",
+    "city": "Mumbai",
+    "address": "Avinya Center, Bandra West, Mumbai 400050"
+  },
+  {
+    "id": "provider-2",
+    "name": "Metropolis Cancer Diagnostics & Advanced Imaging",
+    "email": "lab.delhi@metropolis.in",
+    "phone": "+91 11 2692 5858",
+    "city": "New Delhi",
+    "address": "A-23, Hauz Khas Enclave, New Delhi 110016"
+  }
+]

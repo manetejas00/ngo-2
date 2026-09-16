@@ -1,0 +1,44 @@
+[
+  {
+    "id": "tmh-mumbai",
+    "name": "Tata Memorial Hospital & Cancer Center",
+    "city": "Mumbai",
+    "address": "Dr. E Borges Road, Parel, Mumbai, Maharashtra 400012",
+    "phone": "+91 22 2417 7000"
+  },
+  {
+    "id": "apollo-delhi",
+    "name": "Indraprastha Apollo Hospitals",
+    "city": "New Delhi",
+    "address": "Sarita Vihar, Delhi Mathura Road, New Delhi 110076",
+    "phone": "+91 11 2692 5858"
+  },
+  {
+    "id": "max-saket",
+    "name": "Max Super Speciality Hospital",
+    "city": "New Delhi",
+    "address": "1, 2, Press Enclave Marg, Saket, New Delhi 110017",
+    "phone": "+91 11 2651 5050"
+  },
+  {
+    "id": "fortis-gurugram",
+    "name": "Fortis Memorial Research Institute",
+    "city": "Gurugram",
+    "address": "Sector 44, Opposite HUDA City Centre, Gurugram, Haryana 122002",
+    "phone": "+91 124 496 2200"
+  },
+  {
+    "id": "manipal-bengaluru",
+    "name": "Manipal Comprehensive Cancer Center",
+    "city": "Bengaluru",
+    "address": "98, HAL Old Airport Rd, Kodihalli, Bengaluru, Karnataka 560017",
+    "phone": "+91 80 2502 4444"
+  },
+  {
+    "id": "avinya-clinic-mumbai",
+    "name": "Avinya Care Community Health & Screening Clinic",
+    "city": "Mumbai",
+    "address": "Avinya Care Pavilion, Linking Road, Bandra West, Mumbai 400050",
+    "phone": "+91 98765 43210"
+  }
+]

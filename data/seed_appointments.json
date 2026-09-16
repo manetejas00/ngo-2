@@ -1,0 +1,104 @@
+[
+  {
+    "id": "AVC-APT-2026-000101",
+    "doctorId": "doc-1",
+    "doctorName": "Dr. Priya Sharma",
+    "doctorSpeciality": "Medical Oncology & Cancer Immunotherapy",
+    "doctorHospital": "Tata Memorial Hospital & Cancer Center, Mumbai",
+    "doctorFee": 0,
+    "patientName": "Ramesh Sundaram",
+    "patientPhone": "+91 98201 12345",
+    "patientEmail": "ramesh.sundaram@example.com",
+    "patientAge": 58,
+    "patientGender": "Male",
+    "consultationType": "in-clinic",
+    "location": "Avinya Care Pavilion, Linking Road, Bandra West, Mumbai",
+    "date": "2026-08-20",
+    "time": "10:30 AM",
+    "reason": "Follow-up consultation after PET-CT scan review & immune nutrition advice",
+    "notes": "Patient brings previous pathology reports from TMH.",
+    "status": "confirmed",
+    "history": [
+      {
+        "status": "pending",
+        "timestamp": "2026-08-19 09:15:00 IST",
+        "updatedBy": "Patient",
+        "notes": "Online booking via Avinya platform"
+      },
+      {
+        "status": "confirmed",
+        "timestamp": "2026-08-19 09:30:00 IST",
+        "updatedBy": "Avinya Coordinator",
+        "notes": "Slot confirmed with Dr. Priya Sharma"
+      }
+    ],
+    "createdAt": "2026-08-19T09:15:00.000Z",
+    "updatedAt": "2026-08-19T09:30:00.000Z"
+  },
+  {
+    "id": "AVC-APT-2026-000102",
+    "doctorId": "doc-2",
+    "doctorName": "Dr. Rajesh K. Varma",
+    "doctorSpeciality": "Interventional Cardiology & Preventive Heart Care",
+    "doctorHospital": "Indraprastha Apollo Hospitals, New Delhi",
+    "doctorFee": 1200,
+    "patientName": "Sunita Mehra",
+    "patientPhone": "+91 98112 54321",
+    "patientEmail": "sunita.mehra@example.com",
+    "patientAge": 52,
+    "patientGender": "Female",
+    "consultationType": "online",
+    "location": "Encrypted Telehealth Video Room (Avinya Health Connect)",
+    "date": "2026-08-20",
+    "time": "02:30 PM",
+    "reason": "Cardio-oncology clearance before targeted therapy regimen",
+    "notes": "Echocardiogram done last week showing EF 60%.",
+    "status": "confirmed",
+    "history": [
+      {
+        "status": "confirmed",
+        "timestamp": "2026-08-19 11:20:00 IST",
+        "updatedBy": "System",
+        "notes": "Automated instant confirmation"
+      }
+    ],
+    "createdAt": "2026-08-19T11:20:00.000Z",
+    "updatedAt": "2026-08-19T11:20:00.000Z"
+  },
+  {
+    "id": "AVC-APT-2026-000103",
+    "doctorId": "doc-5",
+    "doctorName": "Dr. Meera Nambiar",
+    "doctorSpeciality": "Internal Medicine & Preventive Health",
+    "doctorHospital": "Avinya Care Community Clinic, Mumbai",
+    "doctorFee": 0,
+    "patientName": "Devendra Patil",
+    "patientPhone": "+91 97654 32109",
+    "patientEmail": "devendra.patil@example.com",
+    "patientAge": 64,
+    "patientGender": "Male",
+    "consultationType": "in-clinic",
+    "location": "Avinya Care Pavilion, Linking Road, Bandra West, Mumbai",
+    "date": "2026-08-19",
+    "time": "04:00 PM",
+    "reason": "Early screening evaluation for persistent fatigue and unintentional weight loss",
+    "notes": "Elderly patient with son accompanying.",
+    "status": "completed",
+    "history": [
+      {
+        "status": "confirmed",
+        "timestamp": "2026-08-18 14:00:00 IST",
+        "updatedBy": "Patient",
+        "notes": "Booked"
+      },
+      {
+        "status": "completed",
+        "timestamp": "2026-08-19 16:30:00 IST",
+        "updatedBy": "Dr. Meera Nambiar",
+        "notes": "Consultation concluded. Prescribed full biomarker panel."
+      }
+    ],
+    "createdAt": "2026-08-18T14:00:00.000Z",
+    "updatedAt": "2026-08-19T16:30:00.000Z"
+  }
+]

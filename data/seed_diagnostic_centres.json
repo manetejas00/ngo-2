@@ -1,0 +1,34 @@
+[
+  {
+    "id": "diag-centre-mumbai",
+    "name": "Avinya Diagnostic & Pathology Hub",
+    "city": "Mumbai",
+    "address": "Avinya Center, Bandra West, Mumbai 400050",
+    "homeCollectionAvailable": true,
+    "phone": "+91 98765 43210"
+  },
+  {
+    "id": "diag-centre-delhi",
+    "name": "SRL Diagnostics & Avinya Referral Lab",
+    "city": "New Delhi",
+    "address": "A-23, Hauz Khas Enclave, New Delhi 110016",
+    "homeCollectionAvailable": true,
+    "phone": "+91 11 4188 9000"
+  },
+  {
+    "id": "diag-centre-bengaluru",
+    "name": "Apollo Diagnostics Partner Hub",
+    "city": "Bengaluru",
+    "address": "80 Feet Road, 4th Block, Koramangala, Bengaluru 560034",
+    "homeCollectionAvailable": true,
+    "phone": "+91 80 4668 8000"
+  },
+  {
+    "id": "diag-centre-pune",
+    "name": "Metropolis Healthcare & Avinya Outreach Lab",
+    "city": "Pune",
+    "address": "Fergusson College Road, Shivajinagar, Pune 411004",
+    "homeCollectionAvailable": true,
+    "phone": "+91 20 6609 5000"
+  }
+]

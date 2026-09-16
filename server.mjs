@@ -215,78 +215,12 @@ function deduplicateArticles(articles) {
 }
 
 // Smart AI Topic Synthesizer & Pool (10 Groundbreaking Medical Research Stories)
-const AI_NEWS_TOPICS_POOL = [
-  {
-    id: "gemini-ai-genomics-screening",
-    title: "AI-Powered Genomic Screening Identifies High-Risk Breast Cancer Biomarkers 3 Years Earlier",
-    description: "Multi-center clinical trials utilizing machine learning predictive models reveal microscopic cellular mutations years before physical mammogram detection, enabling targeted preventive interventions.",
-    category: "Cancer Research",
-    image: "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "gemini-ai-rural-mobile-screening",
-    title: "Mobile AI Diagnostic Vans Expand Early Oral & Cervical Screening Across Maharashtra",
-    description: "Avinya Care Foundation and regional health networks deploy solar-powered diagnostic vans equipped with portable colposcopy and AI-assisted oral visual examination tools for underserved rural communities.",
-    category: "Early Detection",
-    image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "gemini-ai-cart-immunotherapy",
-    title: "Next-Generation CAR-T Cell Immunotherapy Achieves Complete Remission in Refractory Lymphoma Trials",
-    description: "Indigenous cellular engineering and targeted T-cell receptors demonstrate unprecedented success rates in halting aggressive hematologic malignancies while minimizing systemic toxicity.",
-    category: "Treatment",
-    image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "gemini-ai-liquid-biopsy-mcda",
-    title: "Liquid Biopsy Multi-Cancer Early Detection Blood Panels Approved for Clinical Pilot Studies",
-    description: "High-throughput sequencing analyzing cell-free circulating tumor DNA (ctDNA) achieves over 92% specificity across 12 common solid cancer types before physical symptoms emerge.",
-    category: "Early Detection",
-    image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "gemini-ai-integrative-nutrition",
-    title: "Structured Anti-Inflammatory Nutrition & Mindfulness Protocol Reduces Chemotherapy Fatigue by 40%",
-    description: "Clinical studies across tertiary oncology centers highlight that personalized plant-based anti-inflammatory nutrition paired with supervised light exercise significantly accelerates post-chemotherapy recovery.",
-    category: "Care",
-    image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "gemini-ai-crispr-nanoparticles",
-    title: "CRISPR-Guided Nanoparticles Deliver Precision Chemotherapy Directly into Solid Tumors",
-    description: "Bioengineered lipid nanoparticles navigate bloodstream barriers to deliver targeted cytotoxic payloads exclusively into tumor microenvironments, sparing healthy surrounding tissues.",
-    category: "Cancer Research",
-    image: "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "gemini-ai-caregiver-navigation",
-    title: "Grassroots Caregiver Navigation Network Drastically Shortens Time-to-Treatment in Mumbai–Virar",
-    description: "Community caregiver navigators guide newly diagnosed patients through biopsy confirmation, government financial schemes, and specialist appointments within 10 days of first consultation.",
-    category: "Care",
-    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "gemini-ai-hpv-vaccination-protocol",
-    title: "National Cervical Cancer Elimination Drive Introduces Single-Dose HPV Vaccination Protocol",
-    description: "Public health authorities and partner clinics adopt streamlined single-dose immunization schedules for adolescent girls, establishing robust lifelong immunity against high-risk oncogenic HPV strains.",
-    category: "Prevention",
-    image: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "gemini-ai-ultrasound-triaging",
-    title: "AI-Enhanced Ultrasound Triaging Identifies Suspicious Breast Masses with 98% Clinical Concordance",
-    description: "Point-of-care ultrasound devices integrated with real-time deep learning neural networks assist primary care physicians in differentiating benign cysts from malignant lesions instantly.",
-    category: "Early Detection",
-    image: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "gemini-ai-tele-palliative-clinics",
-    title: "Digital Palliative & Tele-Oncology Clinics Connect Homebound Patients with Oncology Specialists",
-    description: "24/7 tele-oncology support platforms provide symptom management, dosage adjustments, and psychosocial counseling directly into patients' living rooms across Maharashtra.",
-    category: "Care",
-    image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80"
-  }
-];
+let AI_NEWS_TOPICS_POOL = [];
+try {
+  AI_NEWS_TOPICS_POOL = JSON.parse(await readFile(join(process.cwd(), 'data', 'aiNewsTopics.json'), 'utf-8'));
+} catch (e) {
+  console.error("Failed to load AI_NEWS_TOPICS_POOL", e.message);
+}
 
 function generateGeminiNewsTopicFromPool(index = null, now = Date.now()) {
   const item = index !== null && AI_NEWS_TOPICS_POOL[index] 

@@ -1,0 +1,61 @@
+[
+  {
+    "id": "AVC-TST-2026-000051",
+    "testId": "test-1",
+    "providerId": "provider-1",
+    "testName": "Comprehensive Cancer Biomarker Panel",
+    "price": 3499,
+    "collectionMethod": "home_collection",
+    "homeAddress": "Flat 402, Sea Breeze Apts, Bandra West",
+    "pincode": "400050",
+    "city": "Mumbai",
+    "centreName": "Avinya Diagnostic & Pathology Hub, Mumbai",
+    "date": "2026-08-21",
+    "timeSlot": "08:00 AM - 09:00 AM",
+    "patientName": "Kavita Chawla",
+    "patientPhone": "+91 98200 98765",
+    "patientEmail": "kavita.chawla@example.com",
+    "patientAge": 46,
+    "patientGender": "Female",
+    "status": "confirmed",
+    "history": [
+      {
+        "status": "confirmed",
+        "timestamp": "2026-08-19 10:00:00 IST",
+        "updatedBy": "System"
+      }
+    ],
+    "createdAt": "2026-08-19T10:00:00.000Z"
+  },
+  {
+    "id": "AVC-TST-2026-000052",
+    "testId": "test-2",
+    "providerId": "provider-1",
+    "testName": "Avinya Whole Body Oncology & Metabolic Shield",
+    "price": 4299,
+    "collectionMethod": "centre_visit",
+    "centreName": "SRL Diagnostics & Avinya Referral Lab, New Delhi",
+    "centreAddress": "A-23, Hauz Khas Enclave, New Delhi 110016",
+    "date": "2026-08-22",
+    "timeSlot": "09:30 AM - 10:30 AM",
+    "patientName": "Anil Kapoor",
+    "patientPhone": "+91 98111 22334",
+    "patientEmail": "anil.kapoor@example.com",
+    "patientAge": 55,
+    "patientGender": "Male",
+    "status": "sample_collected",
+    "history": [
+      {
+        "status": "confirmed",
+        "timestamp": "2026-08-18 16:20:00 IST",
+        "updatedBy": "System"
+      },
+      {
+        "status": "sample_collected",
+        "timestamp": "2026-08-19 10:15:00 IST",
+        "updatedBy": "Diagnostic Center"
+      }
+    ],
+    "createdAt": "2026-08-18T16:20:00.000Z"
+  }
+]
