@@ -1,0 +1,62 @@
+  <!-- 1. MINIMAL FLOATING DOCK NAVIGATION (NESTJS STYLE) -->
+  <header class="navbar-wrapper">
+    <nav class="navbar scrolled-dark" aria-label="Main Navigation">
+      <a href="/index.html#hero" class="nav-brand" aria-label="Avinya Care Foundation Home">
+        <img src="/assets/logo-emblem.png" alt="Avinya Care Foundation Logo" class="brand-logo-img">
+        <div class="brand-text">
+          <span class="brand-name">Avinya Care</span>
+          <span class="brand-tag">Foundation</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="/index.html#hero" class="nav-link">About</a></li>
+        <li><a href="/index.html#what-we-do" class="nav-link">What We Do</a></li>
+        <li><a href="/doctors.html" class="nav-link nav-link-healthcare" id="nav-doctors-tests">Doctors & Tests</a></li>
+        <li><a href="/crowdfunding.html" class="nav-link">Crowdfunding</a></li>
+        <li><a href="/index.html#stories" class="nav-link">Stories</a></li>
+        <li><a href="/index.html#impact" class="nav-link">Impact</a></li>
+        <li><a href="/index.html#news" class="nav-link">News</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="btn-primary" onclick="window.AvinyaModals && window.AvinyaModals.openDonateModal(1000)">
+          <span>Make a Difference</span>
+          <span class="arrow">→</span>
+        </button>
+        <button class="mobile-toggle" aria-label="Toggle Mobile Navigation" aria-expanded="false">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Fullscreen Mobile Navigation Drawer -->
+  <div class="mobile-nav-overlay" id="mobile-nav-overlay" style="display: none;">
+    <button class="modal-close-btn" style="top: 2rem; right: 2rem; color: white; background: rgba(255,255,255,0.1);">✕</button>
+    <div class="mobile-nav-brand-header">
+      <img src="/assets/logo-white.png" alt="Avinya Care Foundation" class="mobile-nav-logo">
+      <div class="mobile-nav-title">Avinya Care Foundation</div>
+      <div class="mobile-nav-tagline">No one should face a health crisis alone</div>
+    </div>
+    <ul class="mobile-nav-menu">
+      <li><a href="/index.html#hero" class="mobile-nav-link">About</a></li>
+      <li><a href="/index.html#what-we-do" class="mobile-nav-link">What We Do</a></li>
+      <li><a href="/doctors.html" class="mobile-nav-link" style="color: var(--brand); font-weight: 700;">Doctors & Tests</a></li>
+      <li><a href="/crowdfunding.html" class="mobile-nav-link">Crowdfunding</a></li>
+      <li><a href="/index.html#stories" class="mobile-nav-link">Stories</a></li>
+      <li><a href="/index.html#impact" class="mobile-nav-link">Impact</a></li>
+      <li><a href="/index.html#news" class="mobile-nav-link">News</a></li>
+    </ul>
+    <div style="margin-top: 2.5rem;">
+      <button class="btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;"
+        onclick="window.AvinyaNavbarEngine && window.AvinyaNavbarEngine.close(); window.AvinyaModals && window.AvinyaModals.openDonateModal(1000);">
+        <span>Make a Difference</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>

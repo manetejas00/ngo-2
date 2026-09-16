@@ -2382,7 +2382,24 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
 
     const ext = extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-    const content = await readFile(filePath);
+    let content = await readFile(filePath);
+
+    if (ext === '.html') {
+      try {
+        let contentStr = content.toString('utf-8');
+        if (contentStr.includes('<!-- REUSABLE_NAVBAR -->')) {
+          const navbar = await readFile(join(__dirname, 'components', 'navbar.html'), 'utf-8');
+          contentStr = contentStr.replace('<!-- REUSABLE_NAVBAR -->', navbar);
+        }
+        if (contentStr.includes('<!-- REUSABLE_FOOTER -->')) {
+          const footer = await readFile(join(__dirname, 'components', 'footer.html'), 'utf-8');
+          contentStr = contentStr.replace('<!-- REUSABLE_FOOTER -->', footer);
+        }
+        content = Buffer.from(contentStr, 'utf-8');
+      } catch (err) {
+        console.warn('[SSI Warning]', err.message);
+      }
+    }
 
     res.writeHead(200, {
       'Content-Type': contentType,

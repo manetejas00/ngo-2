@@ -1,65 +1,65 @@
 {
-  "timestamp": 1789397303831,
+  "timestamp": 1789535400386,
   "articles": [
     {
-      "id": "gemini-ai-topic-1789397305084-2-swdt",
-      "title": "CRISPR-Guided Nanoparticles Deliver Precision Chemotherapy Directly into Solid Tumors",
-      "description": "Bioengineered lipid nanoparticles navigate bloodstream barriers to deliver targeted cytotoxic payloads exclusively into tumor microenvironments, sparing healthy surrounding tissues.",
-      "category": "Cancer Research",
-      "source": "Gemini AI Medical Engine",
-      "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-14T14:18:25.084Z",
-      "isAIGenerated": true,
-      "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      "id": "gemini-ai-topic-1789397305084-3-q56t",
+      "id": "gemini-ai-topic-1789535401882-2-j4nt",
       "title": "AI-Powered Genomic Screening Identifies High-Risk Breast Cancer Biomarkers 3 Years Earlier",
       "description": "Multi-center clinical trials utilizing machine learning predictive models reveal microscopic cellular mutations years before physical mammogram detection, enabling targeted preventive interventions.",
       "category": "Cancer Research",
       "source": "Gemini AI Medical Engine",
       "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-14T13:48:25.084Z",
+      "publishedAt": "2026-09-16T04:40:01.882Z",
       "isAIGenerated": true,
       "url": "#",
       "urlToImage": "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
     },
     {
-      "id": "gemini-ai-topic-1789397305084-4-1ibf",
-      "title": "Grassroots Caregiver Navigation Network Drastically Shortens Time-to-Treatment in Mumbai–Virar",
-      "description": "Community caregiver navigators guide newly diagnosed patients through biopsy confirmation, government financial schemes, and specialist appointments within 10 days of first consultation.",
-      "category": "Care",
+      "id": "gemini-ai-topic-1789535401882-3-4a3s",
+      "title": "Mobile AI Diagnostic Vans Expand Early Oral & Cervical Screening Across Maharashtra",
+      "description": "Avinya Care Foundation and regional health networks deploy solar-powered diagnostic vans equipped with portable colposcopy and AI-assisted oral visual examination tools for underserved rural communities.",
+      "category": "Early Detection",
       "source": "Gemini AI Medical Engine",
       "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-14T13:18:25.084Z",
+      "publishedAt": "2026-09-16T04:10:01.882Z",
       "isAIGenerated": true,
       "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
+      "urlToImage": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80"
     },
     {
-      "id": "gemini-ai-topic-1789397305084-5-2uyy",
+      "id": "gemini-ai-topic-1789535401882-4-mo6m",
+      "title": "CRISPR-Guided Nanoparticles Deliver Precision Chemotherapy Directly into Solid Tumors",
+      "description": "Bioengineered lipid nanoparticles navigate bloodstream barriers to deliver targeted cytotoxic payloads exclusively into tumor microenvironments, sparing healthy surrounding tissues.",
+      "category": "Cancer Research",
+      "source": "Gemini AI Medical Engine",
+      "apiProvider": "Gemini AI Engine",
+      "publishedAt": "2026-09-16T03:40:01.882Z",
+      "isAIGenerated": true,
+      "url": "#",
+      "urlToImage": "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": "gemini-ai-topic-1789535401882-5-f8qg",
       "title": "Next-Generation CAR-T Cell Immunotherapy Achieves Complete Remission in Refractory Lymphoma Trials",
       "description": "Indigenous cellular engineering and targeted T-cell receptors demonstrate unprecedented success rates in halting aggressive hematologic malignancies while minimizing systemic toxicity.",
       "category": "Treatment",
       "source": "Gemini AI Medical Engine",
       "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-14T12:48:25.084Z",
+      "publishedAt": "2026-09-16T03:10:01.882Z",
       "isAIGenerated": true,
       "url": "#",
       "urlToImage": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80"
     },
     {
-      "id": "gemini-ai-topic-1789397305084-1-b1lr",
-      "title": "Structured Anti-Inflammatory Nutrition & Mindfulness Protocol Reduces Chemotherapy Fatigue by 40%",
-      "description": "Clinical studies across tertiary oncology centers highlight that personalized plant-based anti-inflammatory nutrition paired with supervised light exercise significantly accelerates post-chemotherapy recovery.",
-      "category": "Care",
+      "id": "gemini-ai-topic-1789535401882-1-cf4b",
+      "title": "National Cervical Cancer Elimination Drive Introduces Single-Dose HPV Vaccination Protocol",
+      "description": "Public health authorities and partner clinics adopt streamlined single-dose immunization schedules for adolescent girls, establishing robust lifelong immunity against high-risk oncogenic HPV strains.",
+      "category": "Prevention",
       "source": "Gemini AI Medical Engine",
       "apiProvider": "Gemini AI Engine",
-      "publishedAt": "2026-09-14T14:48:25.084Z",
+      "publishedAt": "2026-09-16T05:10:01.882Z",
       "isAIGenerated": true,
       "url": "#",
-      "urlToImage": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80"
+      "urlToImage": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80"
     },
     {
       "id": "cancer-news-1",
@@ -67,7 +67,7 @@
       "description": "New clinical research demonstrates how targeted immunotherapy approaches can significantly enhance survival outcomes and minimize side effects for early-stage oncology patients.",
       "category": "Cancer Research",
       "source": "National Cancer Institute",
-      "publishedAt": "2026-09-14T12:48:22.814Z",
+      "publishedAt": "2026-09-16T03:09:08.259Z",
       "url": "https://www.cancer.gov/news-events",
       "urlToImage": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
@@ -78,7 +78,7 @@
       "description": "Community health initiatives and mobile diagnostic clinics reach underserved populations, empowering individuals to take proactive steps in routine breast and colorectal screenings.",
       "category": "Awareness & Detection",
       "source": "World Health Organization",
-      "publishedAt": "2026-09-14T09:48:22.820Z",
+      "publishedAt": "2026-09-16T00:09:08.260Z",
       "url": "https://www.who.int/health-topics/cancer",
       "urlToImage": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
@@ -89,7 +89,7 @@
       "description": "Liquid biopsy technology shows high accuracy in detecting circulating tumor DNA across multiple cancer types, offering hope for earlier clinical diagnosis.",
       "category": "Early Detection",
       "source": "American Cancer Society",
-      "publishedAt": "2026-09-14T00:48:22.820Z",
+      "publishedAt": "2026-09-15T15:09:08.260Z",
       "url": "https://www.cancer.org/research",
       "urlToImage": "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
@@ -100,7 +100,7 @@
       "description": "Integrative health guidelines emphasize tailored physical activity and clinical nutrition plans to enhance energy levels and reduce recurrence risk post-treatment.",
       "category": "Survivorship",
       "source": "Harvard Health Publishing",
-      "publishedAt": "2026-09-13T14:48:22.820Z",
+      "publishedAt": "2026-09-15T05:09:08.260Z",
       "url": "https://www.health.harvard.edu",
       "urlToImage": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
@@ -111,13 +111,25 @@
       "description": "Non-profit partnerships deploy portable ultrasound and digital mammography units to ensure geographic location does not limit life-saving early detection.",
       "category": "Healthcare Policy",
       "source": "Global Health Journal",
-      "publishedAt": "2026-09-13T08:48:22.820Z",
+      "publishedAt": "2026-09-14T23:09:08.260Z",
       "url": "https://www.sciencedirect.com/journal/global-health-journal",
       "urlToImage": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80",
       "apiProvider": "Verified Oncology Journal"
     },
     {
-      "id": "api-news-ma3v8-2",
+      "id": "api-news-uuaf2-1",
+      "title": "Research for Space Manufacturing, Crew Health Begins Week Aboard Station",
+      "description": "Lead-free soldering, space science hardware, and human research were the main science focus aboard the International Space Station on Monday. The Expedition 75 crew members also programmed automated Earth photography gear and serviced a variety of life support hardware aboard the orbital outpost.",
+      "category": "Global Health",
+      "source": "🌐 Global Healthcare Media",
+      "apiProvider": "🌐 Global Healthcare Media",
+      "publishedAt": "2026-09-14T18:57:21Z",
+      "url": "https://www.nasa.gov/blogs/spacestation/2026/09/14/research-for-space-manufacturing-crew-health-begins-week-aboard-station/",
+      "urlToImage": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80",
+      "isAIGenerated": false
+    },
+    {
+      "id": "api-news-1wvxn-4",
       "title": "Crew Studies Medicine and Physics, Works on Spacesuits and Earth Photo Gear",
       "description": "Vein scans, ultra-hot physics, and Earth observations were the main research activities aboard the International Space Station on Wednesday. The Expedition 75 crew members rounded out their mid-week shift and swapped out spacesuit components and serviced life support gear.",
       "category": "Global Health",
@@ -129,7 +141,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-m0zty-3",
+      "id": "api-news-7bsrc-5",
       "title": "Astronaut Health, Lunar and Earth Photography Fill Crew’s Research Schedule",
       "description": "Exploring astronaut health and photographing the Moon and Earth topped the research schedule for the Expedition 75 crew aboard the International Space Station on Tuesday. The orbital residents also kept up life support maintenance following the departure of cargo spacecraft the day before.",
       "category": "Global Health",
@@ -141,7 +153,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-0k9nl-0",
+      "id": "api-news-gt262-0",
       "title": "Long Covid More Severe In Women Than Men, Suggests Study",
       "description": "The study found that 91% of patients, who were followed up for five months on average, continued to experience Covid-19 symptoms. Breathlessness was the most common symptom of long Covid-19, followed by fatigue",
       "category": "Global Health",
@@ -153,7 +165,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-xe3pn-2",
+      "id": "api-news-qcvpm-2",
       "title": "Why We Can't 'Boost' Our Way Out of the COVID-19 Pandemic in the Long Term – The Wire Science",
       "description": "While current vaccines are effective at preventing severe disease, the next phase of vaccine development will need to focus on triggering long-lived antibody response.",
       "category": "Global Health",
@@ -165,7 +177,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-g9djg-3",
+      "id": "api-news-ruh8g-3",
       "title": "Let's manage pain, learn about 'Pain Medicine'",
       "description": "Pain Medicine is a relatively new medical specialty that deals with the comprehensive management of chronic pain. Chronic pain refers to any pain condition that lasts more than 3 months.",
       "category": "Global Health",
@@ -177,7 +189,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-a8t9d-5",
+      "id": "api-news-0kw8i-5",
       "title": "Good HDL cholesterol may keep Alzheimer's away: study",
       "description": "Having good cholesterol or high-density lipoprotein (HDL) in the body is essential to health as it may protect the brain and keep Alzheimer's disease at bay, according to a recent study. Researchers from University of Southern California's (USC) Keck School o…",
       "category": "Global Health",
@@ -189,7 +201,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-71lwx-6",
+      "id": "api-news-96o1l-6",
       "title": "CDC confirms 4 Americans got Coronavirus from Mink; here is all you need to know about the first animal-to-human transmission of COVID virus",
       "description": "The US health agency recently revealed that a variant of COVID witnessed majorly in mink in 2020 had infected at least four Americans.",
       "category": "Global Health",
@@ -201,7 +213,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-h8zz0-1",
+      "id": "api-news-yjxdu-1",
       "title": "Study evaluates the use of a diagnostic code for Long COVID",
       "description": "Researchers evaluated the use of U09.9, a CD-10-CM code described as 'Post coronavirus disease 2019 (COVID-19) condition, unspecified' for post-acute COVID-19 sequelae (long COVID).",
       "category": "Global Health",
@@ -213,7 +225,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-zvnnw-8",
+      "id": "api-news-xr634-8",
       "title": "Johns Hopkins University: Mediterranean-Style Diet Further Linked to Reduced Risk of Preeclampsia in Pregnant Women of All Races",
       "description": "A new Johns Hopkins Medicine study that surveyed a racially diverse group of more than 8,000 women has added to evidence that following a Mediterranean-style diet could lower the risk of preeclampsia by at least 20%.Preeclampsia is a potentially leth",
       "category": "Prevention",
@@ -225,7 +237,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-5a83w-9",
+      "id": "api-news-o18so-9",
       "title": "Johns Hopkins University: Lab Grown, Self-Sustainable Muscle Cells Repair Muscle Injury and Disease, Mouse Study Shows",
       "description": "In proof-of-concept experiments, Johns Hopkins Medicine scientists say they have successfully cultivated human muscle stem cells capable of renewing themselves and repairing muscle tissue damage in mice, potentially advancing efforts to treat muscle",
       "category": "Global Health",
@@ -237,7 +249,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-y6ztr-11",
+      "id": "api-news-8dkpa-11",
       "title": "Bacteria in urine may signal aggressive prostate cancer: Study",
       "description": "Researchers in the UK have identified five types of bacteria in urine which may be linked to aggressive prostate cancer. The findings, published in the journal European Urology Oncology, could help pave the way for treatments that could target these particula…",
       "category": "Cancer Research",
@@ -249,7 +261,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-o57tf-12",
+      "id": "api-news-af2gg-12",
       "title": "Genetically modified mosquitoes for controlling vector-borne diseases? Successful trial gives hope",
       "description": "The findings were achieved after a decade of fight for public acceptance, regulatory approvals",
       "category": "Global Health",
@@ -261,7 +273,7 @@
       "isAIGenerated": false
     },
     {
-      "id": "api-news-pchrh-4",
+      "id": "api-news-10xis-4",
       "title": "newsGP",
       "description": "People using antidepressants to treat depression have similar outcomes to those who do not, new research suggests.",
       "category": "Global Health",
@@ -270,18 +282,6 @@
       "publishedAt": "2022-04-21T06:57:37Z",
       "url": "https://www1.racgp.org.au/newsgp/clinical/study-questions-antidepressant-impact-on-quality-o",
       "urlToImage": "https://www1.racgp.org.au/getattachment/f4578d37-7066-46db-b8a6-2d9803dfe628/Study-questions-antidepressant-impact-on-quality-o.aspx",
-      "isAIGenerated": false
-    },
-    {
-      "id": "api-news-lnyi8-15",
-      "title": "Intermittent fasting is not for all, experts list health problems that could worsen on this diet",
-      "description": "Intermittent fasting decreases glucose concentration and increases fatty acid oxidation which helps the body break down stored fats.",
-      "category": "Prevention",
-      "source": "Zoom",
-      "apiProvider": "🇮🇳 India Health Desk",
-      "publishedAt": "2022-04-21T06:50:00Z",
-      "url": "https://www.timesnownews.com/health/intermittent-fasting-is-not-for-all-experts-list-health-problems-that-could-worsen-on-this-diet-article-90974386",
-      "urlToImage": "https://static.tnn.in/thumb/msid-90974386,imgsize-100,width-1280,height-720,resizemode-75/90974386.jpg",
       "isAIGenerated": false
     }
   ]
