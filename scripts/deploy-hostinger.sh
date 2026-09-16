@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+set -Eeu
 
 export PATH="$HOME/.node/bin:$PATH"
 
@@ -50,7 +50,7 @@ scp_options=(-P "$HOSTINGER_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=
 scp "${scp_options[@]}" "$archive" "$ssh_target:$remote_archive"
 
 ssh "${ssh_options[@]}" "$ssh_target" bash -s -- "$DEPLOY_TARGET" "$remote_archive" "$release_id" <<'REMOTE_DEPLOY'
-set -Eeuo pipefail
+set -Eeu
 target="$1"
 archive="$2"
 release="$3"
@@ -92,7 +92,7 @@ REMOTE_DEPLOY
 if ! node scripts/live-smoke.mjs "$DEPLOY_URL"; then
   echo "Post-deploy smoke test failed; rolling back $environment." >&2
   ssh "${ssh_options[@]}" "$ssh_target" bash -s -- "$DEPLOY_TARGET" <<'REMOTE_ROLLBACK'
-set -Eeuo pipefail
+set -Eeu
 target="$1"
 backup="${target}.rollback"
 [[ -d "$backup" ]] || { echo "Rollback backup is missing." >&2; exit 1; }
