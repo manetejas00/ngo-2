@@ -1883,12 +1883,14 @@
 
   .hc-card-actions {
     display: flex;
-    gap: 0.5rem;
+    flex-direction: column;
+    gap: 0.85rem;
     width: 100%;
   }
 
   .hc-card-actions button {
-    flex: 1;
+    width: 100%;
+    flex: none;
     justify-content: center;
   }
 
