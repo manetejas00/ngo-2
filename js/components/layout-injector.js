@@ -59,8 +59,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Re-initialize GSAP Navbar and Modals if they were just injected
   if (navbarInjected && typeof AvinyaGsapNavbar !== 'undefined') {
-    if (!window.AvinyaNavbarEngine) {
-      window.AvinyaNavbarEngine = new AvinyaGsapNavbar();
-    }
+    window.AvinyaNavbarEngine = new AvinyaGsapNavbar();
   }
 });

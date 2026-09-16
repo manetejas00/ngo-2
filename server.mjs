@@ -146,9 +146,6 @@ async function savePersistentCache(data) {
   try {
     await mkdir(CACHE_DIR, { recursive: true });
     await writeFile(CACHE_FILE, JSON.stringify(data, null, 2), 'utf-8');
-    // Also keep static api/news.json in sync for deployment
-    const staticPath = join(__dirname, 'api', 'news.json');
-    await writeFile(staticPath, JSON.stringify(data, null, 2), 'utf-8');
   } catch (err) {
     console.warn('[Cache Save Warning] Could not write persistent cache file:', err.message);
   }
@@ -534,7 +531,7 @@ async function refreshNewsCache(force = false) {
       articles: finalArticles
     };
 
-    // Save to persistent storage and update static api/news.json
+    // Save to persistent storage
     await savePersistentCache(newsCache);
     console.log(`[News Sync] Successfully updated newsroom with ${finalArticles.length} worldwide healthcare stories.`);
 

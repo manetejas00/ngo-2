@@ -7,7 +7,6 @@
 class NewsService {
   constructor() {
     this.primaryEndpoint = '/api/news';
-    this.fallbackEndpoint = '/api/news.json';
     this.storageKey = 'avinya_health_news_cache';
     this.articles = [];
     this.lastUpdated = null;
@@ -34,27 +33,7 @@ class NewsService {
       console.warn('Primary news endpoint /api/news unavailable, trying fallback endpoint...');
     }
 
-    // 2. Try Secondary Static JSON endpoint (/api/news.json) for Hostinger static deployment
-    try {
-      const res = await fetch(this.fallbackEndpoint);
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.articles && data.articles.length > 0) {
-          this.articles = data.articles;
-          this.lastUpdated = data.lastUpdated || Date.now();
-          this.setLocalCache(data);
-          return {
-            articles: this.articles,
-            lastUpdated: this.lastUpdated,
-            fromCache: true
-          };
-        }
-      }
-    } catch (err) {
-      console.warn('Fallback news endpoint /api/news.json unavailable, checking browser cache...');
-    }
-
-    // 3. Try Local Browser Storage Cache
+    // 2. Try Local Browser Storage Cache
     const localCache = this.getLocalCache();
     if (localCache && localCache.articles && localCache.articles.length > 0) {
       this.articles = localCache.articles;
