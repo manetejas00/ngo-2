@@ -59,13 +59,24 @@ async function runTests() {
   console.log(`   ✓ 100% of articles (${healthcareMatchCount}/${data.articles.length}) are strictly verified healthcare & medical stories.`);
 
   // Test 3: Daily Refresh Trigger Endpoint
-  console.log('\n3. Testing daily manual/cron refresh endpoint (/api/news/refresh)...');
+  console.log('\n3. Testing manual/cron refresh endpoint (/api/news/refresh)...');
   const refreshRes = await fetch(`${BASE_URL}/api/news/refresh`);
   assert.strictEqual(refreshRes.status, 200, '/api/news/refresh should return 200 OK');
   const refreshData = await refreshRes.json();
   assert.strictEqual(refreshData.status, 'ok', 'Refresh status should be ok');
   assert.ok(refreshData.count >= 10, 'Refreshed feed should have at least 10 articles');
-  console.log(`   ✓ Refreshed daily cache successfully (${refreshData.count} global healthcare articles loaded).`);
+  console.log(`   ✓ Refreshed cache successfully (${refreshData.count} global healthcare articles loaded).`);
+
+  // Test 3.1: Overlapping Refresh Calls
+  console.log('\n3.1 Testing overlapping refresh protection...');
+  const overlapPromises = [
+    fetch(`${BASE_URL}/api/news/refresh`),
+    fetch(`${BASE_URL}/api/news/refresh`)
+  ];
+  const overlapRes = await Promise.all(overlapPromises);
+  assert.strictEqual(overlapRes[0].status, 200);
+  assert.strictEqual(overlapRes[1].status, 200);
+  console.log(`   ✓ Overlapping refresh calls handled gracefully.`);
 
   // Test 4: Verify Worldwide Sources
   console.log('\n4. Verifying worldwide source desks...');

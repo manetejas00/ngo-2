@@ -65,7 +65,7 @@ const rawPort = process.env.PORT || 3000;
 const PORT = typeof rawPort === 'string' && /^\d+$/.test(rawPort) ? parseInt(rawPort, 10) : rawPort;
 const CACHE_DIR = join(__dirname, 'cache');
 const CACHE_FILE = join(CACHE_DIR, 'news_cache.json');
-const CACHE_TTL_MS = 24 * 3600 * 1000; // 24 hours (Daily automated refresh cycle)
+const CACHE_TTL_MS = process.env.NEWS_REFRESH_INTERVAL_MS ? parseInt(process.env.NEWS_REFRESH_INTERVAL_MS, 10) : 2 * 3600 * 1000; // Default 2 hours
 const AUTH_SESSION_TTL_MS = 30 * 60 * 1000;
 const loginAttempts = new Map();
 
@@ -121,8 +121,8 @@ async function initPersistentCache() {
       
       // If cache is older than 24 hours, automatically trigger daily global news refresh
       if ((Date.now() - newsCache.timestamp) >= CACHE_TTL_MS) {
-        console.log('[Daily News Auto-Sync] Cache is older than 24 hours. Refreshing global healthcare news...');
-        setTimeout(() => refreshNewsCache(true).catch(e => console.warn('[Daily News Refresh Err]', e.message)), 1000);
+        console.log('[News Auto-Sync] Cache is older than interval. Refreshing global healthcare news...');
+        setTimeout(() => refreshNewsCache(true).catch(e => console.warn('[News Refresh Err]', e.message)), 1000);
       }
     }
   } catch (err) {
@@ -130,15 +130,17 @@ async function initPersistentCache() {
   }
 }
 
-// Automated Daily Cron Scheduler (runs every 24 hours)
+let isRefreshingNews = false;
+
+// Automated Cron Scheduler
 setInterval(async () => {
-  console.log('[Daily Cron Scheduler] Triggering automated daily global healthcare news refresh...');
+  console.log('[Cron Scheduler] Triggering automated global healthcare news refresh...');
   try {
     await refreshNewsCache(true);
   } catch (e) {
-    console.warn('[Daily News Cron Error]', e.message);
+    console.warn('[News Cron Error]', e.message);
   }
-}, 24 * 3600 * 1000);
+}, CACHE_TTL_MS);
 
 async function savePersistentCache(data) {
   try {
@@ -398,69 +400,7 @@ Return ONLY a valid JSON object (no markdown, no backticks, no markdown code blo
   return generateGeminiNewsTopicFromPool(null, now);
 }
 
-// Fallback Cancer News Data (Guarantees verified health articles)
-const FALLBACK_CANCER_NEWS = [
-  {
-    id: "cancer-news-1",
-    title: "Advancements in Targeted Immunotherapy Show Promise for Early Cancer Interventions",
-    description: "New clinical research demonstrates how targeted immunotherapy approaches can significantly enhance survival outcomes and minimize side effects for early-stage oncology patients.",
-    category: "Cancer Research",
-    source: "National Cancer Institute",
-    publishedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    url: "https://www.cancer.gov/news-events",
-    urlToImage: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "cancer-news-2",
-    title: "Global Awareness Campaigns Driving Record Early Screening Participation",
-    description: "Community health initiatives and mobile diagnostic clinics reach underserved populations, empowering individuals to take proactive steps in routine breast and colorectal screenings.",
-    category: "Awareness & Detection",
-    source: "World Health Organization",
-    publishedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-    url: "https://www.who.int/health-topics/cancer",
-    urlToImage: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "cancer-news-3",
-    title: "The Critical Role of Comprehensive Caregiver Support During Treatment",
-    description: "Studies highlight how emotional counseling, respite care, and financial navigation for family caregivers directly improve patient resilience and recovery quality.",
-    category: "Caregiver Support",
-    source: "Journal of Clinical Oncology",
-    publishedAt: new Date(Date.now() - 3600000 * 10).toISOString(),
-    url: "https://ascopubs.org/journal/jco",
-    urlToImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "cancer-news-4",
-    title: "Breakthrough Blood Tests Enable Multi-Cancer Early Detection Before Symptoms Appear",
-    description: "Liquid biopsy technology shows high accuracy in detecting circulating tumor DNA across multiple cancer types, offering hope for earlier clinical diagnosis.",
-    category: "Early Detection",
-    source: "American Cancer Society",
-    publishedAt: new Date(Date.now() - 3600000 * 14).toISOString(),
-    url: "https://www.cancer.org/research",
-    urlToImage: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "cancer-news-5",
-    title: "Nutritional and Lifestyle Interventions Support Long-Term Cancer Survivorship",
-    description: "Integrative health guidelines emphasize tailored physical activity and clinical nutrition plans to enhance energy levels and reduce recurrence risk post-treatment.",
-    category: "Survivorship",
-    source: "Harvard Health Publishing",
-    publishedAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-    url: "https://www.health.harvard.edu",
-    urlToImage: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80"
-  },
-  {
-    id: "cancer-news-6",
-    title: "Expanding Access to Affordable Diagnostic Imaging in Rural Healthcare Clinics",
-    description: "Non-profit partnerships deploy portable ultrasound and digital mammography units to ensure geographic location does not limit life-saving early detection.",
-    category: "Healthcare Policy",
-    source: "Global Health Journal",
-    publishedAt: new Date(Date.now() - 3600000 * 30).toISOString(),
-    url: "https://www.sciencedirect.com/journal/global-health-journal",
-    urlToImage: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80"
-  }
-];
+
 
 // Curated high-res medical imagery by category
 const HEALTH_CATEGORY_IMAGES = {
@@ -587,55 +527,102 @@ async function refreshNewsCache(force = false) {
     };
   }
 
-  console.log(`[Daily News Sync] Fetching worldwide healthcare news and synthesizing daily medical research...`);
-
-  // 1. Fetch fresh live global healthcare news from around the world
-  let liveArticles = await fetchExternalNews();
-
-  // 2. Generate multiple dynamic Gemini AI Oncology Research stories for today
-  let aiStories = generateMultipleGeminiNewsTopics(8, "early detection & oncology research");
-
-  // 3. Combine live verified global health articles & AI Generated news stories
-  let combined = [...aiStories, ...liveArticles];
-  const fallbackFormatted = FALLBACK_CANCER_NEWS.map(item => ({
-    ...item,
-    apiProvider: item.apiProvider || "Verified Oncology Journal"
-  }));
-  combined.push(...fallbackFormatted);
-
-  // Strictly filter only healthcare news and deduplicate
-  let filtered = combined.filter(isHealthcareOnlyNews);
-  let deduplicated = deduplicateArticles(filtered);
-
-  // Sort newest first
-  deduplicated.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
-
-  // Comprehensive daily feed (up to 24 curated global healthcare articles)
-  let finalArticles = deduplicated.slice(0, 24);
-
-  // Guarantee that daily AI health research stories are prominently featured in the feed
-  const aiStoriesInList = finalArticles.filter(a => a.isAIGenerated);
-  if (aiStoriesInList.length < 5) {
-    const missingAI = aiStories.filter(a => !finalArticles.some(f => f.id === a.id));
-    finalArticles = [...missingAI.slice(0, 5 - aiStoriesInList.length), ...finalArticles].slice(0, 24);
+  if (isRefreshingNews) {
+    console.log('[News Sync] Refresh already in progress. Skipping overlapping job.');
+    return { status: "ok", cached: true, lastUpdated: newsCache.timestamp, articles: newsCache.articles };
   }
 
-  newsCache = {
-    timestamp: now,
-    articles: finalArticles
-  };
+  isRefreshingNews = true;
+  try {
+    console.log(`[News Sync] Fetching worldwide healthcare news and synthesizing medical research...`);
 
-  // Save to persistent storage and update static api/news.json
-  await savePersistentCache(newsCache);
-  console.log(`[Daily News Sync] Successfully updated newsroom with ${finalArticles.length} worldwide healthcare stories.`);
+    // 1. Fetch fresh live global healthcare news from around the world
+    let liveArticles = [];
+    try {
+      liveArticles = await fetchExternalNews();
+    } catch (apiErr) {
+      console.error('[News Sync] External API fetch failed, continuing with AI generation:', apiErr.message);
+    }
 
-  return {
-    status: "ok",
-    cached: false,
-    refreshed: true,
-    lastUpdated: now,
-    articles: finalArticles
-  };
+    // 2. Generate multiple dynamic Gemini AI Oncology Research stories for today
+    let aiStories = generateMultipleGeminiNewsTopics(8, "early detection & oncology research");
+
+    // 3. Combine live verified global health articles & AI Generated news stories
+    let combined = [...aiStories, ...liveArticles];
+
+    // Strictly filter only healthcare news and deduplicate within the new batch
+    let filtered = combined.filter(isHealthcareOnlyNews);
+    let deduplicatedNewBatch = deduplicateArticles(filtered);
+    
+    // Merge logic: Update existing cache with new batch to prevent duplicates and keep fields fresh
+    let mergedArticles = [...newsCache.articles];
+    for (const newArticle of deduplicatedNewBatch) {
+      if (!newArticle.title || !newArticle.url) continue;
+      
+      const cleanTitle = newArticle.title.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+      const existingIndex = mergedArticles.findIndex(a => 
+        a.id === newArticle.id || 
+        a.url === newArticle.url || 
+        (a.title && a.title.toLowerCase().trim().replace(/[^a-z0-9]/g, '') === cleanTitle)
+      );
+      
+      if (existingIndex !== -1) {
+        // Update existing article
+        mergedArticles[existingIndex] = {
+          ...mergedArticles[existingIndex],
+          title: newArticle.title,
+          description: newArticle.description || mergedArticles[existingIndex].description,
+          urlToImage: newArticle.urlToImage || mergedArticles[existingIndex].urlToImage,
+          publishedAt: newArticle.publishedAt || mergedArticles[existingIndex].publishedAt,
+          apiProvider: newArticle.apiProvider || mergedArticles[existingIndex].apiProvider
+        };
+      } else {
+        // Insert new article
+        mergedArticles.push(newArticle);
+      }
+    }
+
+    // Sort newest first
+    mergedArticles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+
+    // Comprehensive feed (up to 24 curated global healthcare articles)
+    let finalArticles = mergedArticles.slice(0, 24);
+
+    // Guarantee that daily AI health research stories are prominently featured in the feed
+    const aiStoriesInList = finalArticles.filter(a => a.isAIGenerated);
+    if (aiStoriesInList.length < 5) {
+      const missingAI = aiStories.filter(a => !finalArticles.some(f => f.id === a.id));
+      finalArticles = [...missingAI.slice(0, 5 - aiStoriesInList.length), ...finalArticles].slice(0, 24);
+    }
+
+    newsCache = {
+      timestamp: now,
+      articles: finalArticles
+    };
+
+    // Save to persistent storage and update static api/news.json
+    await savePersistentCache(newsCache);
+    console.log(`[News Sync] Successfully updated newsroom with ${finalArticles.length} worldwide healthcare stories.`);
+
+    return {
+      status: "ok",
+      cached: false,
+      refreshed: true,
+      lastUpdated: now,
+      articles: finalArticles
+    };
+  } catch (err) {
+    console.error('[News Sync Error] Failed to refresh news completely:', err.stack || err.message);
+    // Return existing cache rather than failing entirely
+    return {
+      status: "error",
+      cached: true,
+      lastUpdated: newsCache.timestamp,
+      articles: newsCache.articles
+    };
+  } finally {
+    isRefreshingNews = false;
+  }
 }
 
 const SUBMISSIONS_FILE = join(CACHE_DIR, 'submissions.json');
