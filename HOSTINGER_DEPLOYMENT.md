@@ -79,7 +79,21 @@ export HOSTINGER_SSH_PORT="65002"
 
 ---
 
-## 5. Live Verification
+## 5. Cache-Busting (Important)
+
+Hostinger and browsers aggressively cache static assets (`.css` and `.js` files). 
+Whenever you make changes to JavaScript or CSS files, **you must update the version query parameter in the HTML files** to ensure users receive the latest code without manually clearing their cache.
+
+For example, in `index.html`, `doctors.html`, etc., change:
+```html
+<link rel="stylesheet" href="css/styles.css?v=3.0">
+<script src="js/components/navbar-gsap.js?v=3.0"></script>
+```
+to a new version like `?v=3.1`.
+
+---
+
+## 6. Live Verification
 
 Run live preflight smoke checks:
 ```bash
