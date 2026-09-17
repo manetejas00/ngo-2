@@ -11,6 +11,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <!-- Chart.js CDN for Interactive Graphs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- GSAP CDN for Smooth UI Animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <!-- html2pdf.js & Avinya PDF Service -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="js/services/pdf-service.js?v=3.1"></script>
@@ -914,6 +916,17 @@
       color: var(--text-muted);
     }
 
+    /* Sidebar Overlay */
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 990; /* Just below sidebar's 1000 */
+      display: none;
+      opacity: 0;
+    }
+
     /* Media Queries */
     @media (max-width: 992px) {
       .sidebar {
@@ -922,9 +935,6 @@
         top: 0;
         bottom: 0;
         z-index: 1000;
-      }
-      .sidebar.open {
-        transform: translateX(280px);
       }
       .mobile-toggle-btn, .mobile-close-btn {
         display: block;
@@ -1146,7 +1156,7 @@
             <div class="brand-tag">ADMIN DASHBOARD</div>
           </div>
         </a>
-        <button class="mobile-close-btn" onclick="toggleMobileSidebar()">✕</button>
+        <button class="mobile-close-btn" onclick="closeMobileSidebar()">✕</button>
       </div>
 
       <div class="sidebar-menu">
@@ -1246,6 +1256,9 @@
       </div>
     </aside>
 
+    <!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
     <!-- Main Workspace Right Container -->
     <div class="main-workspace">
 
@@ -1257,7 +1270,7 @@
         </div>
         <div class="header-right" style="display: flex; align-items: center; gap: 12px;">
           <div class="admin-status-pill">
-            <span class="status-dot"></span> Live Auto-Sync (5m)
+            <span class="status-dot"></span> Live Auto-Sync (<span id="autoSyncCountdown"></span>)
           </div>
           <button type="button" id="roleUserPill" onclick="openCurrentUserProfile()" title="Open my profile" style="font-size:13px;font-weight:600;padding:5px 12px 5px 5px;background:rgba(13,148,136,.15);border:1px solid rgba(13,148,136,.4);color:#5EEAD4;border-radius:24px;display:flex;align-items:center;gap:8px;cursor:pointer;">
             <span id="roleIcon" class="user-avatar" style="width:30px;height:30px;font-size:10px;overflow:hidden;">USR</span><span id="roleText">Logged in as: Super Admin</span>
@@ -1447,7 +1460,7 @@
             <p style="color: var(--text-muted); font-size: 13px;">Manage organization profiles, Hostinger MySQL parameters, SMTP email defaults, and auto-sync polling frequency.</p>
           </div>
 
-          <form id="settingsForm" onsubmit="savePlatformSettings(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+          <form id="settingsForm" onsubmit="savePlatformSettings(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 24px;">
             <div>
               <h3 style="font-size: 14px; font-weight: 700; color: #5EEAD4; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">🌐 Organization Info</h3>
               <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -2359,7 +2372,7 @@
       if (!adminToken) {
         adminToken = sessionStorage.getItem('avinya_admin_token') || '';
       }
-      if (!adminToken) return;
+      if (!adminToken) return false;
 
       try {
         const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
@@ -2373,7 +2386,7 @@
 
         if (res.status === 401) {
           handleLogout();
-          return;
+          return false;
         }
 
         const json = await res.json();
@@ -2382,9 +2395,12 @@
           updateStats(json.analytics || {});
           renderDashboardCharts();
           switchTab(currentTab);
+          return true;
         }
+        return false;
       } catch (err) {
         if (!isSilent) console.error('Error fetching admin data:', err);
+        return false;
       }
     }
 
@@ -2546,6 +2562,50 @@
       }
     }
 
+    let sidebarTimeline = null;
+    
+    function initSidebarTimeline() {
+      if (!sidebarTimeline) {
+        sidebarTimeline = gsap.timeline({ paused: true, defaults: { ease: 'power3.out', duration: 0.35 } });
+        sidebarTimeline.to('#sidebarOverlay', { display: 'block', opacity: 1 }, 0);
+        sidebarTimeline.to('#sidebar', { x: 280 }, 0);
+      }
+    }
+
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      if (!sidebar) return;
+      initSidebarTimeline();
+      if (sidebar.classList.contains('open')) {
+        closeMobileSidebar();
+      } else {
+        sidebar.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        sidebarTimeline.play();
+      }
+    }
+
+    function closeMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar && sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+        document.body.style.overflow = '';
+        if (sidebarTimeline) sidebarTimeline.reverse();
+      }
+    }
+
+    // Handle resize to reset sidebar on desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 992) {
+        gsap.set('#sidebar', { clearProps: 'all' });
+        gsap.set('#sidebarOverlay', { clearProps: 'all' });
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.classList.remove('open');
+        document.body.style.overflow = '';
+        if (sidebarTimeline) sidebarTimeline.pause(0);
+      }
+    });
+
     function switchTab(tab) {
       if (currentUser) {
         const role = currentUser.role || 'admin';
@@ -2566,8 +2626,7 @@
       } catch (e) {}
 
       // Close mobile sidebar if open
-      const sidebar = document.getElementById('sidebar');
-      if (sidebar) sidebar.classList.remove('open');
+      closeMobileSidebar();
 
       // Highlight active sidebar nav item
       document.querySelectorAll('.sidebar-nav-link').forEach(btn => {
@@ -3801,6 +3860,64 @@
       return isNaN(f) ? 0 : f;
     }
 
+    let syncCountdownInterval = null;
+    let isSyncing = false;
+
+    function startAutoPolling() {
+      if (syncCountdownInterval) clearInterval(syncCountdownInterval);
+      
+      const pollMs = parseInt(localStorage.getItem('avinya_poll_interval') || 300000, 10);
+      let nextSyncTime = parseInt(localStorage.getItem('avinya_next_sync_time'), 10);
+      
+      const now = Date.now();
+      // If no valid time exists, or we missed it, or it's way in the future (settings changed), reset it.
+      if (!nextSyncTime || nextSyncTime <= now || nextSyncTime > now + pollMs) {
+        nextSyncTime = now + pollMs;
+        localStorage.setItem('avinya_next_sync_time', nextSyncTime);
+      }
+
+      const el = document.getElementById('autoSyncCountdown');
+      
+      const updateDisplay = async () => {
+        if (!el) return;
+        if (isSyncing) return; // Prevent double sync
+
+        const currentTime = Date.now();
+        const msRemaining = nextSyncTime - currentTime;
+
+        if (msRemaining <= 0) {
+          // Trigger sync
+          isSyncing = true;
+          el.innerText = 'Syncing...';
+          try {
+            const success = await fetchAdminData(true);
+            el.innerText = success ? 'Sync completed' : 'Sync failed';
+          } catch (e) {
+            el.innerText = 'Sync failed';
+          } finally {
+            setTimeout(() => {
+              isSyncing = false;
+              // Reset the next sync time to pollMs from NOW
+              nextSyncTime = Date.now() + pollMs;
+              localStorage.setItem('avinya_next_sync_time', nextSyncTime);
+              updateDisplay();
+            }, 2500); // Wait 2.5s to show result before resetting countdown
+          }
+          return;
+        }
+
+        const sRemaining = Math.floor(msRemaining / 1000);
+        const m = Math.floor(sRemaining / 60);
+        const s = sRemaining % 60;
+        const mStr = m.toString().padStart(2, '0');
+        const sStr = s.toString().padStart(2, '0');
+        el.innerText = `Next sync in ${mStr}:${sStr}`;
+      };
+
+      updateDisplay();
+      syncCountdownInterval = setInterval(updateDisplay, 1000);
+    }
+
     function savePlatformSettings(event) {
       event.preventDefault();
       const orgName = document.getElementById('setOrgName').value;
@@ -3815,9 +3932,9 @@
       localStorage.setItem('avinya_admin_email', adminEmail);
       localStorage.setItem('avinya_poll_interval', pollMs);
 
-      if (autoPollTimer) {
-        clearInterval(autoPollTimer);
-        autoPollTimer = setInterval(() => fetchAdminData(true), parseInt(pollMs, 10));
+      if (syncCountdownInterval) {
+        localStorage.setItem('avinya_next_sync_time', Date.now() + parseInt(pollMs, 10));
+        startAutoPolling();
       }
 
       alert('✅ Platform settings saved successfully!');
