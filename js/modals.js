@@ -452,9 +452,9 @@ class ModalManager {
     else if (modalId.includes('support') || titleLower.includes('support')) formType = 'support';
     else if (modalId.includes('csr') || titleLower.includes('csr') || titleLower.includes('partner')) formType = 'partnership';
     else if (modalId.includes('news') || titleLower.includes('news')) formType = 'newsletter';
+    else if (modalId.includes('coming-soon') || titleLower.includes('coming soon')) formType = 'coming_soon_feedback';
     else if (modalId.includes('feed') || titleLower.includes('feed')) formType = 'feedback';
     else if (modalId.includes('guide') || titleLower.includes('guide')) formType = 'guide';
-    else if (modalId.includes('coming-soon') || titleLower.includes('coming soon')) formType = 'coming_soon_feedback';
 
     const inputs = Array.from(form.querySelectorAll('input, select, textarea'));
     const payload = {};
@@ -496,8 +496,8 @@ class ModalManager {
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,63}$/.test(String(payload.email || '').trim());
     const phoneOk = /^(?:\+91)?[6-9]\d{9}$/.test(String(payload.phone || '').replace(/[\s()-]/g, ''));
     if (!emailOk) errors.email = 'Please enter a valid email address.';
-    if (['donation', 'volunteer', 'support', 'contact', 'partnership'].includes(formType) && !String(payload.name || '').trim()) errors.name = 'Please enter your name.';
-    if (['donation', 'volunteer', 'support'].includes(formType) && !phoneOk) errors.phone = 'Enter a valid 10-digit Indian mobile number.';
+    if (['donation', 'volunteer', 'support', 'contact', 'partnership', 'coming_soon_feedback'].includes(formType) && !String(payload.name || '').trim()) errors.name = 'Please enter your name.';
+    if (['donation', 'volunteer', 'support', 'coming_soon_feedback'].includes(formType) && !phoneOk) errors.phone = 'Enter a valid 10-digit Indian mobile number.';
     if (formType === 'donation' && (!Number.isFinite(Number(payload.amount)) || Number(payload.amount) < 100 || Number(payload.amount) > 10000000)) errors.amount = 'Donation amount must be between ₹100 and ₹1,00,00,000.';
     if (formType === 'partnership' && !String(payload.organization || '').trim()) errors.organization = 'Please enter your organization name.';
     if (['contact', 'support', 'feedback', 'coming_soon_feedback'].includes(formType) && !String(payload.message || '').trim()) errors.message = 'Please enter a message.';
