@@ -811,6 +811,19 @@ const server = createServer(async (req, res) => {
 
   const urlPath = req.url.split('?')[0];
 
+  // Redirect direct requests for .html files to clean URLs
+  if (urlPath.endsWith('.html')) {
+    let cleanPath = urlPath.slice(0, -5);
+    if (cleanPath === '/index') cleanPath = '/';
+    const searchPart = req.url.slice(urlPath.length);
+    res.writeHead(301, {
+      'Location': cleanPath + searchPart,
+      'Cache-Control': 'public, max-age=31536000'
+    });
+    res.end();
+    return;
+  }
+
   // Handle CORS OPTIONS preflight
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -2292,7 +2305,19 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
   }
 
   try {
-    let fileStat = await stat(filePath);
+    let fileStat;
+    try {
+      fileStat = await stat(filePath);
+    } catch (err) {
+      if (err.code === 'ENOENT' && !filePath.endsWith('.html')) {
+        const htmlFilePath = filePath + '.html';
+        fileStat = await stat(htmlFilePath);
+        filePath = htmlFilePath;
+      } else {
+        throw err;
+      }
+    }
+
     if (fileStat.isDirectory()) {
       filePath = join(filePath, 'index.html');
       fileStat = await stat(filePath);
