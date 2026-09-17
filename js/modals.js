@@ -21,7 +21,7 @@ class ModalManager {
     const modalIds = [
       'donate-modal', 'volunteer-modal', 'support-modal',
       'contact-modal', 'csr-modal', 'newsletter-modal', 'feedback-modal', 'guide-modal', 'story-modal',
-      'privacy-modal', 'terms-modal', 'compliance-modal'
+      'privacy-modal', 'terms-modal', 'compliance-modal', 'coming-soon-modal'
     ];
 
     modalIds.forEach(id => {
@@ -49,6 +49,10 @@ class ModalManager {
   }
 
   openModal(modalId) {
+    if (modalId === 'donate-modal') {
+      modalId = 'coming-soon-modal';
+    }
+
     const modal = document.getElementById(modalId);
     if (modal) {
       // Restore template if container exists (except dynamic modals like story-modal and guide-modal)
@@ -343,15 +347,7 @@ class ModalManager {
 
   // --- DONATION MODAL ---
   openDonateModal(defaultAmount = 1000, category = null) {
-    this.openModal('donate-modal');
-    this.selectAmount(defaultAmount);
-    
-    if (category) {
-      const select = document.querySelector('#donate-modal #donor-category');
-      if (select) {
-        select.value = category;
-      }
-    }
+    this.openModal('coming-soon-modal');
   }
 
   // --- VOLUNTEER MODAL ---
@@ -458,6 +454,7 @@ class ModalManager {
     else if (modalId.includes('news') || titleLower.includes('news')) formType = 'newsletter';
     else if (modalId.includes('feed') || titleLower.includes('feed')) formType = 'feedback';
     else if (modalId.includes('guide') || titleLower.includes('guide')) formType = 'guide';
+    else if (modalId.includes('coming-soon') || titleLower.includes('coming soon')) formType = 'coming_soon_feedback';
 
     const inputs = Array.from(form.querySelectorAll('input, select, textarea'));
     const payload = {};
@@ -480,7 +477,7 @@ class ModalManager {
       }
     });
 
-    if (!payload.name && !['newsletter', 'guide', 'feedback'].includes(formType)) payload.name = 'Valued Supporter';
+    if (!payload.name && !['newsletter', 'guide', 'feedback', 'coming_soon_feedback'].includes(formType)) payload.name = 'Valued Supporter';
     if (!payload.email) {
       const emailInput = inputs.find(i => i.type === 'email' || i.placeholder?.toLowerCase().includes('email'));
       if (emailInput) payload.email = emailInput.value;
@@ -503,7 +500,7 @@ class ModalManager {
     if (['donation', 'volunteer', 'support'].includes(formType) && !phoneOk) errors.phone = 'Enter a valid 10-digit Indian mobile number.';
     if (formType === 'donation' && (!Number.isFinite(Number(payload.amount)) || Number(payload.amount) < 100 || Number(payload.amount) > 10000000)) errors.amount = 'Donation amount must be between ₹100 and ₹1,00,00,000.';
     if (formType === 'partnership' && !String(payload.organization || '').trim()) errors.organization = 'Please enter your organization name.';
-    if (['contact', 'support', 'feedback'].includes(formType) && !String(payload.message || '').trim()) errors.message = 'Please enter a message.';
+    if (['contact', 'support', 'feedback', 'coming_soon_feedback'].includes(formType) && !String(payload.message || '').trim()) errors.message = 'Please enter a message.';
     return errors;
   }
 

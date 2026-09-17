@@ -1194,6 +1194,10 @@
           <span class="nav-icon">💰</span> Donations & 80G Claims
           <span class="nav-badge" id="sideFormDonationCount">0</span>
         </button>
+        <button class="sidebar-nav-link" data-tab="forms_coming_soon_feedback" onclick="switchTab('forms_coming_soon_feedback')">
+          <span class="nav-icon">⏳</span> Coming Soon Feedbacks
+          <span class="nav-badge" id="sideFormComingSoonFeedbackCount">0</span>
+        </button>
         <button class="sidebar-nav-link" data-tab="forms_partnership" onclick="switchTab('forms_partnership')">
           <span class="nav-icon">🏢</span> CSR Partnerships
           <span class="nav-badge" id="sideFormPartnershipCount">0</span>
@@ -1881,8 +1885,9 @@
       const savedTab = localStorage.getItem('avinya_active_tab') || '';
       const validTabs = [
         'dashboard', 'forms_all', 'forms_contact', 'forms_newsletter', 
-        'forms_volunteer', 'forms_support', 'forms_donation', 'forms_partnership', 
-        'forms_feedback', 'doctor', 'diagnostic', 'email', 'activity', 
+        'forms_volunteer', 'forms_support', 'forms_donation', 
+        'forms_partnership', 'forms_feedback', 'forms_guide', 'forms_coming_soon_feedback',
+        'doctor', 'diagnostic', 'email', 'activity', 
         'doctorsCatalog', 'testsCatalog', 'usersCatalog', 'settings'
       ];
 
@@ -2588,6 +2593,7 @@
         'forms_donation': 'Donations & 80G Tax Receipts',
         'forms_partnership': 'CSR & Corporate Partnerships',
         'forms_feedback': 'Website Feedbacks & Testimonials',
+        'forms_coming_soon_feedback': 'Coming Soon Payment Feedbacks',
         'doctor': 'Doctor Appointment Bookings',
         'diagnostic': 'Diagnostic Test Package Bookings',
         'email': 'Email Dispatch & Audit Logs',

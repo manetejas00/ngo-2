@@ -903,7 +903,7 @@ const server = createServer(async (req, res) => {
         return;
       }
 
-      const allowedFormTypes = new Set(['donation', 'volunteer', 'support', 'contact', 'partnership', 'newsletter', 'feedback', 'guide']);
+      const allowedFormTypes = new Set(['donation', 'volunteer', 'support', 'contact', 'partnership', 'newsletter', 'feedback', 'guide', 'coming_soon_feedback']);
       const formType = String(payload.form_type || payload.formType || 'contact').trim().toLowerCase();
       const text = (value, max = 500) => String(value ?? '').trim().replace(/\s+/g, ' ').slice(0, max);
       const errors = {};
@@ -917,13 +917,13 @@ const server = createServer(async (req, res) => {
 
       if (!allowedFormTypes.has(formType)) addError('form_type', 'Unsupported form type.');
       if (!emailPattern.test(email)) addError('email', 'Enter a valid email address.');
-      if (['donation', 'volunteer', 'support', 'contact', 'partnership'].includes(formType) && !name) addError('name', 'Enter your name.');
-      if (['donation', 'volunteer', 'support'].includes(formType) && !indianPhone.test(normalizedPhone)) addError('phone', 'Enter a valid Indian mobile number.');
+      if (['donation', 'volunteer', 'support', 'contact', 'partnership', 'coming_soon_feedback'].includes(formType) && !name) addError('name', 'Enter your name.');
+      if (['donation', 'volunteer', 'support', 'coming_soon_feedback'].includes(formType) && !indianPhone.test(normalizedPhone)) addError('phone', 'Enter a valid Indian mobile number.');
 
       const organization = text(payload.organization || payload.company, 160);
       const message = text(payload.message || payload.feedback, 3000);
       if (formType === 'partnership' && !organization) addError('organization', 'Organization name is required.');
-      if (['feedback', 'contact', 'support'].includes(formType) && !message) addError('message', 'Please enter a message.');
+      if (['feedback', 'contact', 'support', 'coming_soon_feedback'].includes(formType) && !message) addError('message', 'Please enter a message.');
 
       let donationAmount = null;
       let paymentStatus = 'PENDING';

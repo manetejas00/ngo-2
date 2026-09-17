@@ -420,31 +420,48 @@ $errorMessage = (!$userEmailSent && !$adminEmailSent) ? "Email dispatch failed o
 try {
     $pdo = getDatabaseConnection();
     if ($pdo !== null) {
-        $stmt = $pdo->prepare("INSERT INTO `form_submissions` 
-            (`submission_id`, `form_type`, `name`, `email`, `phone`, `amount`, `frequency`, `pan`, `transaction_id`, `organization`, `category`, `interest`, `message`, `payment_status`, `is_anonymous`, `user_email_sent`, `admin_email_sent`, `delivery_status`, `raw_payload`)
-            VALUES (:sub_id, :ftype, :name, :email, :phone, :amount, :freq, :pan, :tx_id, :org, :category, :interest, :msg, :pay_stat, :anonymous, :u_sent, :a_sent, :status, :payload)");
-        
-        $stmt->execute([
-            ':sub_id' => $submissionId,
-            ':ftype' => $formType,
-            ':name' => $name,
-            ':email' => $email,
-            ':phone' => $phone,
-            ':amount' => $amount,
-            ':freq' => $frequency,
-            ':pan' => $pan,
-            ':tx_id' => $transactionId,
-            ':org' => $organization,
-            ':category' => $data['category'] ?? null,
-            ':interest' => $interest,
-            ':msg' => $message,
-            ':pay_stat' => $data['payment_status'] ?? 'PENDING',
-            ':anonymous' => !empty($data['is_anonymous']) ? 1 : 0,
-            ':u_sent' => $userEmailSent ? 1 : 0,
-            ':a_sent' => $adminEmailSent ? 1 : 0,
-            ':status' => $deliveryStatus,
-            ':payload' => json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-        ]);
+        if ($formType === 'coming_soon_feedback') {
+            $stmt = $pdo->prepare("INSERT INTO `coming_soon_feedbacks` 
+                (`submission_id`, `name`, `email`, `phone`, `message`, `user_email_sent`, `admin_email_sent`, `delivery_status`, `raw_payload`)
+                VALUES (:sub_id, :name, :email, :phone, :msg, :u_sent, :a_sent, :status, :payload)");
+            $stmt->execute([
+                ':sub_id' => $submissionId,
+                ':name' => $name,
+                ':email' => $email,
+                ':phone' => $phone,
+                ':msg' => $message,
+                ':u_sent' => $userEmailSent ? 1 : 0,
+                ':a_sent' => $adminEmailSent ? 1 : 0,
+                ':status' => $deliveryStatus,
+                ':payload' => json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            ]);
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO `form_submissions` 
+                (`submission_id`, `form_type`, `name`, `email`, `phone`, `amount`, `frequency`, `pan`, `transaction_id`, `organization`, `category`, `interest`, `message`, `payment_status`, `is_anonymous`, `user_email_sent`, `admin_email_sent`, `delivery_status`, `raw_payload`)
+                VALUES (:sub_id, :ftype, :name, :email, :phone, :amount, :freq, :pan, :tx_id, :org, :category, :interest, :msg, :pay_stat, :anonymous, :u_sent, :a_sent, :status, :payload)");
+            
+            $stmt->execute([
+                ':sub_id' => $submissionId,
+                ':ftype' => $formType,
+                ':name' => $name,
+                ':email' => $email,
+                ':phone' => $phone,
+                ':amount' => $amount,
+                ':freq' => $frequency,
+                ':pan' => $pan,
+                ':tx_id' => $transactionId,
+                ':org' => $organization,
+                ':category' => $data['category'] ?? null,
+                ':interest' => $interest,
+                ':msg' => $message,
+                ':pay_stat' => $data['payment_status'] ?? 'PENDING',
+                ':anonymous' => !empty($data['is_anonymous']) ? 1 : 0,
+                ':u_sent' => $userEmailSent ? 1 : 0,
+                ':a_sent' => $adminEmailSent ? 1 : 0,
+                ':status' => $deliveryStatus,
+                ':payload' => json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            ]);
+        }
 
         $logStmt = $pdo->prepare("INSERT INTO `email_logs` (`reference_id`, `form_or_booking_type`, `recipient_role`, `recipient_email`, `subject`, `smtp_status`, `delivery_method`, `error_message`) VALUES (:ref, :type, :role, :to, :subj, :status, 'HOSTINGER_SSL_SMTP_465', :err)");
         

@@ -524,6 +524,21 @@ if ($pdo !== null) {
         } elseif (in_array($userRole, ['admin', 'manager'], true)) {
             // Administrators and managers see operational data.
             $formSubmissions = $pdo->query("SELECT * FROM `form_submissions` ORDER BY `id` DESC LIMIT 200")->fetchAll();
+            $comingSoonFeedbacks = $pdo->query("SELECT * FROM `coming_soon_feedbacks` ORDER BY `id` DESC LIMIT 200")->fetchAll();
+            foreach ($comingSoonFeedbacks as $cs) {
+                $formSubmissions[] = [
+                    'id' => $cs['id'],
+                    'submission_id' => $cs['submission_id'],
+                    'form_type' => 'coming_soon_feedback',
+                    'name' => $cs['name'],
+                    'email' => $cs['email'],
+                    'phone' => $cs['phone'],
+                    'message' => $cs['message'],
+                    'created_at' => $cs['created_at'],
+                    'delivery_status' => $cs['delivery_status'],
+                    'payment_status' => 'N/A'
+                ];
+            }
             $doctorBookings = $pdo->query("SELECT * FROM `doctor_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
             $diagnosticBookings = $pdo->query("SELECT * FROM `diagnostic_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
             $emailLogs = $pdo->query("SELECT * FROM `email_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();

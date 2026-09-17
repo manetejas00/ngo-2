@@ -114,6 +114,24 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             ,UNIQUE KEY `uq_transaction_id` (`transaction_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
 
+        // 1.5 Coming Soon Feedback Table
+        "CREATE TABLE IF NOT EXISTS `coming_soon_feedbacks` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `submission_id` VARCHAR(100) UNIQUE NOT NULL,
+            `name` VARCHAR(255) NOT NULL,
+            `email` VARCHAR(255) NOT NULL,
+            `phone` VARCHAR(50) NOT NULL,
+            `message` TEXT NOT NULL,
+            `user_email_sent` TINYINT(1) DEFAULT 0,
+            `admin_email_sent` TINYINT(1) DEFAULT 0,
+            `delivery_status` VARCHAR(50) DEFAULT 'UNKNOWN',
+            `raw_payload` JSON DEFAULT NULL,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX `idx_coming_soon_email` (`email`),
+            INDEX `idx_coming_soon_sub_id` (`submission_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
         // 2. Doctor Appointment Bookings Table
         "CREATE TABLE IF NOT EXISTS `doctor_bookings` (
             `id` INT AUTO_INCREMENT PRIMARY KEY,

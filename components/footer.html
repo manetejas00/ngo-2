@@ -72,3 +72,39 @@
     </svg>
     <span>Need support? Chat on WhatsApp</span>
   </a>
+  <!-- Coming Soon Modal -->
+  <div id="coming-soon-modal" class="modal-backdrop">
+    <div class="modal-container" style="width: min(500px, 100%);">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">?</button>
+      <div class="modal-header-brand" style="justify-content: center; margin-bottom: 1rem;">
+        <img src="/assets/logo-emblem.png" alt="Avinya Care Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">COMING SOON</div>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; text-align: center; color: var(--text-dark);">Payments Coming Soon</h3>
+      <p style="color: var(--text-dark-muted); font-size: 0.95rem; text-align: center; margin-bottom: 1.5rem;">
+        Our payment gateway is currently under maintenance. Please leave your details and feedback, and we will notify you once it's live!
+      </p>
+
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Coming Soon Feedback')">
+        <div style="margin-bottom: 1rem;">
+          <input type="text" placeholder="Full Name *" required
+            style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-light); width: 100%; box-sizing: border-box;">
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <input type="email" placeholder="Email Address *" required
+            style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-light); width: 100%; box-sizing: border-box;">
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <input type="tel" placeholder="Mobile Number *" required
+            style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-light); width: 100%; box-sizing: border-box;">
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+          <textarea placeholder="Feedback / Message *" rows="3" required
+            style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-light); width: 100%; resize: vertical; font-family: inherit; box-sizing: border-box;"></textarea>
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
+          <span>Submit Details ?</span>
+        </button>
+      </form>
+    </div>
+  </div>
