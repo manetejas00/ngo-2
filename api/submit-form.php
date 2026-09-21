@@ -48,7 +48,7 @@ $submissionId = 'SUB-' . time() . '-' . strtoupper(substr(md5(uniqid()), 0, 5));
 date_default_timezone_set('Asia/Kolkata');
 $timestampIST = date('d F Y, g:i A \I\S\T');
 
-$allowedFormTypes = ['donation', 'volunteer', 'support', 'contact', 'partnership', 'newsletter', 'feedback', 'guide'];
+$allowedFormTypes = ['donation', 'volunteer', 'support', 'contact', 'partnership', 'newsletter', 'feedback', 'guide', 'coming_soon_feedback'];
 $errors = [];
 if (!in_array($formType, $allowedFormTypes, true)) $errors['form_type'] = ['Unsupported form type.'];
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) $errors['email'] = ['Please provide a valid email address.'];
@@ -197,6 +197,11 @@ if ($formType === 'donation') {
     $greeting = "Hello {$name},";
     $bodyText = "Thank you for sharing your valuable feedback regarding our healthcare services and awareness initiatives. Your insights help us continuously elevate our care and community reach.";
     $adminSubject = "[Avinya Care] Website Feedback Received — {$name}";
+} elseif ($formType === 'coming_soon_feedback') {
+    $userSubject = "Thank You for Your Interest in Avinya Care — Avinya Care Foundation";
+    $greeting = "Hello {$name},";
+    $bodyText = "Thank you for reaching out! We are currently working hard behind the scenes to launch our new healthcare platform. We have securely recorded your contact details and will notify you the moment our services go live.";
+    $adminSubject = "[Avinya Care] Coming Soon Subscription/Feedback — {$name}";
 } else {
     $userSubject = "We Have Received Your Message — Avinya Care Foundation";
     $greeting = "Hello {$name},";
