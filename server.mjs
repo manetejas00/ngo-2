@@ -2284,9 +2284,11 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
     return res.end(JSON.stringify({ status: 'error', message: 'Invalid request path.' }));
   }
   const normalizedPath = targetFile.replace(/\/+$/, '').toLowerCase();
-  if (normalizedPath === '/doctors' || normalizedPath === 'doctors') targetFile = '/doctors.html';
+  // TEMPORARY: Doctors module uses shared Coming Soon page until launch.
+  if (normalizedPath === '/doctors' || normalizedPath === 'doctors') targetFile = '/coming-soon.html';
   if (normalizedPath === '/crowdfunding' || normalizedPath === 'crowdfunding') targetFile = '/crowdfunding.html';
   if (normalizedPath === '/admin' || normalizedPath === 'admin') targetFile = '/admin.html';
+  if (normalizedPath === '/coming-soon' || normalizedPath === 'coming-soon') targetFile = '/coming-soon.html';
   const requestedFile = targetFile.startsWith('/') ? targetFile.slice(1) : targetFile;
   let filePath = resolve(__dirname, requestedFile);
 

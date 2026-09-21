@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coming Soon | Avinya Care Foundation</title>
+  <meta name="description" content="Avinya Care Foundation is a humanitarian organization dedicated to health awareness. This page is coming soon.">
+  <meta name="keywords" content="NGO, cancer care, coming soon, avinya care foundation">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="alternate icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="assets/logo-icon.png">
+
+  <!-- Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/styles.css?v=3.1">
+
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      font-family: var(--font-primary, 'Inter', sans-serif);
+      color: #111827;
+      background-color: #FFFFFF !important; /* White background */
+      overflow-x: hidden;
+    }
+    
+    .coming-soon-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-top: 60px; /* Space for navbar */
+      width: 100%;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .coming-soon-logo {
+      width: 100%;
+      max-width: 100px;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.05));
+    }
+    
+    /* 1. ANIMATED COMING SOON TEXT */
+    .gradient-title {
+      font-family: var(--font-primary, 'Manrope', sans-serif);
+      font-size: clamp(2.5rem, 8vw, 5.5rem);
+      font-weight: 800;
+      margin-bottom: 1rem;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      padding-bottom: 0.1em; /* Prevent descender clipping */
+      
+      /* Seamless gradient mapping colors from start to middle and back to start */
+      background: linear-gradient(
+        to right, 
+        #42f587 0%, 
+        #42a7f5 20%, 
+        #9942f5 40%, 
+        #f54293 60%, 
+        #f58442 80%,
+        #42f587 100%
+      );
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent; /* Fallback */
+      
+      /* Smooth, infinite animation */
+      animation: gradientFlow 5s linear infinite;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% center; }
+      100% { background-position: -200% center; }
+    }
+
+    /* Accessibility: Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .gradient-title {
+        animation: none;
+        background-position: left center;
+      }
+    }
+
+    .coming-soon-desc {
+      font-size: clamp(1rem, 3vw, 1.125rem);
+      color: #4B5563; /* Darker gray for readability on white */
+      max-width: 500px;
+      line-height: 1.6;
+      margin-bottom: 2.5rem;
+      font-weight: 400;
+      padding: 0 1rem;
+    }
+
+    /* Countdown Timer */
+    .countdown-wrapper {
+      display: flex;
+      gap: clamp(0.75rem, 3vw, 1.5rem);
+      margin-bottom: 3rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .countdown-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 4.5rem;
+    }
+    .countdown-value {
+      font-family: var(--font-primary, 'Manrope', sans-serif);
+      font-size: clamp(2rem, 6vw, 2.75rem);
+      font-weight: 700;
+      color: #111827; /* Dark text */
+      line-height: 1;
+    }
+    .countdown-label {
+      font-size: clamp(0.7rem, 2vw, 0.875rem);
+      color: #6B7280; /* Gray label */
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.5rem;
+    }
+
+    /* Email Notify Form */
+    .notify-form {
+      display: flex;
+      align-items: center;
+      background-color: #F3F4F6; /* Light gray input background */
+      border-radius: 9999px;
+      padding: 0.375rem;
+      padding-left: 1.5rem;
+      width: 100%;
+      max-width: 450px;
+      margin-bottom: 1rem;
+      border: 1px solid #E5E7EB;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+    
+    .notify-form:focus-within {
+      border-color: #D1D5DB;
+      box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.05);
+    }
+    
+    .notify-form.is-submitting {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    
+    .notify-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #111827;
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+      padding-right: 1rem;
+    }
+    
+    .notify-input::placeholder {
+      color: #9CA3AF;
+    }
+
+    .notify-btn {
+      background-color: #111827; /* Dark button on light theme */
+      color: #FFFFFF;
+      border: none;
+      border-radius: 9999px;
+      padding: 0.75rem 1.75rem;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+      font-family: inherit;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 120px;
+    }
+    
+    .notify-btn:hover:not(:disabled) {
+      background-color: #374151; /* Lighter dark for hover */
+      transform: scale(1.02);
+    }
+    
+    .notify-btn:focus-visible {
+      outline: 2px solid #374151;
+      outline-offset: 2px;
+    }
+
+    .notify-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+
+    /* Form Messages */
+    .form-message {
+      font-size: 0.875rem;
+      min-height: 1.25rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .form-message.success { color: #047857; } /* Green */
+    .form-message.error { color: #DC2626; } /* Red */
+    .form-message.hidden { visibility: hidden; }
+
+    .notify-hint {
+      font-size: 0.875rem;
+      color: #6B7280;
+      letter-spacing: 0.02em;
+    }
+
+    .return-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 2.5rem;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #4B5563;
+      text-decoration: none;
+      border: 1px solid #E5E7EB;
+      border-radius: 9999px;
+      transition: all 0.2s ease;
+      background-color: transparent;
+    }
+    .return-link:hover {
+      background-color: #F9FAFB;
+      color: #111827;
+      border-color: #D1D5DB;
+      transform: translateY(-1px);
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 480px) {
+      .notify-form {
+        flex-direction: column;
+        background: transparent;
+        border: none;
+        padding: 0;
+        gap: 0.75rem;
+      }
+      .notify-form:focus-within {
+        box-shadow: none;
+      }
+      .notify-input {
+        background-color: #F3F4F6;
+        border: 1px solid #E5E7EB;
+        border-radius: 9999px;
+        padding: 1rem 1.5rem;
+        text-align: center;
+      }
+      .notify-input:focus {
+        border-color: #D1D5DB;
+        box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.05);
+      }
+      .notify-btn {
+        width: 100%;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Layout Injector for Navbar -->
+  <div id="navbar-placeholder"></div>
+
+  <main class="coming-soon-container">
+    <img src="assets/logo-emblem.png" alt="Avinya Care Foundation Logo" class="coming-soon-logo">
+    <h1 class="gradient-title">Coming Soon</h1>
+    <p class="coming-soon-desc">From raising health awareness to creating a supportive and compassionate community.</p>
+    
+    <!-- Countdown Timer -->
+    <div class="countdown-wrapper" id="countdown-container" aria-live="polite">
+      <div class="countdown-item">
+        <span class="countdown-value" id="cd-days">00</span>
+        <span class="countdown-label">Days</span>
+      </div>
+      <div class="countdown-item">
+        <span class="countdown-value" id="cd-hours">00</span>
+        <span class="countdown-label">Hours</span>
+      </div>
+      <div class="countdown-item">
+        <span class="countdown-value" id="cd-minutes">00</span>
+        <span class="countdown-label">Minutes</span>
+      </div>
+      <div class="countdown-item">
+        <span class="countdown-value" id="cd-seconds">00</span>
+        <span class="countdown-label">Seconds</span>
+      </div>
+    </div>
+
+    <!-- Notify Form (Backend Ready) -->
+    <form id="notify-form" class="notify-form" novalidate aria-label="Subscribe for launch notifications">
+      <input 
+        type="email" 
+        id="notify-email" 
+        class="notify-input" 
+        placeholder="Please enter your email address" 
+        aria-label="Email address"
+        autocomplete="email"
+        required
+      >
+      <button type="submit" id="notify-submit" class="notify-btn">Notify Me</button>
+    </form>
+    
+    <div id="form-message" class="form-message hidden" role="alert" aria-live="assertive"></div>
+    
+    <div class="notify-hint">- Notify me when it is launched -</div>
+    
+    <a href="/" class="return-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Return to Website
+    </a>
+  </main>
+
+  <!-- Layout Injector for Footer -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Scripts -->
+  <script src="js/components/layout-injector.js"></script>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      /* =====================================================================
+         COUNTDOWN TIMER CONTROLLER
+         Clean, decoupled, memory-leak free, supports backend/config injection
+         ===================================================================== */
+      const CountdownController = {
+        intervalId: null,
+        
+        // This can be set via an API fetch, CMS, or environment variable.
+        // Falling back to 14 days from now for demonstration.
+        getLaunchDate: async () => {
+          // Example: const response = await fetch('/api/launch-config'); return new Date(response.json().launchDate);
+          
+          // MOCK IMPLEMENTATION: Persist the target date so it doesn't reset on page refresh
+          let savedDate = localStorage.getItem('avinya_launch_date');
+          if (!savedDate) {
+            const mockDate = new Date();
+            mockDate.setDate(mockDate.getDate() + 14);
+            savedDate = mockDate.toISOString();
+            localStorage.setItem('avinya_launch_date', savedDate);
+          }
+          return new Date(savedDate);
+        },
+
+        init: async function() {
+          const launchDate = await this.getLaunchDate();
+          
+          if (!(launchDate instanceof Date) || isNaN(launchDate.getTime())) {
+            console.error("Invalid launch date provided to countdown.");
+            return;
+          }
+
+          this.tick(launchDate);
+          this.intervalId = setInterval(() => this.tick(launchDate), 1000);
+
+          // Cleanup interval on page unload to prevent memory leaks
+          window.addEventListener('beforeunload', () => this.cleanup());
+        },
+
+        tick: function(targetDate) {
+          const now = new Date().getTime();
+          const distance = targetDate.getTime() - now;
+
+          if (distance <= 0) {
+            this.handleReachedZero();
+            return;
+          }
+
+          const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const s = Math.floor((distance % (1000 * 60)) / 1000);
+
+          this.updateDOM(d, h, m, s);
+        },
+
+        updateDOM: function(d, h, m, s) {
+          const elDays = document.getElementById("cd-days");
+          const elHours = document.getElementById("cd-hours");
+          const elMinutes = document.getElementById("cd-minutes");
+          const elSeconds = document.getElementById("cd-seconds");
+
+          if (elDays && elDays.textContent !== d.toString()) elDays.textContent = d.toString().padStart(2, '0');
+          if (elHours && elHours.textContent !== h.toString()) elHours.textContent = h.toString().padStart(2, '0');
+          if (elMinutes && elMinutes.textContent !== m.toString()) elMinutes.textContent = m.toString().padStart(2, '0');
+          if (elSeconds && elSeconds.textContent !== s.toString()) elSeconds.textContent = s.toString().padStart(2, '0');
+        },
+
+        handleReachedZero: function() {
+          this.cleanup();
+          const container = document.getElementById("countdown-container");
+          if (container) {
+            container.innerHTML = "<div style='font-size: 1.5rem; font-weight: bold; color: #111827;'>We are live!</div>";
+          }
+        },
+
+        cleanup: function() {
+          if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+          }
+        }
+      };
+
+      CountdownController.init();
+
+
+      /* =====================================================================
+         NOTIFY FORM CONTROLLER
+         Backend-ready, handles validation, loading states, and API simulation
+         ===================================================================== */
+      const NotifyController = {
+        form: document.getElementById('notify-form'),
+        emailInput: document.getElementById('notify-email'),
+        submitBtn: document.getElementById('notify-submit'),
+        messageBox: document.getElementById('form-message'),
+
+        init: function() {
+          if (this.form) {
+            this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+          }
+        },
+
+        validateEmail: function(email) {
+          // Robust HTML5-like email regex
+          const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+          return re.test(email);
+        },
+
+        showMessage: function(text, type) {
+          this.messageBox.textContent = text;
+          this.messageBox.className = `form-message ${type}`;
+        },
+
+        clearMessage: function() {
+          this.messageBox.textContent = '';
+          this.messageBox.className = 'form-message hidden';
+        },
+
+        submitToBackend: async function(email) {
+          // Connect to the existing backend API, using the 'coming_soon_feedback' template
+          // We provide default values for name, phone, and message to satisfy backend validation
+          const payload = {
+            form_type: 'coming_soon_feedback',
+            email: email,
+            name: 'Subscriber',
+            phone: '9999999999',
+            message: 'Subscribed via Coming Soon page notification form.'
+          };
+
+          const response = await fetch('/api/submit-form', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          
+          return response;
+        },
+
+        handleSubmit: async function(e) {
+          e.preventDefault();
+          this.clearMessage();
+          
+          const email = this.emailInput.value.trim();
+          
+          if (!email) {
+            this.showMessage("Please enter your email address.", "error");
+            this.emailInput.focus();
+            return;
+          }
+
+          if (!this.validateEmail(email)) {
+            this.showMessage("Please enter a valid email address.", "error");
+            this.emailInput.focus();
+            return;
+          }
+
+          // Loading state
+          this.form.classList.add('is-submitting');
+          this.submitBtn.disabled = true;
+          this.submitBtn.textContent = 'Submitting...';
+          this.emailInput.disabled = true;
+
+          try {
+            const response = await this.submitToBackend(email);
+            
+            if (response.ok) {
+              this.showMessage("Thank you! We'll notify you when we launch.", "success");
+              this.emailInput.value = '';
+            } else {
+              throw new Error("Server rejected the submission");
+            }
+          } catch (error) {
+            console.error("Submission failed:", error);
+            this.showMessage("Oops! Something went wrong. Please try again.", "error");
+          } finally {
+            // Restore state
+            this.form.classList.remove('is-submitting');
+            this.submitBtn.disabled = false;
+            this.submitBtn.textContent = 'Notify Me';
+            this.emailInput.disabled = false;
+          }
+        }
+      };
+
+      NotifyController.init();
+    });
+  </script>
+</body>
+</html>

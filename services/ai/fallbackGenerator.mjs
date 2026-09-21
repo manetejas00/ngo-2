@@ -141,13 +141,13 @@ export function generateFallbackEmails(formData, formType, submissionId, timesta
         user: {
           subject: `Thank You for Your Interest in Avinya Care`,
           greeting: `Dear ${name},`,
-          body: `Thank you for sharing your contact details and feedback. Our online payment gateway is currently under maintenance and will be live shortly.\n\nWe appreciate your patience and will notify you as soon as we resume accepting online donations.\n\nThank you for standing with us in spreading health awareness across India.`,
+          body: `Thank you for sharing your contact details and feedback. We are currently working hard behind the scenes and our new features will be live shortly.\n\nWe appreciate your patience and will notify you as soon as we officially launch.\n\nThank you for standing with us in spreading health awareness across India.`,
           closing: "With appreciation,\nAvinya Care Foundation Team"
         },
         admin: {
-          subject: `Coming Soon Payment Feedback — ${name}`,
-          summary: `A user attempted to donate but reached the Coming Soon modal. They submitted their details:\n\nName: ${name}\nEmail: ${email}\nMobile: ${phone}${message ? `\nFeedback: "${message}"` : ''}`,
-          recommendedAction: "Keep their details on file to notify them once the payment gateway is live.",
+          subject: `Coming Soon Notification Signup — ${name}`,
+          summary: `A user reached a Coming Soon page/modal and submitted their details:\n\nName: ${name}\nEmail: ${email}\nMobile: ${phone}${message ? `\nFeedback: "${message}"` : ''}`,
+          recommendedAction: "Keep their details on file to notify them once we launch.",
           closing: "Avinya Care Admin Desk"
         }
       };

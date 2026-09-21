@@ -205,7 +205,7 @@ class ModalManager {
     `;
 
     try {
-      const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port && window.location.port !== '3000' ? 'http://' + 'localhost' + ':3000' : '';
+      const apiBase = '';
       const response = await fetch(apiBase + '/api/submit-form', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -249,79 +249,70 @@ class ModalManager {
         const hasDeliveryWarning = delivery.status === 'FAILED' || delivery.status === 'PARTIAL' || Boolean(delivery.errorMessage);
 
         container.innerHTML = `
-          <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-          <div style="text-align: center; padding: 2rem 1rem;">
-            <div style="width: 68px; height: 68px; background: rgba(98, 181, 159, 0.2); border-radius: 50%; color: #087F73; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 1.25rem;">✓</div>
-            <span class="category-tag" style="margin-bottom: 0.5rem; display: inline-block;">${isAI ? '✨ Dynamic AI Email Generated' : '✓ Submission Confirmed'}</span>
-            <h2 style="font-size: 1.8rem; margin-bottom: 0.75rem; color: #111817;">${title || 'Dhanyawad!'}</h2>
-            <p style="color: var(--text-dark-muted); font-size: 1.05rem; margin-bottom: 1.25rem; line-height: 1.6;">
-              ${userEmail.greeting ? `<strong>${userEmail.greeting}</strong><br>` : ''}
+          <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" style="top: 1rem; right: 1rem; font-size: 1rem; cursor: pointer; color: #6B7280; z-index: 10; background: #F3F4F6; border: none; border-radius: 50%; width: 32px; height: 32px; font-weight: bold;">✕</button>
+          <div style="text-align: center; padding: 1.5rem 1rem 0;">
+            <div style="width: 64px; height: 64px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 50%; color: #166534; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.5rem; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.03));">✓</div>
+            <span style="font-size: 0.75rem; font-weight: 700; color: #166534; background: #DCFCE7; padding: 0.35rem 0.75rem; border-radius: 9999px; letter-spacing: 0.05em; text-transform: uppercase;">
+              ${isAI ? '✨ Dynamic AI Generated' : '✓ Submission Confirmed'}
+            </span>
+            <h2 style="font-size: 1.8rem; font-weight: 800; margin: 1rem 0 0.5rem; color: #111827; font-family: var(--font-primary, 'Manrope', sans-serif); letter-spacing: -0.02em;">${title || 'Thank You!'}</h2>
+            <p style="color: #4B5563; font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.6;">
+              ${userEmail.greeting ? `<strong style="color:#111827;">${userEmail.greeting}</strong><br>` : ''}
               ${resData.message || 'We have received your submission and sent a confirmation email to your address.'}
             </p>
 
-            <!-- Live Email Dispatch Status (Success / Error Indicators) -->
-            <div style="background: ${hasDeliveryWarning ? '#FFFBEB' : '#F0FDF4'}; border: 1px solid ${hasDeliveryWarning ? '#FDE68A' : '#BBF7D0'}; border-radius: 12px; padding: 14px 16px; margin-bottom: 1.25rem; text-align: left; font-size: 0.85rem;">
-              <div style="font-weight: 700; color: ${hasDeliveryWarning ? '#B45309' : '#166534'}; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
-                <span>${hasDeliveryWarning ? '⚠️ Email Dispatch Status' : '✓ Live Email Delivery Status'}</span>
-                <span style="font-size: 0.75rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: ${isUserSent && isAdminSent ? '#DCFCE7; color: #166534;' : '#FEF3C7; color: #92400E;'}">
+            <!-- Live Email Dispatch Status -->
+            <div style="background: ${hasDeliveryWarning ? '#FFFBEB' : '#F9FAFB'}; border: 1px solid ${hasDeliveryWarning ? '#FDE68A' : '#E5E7EB'}; border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; text-align: left; font-size: 0.85rem;">
+              <div style="font-weight: 700; color: ${hasDeliveryWarning ? '#B45309' : '#111827'}; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+                <span>${hasDeliveryWarning ? '⚠️ Delivery Notice' : 'Live Dispatch Status'}</span>
+                <span style="font-size: 0.7rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 9999px; background: ${isUserSent && isAdminSent ? '#E5E7EB; color: #374151;' : '#FEF3C7; color: #92400E;'}">
                   ${delivery.status || 'SENT'}
                 </span>
               </div>
-              <div style="color: ${hasDeliveryWarning ? '#92400E' : '#15803D'}; line-height: 1.6;">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span>${isUserSent ? '✅' : '❌'}</span>
-                  <span>User Email (<strong>${payload.email || 'Recipient'}</strong>): ${isUserSent ? 'Dispatched' : (delivery.userEmailError || 'Delivery Failed')}</span>
+              <div style="color: ${hasDeliveryWarning ? '#92400E' : '#4B5563'}; line-height: 1.6;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="color: ${isUserSent ? '#10B981' : '#EF4444'}; font-size: 1.1rem;">${isUserSent ? '•' : '×'}</span>
+                  <span>User (<strong>${payload.email || 'Recipient'}</strong>): ${isUserSent ? 'Sent' : (delivery.userEmailError || 'Failed')}</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                  <span>${isAdminSent ? '✅' : '❌'}</span>
-                  <span>Operations Alert (<strong>${delivery.adminEmailRecipient || 'info@test.avinyacarefoundation.org'}</strong>): ${isAdminSent ? 'Dispatched' : (delivery.adminEmailError || 'Delivery Failed')}</span>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                  <span style="color: ${isAdminSent ? '#10B981' : '#EF4444'}; font-size: 1.1rem;">${isAdminSent ? '•' : '×'}</span>
+                  <span>System (<strong>${delivery.adminEmailRecipient || 'info@test.avinyacarefoundation.org'}</strong>): ${isAdminSent ? 'Sent' : (delivery.adminEmailError || 'Failed')}</span>
                 </div>
-                ${delivery.successMessage ? `<div style="font-size: 0.78rem; color: #166534; margin-top: 6px; border-top: 1px dashed #BBF7D0; padding-top: 4px;">✓ ${delivery.successMessage}</div>` : ''}
-                ${delivery.errorMessage ? `<div style="font-size: 0.78rem; color: #DC2626; margin-top: 6px; border-top: 1px dashed #FECACA; padding-top: 4px;">⚠ ${delivery.errorMessage}</div>` : ''}
               </div>
             </div>
 
             <!-- Email Content Preview Card -->
-            <div style="background: var(--bg-light); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; text-align: left; font-size: 0.9rem; border: 1px solid var(--border-light);">
-              <div style="font-weight: 700; color: #087F73; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
-                <span>📧 Confirmation Email Preview</span>
-                <span style="font-size: 0.75rem; background: #087F73; color: white; padding: 2px 8px; border-radius: 10px;">${resData.submissionId}</span>
+            <div style="background: #FFFFFF; border-radius: 16px; padding: 1.25rem; margin-bottom: 2rem; text-align: left; font-size: 0.9rem; border: 1px solid #E5E7EB; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+              <div style="font-weight: 600; color: #6B7280; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                <span>Email Preview</span>
+                <span style="background: #F3F4F6; padding: 0.15rem 0.5rem; border-radius: 9999px; color: #4B5563;">${resData.submissionId}</span>
               </div>
-              <div style="font-weight: 600; color: #111817; margin-bottom: 4px;">Subject: ${userEmail.subject || 'Submission Confirmation'}</div>
-              <div style="color: var(--text-dark-muted); line-height: 1.5; font-size: 0.85rem; font-style: italic;">
+              <div style="font-weight: 700; color: #111827; margin-bottom: 0.5rem; font-size: 0.95rem;">Subject: ${userEmail.subject || 'Submission Confirmation'}</div>
+              <div style="color: #6B7280; line-height: 1.6; font-size: 0.85rem;">
                 "${userEmail.body ? userEmail.body.slice(0, 180).replace(/<[^>]*>?/gm, '') + '...' : 'A personalized email response has been generated.'}"
               </div>
             </div>
 
-            <!-- PDF Download Action for Donations / Guides -->
+            <!-- Action Buttons -->
             ${isConfirmedDonation ? `
-              <div style="margin-bottom: 1.25rem;">
-                <button class="btn-primary" onclick="window.AvinyaPdf.generateDonationReceiptPDF({
-                  name: '${(payload.name || '').replace(/'/g, "\\'")}',
-                  email: '${(payload.email || '').replace(/'/g, "\\'")}',
-                  phone: '${(payload.phone || '').replace(/'/g, "\\'")}',
-                  pan: '${(payload.pan || '').replace(/'/g, "\\'")}',
-                  amount: ${payload.amount || 1000},
-                  transaction_id: '${payload.transaction_id || resData.submissionId}',
-                  receiptNo: '${resData.submissionId}'
-                })" style="width: 100%; justify-content: center; background: #087F73; margin-bottom: 0.5rem;">
-                  <span>📄 Download Official 80G Tax Receipt (PDF)</span>
-                </button>
-                <div style="font-size: 0.8rem; color: #166534; font-weight: 600;">✓ Form 10BE compliant official letterhead receipt</div>
-              </div>
-            ` : formType === 'donation' ? `
-              <div style="margin-bottom: 1.25rem; background:#FFF7ED; border:1px solid #FED7AA; color:#9A3412; border-radius:10px; padding:0.9rem; font-size:0.88rem; line-height:1.45;">
-                Your donation is pending payment verification. An official receipt will be available only after the payment provider confirms it.
-              </div>
+              <button onclick="window.AvinyaPdf.generateDonationReceiptPDF({
+                name: '${(payload.name || '').replace(/'/g, "\\'")}',
+                email: '${(payload.email || '').replace(/'/g, "\\'")}',
+                phone: '${(payload.phone || '').replace(/'/g, "\\'")}',
+                pan: '${(payload.pan || '').replace(/'/g, "\\'")}',
+                amount: ${payload.amount || 1000},
+                transaction_id: '${payload.transaction_id || resData.submissionId}',
+                receiptNo: '${resData.submissionId}'
+              })" style="width: 100%; display: flex; align-items: center; justify-content: center; padding: 1rem; border-radius: 9999px; background: #F3F4F6; color: #111827; border: 1px solid #E5E7EB; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-bottom: 1rem; transition: all 0.2s;">
+                📄 Download Official 80G Receipt
+              </button>
             ` : formType === 'guide' ? `
-              <div style="margin-bottom: 1.25rem;">
-                <button class="btn-primary" onclick="window.AvinyaPdf.generateAwarenessGuidePDF()" style="width: 100%; justify-content: center; background: #087F73;">
-                  <span>📄 Download Cancer Awareness Toolkit PDF</span>
-                </button>
-              </div>
+              <button onclick="window.AvinyaPdf.generateAwarenessGuidePDF()" style="width: 100%; display: flex; align-items: center; justify-content: center; padding: 1rem; border-radius: 9999px; background: #F3F4F6; color: #111827; border: 1px solid #E5E7EB; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-bottom: 1rem; transition: all 0.2s;">
+                📄 Download Cancer Toolkit PDF
+              </button>
             ` : ''}
 
-            <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="width: 100%; justify-content: center; ${formType === 'donation' ? 'background: #475569;' : ''}">
+            <button onclick="window.AvinyaModals.closeAll()" style="width: 100%; display: flex; align-items: center; justify-content: center; padding: 1rem; border-radius: 9999px; background: #111827; color: #FFFFFF; border: none; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s ease;">
               Return to Website
             </button>
           </div>
@@ -331,15 +322,20 @@ class ModalManager {
       }
     } catch (err) {
       container.innerHTML = `
-        <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
-        <div style="text-align: center; padding: 2rem 1rem;">
-          <div style="width: 64px; height: 64px; background: #FEE2E2; border-radius: 50%; color: #DC2626; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1rem;">!</div>
-          <h3 style="font-size: 1.5rem; margin-bottom: 0.75rem; color: #111817;">Submission Failed</h3>
-          <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 10px; padding: 12px 16px; margin-bottom: 1.5rem; text-align: left; font-size: 0.9rem; color: #991B1B; line-height: 1.5;">
-            <strong>Error Details:</strong><br>
+        <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" style="top: 1rem; right: 1rem; font-size: 1rem; cursor: pointer; color: #6B7280; z-index: 10; background: #F3F4F6; border: none; border-radius: 50%; width: 32px; height: 32px; font-weight: bold;">✕</button>
+        <div style="text-align: center; padding: 1.5rem 1rem 0;">
+          <div style="width: 64px; height: 64px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 50%; color: #EF4444; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 1.5rem; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.03));">!</div>
+          <span style="font-size: 0.75rem; font-weight: 700; color: #B91C1C; background: #FEE2E2; padding: 0.35rem 0.75rem; border-radius: 9999px; letter-spacing: 0.05em; text-transform: uppercase;">
+            Submission Failed
+          </span>
+          <h2 style="font-size: 1.8rem; font-weight: 800; margin: 1rem 0 0.5rem; color: #111827; font-family: var(--font-primary, 'Manrope', sans-serif); letter-spacing: -0.02em;">Oops!</h2>
+          <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 16px; padding: 1.25rem; margin-bottom: 2rem; text-align: left; font-size: 0.9rem; color: #991B1B; line-height: 1.6;">
+            <div style="font-weight: 700; margin-bottom: 0.5rem; color: #7F1D1D;">Error Details:</div>
             ${err.message || 'Could not submit form. Please check your network connection or try again.'}
           </div>
-          <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="width: 100%; justify-content: center;">Close</button>
+          <button onclick="window.AvinyaModals.closeAll()" style="width: 100%; display: flex; align-items: center; justify-content: center; padding: 1rem; border-radius: 9999px; background: #111827; color: #FFFFFF; border: none; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s ease;">
+            Close & Try Again
+          </button>
         </div>
       `;
     }
