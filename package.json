@@ -1,6 +1,6 @@
 {
   "name": "avinya-care-ngo",
-  "version": "1.0.0",
+  "version": "3.2.0",
   "description": "Avinya Care Foundation - Modern Healthcare & Cancer Awareness Platform",
   "main": "server.mjs",
   "type": "module",
