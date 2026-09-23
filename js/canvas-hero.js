@@ -172,37 +172,79 @@ class HeroCanvasEngine {
         const width = this.canvas.width;
         const height = this.canvas.height;
 
-        // Calculate object-fit: cover scaling
         const imgRatio = currentImg.naturalWidth / currentImg.naturalHeight;
         const canvasRatio = width / height;
 
-        let drawWidth, drawHeight, offsetX, offsetY;
-
-        if (canvasRatio > imgRatio) {
-          drawWidth = width;
-          drawHeight = width / imgRatio;
-          offsetX = 0;
-          offsetY = (height - drawHeight) / 2;
-        } else {
-          drawWidth = height * imgRatio;
-          drawHeight = height;
-          offsetX = (width - drawWidth) / 2;
-          offsetY = 0;
-        }
-
-        // Draw image frame
-        this.ctx.drawImage(currentImg, offsetX, offsetY, drawWidth, drawHeight);
-
-        // Ultra-soft vignette overlay (leaves center 100% crystal clear)
-        const vignetteGrad = this.ctx.createRadialGradient(
-          width / 2, height / 2, width * 0.45,
-          width / 2, height / 2, width * 0.9
-        );
-        vignetteGrad.addColorStop(0, 'rgba(11, 13, 12, 0)');
-        vignetteGrad.addColorStop(1, 'rgba(11, 13, 12, 0.35)');
-
-        this.ctx.fillStyle = vignetteGrad;
+        // Clear background with deep black
+        this.ctx.fillStyle = '#0A0A0A';
         this.ctx.fillRect(0, 0, width, height);
+
+        if (canvasRatio < 1.05) {
+          // PORTRAIT / MOBILE VIEWPORTS: Responsive Fit-Contain (100% visible, zero frame cutting)
+
+          // Step 1: Background ambient ambient fill (soft cover glow)
+          const bgW = height * imgRatio;
+          const bgH = height;
+          const bgX = (width - bgW) / 2;
+          const bgY = 0;
+
+          this.ctx.save();
+          this.ctx.globalAlpha = 0.35;
+          this.ctx.drawImage(currentImg, bgX, bgY, bgW, bgH);
+          this.ctx.restore();
+
+          // Step 2: Draw main crisp frame (fit horizontally, zero side cropping)
+          const fitWidth = width;
+          const fitHeight = width / imgRatio;
+          const fitX = 0;
+          // Position frame in upper-center (top 42%) so bottom floating text sits cleanly below
+          const fitY = Math.max(height * 0.10, (height * 0.42) - (fitHeight / 2));
+
+          this.ctx.drawImage(currentImg, fitX, fitY, fitWidth, fitHeight);
+
+          // Step 3: Soft subtle edge gradients for organic blending
+          const topFade = this.ctx.createLinearGradient(0, fitY, 0, fitY + (fitHeight * 0.2));
+          topFade.addColorStop(0, 'rgba(10, 10, 10, 0.35)');
+          topFade.addColorStop(1, 'transparent');
+          this.ctx.fillStyle = topFade;
+          this.ctx.fillRect(fitX, fitY, fitWidth, fitHeight * 0.2);
+
+          const bottomFade = this.ctx.createLinearGradient(0, fitY + (fitHeight * 0.8), 0, fitY + fitHeight);
+          bottomFade.addColorStop(0, 'transparent');
+          bottomFade.addColorStop(1, 'rgba(10, 10, 10, 0.55)');
+          this.ctx.fillStyle = bottomFade;
+          this.ctx.fillRect(fitX, fitY + (fitHeight * 0.8), fitWidth, fitHeight * 0.2);
+
+        } else {
+          // LANDSCAPE / DESKTOP WIDESCREEN: Full cover scaling
+          let drawWidth, drawHeight, offsetX, offsetY;
+
+          if (canvasRatio > imgRatio) {
+            drawWidth = width;
+            drawHeight = width / imgRatio;
+            offsetX = 0;
+            offsetY = (height - drawHeight) / 2;
+          } else {
+            drawWidth = height * imgRatio;
+            drawHeight = height;
+            offsetX = (width - drawWidth) / 2;
+            offsetY = 0;
+          }
+
+          // Draw main frame
+          this.ctx.drawImage(currentImg, offsetX, offsetY, drawWidth, drawHeight);
+
+          // Soft edge vignette
+          const vignetteGrad = this.ctx.createRadialGradient(
+            width / 2, height / 2, width * 0.45,
+            width / 2, height / 2, width * 0.9
+          );
+          vignetteGrad.addColorStop(0, 'rgba(11, 13, 12, 0)');
+          vignetteGrad.addColorStop(1, 'rgba(11, 13, 12, 0.35)');
+
+          this.ctx.fillStyle = vignetteGrad;
+          this.ctx.fillRect(0, 0, width, height);
+        }
 
         this.lastDrawnFrameIndex = frameToDrawIndex;
         this.needsRedraw = false;
