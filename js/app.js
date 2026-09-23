@@ -104,25 +104,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 7-Stage Hero Narrative Card Scroll Progression
+  // 7-Stage Hero Narrative Card Scroll Progression (Mapped to 0.90 Animation Phase + Brief Final Hold)
   let activeCardId = null;
   function updateHeroNarrativeCards(p, cards) {
     let currentId = null;
 
-    if (p >= 0 && p < 0.14) {
+    if (p >= 0 && p < 0.11) {
       currentId = 'card-1';
-    } else if (p >= 0.14 && p < 0.28) {
+    } else if (p >= 0.13 && p < 0.24) {
       currentId = 'card-2';
-    } else if (p >= 0.28 && p < 0.42) {
+    } else if (p >= 0.26 && p < 0.37) {
       currentId = 'card-3';
-    } else if (p >= 0.42 && p < 0.56) {
+    } else if (p >= 0.39 && p < 0.50) {
       currentId = 'card-4';
-    } else if (p >= 0.56 && p < 0.70) {
+    } else if (p >= 0.52 && p < 0.63) {
       currentId = 'card-5';
-    } else if (p >= 0.70 && p < 0.86) {
+    } else if (p >= 0.65 && p < 0.76) {
       currentId = 'card-6';
-    } else if (p >= 0.86 && p <= 1.0) {
-      currentId = 'card-7';
+    } else if (p >= 0.78 && p <= 1.0) {
+      currentId = 'card-7'; // Stays active through brief final-frame hold phase until unpin
     }
 
     if (currentId !== activeCardId) {

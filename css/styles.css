@@ -590,6 +590,7 @@ body.mobile-nav-open {
   z-index: 1;
 }
 
+/* Light edge vignette only - central video stays 100% visible */
 .hero-cinematic-overlay {
   position: absolute;
   top: 0;
@@ -597,59 +598,82 @@ body.mobile-nav-open {
   width: 100%;
   height: 100%;
   z-index: 2;
-  background: radial-gradient(circle at center, rgba(10, 10, 10, 0.2) 0%, rgba(10, 10, 10, 0.75) 75%, rgba(10, 10, 10, 0.98) 100%),
-              linear-gradient(to bottom, rgba(10, 10, 10, 0.4) 0%, transparent 35%, transparent 65%, rgba(10, 10, 10, 0.98) 100%);
+  background: linear-gradient(to bottom, rgba(10, 10, 10, 0.45) 0%, transparent 22%, transparent 78%, rgba(10, 10, 10, 0.92) 100%);
   pointer-events: none;
 }
 
 .hero-overlay {
   position: relative;
   z-index: 3;
-  width: min(1100px, 90%);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
+/* Seamless floating typography at the bottom - NO DARK BOX CONTAINER */
 .hero-narrative-card {
   position: absolute;
-  top: 50%;
+  bottom: 3.5rem;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.96);
-  width: 100%;
-  max-width: 960px;
+  top: auto;
+  right: auto;
+  transform: translateX(-50%) translateY(25px) scale(0.96);
+  width: min(900px, 92vw);
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
   opacity: 0;
   visibility: hidden;
   will-change: opacity, transform;
-  transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out), visibility 180ms;
+  transition: opacity 300ms var(--ease-out), transform 300ms var(--ease-out), visibility 300ms;
   pointer-events: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  text-align: center;
 }
 
 .hero-narrative-card.active {
   opacity: 1;
   visibility: visible;
-  transform: translate(-50%, -50%) scale(1);
   pointer-events: auto;
-  transition: opacity 280ms var(--ease-out), transform 280ms var(--ease-out), visibility 0s;
+  transform: translateX(-50%) translateY(0) scale(1);
+  transition: opacity 320ms var(--ease-out), transform 320ms var(--ease-out), visibility 0s;
+}
+
+/* Individual Card Overrides - All unified floating seamlessly at bottom */
+#card-1, #card-2, #card-3, #card-4, #card-5, #card-6, #card-7 {
+  bottom: 3.5rem;
+  left: 50%;
+  top: auto;
+  right: auto;
+  transform: translateX(-50%) translateY(25px) scale(0.96);
+  text-align: center;
+  align-items: center;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+#card-1.active, #card-2.active, #card-3.active, #card-4.active, #card-5.active, #card-6.active, #card-7.active {
+  transform: translateX(-50%) translateY(0) scale(1);
 }
 
 .hero-title {
-  font-size: var(--hero-title-size);
+  font-size: clamp(1.75rem, 3.8vw, 2.85rem);
   font-weight: 800;
   color: #FFFFFF;
-  line-height: 1.05;
-  letter-spacing: -0.04em;
-  margin-bottom: clamp(1.8rem, 3vw, 2.75rem);
-  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
-  max-width: 940px;
-  margin-left: auto;
-  margin-right: auto;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  margin-top: 0.6rem;
+  margin-bottom: 1.25rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 4px 25px rgba(0, 0, 0, 0.85), 0 8px 45px rgba(0, 0, 0, 0.75);
+  max-width: 100%;
   text-wrap: balance;
 }
 
@@ -663,6 +687,49 @@ body.mobile-nav-open {
   justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+/* Responsive Media Queries for Seamless Floating Hero Cards */
+@media (max-width: 1024px) {
+  .hero-narrative-card,
+  #card-1, #card-2, #card-3, #card-4, #card-5, #card-6, #card-7 {
+    width: min(780px, 92vw);
+    bottom: 2.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-narrative-card,
+  #card-1, #card-2, #card-3, #card-4, #card-5, #card-6, #card-7 {
+    left: 4% !important;
+    right: 4% !important;
+    bottom: 2rem !important;
+    top: auto !important;
+    width: 92% !important;
+    max-width: none !important;
+    transform: translateX(0) translateY(15px) scale(0.98) !important;
+    text-align: center !important;
+    align-items: center !important;
+    padding: 0 !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .hero-narrative-card.active,
+  #card-1.active, #card-2.active, #card-3.active, #card-4.active, #card-5.active, #card-6.active, #card-7.active {
+    transform: translateX(0) translateY(0) scale(1) !important;
+  }
+  .hero-title {
+    font-size: clamp(1.4rem, 5.2vw, 1.9rem) !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 1rem !important;
+  }
+  .hero-cta-group {
+    justify-content: center !important;
+    width: 100%;
+  }
 }
 
 .scroll-indicator {

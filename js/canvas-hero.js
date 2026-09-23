@@ -9,7 +9,7 @@ class HeroCanvasEngine {
     if (!this.canvas) return;
     this.ctx = this.canvas.getContext('2d', { alpha: false }); // Optimize context for fast rendering
 
-    this.frameCount = 240;
+    this.frameCount = 289;
     this.images = new Array(this.frameCount);
     this.imagesLoadedCount = 0;
     this.currentFrameIndex = 0;
@@ -119,9 +119,13 @@ class HeroCanvasEngine {
     const newProgress = Math.max(0, Math.min(1, progress));
     this.scrollProgress = newProgress;
 
+    // Split scroll distance: Animation phase (0.0 to 0.90) -> Brief hold phase (0.90 to 1.0)
+    const holdStartProgress = 0.90;
+    const animProgress = Math.min(1, newProgress / holdStartProgress);
+
     const newTarget = Math.min(
       this.frameCount - 1,
-      Math.floor(this.scrollProgress * (this.frameCount - 1))
+      Math.floor(animProgress * (this.frameCount - 1))
     );
 
     if (newTarget !== this.targetFrameIndex || this.needsRedraw) {
@@ -189,13 +193,13 @@ class HeroCanvasEngine {
         // Draw image frame
         this.ctx.drawImage(currentImg, offsetX, offsetY, drawWidth, drawHeight);
 
-        // Soft vignette overlay
+        // Ultra-soft vignette overlay (leaves center 100% crystal clear)
         const vignetteGrad = this.ctx.createRadialGradient(
-          width / 2, height / 2, width * 0.35,
-          width / 2, height / 2, width * 0.85
+          width / 2, height / 2, width * 0.45,
+          width / 2, height / 2, width * 0.9
         );
-        vignetteGrad.addColorStop(0, 'rgba(11, 13, 12, 0.1)');
-        vignetteGrad.addColorStop(1, 'rgba(11, 13, 12, 0.65)');
+        vignetteGrad.addColorStop(0, 'rgba(11, 13, 12, 0)');
+        vignetteGrad.addColorStop(1, 'rgba(11, 13, 12, 0.35)');
 
         this.ctx.fillStyle = vignetteGrad;
         this.ctx.fillRect(0, 0, width, height);
