@@ -1,0 +1,267 @@
+/* ==========================================================================
+   AVINYA CARE FOUNDATION — Premium GSAP Radial FAB Menu (High-Contrast Edition)
+   Deep Black & Gold Accent, Crisp 100% Visible White/Gold Line Icons, Compact Arc
+   ========================================================================== */
+
+/* Container fixed at bottom-right corner */
+.radial-fab-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9990;
+  width: 56px;
+  height: 56px;
+  pointer-events: none; /* Allows click-through when closed, re-enabled on buttons */
+  font-family: var(--font-primary, 'Inter', sans-serif);
+}
+
+/* Base button & item common styles */
+.radial-fab-btn,
+.radial-action-item {
+  pointer-events: auto;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  text-decoration: none;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 250ms ease, border-color 250ms ease, box-shadow 250ms ease, color 250ms ease;
+}
+
+/* Focus visible accessibility outline */
+.radial-fab-btn:focus-visible,
+.radial-action-item:focus-visible {
+  outline: 2px solid #FFD700;
+  outline-offset: 3px;
+}
+
+/* Main Toggle Floating Action Button */
+.radial-fab-main-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 56px;
+  height: 56px;
+  background: #0A0A0A;
+  border: 2px solid #D4AF37;
+  color: #FFFFFF;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.4);
+  z-index: 20;
+}
+
+.radial-fab-main-btn:hover {
+  background: #141414;
+  border-color: #FFD700;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), 0 0 26px rgba(255, 215, 0, 0.55);
+}
+
+.radial-fab-main-btn:active {
+  transform: scale(0.95);
+}
+
+/* Plus/Close Icon inside Main Button */
+.radial-fab-icon {
+  width: 24px;
+  height: 24px;
+  transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1), stroke 250ms ease;
+  stroke: #FFFFFF;
+  stroke-width: 2.2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+/* Bright Gold + High Contrast when open */
+.radial-fab-container.is-open .radial-fab-icon {
+  stroke: #FFD700 !important;
+}
+
+/* Action Items Container */
+.radial-actions-wrapper {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 56px;
+  height: 56px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.radial-fab-container.is-open .radial-actions-wrapper {
+  pointer-events: auto;
+}
+
+/* Individual Radial Action Button (42px diameter) */
+.radial-action-item {
+  position: absolute;
+  bottom: 7px;
+  right: 7px;
+  width: 42px;
+  height: 42px;
+  background: #141414;
+  border: 1.5px solid rgba(212, 175, 55, 0.5);
+  color: #FFFFFF;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(212, 175, 55, 0.25);
+  opacity: 0;
+  transform: translate(0, 0) scale(0.5);
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+/* Crisp 100% Pure White SVG Icons */
+.radial-action-item svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #FFFFFF;
+  stroke-width: 1.8px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), stroke 200ms ease;
+}
+
+/* High-Contrast Gold Highlight on Hover / Click */
+.radial-action-item:hover {
+  background: #1F1F1F;
+  border-color: #FFD700;
+  color: #FFD700;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.radial-action-item:hover svg {
+  transform: scale(1.16);
+  stroke: #FFD700 !important;
+}
+
+/* Tooltip Labels on Hover/Focus */
+.radial-action-item .radial-tooltip {
+  position: absolute;
+  right: 50px;
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  background: rgba(10, 10, 10, 0.95);
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  color: #FFFFFF;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms ease, transform 200ms ease, visibility 200ms ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.radial-action-item:hover .radial-tooltip,
+.radial-action-item:focus-visible .radial-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Disabled Arrow Button Context State */
+.radial-action-item.disabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: none !important;
+  filter: grayscale(1);
+}
+
+.radial-action-item.disabled svg {
+  stroke: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Custom Link Copied Toast Notification */
+.radial-toast {
+  position: fixed;
+  bottom: 5.5rem;
+  right: 2rem;
+  z-index: 9999;
+  background: rgba(15, 15, 15, 0.96);
+  border: 1.5px solid #FFD700;
+  color: #FFFFFF;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(255, 215, 0, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(12px) scale(0.95);
+  pointer-events: none;
+  transition: opacity 300ms cubic-bezier(0.22, 1, 0.36, 1), transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.radial-toast.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.radial-toast svg {
+  width: 18px;
+  height: 18px;
+  stroke: #FFD700;
+  fill: none;
+  stroke-width: 2;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 767px) {
+  .radial-fab-container {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 50px;
+    height: 50px;
+  }
+
+  .radial-fab-main-btn {
+    width: 50px;
+    height: 50px;
+  }
+
+  .radial-action-item {
+    width: 38px;
+    height: 38px;
+    bottom: 6px;
+    right: 6px;
+  }
+
+  .radial-action-item svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .radial-action-item .radial-tooltip {
+    display: none; /* Hide tooltips on mobile touch devices to keep clean viewport */
+  }
+
+  .radial-toast {
+    bottom: 5rem;
+    right: 1.5rem;
+  }
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  .radial-action-item,
+  .radial-fab-icon,
+  .radial-toast {
+    transition: none !important;
+  }
+}

@@ -57,8 +57,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     injectComponent('REUSABLE_FOOTER', '/components/footer.html')
   ]);
 
-  // Re-initialize GSAP Navbar and Modals if they were just injected
+  // Re-initialize GSAP Navbar and Radial FAB Menu if they were just injected
   if (navbarInjected && typeof AvinyaGsapNavbar !== 'undefined') {
     window.AvinyaNavbarEngine = new AvinyaGsapNavbar();
+  }
+  if (footerInjected && typeof window.initRadialMenu === 'function') {
+    window.initRadialMenu();
   }
 });
