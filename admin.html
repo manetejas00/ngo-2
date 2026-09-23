@@ -1182,6 +1182,10 @@
           <span class="nav-icon">💊</span> Diagnostic Tests Catalog
           <span class="nav-badge" id="sideTestsCatalogCount">0</span>
         </button>
+        <button class="sidebar-nav-link" data-tab="gallery" onclick="switchTab('gallery')">
+          <span class="nav-icon">🖼️</span> Gallery Management
+          <span class="nav-badge" id="sideGalleryCount">0</span>
+        </button>
 
         <div class="menu-group-label">FORM SUBMISSIONS</div>
         <button class="sidebar-nav-link" data-tab="forms_contact" onclick="switchTab('forms_contact')">
@@ -1375,6 +1379,7 @@
               <button class="btn btn-teal" id="addDoctorBtn" style="display:none;" onclick="openDoctorModal()">➕ Add Doctor</button>
               <button class="btn btn-teal" id="addTestBtn" style="display:none;" onclick="openTestModal()">➕ Add Test Package</button>
               <button class="btn btn-teal" id="addUserBtn" style="display:none;" onclick="openUserModal()">➕ Add User</button>
+              <button class="btn btn-teal" id="addGalleryBtn" style="display:none;" onclick="openGalleryModal()">🖼️ Add Gallery Item</button>
               <button class="btn btn-outline" id="reseedCatalogBtn" style="display:none;" onclick="reseedCatalog()">🔄 Re-Seed Catalog</button>
 
               <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
@@ -1859,6 +1864,125 @@
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
           <button type="button" class="btn btn-outline" onclick="closeUserModal()">Cancel</button>
           <button type="submit" class="btn btn-teal">Save System User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Gallery Item Add/Edit Modal -->
+  <div id="galleryEditModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 650px;">
+      <div class="modal-header">
+        <div class="modal-title" id="galleryModalTitle">Add / Edit Gallery Item</div>
+        <button class="close-btn" onclick="closeGalleryModal()">✕</button>
+      </div>
+      <form id="galleryForm" onsubmit="saveGalleryForm(event)" style="padding: 16px; display: flex; flex-direction: column; gap: 12px; max-height: 80vh; overflow-y: auto;">
+        <input type="hidden" id="galId">
+        <input type="hidden" id="galPhotoBase64">
+
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 2;">
+            <label style="font-size: 12px; color: var(--text-muted);">Title (Optional for Mode A Image-only items)</label>
+            <input type="text" id="galTitle" class="search-input" placeholder="e.g. Mobile Medical Clinic Launch">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Category</label>
+            <input type="text" id="galCategory" class="search-input" placeholder="e.g. Healthcare, Events, Awareness" list="categoryPresets">
+            <datalist id="categoryPresets">
+              <option value="Healthcare">
+              <option value="Events">
+              <option value="Awareness">
+              <option value="Community">
+              <option value="Campaigns">
+            </datalist>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Event Date</label>
+            <input type="date" id="galEventDate" class="date-input" style="width: 100%;">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Location</label>
+            <input type="text" id="galLocation" class="search-input" placeholder="e.g. Palghar, Maharashtra">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Photographer / Credit</label>
+            <input type="text" id="galPhotographer" class="search-input" placeholder="e.g. Avinya Media Team">
+          </div>
+        </div>
+
+        <!-- Image Upload / Path Selection -->
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Gallery Image * (Upload file or enter URL)</label>
+          <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
+            <input type="url" id="galImage" class="search-input" style="flex: 1;" placeholder="https://images.unsplash.com/... or /assets/gallery/..." oninput="previewGalleryImage()">
+            <label class="btn btn-outline" style="cursor: pointer; margin: 0; padding: 8px 12px; font-size: 12px; white-space: nowrap;">
+              📁 Browse Image...
+              <input type="file" id="galFileInput" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handleGalleryImageSelect(event)">
+            </label>
+          </div>
+        </div>
+
+        <!-- Live Image Preview Container -->
+        <div id="galImagePreviewContainer" style="display: none; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; align-items: center; gap: 12px;">
+          <img id="galImagePreview" src="" alt="Preview" style="width: 80px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color);">
+          <div style="font-size: 12px; color: var(--text-muted); flex: 1;" id="galImagePreviewInfo">Image loaded</div>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Alt Text (Accessibility)</label>
+          <input type="text" id="galAltText" class="search-input" placeholder="Description of image for screen readers">
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Short Description (Card preview text)</label>
+          <input type="text" id="galShortDesc" class="search-input" placeholder="Brief summary of the event or photo">
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Full Description (Detail Lightbox story text)</label>
+          <textarea id="galDesc" class="search-input" style="height: 70px; resize: vertical;" placeholder="Detailed story, impact details, and background narrative..."></textarea>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">External Link (Optional)</label>
+          <input type="url" id="galExternalLink" class="search-input" placeholder="https://...">
+        </div>
+
+        <!-- Presentation & Status Controls -->
+        <div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size: 12px; font-weight: 700; color: #5EEAD4;">🎨 Presentation & Visibility Options</div>
+          <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+              <input type="checkbox" id="galHasDetails" style="accent-color: var(--teal);" onchange="updateGalModeHint()">
+              <span><strong>Has Details / Information</strong> (Use Mode B Scrubbed Bento)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+              <input type="checkbox" id="galIsFeatured" style="accent-color: var(--accent);">
+              <span>⭐ Featured Item</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+              <input type="checkbox" id="galIsPublished" checked style="accent-color: var(--success);">
+              <span>🟢 Published</span>
+            </label>
+          </div>
+          <div id="galModeHint" style="font-size: 11px; color: var(--text-muted);">
+            💡 Mode A (Image-Only GSAP Scroll) is used when "Has Details" is unchecked. Mode B (Scrubbed Bento Gallery) is used when checked.
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Sort Order (Lower numbers appear first)</label>
+            <input type="number" id="galSortOrder" class="search-input" value="0">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button type="button" class="btn btn-outline" onclick="closeGalleryModal()">Cancel</button>
+          <button type="submit" class="btn btn-teal">Save Gallery Item</button>
         </div>
       </form>
     </div>
@@ -2660,6 +2784,7 @@
         'doctorsCatalog': 'Doctors Directory Catalog',
         'testsCatalog': 'Diagnostic Tests Catalog',
         'usersCatalog': 'System User Accounts & Management',
+        'gallery': 'Gallery & Media Management',
         'settings': 'Platform & Infrastructure Settings'
       };
       const pageTitleEl = document.getElementById('pageTitle');
@@ -2789,6 +2914,7 @@
       else if (currentTab === 'doctorsCatalog') items = [...(rawData.doctorsCatalog || [])];
       else if (currentTab === 'testsCatalog') items = [...(rawData.diagnosticTestsCatalog || [])];
       else if (currentTab === 'usersCatalog') items = [...(rawData.usersCatalog || [])];
+      else if (currentTab === 'gallery') items = [...(rawData.galleriesCatalog || [])];
 
       // 1. Text Search Filter
       if (q) {
@@ -2858,6 +2984,7 @@
       else if (currentTab === 'doctorsCatalog') renderDoctorsCatalog(items);
       else if (currentTab === 'testsCatalog') renderDiagnosticTestsCatalog(items);
       else if (currentTab === 'usersCatalog') renderUsersCatalog(items);
+      else if (currentTab === 'gallery') renderGalleriesCatalog(items);
     }
 
     function updateActiveFilterPills(typeFilter, startDate, endDate, delivery, sort) {
@@ -2885,11 +3012,13 @@
       const addDocBtn = document.getElementById('addDoctorBtn');
       const addTestBtn = document.getElementById('addTestBtn');
       const addUserBtn = document.getElementById('addUserBtn');
+      const addGalBtn = document.getElementById('addGalleryBtn');
       const reseedBtn = document.getElementById('reseedCatalogBtn');
 
       if (addDocBtn) addDocBtn.style.display = (currentTab === 'doctorsCatalog') ? 'inline-flex' : 'none';
       if (addTestBtn) addTestBtn.style.display = (currentTab === 'testsCatalog') ? 'inline-flex' : 'none';
       if (addUserBtn) addUserBtn.style.display = (currentTab === 'usersCatalog') ? 'inline-flex' : 'none';
+      if (addGalBtn) addGalBtn.style.display = (currentTab === 'gallery') ? 'inline-flex' : 'none';
       if (reseedBtn) reseedBtn.style.display = (currentTab === 'doctorsCatalog' || currentTab === 'testsCatalog' || currentTab === 'usersCatalog') ? 'inline-flex' : 'none';
 
       if (currentTab.startsWith('forms')) {
@@ -2973,6 +3102,17 @@
           <th>System Role</th>
           <th>Account Status</th>
           <th>Last Login</th>
+          <th>Actions</th>
+        `;
+      } else if (currentTab === 'gallery') {
+        thead.innerHTML = `
+          <th>Thumbnail</th>
+          <th>Title & Category</th>
+          <th>Event Date & Location</th>
+          <th>Presentation Mode</th>
+          <th>Order</th>
+          <th>Status</th>
+          <th>Featured</th>
           <th>Actions</th>
         `;
       }
@@ -3804,6 +3944,7 @@
       else if (currentTab === 'doctorsCatalog') data = rawData.doctorsCatalog || [];
       else if (currentTab === 'testsCatalog') data = rawData.diagnosticTestsCatalog || [];
       else if (currentTab === 'usersCatalog') data = rawData.usersCatalog || [];
+      else if (currentTab === 'gallery') data = rawData.galleriesCatalog || [];
 
       if (!data || data.length === 0) {
         alert('No data available in current view to export as PDF.');
@@ -3832,6 +3973,7 @@
       else if (currentTab === 'doctorsCatalog') data = rawData.doctorsCatalog;
       else if (currentTab === 'testsCatalog') data = rawData.diagnosticTestsCatalog;
       else if (currentTab === 'usersCatalog') data = rawData.usersCatalog;
+      else if (currentTab === 'gallery') data = rawData.galleriesCatalog;
 
       if (!data || data.length === 0) {
         alert('No data available to export.');
@@ -3849,6 +3991,286 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    }
+
+    // --- GALLERY MANAGEMENT FUNCTIONS ---
+
+    function renderGalleriesCatalog(items) {
+      const tbody = document.getElementById('tableBody');
+      const badge = document.getElementById('recordCountBadge');
+      if (badge) badge.innerText = `${items.length} Gallery Records`;
+
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);">No gallery items found. Click "+ Add Gallery Item" to create one.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = items.map(g => {
+        const id = g.gallery_id || g.id || '';
+        const title = escapeHtml(g.title || '(Untitled Gallery Item)');
+        const cat = escapeHtml(g.category || 'General');
+        const img = escapeHtml(g.image || '/assets/logo-emblem.png');
+        const alt = escapeHtml(g.alt_text || title);
+        const hasDetails = Boolean(g.has_details);
+        const isFeatured = Boolean(g.is_featured);
+        const isPublished = g.is_published !== false && g.is_published !== 0;
+        const sortOrder = g.sort_order ?? 0;
+        const eventDate = escapeHtml(g.event_date || 'N/A');
+        const location = escapeHtml(g.location || 'N/A');
+
+        const modeBadge = hasDetails 
+          ? `<span class="badge badge-teal" title="Mode B Scrubbed Bento Grid with Text Details">Mode B: Bento Info</span>`
+          : `<span class="badge badge-info" title="Mode A Image-Only GSAP 3D Gallery">Mode A: Image Only</span>`;
+
+        const pubBadge = isPublished
+          ? `<span class="badge badge-success" style="cursor:pointer;" onclick="toggleGalleryPublish('${id}', false)">🟢 Published</span>`
+          : `<span class="badge badge-warning" style="cursor:pointer;" onclick="toggleGalleryPublish('${id}', true)">🟡 Draft</span>`;
+
+        const featBadge = isFeatured
+          ? `<span class="badge badge-accent">⭐ Featured</span>`
+          : `<span style="color:var(--text-dim);font-size:12px;">Standard</span>`;
+
+        return `
+          <tr>
+            <td style="width:70px;">
+              <img src="${img}" alt="${alt}" style="width:60px;height:45px;object-fit:cover;border-radius:6px;border:1px solid var(--border-color);background:#000;" onerror="this.src='/assets/logo-emblem.png'">
+            </td>
+            <td>
+              <div style="font-weight:700;color:var(--text-main);font-size:13px;">${title}</div>
+              <div style="font-size:11px;color:#5EEAD4;margin-top:2px;">📁 ${cat}</div>
+            </td>
+            <td>
+              <div style="font-size:12px;color:var(--text-muted);">📅 ${eventDate}</div>
+              <div style="font-size:11px;color:var(--text-dim);">📍 ${location}</div>
+            </td>
+            <td>${modeBadge}</td>
+            <td style="width:90px;">
+              <input type="number" value="${sortOrder}" class="search-input" style="width:65px;padding:4px 6px;text-align:center;font-size:12px;" onchange="updateGallerySortOrder('${id}', this.value)">
+            </td>
+            <td>${pubBadge}</td>
+            <td>${featBadge}</td>
+            <td>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-outline btn-sm" onclick="openGalleryModal('${id}')" title="Edit Item">✏️ Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteGalleryItem('${id}')" title="Delete Item">🗑️ Delete</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function previewGalleryImage() {
+      const urlInput = document.getElementById('galImage');
+      const base64Input = document.getElementById('galPhotoBase64');
+      const container = document.getElementById('galImagePreviewContainer');
+      const preview = document.getElementById('galImagePreview');
+      const info = document.getElementById('galImagePreviewInfo');
+
+      const src = (base64Input.value || urlInput.value || '').trim();
+      if (src) {
+        container.style.display = 'flex';
+        preview.src = src;
+        info.innerText = base64Input.value ? '✓ Uploaded image ready' : '✓ Image URL linked';
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    function handleGalleryImageSelect(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file (JPEG, PNG, WebP).');
+        return;
+      }
+      if (file.size > 8 * 1024 * 1024) {
+        alert('Image file size exceeds 8MB limit. Please select a smaller file.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64 = e.target.result;
+        document.getElementById('galPhotoBase64').value = base64;
+        document.getElementById('galImage').value = `[Uploaded File: ${file.name}]`;
+        previewGalleryImage();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateGalModeHint() {
+      const hasDet = document.getElementById('galHasDetails').checked;
+      const hint = document.getElementById('galModeHint');
+      if (hint) {
+        hint.innerHTML = hasDet 
+          ? '✨ <strong>Mode B (Scrubbed Bento Gallery)</strong> active: Content card displays Title, Short Description, Date, Location, and Lightbox details on public /gallery.'
+          : '🖼️ <strong>Mode A (Image-Only GSAP Scroll)</strong> active: Visual image-focused gallery item without heavy text cards.';
+      }
+    }
+
+    function openGalleryModal(galId = null) {
+      document.getElementById('galleryForm').reset();
+      document.getElementById('galId').value = '';
+      document.getElementById('galPhotoBase64').value = '';
+      document.getElementById('galFileInput').value = '';
+      document.getElementById('galImagePreviewContainer').style.display = 'none';
+      document.getElementById('galHasDetails').checked = false;
+      document.getElementById('galIsFeatured').checked = false;
+      document.getElementById('galIsPublished').checked = true;
+      document.getElementById('galSortOrder').value = 0;
+
+      const title = document.getElementById('galleryModalTitle');
+
+      if (galId) {
+        title.innerText = 'Edit Gallery Item (' + galId + ')';
+        const gal = (rawData.galleriesCatalog || []).find(g => (g.gallery_id || g.id) === galId);
+        if (gal) {
+          document.getElementById('galId').value = gal.gallery_id || gal.id || '';
+          document.getElementById('galTitle').value = gal.title || '';
+          document.getElementById('galCategory').value = gal.category || 'General';
+          document.getElementById('galEventDate').value = gal.event_date || '';
+          document.getElementById('galLocation').value = gal.location || '';
+          document.getElementById('galPhotographer').value = gal.photographer || '';
+          document.getElementById('galImage').value = gal.image || '';
+          document.getElementById('galAltText').value = gal.alt_text || '';
+          document.getElementById('galShortDesc').value = gal.short_description || '';
+          document.getElementById('galDesc').value = gal.description || '';
+          document.getElementById('galExternalLink').value = gal.external_link || '';
+          document.getElementById('galHasDetails').checked = Boolean(gal.has_details);
+          document.getElementById('galIsFeatured').checked = Boolean(gal.is_featured);
+          document.getElementById('galIsPublished').checked = gal.is_published !== false && gal.is_published !== 0;
+          document.getElementById('galSortOrder').value = gal.sort_order ?? 0;
+          previewGalleryImage();
+        }
+      } else {
+        title.innerText = 'Add New Gallery Item';
+      }
+
+      updateGalModeHint();
+      document.getElementById('galleryEditModal').classList.add('active');
+    }
+
+    function closeGalleryModal() {
+      document.getElementById('galleryEditModal').classList.remove('active');
+    }
+
+    async function saveGalleryForm(event) {
+      event.preventDefault();
+      const galId = document.getElementById('galId').value.trim();
+      const base64 = document.getElementById('galPhotoBase64').value;
+      const imageUrl = document.getElementById('galImage').value.trim();
+
+      if (!base64 && !imageUrl) {
+        alert('Please select an image file or enter an image URL.');
+        return;
+      }
+
+      const payload = {
+        action: 'save_gallery',
+        gallery: {
+          id: galId,
+          gallery_id: galId,
+          title: document.getElementById('galTitle').value.trim(),
+          category: document.getElementById('galCategory').value.trim() || 'General',
+          event_date: document.getElementById('galEventDate').value.trim(),
+          location: document.getElementById('galLocation').value.trim(),
+          photographer: document.getElementById('galPhotographer').value.trim(),
+          image: base64 || imageUrl,
+          alt_text: document.getElementById('galAltText').value.trim(),
+          short_description: document.getElementById('galShortDesc').value.trim(),
+          description: document.getElementById('galDesc').value.trim(),
+          external_link: document.getElementById('galExternalLink').value.trim(),
+          has_details: document.getElementById('galHasDetails').checked,
+          is_featured: document.getElementById('galIsFeatured').checked,
+          is_published: document.getElementById('galIsPublished').checked,
+          sort_order: parseInt(document.getElementById('galSortOrder').value, 10) || 0
+        }
+      };
+
+      try {
+        const res = await fetch('/api/admin-data.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+          closeGalleryModal();
+          await fetchAdminData(true);
+          renderCurrentTab();
+        } else {
+          alert('Failed to save gallery item: ' + (data.message || 'Unknown error'));
+        }
+      } catch (e) {
+        alert('Error saving gallery item: ' + e.message);
+      }
+    }
+
+    async function deleteGalleryItem(galId) {
+      if (!confirm(`Are you sure you want to delete gallery item ${galId}?`)) return;
+      try {
+        const res = await fetch('/api/admin-data.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
+          },
+          body: JSON.stringify({ action: 'delete_gallery', id: galId })
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+          await fetchAdminData(true);
+          renderCurrentTab();
+        } else {
+          alert('Failed to delete gallery item: ' + (data.message || 'Error'));
+        }
+      } catch (e) {
+        alert('Error deleting item: ' + e.message);
+      }
+    }
+
+    async function toggleGalleryPublish(galId, isPublished) {
+      try {
+        const res = await fetch('/api/admin-data.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
+          },
+          body: JSON.stringify({ action: 'toggle_gallery_published', id: galId, is_published: isPublished })
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+          await fetchAdminData(true);
+          renderCurrentTab();
+        }
+      } catch (e) {
+        console.error('Error toggling gallery publish status:', e);
+      }
+    }
+
+    async function updateGallerySortOrder(galId, newOrder) {
+      try {
+        await fetch('/api/admin-data.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
+          },
+          body: JSON.stringify({
+            action: 'reorder_galleries',
+            orders: [{ id: galId, sort_order: parseInt(newOrder, 10) || 0 }]
+          })
+        });
+        await fetchAdminData(true);
+      } catch (e) {
+        console.error('Error updating sort order:', e);
+      }
     }
 
     function escapeHtml(str) {

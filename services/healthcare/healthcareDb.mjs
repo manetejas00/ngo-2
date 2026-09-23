@@ -68,6 +68,7 @@ export async function getDb() {
     const raw = await readFile(DB_FILE, 'utf-8');
     dbCache = JSON.parse(raw);
     if (!dbCache.diagnosticProviders) dbCache.diagnosticProviders = await loadData('diagnostic_providers');
+    if (!dbCache.galleries || dbCache.galleries.length < 100) dbCache.galleries = await loadData('galleries');
     if (!dbCache.users) dbCache.users = buildUsersCatalog(dbCache.doctors || await loadData('doctors'), dbCache.diagnosticProviders);
   } catch (err) {
     const docs = await loadData('doctors');
@@ -83,6 +84,7 @@ export async function getDb() {
       diagnosticTests: await loadData('diagnostic_tests'),
       appointments: await loadData('appointments'),
       testBookings: await loadData('test_bookings'),
+      galleries: await loadData('galleries'),
       users: buildUsersCatalog(docs, provs),
       passwordResets: [],
       notificationLogs: []
@@ -1089,4 +1091,157 @@ export async function adminToggleUserStatus(targetUserId, status) {
   await persistDb();
 
   return { success: true, message: `User ${user.name} account status set to ${user.status}.` };
+}
+
+// -------------------------------------------------------------
+// GALLERY MANAGEMENT
+// -------------------------------------------------------------
+
+export async function getGalleries(filters = {}) {
+  const db = await getDb();
+  if (!Array.isArray(db.galleries) || db.galleries.length < 100) {
+    try {
+      const p = join(__dirname, '../../data', 'seed_galleries.json');
+      db.galleries = JSON.parse(await readFile(p, 'utf-8'));
+      await persistDb();
+    } catch (e) {
+      console.error('[Healthcare DB] Failed to auto-reload 100 gallery seed items:', e);
+    }
+  }
+  let list = Array.isArray(db.galleries) ? [...db.galleries] : [];
+
+  // Exclude soft-deleted items
+  list = list.filter(g => !g.deleted_at);
+
+  if (filters.onlyPublished) {
+    list = list.filter(g => g.is_published !== false);
+  }
+
+  if (filters.category && filters.category !== 'all') {
+    list = list.filter(g => (g.category || '').toLowerCase() === filters.category.toLowerCase());
+  }
+
+  if (filters.search) {
+    const q = filters.search.toLowerCase().trim();
+    list = list.filter(g =>
+      (g.title || '').toLowerCase().includes(q) ||
+      (g.short_description || '').toLowerCase().includes(q) ||
+      (g.description || '').toLowerCase().includes(q) ||
+      (g.category || '').toLowerCase().includes(q) ||
+      (g.location || '').toLowerCase().includes(q)
+    );
+  }
+
+  // Default ordering: latest created/updated first
+  list.sort((a, b) => {
+    const dateA = new Date(a.updated_at || a.created_at || a.event_date || 0);
+    const dateB = new Date(b.updated_at || b.created_at || b.event_date || 0);
+    return dateB - dateA;
+  });
+
+  return list;
+}
+
+export async function getGalleryById(id) {
+  const db = await getDb();
+  return (db.galleries || []).find(g => (g.gallery_id === id || g.id === id) && !g.deleted_at) || null;
+}
+
+export async function addGallery(data) {
+  const db = await getDb();
+  if (!db.galleries) db.galleries = [];
+
+  const newId = data.id || data.gallery_id || `gal-${Date.now()}`;
+  const newItem = {
+    id: newId,
+    gallery_id: newId,
+    title: (data.title || '').trim(),
+    slug: (data.slug || (data.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `gallery-${Date.now()}`),
+    short_description: (data.short_description || '').trim(),
+    description: (data.description || '').trim(),
+    image: data.image || '',
+    alt_text: (data.alt_text || data.title || 'Avinya Care Gallery Image').trim(),
+    category: (data.category || 'General').trim(),
+    event_date: (data.event_date || '').trim(),
+    location: (data.location || '').trim(),
+    photographer: (data.photographer || '').trim(),
+    created_by: (data.created_by || 'Admin User').trim(),
+    updated_by: (data.updated_by || data.created_by || 'Admin User').trim(),
+    external_link: (data.external_link || '').trim(),
+    has_details: Boolean(data.has_details),
+    image_only: data.image_only !== undefined ? Boolean(data.image_only) : !data.description,
+    is_featured: Boolean(data.is_featured),
+    is_published: data.is_published !== false,
+    sort_order: Number(data.sort_order) || 0,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    deleted_at: null
+  };
+
+  db.galleries.push(newItem);
+  await persistDb();
+  return newItem;
+}
+
+export async function updateGallery(id, data) {
+  const db = await getDb();
+  if (!db.galleries) db.galleries = [];
+  const index = db.galleries.findIndex(g => (g.gallery_id === id || g.id === id) && !g.deleted_at);
+  if (index === -1) return null;
+
+  const existing = db.galleries[index];
+  const updated = {
+    ...existing,
+    title: data.title !== undefined ? (data.title || '').trim() : existing.title,
+    slug: data.slug !== undefined ? (data.slug || '').trim() : existing.slug,
+    short_description: data.short_description !== undefined ? (data.short_description || '').trim() : existing.short_description,
+    description: data.description !== undefined ? (data.description || '').trim() : existing.description,
+    image: data.image !== undefined ? data.image : existing.image,
+    alt_text: data.alt_text !== undefined ? (data.alt_text || '').trim() : existing.alt_text,
+    category: data.category !== undefined ? (data.category || '').trim() : existing.category,
+    event_date: data.event_date !== undefined ? (data.event_date || '').trim() : existing.event_date,
+    location: data.location !== undefined ? (data.location || '').trim() : existing.location,
+    photographer: data.photographer !== undefined ? (data.photographer || '').trim() : existing.photographer,
+    created_by: data.created_by !== undefined ? (data.created_by || '').trim() : existing.created_by,
+    updated_by: data.updated_by !== undefined ? (data.updated_by || '').trim() : (existing.updated_by || 'Admin User'),
+    external_link: data.external_link !== undefined ? (data.external_link || '').trim() : existing.external_link,
+    has_details: data.has_details !== undefined ? Boolean(data.has_details) : existing.has_details,
+    image_only: data.image_only !== undefined ? Boolean(data.image_only) : existing.image_only,
+    is_featured: data.is_featured !== undefined ? Boolean(data.is_featured) : existing.is_featured,
+    is_published: data.is_published !== undefined ? Boolean(data.is_published) : existing.is_published,
+    sort_order: data.sort_order !== undefined ? Number(data.sort_order) : existing.sort_order,
+    updated_at: new Date().toISOString()
+  };
+
+  db.galleries[index] = updated;
+  await persistDb();
+  return updated;
+}
+
+export async function deleteGallery(id) {
+  const db = await getDb();
+  if (!db.galleries) db.galleries = [];
+  const item = db.galleries.find(g => g.gallery_id === id || g.id === id);
+  if (item) {
+    item.deleted_at = new Date().toISOString();
+    await persistDb();
+    return true;
+  }
+  return false;
+}
+
+export async function reorderGalleries(orderMap = []) {
+  const db = await getDb();
+  if (!db.galleries || !Array.isArray(orderMap)) return false;
+
+  orderMap.forEach(({ id, sort_order }) => {
+    const item = db.galleries.find(g => g.gallery_id === id || g.id === id);
+    if (item) {
+      item.sort_order = Number(sort_order) || 0;
+      item.updated_at = new Date().toISOString();
+    }
+  });
+
+  await persistDb();
+  return true;
 }

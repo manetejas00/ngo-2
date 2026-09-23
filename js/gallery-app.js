@@ -1,0 +1,3165 @@
+/**
+ * Avinya Care Foundation - Immersive GSAP Digital Photography Exhibition Controller
+ * Features:
+ * - Dynamic API integration with /api/gallery
+ * - Hero Word Reveal & Editorial Typography GSAP Entrance
+ * - Scattered Intro Collage -> Grid Docking ScrollTrigger scrubbed animation
+ * - Scrubbed Bento Gallery with differential parallax, scale (1.08 -> 1), and clip-path mask reveals
+ * - Full-Bleed Expanding Featured Moments (78vw -> 94vw & border-radius 36px -> 12px)
+ * - Custom Magnetic Follow Pointer Cursor ("VIEW") using GSAP quickTo
+ * - Scroll Velocity Skew Effect on fast scroll
+ * - Immersive Fullscreen Lightbox Modal with Photo Counter, Arrow & Touch Swipe Navigation
+ * - GSAP Context cleanup for leak-free category filtering
+ */
+
+(function () {
+  'use strict';
+
+  let galleryItems = [];
+  let currentCategory = 'all';
+  let currentFilteredItems = [];
+  let currentLightboxIndex = -1;
+  let displayedMasonryCount = 12;
+  let gsapCtx = null;
+  let quickX = null;
+  let quickY = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initGalleryApp();
+  });
+
+  async function initGalleryApp() {
+    showSkeleton(true);
+    await fetchGalleryData();
+    showSkeleton(false);
+
+    if (!galleryItems || galleryItems.length === 0) {
+      showEmptyState(true);
+      return;
+    }
+
+    renderCategoryFilters();
+    initCustomCursor();
+    renderGalleryExperience();
+    initLightboxListeners();
+  }
+
+  // 1. Fetch Published Gallery Items from API
+  async function fetchGalleryData() {
+    try {
+      const res = await fetch('/api/gallery');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if (json.status === 'ok' && Array.isArray(json.data)) {
+        galleryItems = json.data;
+      } else if (Array.isArray(json)) {
+        galleryItems = json;
+      } else {
+        throw new Error('Invalid API response');
+      }
+    } catch (err) {
+      console.warn('[Gallery API Notice] Primary endpoint unreachable, checking fallback...', err.message);
+      try {
+        const fallbackRes = await fetch('/api/gallery.php');
+        const fallbackJson = await fallbackRes.json();
+        if (fallbackJson.status === 'ok' && Array.isArray(fallbackJson.data)) {
+          galleryItems = fallbackJson.data;
+        }
+      } catch (e) {
+        console.error('[Gallery API Error] Failed to load gallery dataset:', e);
+        galleryItems = getFallbackDemoData();
+      }
+    }
+
+    // Ensure full 30 seed gallery items dataset is populated
+    const fallback = getFallbackDemoData();
+    const existingIds = new Set(galleryItems.map(i => i.gallery_id || i.id));
+    fallback.forEach(item => {
+      const itemId = item.gallery_id || item.id;
+      if (!existingIds.has(itemId)) {
+        galleryItems.push(item);
+        existingIds.add(itemId);
+      }
+    });
+
+    // Ensure items are sorted latest first by updated_at or created_at
+    galleryItems.sort((a, b) => {
+      const dA = new Date(a.updated_at || a.created_at || a.event_date || 0);
+      const dB = new Date(b.updated_at || b.created_at || b.event_date || 0);
+      return dB - dA;
+    });
+  }
+
+  // Fallback demo dataset with 30 high-impact gallery records
+  function getFallbackDemoData() {
+    return [
+  {
+    "id": "gal-100",
+    "gallery_id": "gal-100",
+    "title": "Emergency Blood Transfusion Assistance Cell",
+    "slug": "emergency-blood-transfusion-assistance-cell",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive emergency blood transfusion assistance cell at Malad, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Emergency Blood Transfusion Assistance Cell organized by Avinya Care Foundation at Malad, Mumbai",
+    "category": "Community",
+    "event_date": "2026-09-22",
+    "location": "Malad, Mumbai",
+    "photographer": "Avinya Care Outreach",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-22T20:56:20.350Z",
+    "updated_at": "2026-09-22T20:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 100
+  },
+  {
+    "id": "gal-080",
+    "gallery_id": "gal-080",
+    "title": "Zero Tobacco Workplace Certification Campaign",
+    "slug": "zero-tobacco-workplace-certification-campaign",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive zero tobacco workplace certification campaign at Chembur, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Zero Tobacco Workplace Certification Campaign organized by Avinya Care Foundation at Chembur, Mumbai",
+    "category": "Campaigns",
+    "event_date": "2026-09-22",
+    "location": "Chembur, Mumbai",
+    "photographer": "Meera Nair",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-22T17:56:20.350Z",
+    "updated_at": "2026-09-22T17:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 80
+  },
+  {
+    "id": "gal-060",
+    "gallery_id": "gal-060",
+    "title": "Pap Smear & Cervical Screening Information Drive",
+    "slug": "pap-smear-cervical-screening-information-drive",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive pap smear & cervical screening information drive at Virar West, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Pap Smear & Cervical Screening Information Drive organized by Avinya Care Foundation at Virar West, Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-22",
+    "location": "Virar West, Mumbai",
+    "photographer": "Karan Sharma",
+    "created_by": "Media Manager",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-22T14:56:20.350Z",
+    "updated_at": "2026-09-22T14:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 60
+  },
+  {
+    "id": "gal-040",
+    "gallery_id": "gal-040",
+    "title": "Palliative Care Pioneers Annual Assembly",
+    "slug": "palliative-care-pioneers-annual-assembly",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive palliative care pioneers annual assembly at Andheri, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Palliative Care Pioneers Annual Assembly organized by Avinya Care Foundation at Andheri, Mumbai",
+    "category": "Events",
+    "event_date": "2026-09-22",
+    "location": "Andheri, Mumbai",
+    "photographer": "Rohit Verma",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-22T11:56:20.350Z",
+    "updated_at": "2026-09-22T11:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 40
+  },
+  {
+    "id": "gal-099",
+    "gallery_id": "gal-099",
+    "title": "Shelter & Transit Home Support for Patient Families",
+    "slug": "shelter-transit-home-support-for-patient-families",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive shelter & transit home support for patient families at Taloja, Navi Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Shelter & Transit Home Support for Patient Families organized by Avinya Care Foundation at Taloja, Navi Mumbai",
+    "category": "Community",
+    "event_date": "2026-09-22",
+    "location": "Taloja, Navi Mumbai",
+    "photographer": "Rajesh Mehta",
+    "created_by": "Admin User",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-22T05:56:20.350Z",
+    "updated_at": "2026-09-22T09:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 99
+  },
+  {
+    "id": "gal-020",
+    "gallery_id": "gal-020",
+    "title": "Pulmonology & Respiratory Health Checkup Camp",
+    "slug": "pulmonology-respiratory-health-checkup-camp",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive pulmonology & respiratory health checkup camp at Dadar, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Pulmonology & Respiratory Health Checkup Camp organized by Avinya Care Foundation at Dadar, Mumbai",
+    "category": "Healthcare",
+    "event_date": "2026-09-22",
+    "location": "Dadar, Mumbai",
+    "photographer": "Avinya Care Outreach",
+    "created_by": "Community Coordinator",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-22T08:56:20.350Z",
+    "updated_at": "2026-09-22T08:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 20
+  },
+  {
+    "id": "gal-079",
+    "gallery_id": "gal-079",
+    "title": "Community Hygiene & Infection Prevention Tour",
+    "slug": "community-hygiene-infection-prevention-tour",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive community hygiene & infection prevention tour at Ghatkopar, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Community Hygiene & Infection Prevention Tour organized by Avinya Care Foundation at Ghatkopar, Mumbai",
+    "category": "Campaigns",
+    "event_date": "2026-09-22",
+    "location": "Ghatkopar, Mumbai",
+    "photographer": "Siddharth Rao",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-22T02:56:20.350Z",
+    "updated_at": "2026-09-22T06:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 79
+  },
+  {
+    "id": "gal-059",
+    "gallery_id": "gal-059",
+    "title": "Community Radio Broadcast on Early Symptoms",
+    "slug": "community-radio-broadcast-on-early-symptoms",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive community radio broadcast on early symptoms at Thane West, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Community Radio Broadcast on Early Symptoms organized by Avinya Care Foundation at Thane West, Maharashtra",
+    "category": "Awareness",
+    "event_date": "2026-09-21",
+    "location": "Thane West, Maharashtra",
+    "photographer": "Tech Health Media",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-21T23:56:20.350Z",
+    "updated_at": "2026-09-22T03:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 59
+  },
+  {
+    "id": "gal-039",
+    "gallery_id": "gal-039",
+    "title": "Survivors' Choir & Musical Evening of Hope",
+    "slug": "survivors-choir-musical-evening-of-hope",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive survivors' choir & musical evening of hope at Bhiwandi, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Survivors' Choir & Musical Evening of Hope organized by Avinya Care Foundation at Bhiwandi, Maharashtra",
+    "category": "Events",
+    "event_date": "2026-09-21",
+    "location": "Bhiwandi, Maharashtra",
+    "photographer": "Avinya Outreach Team",
+    "created_by": "Media Manager",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-21T20:56:20.350Z",
+    "updated_at": "2026-09-22T00:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 39
+  },
+  {
+    "id": "gal-019",
+    "gallery_id": "gal-019",
+    "title": "Dermatology & Skin Cancer Diagnostic Drive",
+    "slug": "dermatology-skin-cancer-diagnostic-drive",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive dermatology & skin cancer diagnostic drive at Panvel, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Dermatology & Skin Cancer Diagnostic Drive organized by Avinya Care Foundation at Panvel, Maharashtra",
+    "category": "Healthcare",
+    "event_date": "2026-09-21",
+    "location": "Panvel, Maharashtra",
+    "photographer": "Rajesh Mehta",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-21T17:56:20.350Z",
+    "updated_at": "2026-09-21T21:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 19
+  },
+  {
+    "id": "gal-098",
+    "gallery_id": "gal-098",
+    "title": "Photo Showcase #098",
+    "slug": "grassroots-health-worker-support-kit-handover",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Grassroots Health Worker Support Kit Handover organized by Avinya Care Foundation at Kalyan, Maharashtra",
+    "category": "Community",
+    "event_date": "2026-09-21",
+    "location": "Kalyan, Maharashtra",
+    "photographer": "Sneha Kulkarni",
+    "created_by": "System Seeder",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-21T14:56:20.350Z",
+    "updated_at": "2026-09-21T17:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 98
+  },
+  {
+    "id": "gal-078",
+    "gallery_id": "gal-078",
+    "title": "Photo Showcase #078",
+    "slug": "free-ultrasound-abdominal-screening-campaign",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Free Ultrasound & Abdominal Screening Campaign organized by Avinya Care Foundation at Bandra West, Mumbai",
+    "category": "Campaigns",
+    "event_date": "2026-09-21",
+    "location": "Bandra West, Mumbai",
+    "photographer": "Avinya Vision Wing",
+    "created_by": "Admin User",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-21T11:56:20.350Z",
+    "updated_at": "2026-09-21T14:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 78
+  },
+  {
+    "id": "gal-058",
+    "gallery_id": "gal-058",
+    "title": "Photo Showcase #058",
+    "slug": "corporate-workplace-health-cancer-awareness",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1581056771107-24ca5f033842?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Corporate Workplace Health & Cancer Awareness organized by Avinya Care Foundation at Dharavi, Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-21",
+    "location": "Dharavi, Mumbai",
+    "photographer": "Avinya Events",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-21T08:56:20.350Z",
+    "updated_at": "2026-09-21T11:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 58
+  },
+  {
+    "id": "gal-038",
+    "gallery_id": "gal-038",
+    "title": "Photo Showcase #038",
+    "slug": "national-doctor-s-day-recognition-forum",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "National Doctor's Day Recognition Forum organized by Avinya Care Foundation at Vasai, Maharashtra",
+    "category": "Events",
+    "event_date": "2026-09-21",
+    "location": "Vasai, Maharashtra",
+    "photographer": "Ananya Roy",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-21T05:56:20.350Z",
+    "updated_at": "2026-09-21T08:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 38
+  },
+  {
+    "id": "gal-018",
+    "gallery_id": "gal-018",
+    "title": "Photo Showcase #018",
+    "slug": "renal-health-free-dialysis-counselling-hub",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Renal Health & Free Dialysis Counselling Hub organized by Avinya Care Foundation at Kurla West, Mumbai",
+    "category": "Healthcare",
+    "event_date": "2026-09-21",
+    "location": "Kurla West, Mumbai",
+    "photographer": "Sneha Kulkarni",
+    "created_by": "Media Manager",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-21T02:56:20.350Z",
+    "updated_at": "2026-09-21T05:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 18
+  },
+  {
+    "id": "gal-077",
+    "gallery_id": "gal-077",
+    "title": "Early Detection Drives in Coastal Fishing Hamlets",
+    "slug": "early-detection-drives-in-coastal-fishing-hamlets",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive early detection drives in coastal fishing hamlets at Jawhar, Palghar. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Early Detection Drives in Coastal Fishing Hamlets organized by Avinya Care Foundation at Jawhar, Palghar",
+    "category": "Campaigns",
+    "event_date": "2026-09-20",
+    "location": "Jawhar, Palghar",
+    "photographer": "Pooja Hegde",
+    "created_by": "System Seeder",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-20T20:56:20.350Z",
+    "updated_at": "2026-09-20T22:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 77
+  },
+  {
+    "id": "gal-057",
+    "gallery_id": "gal-057",
+    "title": "Empowering Rural Women with Hygiene Knowledge",
+    "slug": "empowering-rural-women-with-hygiene-knowledge",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive empowering rural women with hygiene knowledge at Palghar, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Empowering Rural Women with Hygiene Knowledge organized by Avinya Care Foundation at Palghar, Maharashtra",
+    "category": "Awareness",
+    "event_date": "2026-09-20",
+    "location": "Palghar, Maharashtra",
+    "photographer": "Dr. S. Patil",
+    "created_by": "Admin User",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-20T17:56:20.350Z",
+    "updated_at": "2026-09-20T19:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 57
+  },
+  {
+    "id": "gal-037",
+    "gallery_id": "gal-037",
+    "title": "Medical Students' Healthcare Service Convention",
+    "slug": "medical-students-healthcare-service-convention",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive medical students' healthcare service convention at Ratnagiri, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Medical Students' Healthcare Service Convention organized by Avinya Care Foundation at Ratnagiri, Maharashtra",
+    "category": "Events",
+    "event_date": "2026-09-20",
+    "location": "Ratnagiri, Maharashtra",
+    "photographer": "Vikram Desai",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-20T14:56:20.350Z",
+    "updated_at": "2026-09-20T16:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 37
+  },
+  {
+    "id": "gal-017",
+    "gallery_id": "gal-017",
+    "title": "Diabetes & Hypertension Early Intervention",
+    "slug": "diabetes-hypertension-early-intervention",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive diabetes & hypertension early intervention at Vashi, Navi Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Diabetes & Hypertension Early Intervention organized by Avinya Care Foundation at Vashi, Navi Mumbai",
+    "category": "Healthcare",
+    "event_date": "2026-09-20",
+    "location": "Vashi, Navi Mumbai",
+    "photographer": "Avinya Media Team",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-20T11:56:20.350Z",
+    "updated_at": "2026-09-20T13:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 17
+  },
+  {
+    "id": "gal-097",
+    "gallery_id": "gal-097",
+    "title": "Maternal & Infant Health Pack Distribution",
+    "slug": "maternal-infant-health-pack-distribution",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive maternal & infant health pack distribution at Borivali, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Maternal & Infant Health Pack Distribution organized by Avinya Care Foundation at Borivali, Mumbai",
+    "category": "Community",
+    "event_date": "2026-09-20",
+    "location": "Borivali, Mumbai",
+    "photographer": "Avinya Media Team",
+    "created_by": "Community Coordinator",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-20T02:56:20.350Z",
+    "updated_at": "2026-09-20T04:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 97
+  },
+  {
+    "id": "gal-056",
+    "gallery_id": "gal-056",
+    "title": "Environmental Health & Pollution Risks Forum",
+    "slug": "environmental-health-pollution-risks-forum",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive environmental health & pollution risks forum at Ulhasnagar, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Environmental Health & Pollution Risks Forum organized by Avinya Care Foundation at Ulhasnagar, Maharashtra",
+    "category": "Awareness",
+    "event_date": "2026-09-20",
+    "location": "Ulhasnagar, Maharashtra",
+    "photographer": "Rohit Verma",
+    "created_by": "System Seeder",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-20T02:56:20.350Z",
+    "updated_at": "2026-09-20T03:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 56
+  },
+  {
+    "id": "gal-036",
+    "gallery_id": "gal-036",
+    "title": "Art for Healing Exhibition & Fundraiser",
+    "slug": "art-for-healing-exhibition-fundraiser",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive art for healing exhibition & fundraiser at Aurangabad, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Art for Healing Exhibition & Fundraiser organized by Avinya Care Foundation at Aurangabad, Maharashtra",
+    "category": "Events",
+    "event_date": "2026-09-19",
+    "location": "Aurangabad, Maharashtra",
+    "photographer": "Avinya Care Outreach",
+    "created_by": "Admin User",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-19T23:56:20.350Z",
+    "updated_at": "2026-09-20T00:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 36
+  },
+  {
+    "id": "gal-016",
+    "gallery_id": "gal-016",
+    "title": "Maternal Care & Prenatal Diagnostic Camp",
+    "slug": "maternal-care-prenatal-diagnostic-camp",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive maternal care & prenatal diagnostic camp at Malad, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Maternal Care & Prenatal Diagnostic Camp organized by Avinya Care Foundation at Malad, Mumbai",
+    "category": "Healthcare",
+    "event_date": "2026-09-19",
+    "location": "Malad, Mumbai",
+    "photographer": "Meera Nair",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-19T20:56:20.350Z",
+    "updated_at": "2026-09-19T21:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 16
+  },
+  {
+    "id": "gal-096",
+    "gallery_id": "gal-096",
+    "title": "Wheelchair & Mobility Aid Community Handover",
+    "slug": "wheelchair-mobility-aid-community-handover",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive wheelchair & mobility aid community handover at Andheri, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Wheelchair & Mobility Aid Community Handover organized by Avinya Care Foundation at Andheri, Mumbai",
+    "category": "Community",
+    "event_date": "2026-09-19",
+    "location": "Andheri, Mumbai",
+    "photographer": "Meera Nair",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-19T11:56:20.350Z",
+    "updated_at": "2026-09-19T12:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 96
+  },
+  {
+    "id": "gal-076",
+    "gallery_id": "gal-076",
+    "title": "Scalp Cooling & Chemotherapy Support Campaign",
+    "slug": "scalp-cooling-chemotherapy-support-campaign",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive scalp cooling & chemotherapy support campaign at Dadar, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Scalp Cooling & Chemotherapy Support Campaign organized by Avinya Care Foundation at Dadar, Mumbai",
+    "category": "Campaigns",
+    "event_date": "2026-09-19",
+    "location": "Dadar, Mumbai",
+    "photographer": "Karan Sharma",
+    "created_by": "Community Coordinator",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-19T08:56:20.350Z",
+    "updated_at": "2026-09-19T09:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 76
+  },
+  {
+    "id": "gal-035",
+    "gallery_id": "gal-035",
+    "title": "Photo Showcase #035",
+    "slug": "cancer-patient-caregiver-wellness-retreat",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Cancer Patient Caregiver Wellness Retreat organized by Avinya Care Foundation at Nashik, Maharashtra",
+    "category": "Events",
+    "event_date": "2026-09-19",
+    "location": "Nashik, Maharashtra",
+    "photographer": "Rajesh Mehta",
+    "created_by": "System Seeder",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-19T08:56:20.350Z",
+    "updated_at": "2026-09-19T08:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 35
+  },
+  {
+    "id": "gal-015",
+    "gallery_id": "gal-015",
+    "title": "Photo Showcase #015",
+    "slug": "subsidized-radiation-therapy-guidance-kiosk",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1584467735871-8e85353a8413?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Subsidized Radiation Therapy Guidance Kiosk organized by Avinya Care Foundation at Taloja, Navi Mumbai",
+    "category": "Healthcare",
+    "event_date": "2026-09-19",
+    "location": "Taloja, Navi Mumbai",
+    "photographer": "Siddharth Rao",
+    "created_by": "Admin User",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-19T05:56:20.350Z",
+    "updated_at": "2026-09-19T05:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 15
+  },
+  {
+    "id": "gal-095",
+    "gallery_id": "gal-095",
+    "title": "Photo Showcase #095",
+    "slug": "voluntary-blood-donors-network-registration",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Voluntary Blood Donors' Network Registration organized by Avinya Care Foundation at Bhiwandi, Maharashtra",
+    "category": "Community",
+    "event_date": "2026-09-18",
+    "location": "Bhiwandi, Maharashtra",
+    "photographer": "Siddharth Rao",
+    "created_by": "Media Manager",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-18T20:56:20.350Z",
+    "updated_at": "2026-09-18T20:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 95
+  },
+  {
+    "id": "gal-014",
+    "gallery_id": "gal-014",
+    "title": "Orthopedic Mobility & Joint Screening Mission",
+    "slug": "orthopedic-mobility-joint-screening-mission",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive orthopedic mobility & joint screening mission at Kalyan, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Orthopedic Mobility & Joint Screening Mission organized by Avinya Care Foundation at Kalyan, Maharashtra",
+    "category": "Healthcare",
+    "event_date": "2026-09-18",
+    "location": "Kalyan, Maharashtra",
+    "photographer": "Avinya Vision Wing",
+    "created_by": "System Seeder",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-18T14:56:20.350Z",
+    "updated_at": "2026-09-18T18:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 14
+  },
+  {
+    "id": "gal-075",
+    "gallery_id": "gal-075",
+    "title": "Photo Showcase #075",
+    "slug": "clean-water-gastro-intestinal-health-campaign",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Clean Water & Gastro-Intestinal Health Campaign organized by Avinya Care Foundation at Panvel, Maharashtra",
+    "category": "Campaigns",
+    "event_date": "2026-09-18",
+    "location": "Panvel, Maharashtra",
+    "photographer": "Tech Health Media",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-18T17:56:20.350Z",
+    "updated_at": "2026-09-18T17:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 75
+  },
+  {
+    "id": "gal-055",
+    "gallery_id": "gal-055",
+    "title": "Photo Showcase #055",
+    "slug": "genetic-counselling-hereditary-cancer-talk",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Genetic Counselling & Hereditary Cancer Talk organized by Avinya Care Foundation at Mira Road, Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-18",
+    "location": "Mira Road, Mumbai",
+    "photographer": "Avinya Outreach Team",
+    "created_by": "Community Coordinator",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-18T14:56:20.350Z",
+    "updated_at": "2026-09-18T14:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 55
+  },
+  {
+    "id": "gal-094",
+    "gallery_id": "gal-094",
+    "title": "Subsidized Prescription Distribution Kiosk",
+    "slug": "subsidized-prescription-distribution-kiosk",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive subsidized prescription distribution kiosk at Vasai, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Subsidized Prescription Distribution Kiosk organized by Avinya Care Foundation at Vasai, Maharashtra",
+    "category": "Community",
+    "event_date": "2026-09-18",
+    "location": "Vasai, Maharashtra",
+    "photographer": "Avinya Vision Wing",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-18T05:56:20.350Z",
+    "updated_at": "2026-09-18T09:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 94
+  },
+  {
+    "id": "gal-074",
+    "gallery_id": "gal-074",
+    "title": "Subsidized Lab Testing Campaign for Rural Families",
+    "slug": "subsidized-lab-testing-campaign-for-rural-families",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive subsidized lab testing campaign for rural families at Kurla West, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Subsidized Lab Testing Campaign for Rural Families organized by Avinya Care Foundation at Kurla West, Mumbai",
+    "category": "Campaigns",
+    "event_date": "2026-09-18",
+    "location": "Kurla West, Mumbai",
+    "photographer": "Avinya Events",
+    "created_by": "Media Manager",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-18T02:56:20.350Z",
+    "updated_at": "2026-09-18T06:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 74
+  },
+  {
+    "id": "gal-054",
+    "gallery_id": "gal-054",
+    "title": "Breast Health Awareness Bus Tour",
+    "slug": "breast-health-awareness-bus-tour",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive breast health awareness bus tour at Worli, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Breast Health Awareness Bus Tour organized by Avinya Care Foundation at Worli, Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-17",
+    "location": "Worli, Mumbai",
+    "photographer": "Ananya Roy",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-17T23:56:20.350Z",
+    "updated_at": "2026-09-18T03:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 54
+  },
+  {
+    "id": "gal-034",
+    "gallery_id": "gal-034",
+    "title": "Grassroots Health Champions Honor Ceremony",
+    "slug": "grassroots-health-champions-honor-ceremony",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive grassroots health champions honor ceremony at Pune, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Grassroots Health Champions Honor Ceremony organized by Avinya Care Foundation at Pune, Maharashtra",
+    "category": "Events",
+    "event_date": "2026-09-17",
+    "location": "Pune, Maharashtra",
+    "photographer": "Sneha Kulkarni",
+    "created_by": "Community Coordinator",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-17T20:56:20.350Z",
+    "updated_at": "2026-09-18T00:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 34
+  },
+  {
+    "id": "gal-093",
+    "gallery_id": "gal-093",
+    "title": "Children's Educational Toy Drive for Oncology Wards",
+    "slug": "children-s-educational-toy-drive-for-oncology-wards",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive children's educational toy drive for oncology wards at Ratnagiri, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1584467735871-8e85353a8413?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Children's Educational Toy Drive for Oncology Wards organized by Avinya Care Foundation at Ratnagiri, Maharashtra",
+    "category": "Community",
+    "event_date": "2026-09-17",
+    "location": "Ratnagiri, Maharashtra",
+    "photographer": "Pooja Hegde",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-17T14:56:20.350Z",
+    "updated_at": "2026-09-17T17:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 93
+  },
+  {
+    "id": "gal-073",
+    "gallery_id": "gal-073",
+    "title": "Women's Reproductive Health Screening Fortnight",
+    "slug": "women-s-reproductive-health-screening-fortnight",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive women's reproductive health screening fortnight at Vashi, Navi Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Women's Reproductive Health Screening Fortnight organized by Avinya Care Foundation at Vashi, Navi Mumbai",
+    "category": "Campaigns",
+    "event_date": "2026-09-17",
+    "location": "Vashi, Navi Mumbai",
+    "photographer": "Dr. S. Patil",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-17T11:56:20.350Z",
+    "updated_at": "2026-09-17T14:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 73
+  },
+  {
+    "id": "gal-053",
+    "gallery_id": "gal-053",
+    "title": "Youth Anti-Vaping & Nicotine Harm Education",
+    "slug": "youth-anti-vaping-nicotine-harm-education",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive youth anti-vaping & nicotine harm education at Sion, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Youth Anti-Vaping & Nicotine Harm Education organized by Avinya Care Foundation at Sion, Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-17",
+    "location": "Sion, Mumbai",
+    "photographer": "Vikram Desai",
+    "created_by": "Media Manager",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-17T08:56:20.350Z",
+    "updated_at": "2026-09-17T11:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 53
+  },
+  {
+    "id": "gal-033",
+    "gallery_id": "gal-033",
+    "title": "Youth Leadership for Cancer Awareness Summit",
+    "slug": "youth-leadership-for-cancer-awareness-summit",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive youth leadership for cancer awareness summit at Navi Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Youth Leadership for Cancer Awareness Summit organized by Avinya Care Foundation at Navi Mumbai",
+    "category": "Events",
+    "event_date": "2026-09-17",
+    "location": "Navi Mumbai",
+    "photographer": "Avinya Media Team",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-17T05:56:20.350Z",
+    "updated_at": "2026-09-17T08:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 33
+  },
+  {
+    "id": "gal-013",
+    "gallery_id": "gal-013",
+    "title": "Neurology Evaluation & Brain Health Awareness",
+    "slug": "neurology-evaluation-brain-health-awareness",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive neurology evaluation & brain health awareness at Borivali, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Neurology Evaluation & Brain Health Awareness organized by Avinya Care Foundation at Borivali, Mumbai",
+    "category": "Healthcare",
+    "event_date": "2026-09-17",
+    "location": "Borivali, Mumbai",
+    "photographer": "Pooja Hegde",
+    "created_by": "Community Coordinator",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-17T02:56:20.350Z",
+    "updated_at": "2026-09-17T05:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 13
+  },
+  {
+    "id": "gal-092",
+    "gallery_id": "gal-092",
+    "title": "Photo Showcase #092",
+    "slug": "transportation-voucher-assistance-for-rural-patients",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Transportation Voucher Assistance for Rural Patients organized by Avinya Care Foundation at Aurangabad, Maharashtra",
+    "category": "Community",
+    "event_date": "2026-09-16",
+    "location": "Aurangabad, Maharashtra",
+    "photographer": "Karan Sharma",
+    "created_by": "Admin User",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-16T23:56:20.350Z",
+    "updated_at": "2026-09-17T01:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 92
+  },
+  {
+    "id": "gal-072",
+    "gallery_id": "gal-072",
+    "title": "Photo Showcase #072",
+    "slug": "mass-blood-pressure-heart-risk-campaign",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Mass Blood Pressure & Heart Risk Campaign organized by Avinya Care Foundation at Malad, Mumbai",
+    "category": "Campaigns",
+    "event_date": "2026-09-16",
+    "location": "Malad, Mumbai",
+    "photographer": "Rohit Verma",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-16T20:56:20.350Z",
+    "updated_at": "2026-09-16T22:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 72
+  },
+  {
+    "id": "gal-052",
+    "gallery_id": "gal-052",
+    "title": "Photo Showcase #052",
+    "slug": "occupational-health-chemical-safety-workshop",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Occupational Health & Chemical Safety Workshop organized by Avinya Care Foundation at Chembur, Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-16",
+    "location": "Chembur, Mumbai",
+    "photographer": "Avinya Care Outreach",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-16T17:56:20.350Z",
+    "updated_at": "2026-09-16T19:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 52
+  },
+  {
+    "id": "gal-032",
+    "gallery_id": "gal-032",
+    "title": "Photo Showcase #032",
+    "slug": "hospice-comfort-memorial-remembrance-evening",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1581056771107-24ca5f033842?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Hospice Comfort & Memorial Remembrance Evening organized by Avinya Care Foundation at Virar West, Mumbai",
+    "category": "Events",
+    "event_date": "2026-09-16",
+    "location": "Virar West, Mumbai",
+    "photographer": "Meera Nair",
+    "created_by": "Media Manager",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-16T14:56:20.350Z",
+    "updated_at": "2026-09-16T16:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 32
+  },
+  {
+    "id": "gal-012",
+    "gallery_id": "gal-012",
+    "title": "Photo Showcase #012",
+    "slug": "subsidized-chemotherapy-access-initiative",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Subsidized Chemotherapy Access Initiative organized by Avinya Care Foundation at Andheri, Mumbai",
+    "category": "Healthcare",
+    "event_date": "2026-09-16",
+    "location": "Andheri, Mumbai",
+    "photographer": "Karan Sharma",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-16T11:56:20.350Z",
+    "updated_at": "2026-09-16T13:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 12
+  },
+  {
+    "id": "gal-091",
+    "gallery_id": "gal-091",
+    "title": "Community Kitchen Free Meals for Hospital Attendants",
+    "slug": "community-kitchen-free-meals-for-hospital-attendants",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive community kitchen free meals for hospital attendants at Nashik, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Community Kitchen Free Meals for Hospital Attendants organized by Avinya Care Foundation at Nashik, Maharashtra",
+    "category": "Community",
+    "event_date": "2026-09-16",
+    "location": "Nashik, Maharashtra",
+    "photographer": "Tech Health Media",
+    "created_by": "System Seeder",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-16T08:56:20.350Z",
+    "updated_at": "2026-09-16T09:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 91
+  },
+  {
+    "id": "gal-071",
+    "gallery_id": "gal-071",
+    "title": "Clean Air & Lung Health Screening Campaign",
+    "slug": "clean-air-lung-health-screening-campaign",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive clean air & lung health screening campaign at Taloja, Navi Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Clean Air & Lung Health Screening Campaign organized by Avinya Care Foundation at Taloja, Navi Mumbai",
+    "category": "Campaigns",
+    "event_date": "2026-09-16",
+    "location": "Taloja, Navi Mumbai",
+    "photographer": "Avinya Outreach Team",
+    "created_by": "Admin User",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-16T05:56:20.350Z",
+    "updated_at": "2026-09-16T06:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 71
+  },
+  {
+    "id": "gal-051",
+    "gallery_id": "gal-051",
+    "title": "Colorectal Health & Early Diagnostic Seminar",
+    "slug": "colorectal-health-early-diagnostic-seminar",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive colorectal health & early diagnostic seminar at Ghatkopar, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Colorectal Health & Early Diagnostic Seminar organized by Avinya Care Foundation at Ghatkopar, Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-16",
+    "location": "Ghatkopar, Mumbai",
+    "photographer": "Rajesh Mehta",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-16T02:56:20.350Z",
+    "updated_at": "2026-09-16T03:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 51
+  },
+  {
+    "id": "gal-031",
+    "gallery_id": "gal-031",
+    "title": "Oncology Research & Innovation Symposium",
+    "slug": "oncology-research-innovation-symposium",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive oncology research & innovation symposium at Thane West, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Oncology Research & Innovation Symposium organized by Avinya Care Foundation at Thane West, Maharashtra",
+    "category": "Events",
+    "event_date": "2026-09-15",
+    "location": "Thane West, Maharashtra",
+    "photographer": "Siddharth Rao",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-15T23:56:20.350Z",
+    "updated_at": "2026-09-16T00:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 31
+  },
+  {
+    "id": "gal-011",
+    "gallery_id": "gal-011",
+    "title": "Community Dental & Oral Hygiene Drive",
+    "slug": "community-dental-oral-hygiene-drive",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive community dental & oral hygiene drive at Bhiwandi, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Community Dental & Oral Hygiene Drive organized by Avinya Care Foundation at Bhiwandi, Maharashtra",
+    "category": "Healthcare",
+    "event_date": "2026-09-15",
+    "location": "Bhiwandi, Maharashtra",
+    "photographer": "Tech Health Media",
+    "created_by": "Media Manager",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-15T20:56:20.350Z",
+    "updated_at": "2026-09-15T21:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 11
+  },
+  {
+    "id": "gal-070",
+    "gallery_id": "gal-070",
+    "title": "Senior Citizen Preventive Health Assessment Tour",
+    "slug": "senior-citizen-preventive-health-assessment-tour",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive senior citizen preventive health assessment tour at Kalyan, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Senior Citizen Preventive Health Assessment Tour organized by Avinya Care Foundation at Kalyan, Maharashtra",
+    "category": "Campaigns",
+    "event_date": "2026-09-15",
+    "location": "Kalyan, Maharashtra",
+    "photographer": "Ananya Roy",
+    "created_by": "System Seeder",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-15T14:56:20.350Z",
+    "updated_at": "2026-09-15T14:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 70
+  },
+  {
+    "id": "gal-050",
+    "gallery_id": "gal-050",
+    "title": "Prostate Cancer Screening Awareness Rally",
+    "slug": "prostate-cancer-screening-awareness-rally",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive prostate cancer screening awareness rally at Bandra West, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Prostate Cancer Screening Awareness Rally organized by Avinya Care Foundation at Bandra West, Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-15",
+    "location": "Bandra West, Mumbai",
+    "photographer": "Sneha Kulkarni",
+    "created_by": "Admin User",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-15T11:56:20.350Z",
+    "updated_at": "2026-09-15T11:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 50
+  },
+  {
+    "id": "gal-030",
+    "gallery_id": "gal-030",
+    "title": "Benefactor & Medical Partners' Roundtable",
+    "slug": "benefactor-medical-partners-roundtable",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive benefactor & medical partners' roundtable at Dharavi, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Benefactor & Medical Partners' Roundtable organized by Avinya Care Foundation at Dharavi, Mumbai",
+    "category": "Events",
+    "event_date": "2026-09-15",
+    "location": "Dharavi, Mumbai",
+    "photographer": "Avinya Vision Wing",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-15T08:56:20.350Z",
+    "updated_at": "2026-09-15T08:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 30
+  },
+  {
+    "id": "gal-010",
+    "gallery_id": "gal-010",
+    "title": "Prosthetics Distribution & Orthotic Rehab Camp",
+    "slug": "prosthetics-distribution-orthotic-rehab-camp",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive prosthetics distribution & orthotic rehab camp at Vasai, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Prosthetics Distribution & Orthotic Rehab Camp organized by Avinya Care Foundation at Vasai, Maharashtra",
+    "category": "Healthcare",
+    "event_date": "2026-09-15",
+    "location": "Vasai, Maharashtra",
+    "photographer": "Avinya Events",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-15T05:56:20.350Z",
+    "updated_at": "2026-09-15T05:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 10
+  },
+  {
+    "id": "gal-049",
+    "gallery_id": "gal-049",
+    "title": "Photo Showcase #049",
+    "slug": "dietary-nutrition-anti-oxidant-health-lecture",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Dietary Nutrition & Anti-Oxidant Health Lecture organized by Avinya Care Foundation at Jawhar, Palghar",
+    "category": "Awareness",
+    "event_date": "2026-09-14",
+    "location": "Jawhar, Palghar",
+    "photographer": "Avinya Media Team",
+    "created_by": "System Seeder",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-14T20:56:20.350Z",
+    "updated_at": "2026-09-15T00:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 49
+  },
+  {
+    "id": "gal-029",
+    "gallery_id": "gal-029",
+    "title": "Photo Showcase #029",
+    "slug": "community-health-workers-graduation-day",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Community Health Workers' Graduation Day organized by Avinya Care Foundation at Palghar, Maharashtra",
+    "category": "Events",
+    "event_date": "2026-09-14",
+    "location": "Palghar, Maharashtra",
+    "photographer": "Pooja Hegde",
+    "created_by": "Admin User",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-14T17:56:20.350Z",
+    "updated_at": "2026-09-14T21:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 29
+  },
+  {
+    "id": "gal-090",
+    "gallery_id": "gal-090",
+    "title": "Nutritional Supplement Support for Cancer Patients",
+    "slug": "nutritional-supplement-support-for-cancer-patients",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive nutritional supplement support for cancer patients at Pune, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Nutritional Supplement Support for Cancer Patients organized by Avinya Care Foundation at Pune, Maharashtra",
+    "category": "Community",
+    "event_date": "2026-09-14",
+    "location": "Pune, Maharashtra",
+    "photographer": "Avinya Events",
+    "created_by": "Community Coordinator",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-14T20:56:20.350Z",
+    "updated_at": "2026-09-14T20:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 90
+  },
+  {
+    "id": "gal-009",
+    "gallery_id": "gal-009",
+    "title": "Photo Showcase #009",
+    "slug": "pathology-diagnostic-camp-for-tribal-hamlets",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Pathology Diagnostic Camp for Tribal Hamlets organized by Avinya Care Foundation at Ratnagiri, Maharashtra",
+    "category": "Healthcare",
+    "event_date": "2026-09-14",
+    "location": "Ratnagiri, Maharashtra",
+    "photographer": "Dr. S. Patil",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-14T14:56:20.350Z",
+    "updated_at": "2026-09-14T18:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 9
+  },
+  {
+    "id": "gal-089",
+    "gallery_id": "gal-089",
+    "title": "Photo Showcase #089",
+    "slug": "warm-blankets-care-package-winter-distribution",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Warm Blankets & Care Package Winter Distribution organized by Avinya Care Foundation at Navi Mumbai",
+    "category": "Community",
+    "event_date": "2026-09-14",
+    "location": "Navi Mumbai",
+    "photographer": "Dr. S. Patil",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-14T05:56:20.350Z",
+    "updated_at": "2026-09-14T09:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 89
+  },
+  {
+    "id": "gal-069",
+    "gallery_id": "gal-069",
+    "title": "Photo Showcase #069",
+    "slug": "community-health-worker-door-to-door-screening",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Community Health Worker Door-to-Door Screening organized by Avinya Care Foundation at Borivali, Mumbai",
+    "category": "Campaigns",
+    "event_date": "2026-09-14",
+    "location": "Borivali, Mumbai",
+    "photographer": "Vikram Desai",
+    "created_by": "Community Coordinator",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-14T02:56:20.350Z",
+    "updated_at": "2026-09-14T06:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 69
+  },
+  {
+    "id": "gal-028",
+    "gallery_id": "gal-028",
+    "title": "Children's Healthcare & Play Therapy Festival",
+    "slug": "children-s-healthcare-play-therapy-festival",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive children's healthcare & play therapy festival at Ulhasnagar, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Children's Healthcare & Play Therapy Festival organized by Avinya Care Foundation at Ulhasnagar, Maharashtra",
+    "category": "Events",
+    "event_date": "2026-09-14",
+    "location": "Ulhasnagar, Maharashtra",
+    "photographer": "Karan Sharma",
+    "created_by": "System Seeder",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-14T02:56:20.350Z",
+    "updated_at": "2026-09-14T05:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 28
+  },
+  {
+    "id": "gal-008",
+    "gallery_id": "gal-008",
+    "title": "Oncology Nursing & Grassroots Caregiver Training",
+    "slug": "oncology-nursing-grassroots-caregiver-training",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive oncology nursing & grassroots caregiver training at Aurangabad, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Oncology Nursing & Grassroots Caregiver Training organized by Avinya Care Foundation at Aurangabad, Maharashtra",
+    "category": "Healthcare",
+    "event_date": "2026-09-13",
+    "location": "Aurangabad, Maharashtra",
+    "photographer": "Rohit Verma",
+    "created_by": "Admin User",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-13T23:56:20.350Z",
+    "updated_at": "2026-09-14T02:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 8
+  },
+  {
+    "id": "gal-088",
+    "gallery_id": "gal-088",
+    "title": "Prosthetic Limb Fitting & Mobility Aid Donation",
+    "slug": "prosthetic-limb-fitting-mobility-aid-donation",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive prosthetic limb fitting & mobility aid donation at Virar West, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Prosthetic Limb Fitting & Mobility Aid Donation organized by Avinya Care Foundation at Virar West, Mumbai",
+    "category": "Community",
+    "event_date": "2026-09-13",
+    "location": "Virar West, Mumbai",
+    "photographer": "Rohit Verma",
+    "created_by": "Media Manager",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-13T14:56:20.350Z",
+    "updated_at": "2026-09-13T17:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 88
+  },
+  {
+    "id": "gal-068",
+    "gallery_id": "gal-068",
+    "title": "Childhood Cancer Early Diagnosis Campus Campaign",
+    "slug": "childhood-cancer-early-diagnosis-campus-campaign",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive childhood cancer early diagnosis campus campaign at Andheri, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Childhood Cancer Early Diagnosis Campus Campaign organized by Avinya Care Foundation at Andheri, Mumbai",
+    "category": "Campaigns",
+    "event_date": "2026-09-13",
+    "location": "Andheri, Mumbai",
+    "photographer": "Avinya Care Outreach",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-13T11:56:20.350Z",
+    "updated_at": "2026-09-13T14:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 68
+  },
+  {
+    "id": "gal-048",
+    "gallery_id": "gal-048",
+    "title": "Pediatric Cancer Symptoms Guidance for Teachers",
+    "slug": "pediatric-cancer-symptoms-guidance-for-teachers",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive pediatric cancer symptoms guidance for teachers at Dadar, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Pediatric Cancer Symptoms Guidance for Teachers organized by Avinya Care Foundation at Dadar, Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-13",
+    "location": "Dadar, Mumbai",
+    "photographer": "Meera Nair",
+    "created_by": "Community Coordinator",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-13T08:56:20.350Z",
+    "updated_at": "2026-09-13T11:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 48
+  },
+  {
+    "id": "gal-007",
+    "gallery_id": "gal-007",
+    "title": "Telemedicine Kiosk Network Inauguration",
+    "slug": "telemedicine-kiosk-network-inauguration",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive telemedicine kiosk network inauguration at Nashik, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Telemedicine Kiosk Network Inauguration organized by Avinya Care Foundation at Nashik, Maharashtra",
+    "category": "Healthcare",
+    "event_date": "2026-09-13",
+    "location": "Nashik, Maharashtra",
+    "photographer": "Avinya Outreach Team",
+    "created_by": "System Seeder",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-13T08:56:20.350Z",
+    "updated_at": "2026-09-13T10:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 7
+  },
+  {
+    "id": "gal-087",
+    "gallery_id": "gal-087",
+    "title": "Patient Family Rations & Support Package Drive",
+    "slug": "patient-family-rations-support-package-drive",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive patient family rations & support package drive at Thane West, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Patient Family Rations & Support Package Drive organized by Avinya Care Foundation at Thane West, Maharashtra",
+    "category": "Community",
+    "event_date": "2026-09-12",
+    "location": "Thane West, Maharashtra",
+    "photographer": "Avinya Outreach Team",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-12T23:56:20.350Z",
+    "updated_at": "2026-09-13T01:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 87
+  },
+  {
+    "id": "gal-067",
+    "gallery_id": "gal-067",
+    "title": "Industrial Belt Tobacco Harm Elimination Campaign",
+    "slug": "industrial-belt-tobacco-harm-elimination-campaign",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive industrial belt tobacco harm elimination campaign at Bhiwandi, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1584467735871-8e85353a8413?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Industrial Belt Tobacco Harm Elimination Campaign organized by Avinya Care Foundation at Bhiwandi, Maharashtra",
+    "category": "Campaigns",
+    "event_date": "2026-09-12",
+    "location": "Bhiwandi, Maharashtra",
+    "photographer": "Rajesh Mehta",
+    "created_by": "Media Manager",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-12T20:56:20.350Z",
+    "updated_at": "2026-09-12T22:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 67
+  },
+  {
+    "id": "gal-047",
+    "gallery_id": "gal-047",
+    "title": "Sun Protection & Skin Melanoma Warning Signals",
+    "slug": "sun-protection-skin-melanoma-warning-signals",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive sun protection & skin melanoma warning signals at Panvel, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Sun Protection & Skin Melanoma Warning Signals organized by Avinya Care Foundation at Panvel, Maharashtra",
+    "category": "Awareness",
+    "event_date": "2026-09-12",
+    "location": "Panvel, Maharashtra",
+    "photographer": "Siddharth Rao",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-12T17:56:20.350Z",
+    "updated_at": "2026-09-12T19:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 47
+  },
+  {
+    "id": "gal-027",
+    "gallery_id": "gal-027",
+    "title": "Volunteer Appreciation & Milestone Awards Ceremony",
+    "slug": "volunteer-appreciation-milestone-awards-ceremony",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive volunteer appreciation & milestone awards ceremony at Mira Road, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Volunteer Appreciation & Milestone Awards Ceremony organized by Avinya Care Foundation at Mira Road, Mumbai",
+    "category": "Events",
+    "event_date": "2026-09-12",
+    "location": "Mira Road, Mumbai",
+    "photographer": "Tech Health Media",
+    "created_by": "Community Coordinator",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-12T14:56:20.350Z",
+    "updated_at": "2026-09-12T16:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 27
+  },
+  {
+    "id": "gal-086",
+    "gallery_id": "gal-086",
+    "title": "Photo Showcase #086",
+    "slug": "single-donor-platelet-sdp-apheresis-drive",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Single Donor Platelet (SDP) Apheresis Drive organized by Avinya Care Foundation at Dharavi, Mumbai",
+    "category": "Community",
+    "event_date": "2026-09-12",
+    "location": "Dharavi, Mumbai",
+    "photographer": "Ananya Roy",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-12T08:56:20.350Z",
+    "updated_at": "2026-09-12T09:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 86
+  },
+  {
+    "id": "gal-066",
+    "gallery_id": "gal-066",
+    "title": "Photo Showcase #066",
+    "slug": "hpv-immunization-drive-for-young-girls",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "HPV Immunization Drive for Young Girls organized by Avinya Care Foundation at Vasai, Maharashtra",
+    "category": "Campaigns",
+    "event_date": "2026-09-12",
+    "location": "Vasai, Maharashtra",
+    "photographer": "Sneha Kulkarni",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-12T05:56:20.350Z",
+    "updated_at": "2026-09-12T06:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 66
+  },
+  {
+    "id": "gal-046",
+    "gallery_id": "gal-046",
+    "title": "Photo Showcase #046",
+    "slug": "lifestyle-medicine-cancer-risk-mitigation-forum",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Lifestyle Medicine & Cancer Risk Mitigation Forum organized by Avinya Care Foundation at Kurla West, Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-12",
+    "location": "Kurla West, Mumbai",
+    "photographer": "Avinya Vision Wing",
+    "created_by": "Media Manager",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-12T02:56:20.350Z",
+    "updated_at": "2026-09-12T03:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 46
+  },
+  {
+    "id": "gal-026",
+    "gallery_id": "gal-026",
+    "title": "Photo Showcase #026",
+    "slug": "oncology-survivors-stories-of-courage-forum",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Oncology Survivors' Stories of Courage Forum organized by Avinya Care Foundation at Worli, Mumbai",
+    "category": "Events",
+    "event_date": "2026-09-11",
+    "location": "Worli, Mumbai",
+    "photographer": "Avinya Events",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-11T23:56:20.350Z",
+    "updated_at": "2026-09-12T00:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 26
+  },
+  {
+    "id": "gal-006",
+    "gallery_id": "gal-006",
+    "title": "Photo Showcase #006",
+    "slug": "subsidized-surgical-reconstruction-program",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1581056771107-24ca5f033842?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Subsidized Surgical Reconstruction Program organized by Avinya Care Foundation at Pune, Maharashtra",
+    "category": "Healthcare",
+    "event_date": "2026-09-11",
+    "location": "Pune, Maharashtra",
+    "photographer": "Ananya Roy",
+    "created_by": "Community Coordinator",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-11T20:56:20.350Z",
+    "updated_at": "2026-09-11T21:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 6
+  },
+  {
+    "id": "gal-085",
+    "gallery_id": "gal-085",
+    "title": "Clean Water Filter & Hygiene Kit Distribution",
+    "slug": "clean-water-filter-hygiene-kit-distribution",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive clean water filter & hygiene kit distribution at Palghar, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Clean Water Filter & Hygiene Kit Distribution organized by Avinya Care Foundation at Palghar, Maharashtra",
+    "category": "Community",
+    "event_date": "2026-09-11",
+    "location": "Palghar, Maharashtra",
+    "photographer": "Vikram Desai",
+    "created_by": "Admin User",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-11T17:56:20.350Z",
+    "updated_at": "2026-09-11T17:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 85
+  },
+  {
+    "id": "gal-065",
+    "gallery_id": "gal-065",
+    "title": "Early Diagnostic Screening Campaign for Urban Poor",
+    "slug": "early-diagnostic-screening-campaign-for-urban-poor",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive early diagnostic screening campaign for urban poor at Ratnagiri, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Early Diagnostic Screening Campaign for Urban Poor organized by Avinya Care Foundation at Ratnagiri, Maharashtra",
+    "category": "Campaigns",
+    "event_date": "2026-09-11",
+    "location": "Ratnagiri, Maharashtra",
+    "photographer": "Avinya Media Team",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-11T14:56:20.350Z",
+    "updated_at": "2026-09-11T14:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 65
+  },
+  {
+    "id": "gal-045",
+    "gallery_id": "gal-045",
+    "title": "Tobacco Cessation Counselling Kiosk Setup",
+    "slug": "tobacco-cessation-counselling-kiosk-setup",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive tobacco cessation counselling kiosk setup at Vashi, Navi Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Tobacco Cessation Counselling Kiosk Setup organized by Avinya Care Foundation at Vashi, Navi Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-11",
+    "location": "Vashi, Navi Mumbai",
+    "photographer": "Pooja Hegde",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-11T11:56:20.350Z",
+    "updated_at": "2026-09-11T11:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 45
+  },
+  {
+    "id": "gal-025",
+    "gallery_id": "gal-025",
+    "title": "Caregiver Stress Resilience & Mental Health Workshop",
+    "slug": "caregiver-stress-resilience-mental-health-workshop",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive caregiver stress resilience & mental health workshop at Sion, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Caregiver Stress Resilience & Mental Health Workshop organized by Avinya Care Foundation at Sion, Mumbai",
+    "category": "Events",
+    "event_date": "2026-09-11",
+    "location": "Sion, Mumbai",
+    "photographer": "Dr. S. Patil",
+    "created_by": "Media Manager",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-11T08:56:20.350Z",
+    "updated_at": "2026-09-11T08:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 25
+  },
+  {
+    "id": "gal-084",
+    "gallery_id": "gal-084",
+    "title": "Hospice Caregiver Support Group Monthly Gathering",
+    "slug": "hospice-caregiver-support-group-monthly-gathering",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive hospice caregiver support group monthly gathering at Ulhasnagar, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1581056771107-24ca5f033842?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Hospice Caregiver Support Group Monthly Gathering organized by Avinya Care Foundation at Ulhasnagar, Maharashtra",
+    "category": "Community",
+    "event_date": "2026-09-11",
+    "location": "Ulhasnagar, Maharashtra",
+    "photographer": "Avinya Care Outreach",
+    "created_by": "System Seeder",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-11T02:56:20.350Z",
+    "updated_at": "2026-09-11T06:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 84
+  },
+  {
+    "id": "gal-005",
+    "gallery_id": "gal-005",
+    "title": "Rural Vision & Subsidized Cataract Surgery Mission",
+    "slug": "rural-vision-subsidized-cataract-surgery-mission",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive rural vision & subsidized cataract surgery mission at Navi Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Rural Vision & Subsidized Cataract Surgery Mission organized by Avinya Care Foundation at Navi Mumbai",
+    "category": "Healthcare",
+    "event_date": "2026-09-11",
+    "location": "Navi Mumbai",
+    "photographer": "Vikram Desai",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-11T05:56:20.350Z",
+    "updated_at": "2026-09-11T05:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 5
+  },
+  {
+    "id": "gal-064",
+    "gallery_id": "gal-064",
+    "title": "Mobile Mammography Van Slum Cluster Outreach",
+    "slug": "mobile-mammography-van-slum-cluster-outreach",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive mobile mammography van slum cluster outreach at Aurangabad, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Mobile Mammography Van Slum Cluster Outreach organized by Avinya Care Foundation at Aurangabad, Maharashtra",
+    "category": "Campaigns",
+    "event_date": "2026-09-10",
+    "location": "Aurangabad, Maharashtra",
+    "photographer": "Meera Nair",
+    "created_by": "Admin User",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-10T23:56:20.350Z",
+    "updated_at": "2026-09-11T03:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 64
+  },
+  {
+    "id": "gal-044",
+    "gallery_id": "gal-044",
+    "title": "Women's Wellness & Anemia Prevention Seminar",
+    "slug": "women-s-wellness-anemia-prevention-seminar",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive women's wellness & anemia prevention seminar at Malad, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Women's Wellness & Anemia Prevention Seminar organized by Avinya Care Foundation at Malad, Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-10",
+    "location": "Malad, Mumbai",
+    "photographer": "Karan Sharma",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-10T20:56:20.350Z",
+    "updated_at": "2026-09-11T00:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 44
+  },
+  {
+    "id": "gal-024",
+    "gallery_id": "gal-024",
+    "title": "World Cancer Day Public Transit Flash Mob",
+    "slug": "world-cancer-day-public-transit-flash-mob",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive world cancer day public transit flash mob at Chembur, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "World Cancer Day Public Transit Flash Mob organized by Avinya Care Foundation at Chembur, Mumbai",
+    "category": "Events",
+    "event_date": "2026-09-10",
+    "location": "Chembur, Mumbai",
+    "photographer": "Rohit Verma",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-10T17:56:20.350Z",
+    "updated_at": "2026-09-10T21:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 24
+  },
+  {
+    "id": "gal-004",
+    "gallery_id": "gal-004",
+    "title": "Cardiology Consultation & 12-Lead ECG Camp",
+    "slug": "cardiology-consultation-12-lead-ecg-camp",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive cardiology consultation & 12-lead ecg camp at Virar West, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Cardiology Consultation & 12-Lead ECG Camp organized by Avinya Care Foundation at Virar West, Mumbai",
+    "category": "Healthcare",
+    "event_date": "2026-09-10",
+    "location": "Virar West, Mumbai",
+    "photographer": "Avinya Care Outreach",
+    "created_by": "Media Manager",
+    "updated_by": "Avinya Content Editor",
+    "created_at": "2026-09-10T14:56:20.350Z",
+    "updated_at": "2026-09-10T18:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 4
+  },
+  {
+    "id": "gal-063",
+    "gallery_id": "gal-063",
+    "title": "Photo Showcase #063",
+    "slug": "free-diabetes-hypertension-screening-marathon",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Free Diabetes & Hypertension Screening Marathon organized by Avinya Care Foundation at Nashik, Maharashtra",
+    "category": "Campaigns",
+    "event_date": "2026-09-10",
+    "location": "Nashik, Maharashtra",
+    "photographer": "Siddharth Rao",
+    "created_by": "System Seeder",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-10T08:56:20.350Z",
+    "updated_at": "2026-09-10T11:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 63
+  },
+  {
+    "id": "gal-043",
+    "gallery_id": "gal-043",
+    "title": "Photo Showcase #043",
+    "slug": "oral-cancer-prevention-in-industrial-factory-belts",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Oral Cancer Prevention in Industrial Factory Belts organized by Avinya Care Foundation at Taloja, Navi Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-10",
+    "location": "Taloja, Navi Mumbai",
+    "photographer": "Tech Health Media",
+    "created_by": "Admin User",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-10T05:56:20.350Z",
+    "updated_at": "2026-09-10T08:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 43
+  },
+  {
+    "id": "gal-023",
+    "gallery_id": "gal-023",
+    "title": "Photo Showcase #023",
+    "slug": "annual-hope-gala-benefactor-recognition-night",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Annual Hope Gala & Benefactor Recognition Night organized by Avinya Care Foundation at Ghatkopar, Mumbai",
+    "category": "Events",
+    "event_date": "2026-09-10",
+    "location": "Ghatkopar, Mumbai",
+    "photographer": "Avinya Outreach Team",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-10T02:56:20.350Z",
+    "updated_at": "2026-09-10T05:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 23
+  },
+  {
+    "id": "gal-003",
+    "gallery_id": "gal-003",
+    "title": "Photo Showcase #003",
+    "slug": "geriatric-consultation-mobility-health-drive",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Geriatric Consultation & Mobility Health Drive organized by Avinya Care Foundation at Thane West, Maharashtra",
+    "category": "Healthcare",
+    "event_date": "2026-09-09",
+    "location": "Thane West, Maharashtra",
+    "photographer": "Rajesh Mehta",
+    "created_by": "Avinya Outreach Lead",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-09T23:56:20.350Z",
+    "updated_at": "2026-09-10T02:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 3
+  },
+  {
+    "id": "gal-083",
+    "gallery_id": "gal-083",
+    "title": "Photo Showcase #083",
+    "slug": "emergency-medical-supplies-oxygen-relief-support",
+    "short_description": "",
+    "description": "",
+    "image": "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Emergency Medical Supplies & Oxygen Relief Support organized by Avinya Care Foundation at Mira Road, Mumbai",
+    "category": "Community",
+    "event_date": "2026-09-09",
+    "location": "Mira Road, Mumbai",
+    "photographer": "Rajesh Mehta",
+    "created_by": "Community Coordinator",
+    "updated_by": "System Seeder",
+    "created_at": "2026-09-09T14:56:20.350Z",
+    "updated_at": "2026-09-09T17:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": false,
+    "image_only": true,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 83
+  },
+  {
+    "id": "gal-042",
+    "gallery_id": "gal-042",
+    "title": "Cervical Cancer Awareness Rally & HPV Walkathon",
+    "slug": "cervical-cancer-awareness-rally-hpv-walkathon",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive cervical cancer awareness rally & hpv walkathon at Kalyan, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Cervical Cancer Awareness Rally & HPV Walkathon organized by Avinya Care Foundation at Kalyan, Maharashtra",
+    "category": "Awareness",
+    "event_date": "2026-09-09",
+    "location": "Kalyan, Maharashtra",
+    "photographer": "Avinya Events",
+    "created_by": "System Seeder",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-09T14:56:20.350Z",
+    "updated_at": "2026-09-09T16:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 42
+  },
+  {
+    "id": "gal-022",
+    "gallery_id": "gal-022",
+    "title": "National Cancer Survivors' Triumph Celebration",
+    "slug": "national-cancer-survivors-triumph-celebration",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive national cancer survivors' triumph celebration at Bandra West, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "National Cancer Survivors' Triumph Celebration organized by Avinya Care Foundation at Bandra West, Mumbai",
+    "category": "Events",
+    "event_date": "2026-09-09",
+    "location": "Bandra West, Mumbai",
+    "photographer": "Ananya Roy",
+    "created_by": "Admin User",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-09T11:56:20.350Z",
+    "updated_at": "2026-09-09T13:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 22
+  },
+  {
+    "id": "gal-002",
+    "gallery_id": "gal-002",
+    "title": "Pediatric Care & Specialized Oncology Screening",
+    "slug": "pediatric-care-specialized-oncology-screening",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive pediatric care & specialized oncology screening at Dharavi, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Pediatric Care & Specialized Oncology Screening organized by Avinya Care Foundation at Dharavi, Mumbai",
+    "category": "Healthcare",
+    "event_date": "2026-09-09",
+    "location": "Dharavi, Mumbai",
+    "photographer": "Sneha Kulkarni",
+    "created_by": "Dr. S. Patil",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-09T08:56:20.350Z",
+    "updated_at": "2026-09-09T10:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 2
+  },
+  {
+    "id": "gal-082",
+    "gallery_id": "gal-082",
+    "title": "Voluntary Blood Donation Marathon for Leukaemia",
+    "slug": "voluntary-blood-donation-marathon-for-leukaemia",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive voluntary blood donation marathon for leukaemia at Worli, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Voluntary Blood Donation Marathon for Leukaemia organized by Avinya Care Foundation at Worli, Mumbai",
+    "category": "Community",
+    "event_date": "2026-09-08",
+    "location": "Worli, Mumbai",
+    "photographer": "Sneha Kulkarni",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-08T23:56:20.350Z",
+    "updated_at": "2026-09-09T01:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 82
+  },
+  {
+    "id": "gal-062",
+    "gallery_id": "gal-062",
+    "title": "Youth Anti-Smoking School Campaign Across 25 Schools",
+    "slug": "youth-anti-smoking-school-campaign-across-25-schools",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive youth anti-smoking school campaign across 25 schools at Pune, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Youth Anti-Smoking School Campaign Across 25 Schools organized by Avinya Care Foundation at Pune, Maharashtra",
+    "category": "Campaigns",
+    "event_date": "2026-09-08",
+    "location": "Pune, Maharashtra",
+    "photographer": "Avinya Vision Wing",
+    "created_by": "Community Coordinator",
+    "updated_by": "Media Manager",
+    "created_at": "2026-09-08T20:56:20.350Z",
+    "updated_at": "2026-09-08T22:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": false,
+    "is_published": true,
+    "sort_order": 62
+  },
+  {
+    "id": "gal-021",
+    "gallery_id": "gal-021",
+    "title": "Pediatric Oncology Ward Art & Joy Workshop",
+    "slug": "pediatric-oncology-ward-art-joy-workshop",
+    "short_description": "Dedicated events initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive pediatric oncology ward art & joy workshop at Jawhar, Palghar. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Pediatric Oncology Ward Art & Joy Workshop organized by Avinya Care Foundation at Jawhar, Palghar",
+    "category": "Events",
+    "event_date": "2026-09-08",
+    "location": "Jawhar, Palghar",
+    "photographer": "Vikram Desai",
+    "created_by": "System Seeder",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-08T20:56:20.350Z",
+    "updated_at": "2026-09-08T21:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 21
+  },
+  {
+    "id": "gal-001",
+    "gallery_id": "gal-001",
+    "title": "Mobile Diagnostic & Tele-Pathology Outreach",
+    "slug": "mobile-diagnostic-tele-pathology-outreach",
+    "short_description": "Dedicated healthcare initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive mobile diagnostic & tele-pathology outreach at Palghar, Maharashtra. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Mobile Diagnostic & Tele-Pathology Outreach organized by Avinya Care Foundation at Palghar, Maharashtra",
+    "category": "Healthcare",
+    "event_date": "2026-09-08",
+    "location": "Palghar, Maharashtra",
+    "photographer": "Avinya Media Team",
+    "created_by": "Admin User",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-08T17:56:20.350Z",
+    "updated_at": "2026-09-08T18:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 1
+  },
+  {
+    "id": "gal-081",
+    "gallery_id": "gal-081",
+    "title": "Chemotherapy Care Kit Distribution Drive",
+    "slug": "chemotherapy-care-kit-distribution-drive",
+    "short_description": "Dedicated community initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive chemotherapy care kit distribution drive at Sion, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Chemotherapy Care Kit Distribution Drive organized by Avinya Care Foundation at Sion, Mumbai",
+    "category": "Community",
+    "event_date": "2026-09-08",
+    "location": "Sion, Mumbai",
+    "photographer": "Avinya Media Team",
+    "created_by": "Media Manager",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-08T08:56:20.350Z",
+    "updated_at": "2026-09-08T09:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 81
+  },
+  {
+    "id": "gal-061",
+    "gallery_id": "gal-061",
+    "title": "Free Community Mammography & Screening Campaign",
+    "slug": "free-community-mammography-screening-campaign",
+    "short_description": "Dedicated campaigns initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive free community mammography & screening campaign at Navi Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Free Community Mammography & Screening Campaign organized by Avinya Care Foundation at Navi Mumbai",
+    "category": "Campaigns",
+    "event_date": "2026-09-08",
+    "location": "Navi Mumbai",
+    "photographer": "Pooja Hegde",
+    "created_by": "Dr. K. Merchant",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-08T05:56:20.350Z",
+    "updated_at": "2026-09-08T06:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 61
+  },
+  {
+    "id": "gal-041",
+    "gallery_id": "gal-041",
+    "title": "Breast Cancer Early Self-Examination Workshop",
+    "slug": "breast-cancer-early-self-examination-workshop",
+    "short_description": "Dedicated awareness initiative providing compassionate care, diagnostics, and patient support across the Mumbai-Virar belt.",
+    "description": "Avinya Care Foundation conducted this comprehensive breast cancer early self-examination workshop at Borivali, Mumbai. Our healthcare practitioners and dedicated volunteers delivered free consultations, early diagnostic evaluations, and ongoing patient assistance to hundreds of community members.",
+    "image": "https://images.unsplash.com/photo-1584467735871-8e85353a8413?auto=format&fit=crop&w=1200&q=80",
+    "alt_text": "Breast Cancer Early Self-Examination Workshop organized by Avinya Care Foundation at Borivali, Mumbai",
+    "category": "Awareness",
+    "event_date": "2026-09-08",
+    "location": "Borivali, Mumbai",
+    "photographer": "Dr. S. Patil",
+    "created_by": "Community Coordinator",
+    "updated_by": "Admin User",
+    "created_at": "2026-09-08T02:56:20.350Z",
+    "updated_at": "2026-09-08T03:56:20.350Z",
+    "external_link": "https://avinyacarefoundation.org",
+    "has_details": true,
+    "image_only": false,
+    "is_featured": true,
+    "is_published": true,
+    "sort_order": 41
+  }
+];
+  }
+
+  function showSkeleton(show) {
+    const skel = document.getElementById('gallerySkeleton');
+    if (skel) skel.style.display = show ? 'grid' : 'none';
+  }
+
+  function showEmptyState(show) {
+    const empty = document.getElementById('galleryEmptyState');
+    if (empty) {
+      empty.classList.toggle('hidden', !show);
+      empty.style.display = show ? 'block' : 'none';
+    }
+  }
+
+  // 3. Render Dynamic Category Pills
+  function renderCategoryFilters() {
+    const container = document.getElementById('galleryCategoryBar');
+    if (!container) return;
+
+    const categoriesSet = new Set();
+    galleryItems.forEach(g => {
+      if (g.category && g.category.trim()) categoriesSet.add(g.category.trim());
+    });
+
+    const categories = ['All', ...Array.from(categoriesSet)];
+
+    container.innerHTML = categories.map(cat => {
+      const catKey = cat.toLowerCase();
+      const isActive = currentCategory === catKey;
+      let icon = 'fa-layer-group';
+      if (catKey.includes('health') || catKey.includes('medical')) icon = 'fa-stethoscope';
+      else if (catKey.includes('event')) icon = 'fa-calendar-star';
+      else if (catKey.includes('awareness')) icon = 'fa-bullhorn';
+      else if (catKey.includes('campaign')) icon = 'fa-flag';
+      else if (catKey.includes('community')) icon = 'fa-hand-holding-heart';
+
+      return `
+        <button class="gallery-category-pill ${isActive ? 'active' : ''}" data-category="${catKey}" role="tab" aria-selected="${isActive}">
+          <i class="fa-solid ${icon}"></i> <span>${escapeHtml(cat)}</span>
+        </button>
+      `;
+    }).join('');
+
+    // Attach click listeners with smooth GSAP transition
+    container.querySelectorAll('.gallery-category-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const selected = btn.getAttribute('data-category');
+        if (selected === currentCategory) return;
+
+        container.querySelectorAll('.gallery-category-pill').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+
+        currentCategory = selected;
+        animateCategorySwitch();
+      });
+    });
+  }
+
+  // Category switch animation: scale/fade out, re-render, scale/fade in
+  function animateCategorySwitch() {
+    const mainWrap = document.getElementById('galleryContent');
+    if (typeof gsap !== 'undefined' && mainWrap) {
+      gsap.to(['#introCollageSection', '#bentoExhibitionSection', '#fullBleedSection1', '#editorialMasonrySection', '#fullBleedSection2'], {
+        opacity: 0,
+        y: 20,
+        duration: 0.35,
+        ease: 'power2.in',
+        onComplete: () => {
+          renderGalleryExperience();
+          gsap.to(['#introCollageSection', '#bentoExhibitionSection', '#fullBleedSection1', '#editorialMasonrySection', '#fullBleedSection2'], {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.08,
+            ease: 'power2.out'
+          });
+        }
+      });
+    } else {
+      renderGalleryExperience();
+    }
+  }
+
+  // 4. Main Gallery Experience Controller
+  function renderGalleryExperience() {
+    // Revert previous GSAP animations cleanly
+    if (gsapCtx) {
+      gsapCtx.revert();
+      gsapCtx = null;
+    }
+
+    // Filter dataset
+    currentFilteredItems = galleryItems.filter(item => {
+      if (currentCategory === 'all') return true;
+      return (item.category || '').toLowerCase() === currentCategory;
+    });
+
+    if (currentFilteredItems.length === 0) {
+      showEmptyState(true);
+      hideAllSections();
+      return;
+    }
+    showEmptyState(false);
+
+    // Section 1: Intro Scattered Collage (5 items)
+    const collageItems = currentFilteredItems.slice(0, 5);
+    renderIntroCollage(collageItems);
+
+    // Section 2: GSAP Scrubbed Bento Exhibition (items 5 -> 11)
+    const bentoItems = currentFilteredItems.slice(5, 11);
+    const fallbackBentoItems = bentoItems.length > 0 ? bentoItems : currentFilteredItems.slice(0, 6);
+    renderScrubbedBento(fallbackBentoItems);
+
+    // Section 3 & 5: Full-Bleed Featured Moments
+    const featuredItems = currentFilteredItems.filter(i => i.is_featured) || currentFilteredItems;
+    renderFullBleedSections(featuredItems);
+
+    // Section 4: Editorial Masonry Archive
+    const masonryItems = currentFilteredItems.slice(11);
+    const fallbackMasonryItems = masonryItems.length > 0 ? masonryItems : currentFilteredItems;
+    renderEditorialMasonry(fallbackMasonryItems);
+
+    // Attach card click handlers for fullscreen lightbox
+    attachLightboxCardTriggers();
+
+    // Initialize GSAP Animations inside context
+    initGSAPExhibition();
+  }
+
+  function hideAllSections() {
+    ['introCollageSection', 'bentoExhibitionSection', 'fullBleedSection1', 'editorialMasonrySection', 'fullBleedSection2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    });
+  }
+
+  // Render 1: Scattered Intro Collage
+  function renderIntroCollage(items) {
+    const sec = document.getElementById('introCollageSection');
+    const grid = document.getElementById('introCollageGrid');
+    if (!sec || !grid) return;
+
+    if (items.length === 0) {
+      sec.classList.add('hidden');
+      return;
+    }
+    sec.classList.remove('hidden');
+
+    grid.innerHTML = items.map((item, idx) => {
+      const id = item.gallery_id || item.id || `col-${idx}`;
+      const title = escapeHtml(item.title || item.category || 'Avinya Care Gallery');
+      const cat = escapeHtml(item.category || 'Impact');
+      const img = escapeHtml(item.image);
+      const alt = escapeHtml(item.alt_text || title);
+      const date = escapeHtml(item.event_date ? new Date(item.event_date).getFullYear() : '');
+
+      return `
+        <div class="collage-card collage-item-${idx + 1} gallery-item" data-gallery-id="${id}" role="button" tabindex="0" aria-label="${alt}">
+          <img src="${img}" alt="${alt}" class="collage-card-img" loading="lazy">
+          <div class="gallery-hover-overlay">
+            <span class="hover-cat">${cat}</span>
+            <h3 class="hover-title">${title}</h3>
+            ${date ? `<div class="hover-meta"><span>${date}</span></div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Render 2: GSAP Scrubbed Bento Exhibition
+  function renderScrubbedBento(items) {
+    const sec = document.getElementById('bentoExhibitionSection');
+    const grid = document.getElementById('scrubbedBentoGrid');
+    if (!sec || !grid) return;
+
+    if (items.length === 0) {
+      sec.classList.add('hidden');
+      return;
+    }
+    sec.classList.remove('hidden');
+
+    const spanClasses = [
+      'bento-span-8-wide',
+      'bento-span-4-portrait',
+      'bento-span-4-square',
+      'bento-span-4-tall',
+      'bento-span-6-wide',
+      'bento-span-12-banner'
+    ];
+
+    grid.innerHTML = items.map((item, idx) => {
+      const id = item.gallery_id || item.id || `bento-${idx}`;
+      const title = escapeHtml(item.title || item.category || 'Healthcare Drive');
+      const cat = escapeHtml(item.category || 'Exhibition');
+      const img = escapeHtml(item.image);
+      const alt = escapeHtml(item.alt_text || title);
+      const date = escapeHtml(item.event_date ? new Date(item.event_date).getFullYear() : '');
+      const spanClass = spanClasses[idx % spanClasses.length];
+
+      return `
+        <div class="bento-card ${spanClass} gallery-item" data-gallery-id="${id}" role="button" tabindex="0" aria-label="${alt}">
+          <div class="bento-card-media">
+            <img src="${img}" alt="${alt}" class="bento-card-img" loading="lazy">
+            <div class="gallery-hover-overlay">
+              <span class="hover-cat">${cat}</span>
+              <h3 class="hover-title">${title}</h3>
+              ${date ? `<div class="hover-meta"><span><i class="fa-regular fa-calendar"></i> ${date}</span></div>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Render 3 & 5: Full-Bleed Featured Moments
+  function renderFullBleedSections(featuredItems) {
+    const sec1 = document.getElementById('fullBleedSection1');
+    const sec2 = document.getElementById('fullBleedSection2');
+
+    const item1 = featuredItems[0] || galleryItems[0];
+    const item2 = featuredItems[1] || galleryItems[1] || item1;
+
+    if (item1 && sec1) {
+      sec1.classList.remove('hidden');
+      setupFullBleedContent(1, item1);
+    } else if (sec1) sec1.classList.add('hidden');
+
+    if (item2 && sec2 && item2 !== item1) {
+      sec2.classList.remove('hidden');
+      setupFullBleedContent(2, item2);
+    } else if (sec2) sec2.classList.add('hidden');
+  }
+
+  function setupFullBleedContent(num, item) {
+    const imgEl = document.getElementById(`fullBleedImage${num}`);
+    const badgeEl = document.getElementById(`fullBleedBadge${num}`);
+    const titleEl = document.getElementById(`fullBleedTitle${num}`);
+    const subEl = document.getElementById(`fullBleedSub${num}`);
+    const btnEl = document.getElementById(`fullBleedBtn${num}`);
+    const container = document.getElementById(`fullBleedContainer${num}`);
+
+    const id = item.gallery_id || item.id || `fullbleed-${num}`;
+    const title = item.title || 'Key Healthcare Milestone';
+    const cat = item.category || 'Featured Highlight';
+    const sub = item.short_description || item.description || 'Impactful healthcare outreach across our communities.';
+
+    if (imgEl) { imgEl.src = item.image; imgEl.alt = item.alt_text || title; }
+    if (badgeEl) badgeEl.innerHTML = `<i class="fa-solid fa-star"></i> ${escapeHtml(cat)} SPOTLIGHT`;
+    if (titleEl) titleEl.innerText = title;
+    if (subEl) subEl.innerText = sub;
+
+    if (container) {
+      container.setAttribute('data-gallery-id', id);
+      container.onclick = () => openLightboxById(id);
+    }
+    if (btnEl) {
+      btnEl.onclick = (e) => {
+        e.stopPropagation();
+        openLightboxById(id);
+      };
+    }
+  }
+
+  // Render 4: Editorial Masonry Archive Grid
+  function renderEditorialMasonry(items) {
+    const sec = document.getElementById('editorialMasonrySection');
+    const grid = document.getElementById('editorialMasonryGrid');
+    const loadMoreWrapper = document.getElementById('galleryLoadMoreWrapper');
+    const loadMoreBtn = document.getElementById('galleryLoadMoreBtn');
+    if (!sec || !grid) return;
+
+    if (items.length === 0) {
+      sec.classList.add('hidden');
+      return;
+    }
+    sec.classList.remove('hidden');
+
+    const visibleItems = items.slice(0, displayedMasonryCount);
+    const spanClasses = ['masonry-span-4', 'masonry-span-8', 'masonry-span-6', 'masonry-span-6', 'masonry-span-8', 'masonry-span-4'];
+
+    grid.innerHTML = visibleItems.map((item, idx) => {
+      const id = item.gallery_id || item.id || `masonry-${idx}`;
+      const title = escapeHtml(item.title || item.category || 'Healthcare Outreach');
+      const cat = escapeHtml(item.category || 'Collection');
+      const img = escapeHtml(item.image);
+      const alt = escapeHtml(item.alt_text || title);
+      const date = escapeHtml(item.event_date ? new Date(item.event_date).getFullYear() : '');
+      const spanClass = spanClasses[idx % spanClasses.length];
+
+      return `
+        <div class="masonry-card ${spanClass} gallery-item" data-gallery-id="${id}" role="button" tabindex="0" aria-label="${alt}">
+          <img src="${img}" alt="${alt}" class="masonry-card-img" loading="lazy">
+          <div class="gallery-hover-overlay">
+            <span class="hover-cat">${cat}</span>
+            <h3 class="hover-title">${title}</h3>
+            ${date ? `<div class="hover-meta"><span>${date}</span></div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Pagination button
+    if (loadMoreWrapper && loadMoreBtn) {
+      if (items.length > displayedMasonryCount) {
+        loadMoreWrapper.classList.remove('hidden');
+        loadMoreBtn.onclick = () => {
+          displayedMasonryCount += 12;
+          renderEditorialMasonry(items);
+          attachLightboxCardTriggers();
+        };
+      } else {
+        loadMoreWrapper.classList.add('hidden');
+      }
+    }
+  }
+
+  // Attach Lightbox Trigger Click Listeners
+  function attachLightboxCardTriggers() {
+    document.querySelectorAll('.gallery-item').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-gallery-id');
+        openLightboxById(id);
+      });
+    });
+  }
+
+  function openLightboxById(id) {
+    const idx = currentFilteredItems.findIndex(i => (i.gallery_id || i.id) === id);
+    if (idx !== -1) openLightbox(idx);
+    else {
+      const globalIdx = galleryItems.findIndex(i => (i.gallery_id || i.id) === id);
+      if (globalIdx !== -1) openLightbox(globalIdx);
+    }
+  }
+
+  // 5. Custom Magnetic Follow Cursor Setup (GSAP quickTo)
+  function initCustomCursor() {
+    const cursor = document.getElementById('galleryCustomCursor');
+    if (!cursor || typeof gsap === 'undefined') return;
+
+    // Check touch screen
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
+
+    quickX = gsap.quickTo(cursor, 'x', { duration: 0.3, ease: 'power2.out' });
+    quickY = gsap.quickTo(cursor, 'y', { duration: 0.3, ease: 'power2.out' });
+
+    window.addEventListener('mousemove', (e) => {
+      quickX(e.clientX);
+      quickY(e.clientY);
+    });
+
+    document.addEventListener('mouseover', (e) => {
+      const targetCard = e.target.closest('.gallery-item, .full-bleed-container, .collage-card');
+      if (targetCard) {
+        cursor.classList.add('active');
+      } else {
+        cursor.classList.remove('active');
+      }
+    });
+  }
+
+  // 6. GSAP Exhibition Animations (ScrollTrigger Scrubbed & Parallax)
+  function initGSAPExhibition() {
+    const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined' || isReducedMotion) {
+      console.log('[Gallery GSAP Notice] Static layout applied.');
+      return;
+    }
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsapCtx = gsap.context(() => {
+
+      // A. Hero Word-by-Word Reveal Animation
+      const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      heroTl.fromTo('.hero-word',
+        { opacity: 0, y: 50, rotateX: -30 },
+        { opacity: 1, y: 0, rotateX: 0, duration: 1, stagger: 0.15 }
+      )
+      .fromTo('.hero-divider',
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.8 },
+        '-=0.6'
+      )
+      .fromTo('.gallery-hero-subtitle, .gallery-category-bar',
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, duration: 0.8, stagger: 0.15 },
+        '-=0.4'
+      );
+
+      // B. Intro Scattered Collage -> Docking Animation
+      const collageCards = gsap.utils.toArray('#introCollageGrid .collage-card');
+      if (collageCards.length > 0) {
+        const transforms = [
+          { rotate: -8, y: 50, x: -30, scale: 0.94 },
+          { rotate: 6, y: 70, x: 20, scale: 0.92 },
+          { rotate: -5, y: 40, x: 40, scale: 0.95 },
+          { rotate: 7, y: 60, x: -20, scale: 0.93 },
+          { rotate: -6, y: 50, x: 30, scale: 0.94 }
+        ];
+
+        collageCards.forEach((card, i) => {
+          const t = transforms[i % transforms.length];
+          gsap.set(card, { rotate: t.rotate, y: t.y, x: t.x, scale: t.scale, opacity: 0.8 });
+
+          gsap.to(card, {
+            rotate: 0,
+            y: 0,
+            x: 0,
+            scale: 1,
+            opacity: 1,
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 90%',
+              end: 'top 40%',
+              scrub: 1.2
+            }
+          });
+        });
+      }
+
+      // C. GSAP Scrubbed Bento Gallery (Mask, Scale 1.08 -> 1, Differential Speed)
+      const bentoCards = gsap.utils.toArray('#scrubbedBentoGrid .bento-card');
+      bentoCards.forEach((card, idx) => {
+        const img = card.querySelector('.bento-card-img');
+
+        // Clip path & scale reveal scrub
+        if (img) {
+          gsap.fromTo(img,
+            { scale: 1.15, filter: 'brightness(0.7)' },
+            {
+              scale: 1,
+              filter: 'brightness(1)',
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 88%',
+                end: 'bottom 45%',
+                scrub: 1
+              }
+            }
+          );
+        }
+
+        // Differential vertical parallax offsets for visual rhythm
+        const parallaxY = (idx % 2 === 0) ? -35 : 35;
+        gsap.fromTo(card,
+          { y: (idx % 3 === 0) ? 40 : 0 },
+          {
+            y: parallaxY,
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 95%',
+              end: 'bottom 15%',
+              scrub: 1.5
+            }
+          }
+        );
+      });
+
+      // D. Full-Bleed Expanding Featured Moments (78vw -> 94vw & border-radius 36px -> 12px)
+      [1, 2].forEach(num => {
+        const container = document.getElementById(`fullBleedContainer${num}`);
+        if (!container) return;
+
+        gsap.fromTo(container,
+          { width: '78vw', borderRadius: '36px' },
+          {
+            width: '94vw',
+            borderRadius: '12px',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: container,
+              start: 'top 85%',
+              end: 'center 45%',
+              scrub: 1
+            }
+          }
+        );
+      });
+
+      // E. Editorial Masonry Batch Fade Reveal
+      const masonryCards = gsap.utils.toArray('#editorialMasonryGrid .masonry-card');
+      if (masonryCards.length > 0) {
+        ScrollTrigger.batch(masonryCards, {
+          interval: 0.1,
+          batchMax: 6,
+          onEnter: batch => gsap.fromTo(batch,
+            { opacity: 0, y: 40, scale: 0.95 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.1, ease: 'power2.out', overwrite: 'auto' }
+          )
+        });
+      }
+
+      // F. Scroll Velocity Skew Effect during fast scroll
+      let proxy = { skew: 0 };
+      let skewSetter = gsap.quickSetter('.gallery-item', 'skewY', 'deg');
+      let clamp = gsap.utils.clamp(-3, 3);
+
+      ScrollTrigger.create({
+        onUpdate: (self) => {
+          let skew = clamp(self.getVelocity() / -400);
+          if (Math.abs(skew) > Math.abs(proxy.skew)) {
+            proxy.skew = skew;
+            gsap.to(proxy, {
+              skew: 0,
+              duration: 0.8,
+              ease: 'power3.out',
+              overwrite: true,
+              onUpdate: () => skewSetter(proxy.skew)
+            });
+          }
+        }
+      });
+
+      ScrollTrigger.refresh();
+    });
+  }
+
+  // 7. IMMERSIVE FULLSCREEN LIGHTBOX HANDLERS & ACCESSIBILITY
+  function initLightboxListeners() {
+    const overlay = document.getElementById('galleryLightbox');
+    const closeBtn = document.getElementById('lightboxClose');
+    const prevBtn = document.getElementById('lightboxPrev');
+    const nextBtn = document.getElementById('lightboxNext');
+
+    if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+
+    if (overlay) {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay || e.target.id === 'lightboxOverlay') closeLightbox();
+      });
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigateLightbox(-1);
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigateLightbox(1);
+      });
+    }
+
+    // Keyboard Arrow & ESC navigation
+    document.addEventListener('keydown', (e) => {
+      if (!overlay || !overlay.classList.contains('active')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') navigateLightbox(-1);
+      if (e.key === 'ArrowRight') navigateLightbox(1);
+    });
+
+    // Mobile Touch Swipe Navigation
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    if (overlay) {
+      overlay.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      overlay.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipeGesture();
+      }, { passive: true });
+    }
+
+    function handleSwipeGesture() {
+      const swipeThreshold = 50;
+      if (touchEndX < touchStartX - swipeThreshold) {
+        navigateLightbox(1); // Swipe left -> Next
+      } else if (touchEndX > touchStartX + swipeThreshold) {
+        navigateLightbox(-1); // Swipe right -> Prev
+      }
+    }
+  }
+
+  function openLightbox(index) {
+    const dataset = currentFilteredItems.length > 0 ? currentFilteredItems : galleryItems;
+    if (index < 0 || index >= dataset.length) return;
+    currentLightboxIndex = index;
+    const item = dataset[index];
+
+    const overlay = document.getElementById('galleryLightbox');
+    if (!overlay) return;
+
+    const counterEl = document.getElementById('lightboxCounter');
+    const imgEl = document.getElementById('lightboxImage');
+    const titleEl = document.getElementById('lightboxTitle');
+    const catEl = document.getElementById('lightboxCategory');
+    const dateEl = document.getElementById('lightboxDate');
+    const locEl = document.getElementById('lightboxLocation');
+    const photogEl = document.getElementById('lightboxPhotographer');
+    const authorEl = document.getElementById('lightboxAuthor');
+    const descEl = document.getElementById('lightboxDescription');
+
+    const title = item.title || item.category || 'Avinya Care Foundation Photo';
+    const cat = item.category || 'Impact Story';
+    const currentNum = String(index + 1).padStart(2, '0');
+    const totalNum = String(dataset.length).padStart(2, '0');
+
+    if (counterEl) counterEl.innerText = `${currentNum} / ${totalNum}`;
+
+    if (imgEl) {
+      imgEl.src = item.image;
+      imgEl.alt = item.alt_text || title;
+    }
+
+    if (titleEl) titleEl.innerText = title;
+    if (catEl) catEl.innerText = cat;
+    if (dateEl) dateEl.innerHTML = item.event_date ? `<i class="fa-regular fa-calendar"></i> <span>${escapeHtml(item.event_date)}</span>` : '';
+    if (locEl) locEl.innerHTML = item.location ? `<i class="fa-solid fa-location-dot"></i> <span>${escapeHtml(item.location)}</span>` : '';
+    if (photogEl) photogEl.innerHTML = item.photographer ? `<i class="fa-solid fa-camera"></i> <span>${escapeHtml(item.photographer)}</span>` : '';
+    
+    const authorText = item.created_by ? `By ${item.created_by}` : (item.updated_by ? `Updated by ${item.updated_by}` : 'Admin User');
+    if (authorEl) authorEl.innerHTML = `<i class="fa-solid fa-user-pen"></i> <span>${escapeHtml(authorText)}</span>`;
+
+    if (descEl) {
+      if (item.image_only || (!item.description && !item.short_description)) {
+        descEl.style.display = 'none';
+        descEl.innerText = '';
+      } else {
+        descEl.style.display = 'block';
+        descEl.innerText = item.description || item.short_description;
+      }
+    }
+
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    // Animate image entrance
+    if (typeof gsap !== 'undefined' && imgEl) {
+      gsap.fromTo(imgEl, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'power2.out' });
+    }
+  }
+
+  function navigateLightbox(direction) {
+    const dataset = currentFilteredItems.length > 0 ? currentFilteredItems : galleryItems;
+    if (dataset.length === 0) return;
+    let newIndex = currentLightboxIndex + direction;
+    if (newIndex < 0) newIndex = dataset.length - 1;
+    if (newIndex >= dataset.length) newIndex = 0;
+    openLightbox(newIndex);
+  }
+
+  function closeLightbox() {
+    const overlay = document.getElementById('galleryLightbox');
+    if (overlay) {
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    document.body.style.overflow = '';
+    currentLightboxIndex = -1;
+  }
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+})();

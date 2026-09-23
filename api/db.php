@@ -325,6 +325,37 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
             `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
             INDEX `idx_reset_email` (`email`),
             INDEX `idx_reset_token` (`token`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
+        // 11. Galleries Table
+        "CREATE TABLE IF NOT EXISTS `galleries` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `gallery_id` VARCHAR(100) UNIQUE NOT NULL,
+            `title` VARCHAR(255) DEFAULT NULL,
+            `slug` VARCHAR(255) DEFAULT NULL,
+            `short_description` VARCHAR(500) DEFAULT NULL,
+            `description` TEXT DEFAULT NULL,
+            `image` TEXT NOT NULL,
+            `alt_text` VARCHAR(255) DEFAULT NULL,
+            `category` VARCHAR(100) DEFAULT NULL,
+            `event_date` VARCHAR(100) DEFAULT NULL,
+            `location` VARCHAR(255) DEFAULT NULL,
+            `photographer` VARCHAR(255) DEFAULT NULL,
+            `created_by` VARCHAR(255) DEFAULT 'Admin User',
+            `updated_by` VARCHAR(255) DEFAULT 'Admin User',
+            `external_link` VARCHAR(500) DEFAULT NULL,
+            `has_details` TINYINT(1) DEFAULT 0,
+            `image_only` TINYINT(1) DEFAULT 0,
+            `is_featured` TINYINT(1) DEFAULT 0,
+            `is_published` TINYINT(1) DEFAULT 1,
+            `sort_order` INT DEFAULT 0,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            `deleted_at` DATETIME DEFAULT NULL,
+            INDEX `idx_gal_id` (`gallery_id`),
+            INDEX `idx_gal_cat` (`category`),
+            INDEX `idx_gal_pub` (`is_published`),
+            INDEX `idx_gal_sort` (`sort_order`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
     ];
 
@@ -379,6 +410,17 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
         if (!in_array('provider_id', $colsDiagBookings, true)) {
             $pdo->exec("ALTER TABLE `diagnostic_bookings` ADD COLUMN `provider_id` VARCHAR(100) DEFAULT 'provider-1' AFTER `test_id`");
         }
+
+        $colsGal = $pdo->query("SHOW COLUMNS FROM `galleries`")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('created_by', $colsGal, true)) {
+            $pdo->exec("ALTER TABLE `galleries` ADD COLUMN `created_by` VARCHAR(255) DEFAULT 'Admin User' AFTER `photographer`");
+        }
+        if (!in_array('updated_by', $colsGal, true)) {
+            $pdo->exec("ALTER TABLE `galleries` ADD COLUMN `updated_by` VARCHAR(255) DEFAULT 'Admin User' AFTER `created_by`");
+        }
+        if (!in_array('image_only', $colsGal, true)) {
+            $pdo->exec("ALTER TABLE `galleries` ADD COLUMN `image_only` TINYINT(1) DEFAULT 0 AFTER `has_details`");
+        }
     } catch (Throwable $e) {
         // Table created or column addition safely handled
     }
@@ -386,9 +428,62 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
     seedDiagnosticProviders($pdo);
     seedCatalogFromJSON($pdo);
     seedDefaultUsers($pdo);
+    seedGalleryFromJSON($pdo);
 
     $migrated = true;
     return true;
+}
+
+function seedGalleryFromJSON(PDO $pdo, bool $force = false): int {
+    try {
+        $galCount = (int) $pdo->query("SELECT COUNT(*) FROM `galleries`")->fetchColumn();
+        if ($galCount < 100 || $force) {
+            $seedFile = dirname(__DIR__) . '/data/seed_galleries.json';
+            if (file_exists($seedFile)) {
+                $seedItems = json_decode((string) file_get_contents($seedFile), true);
+                if (is_array($seedItems) && count($seedItems) > 0) {
+                    $stmt = $pdo->prepare("INSERT INTO `galleries` 
+                        (`gallery_id`, `title`, `slug`, `short_description`, `description`, `image`, `alt_text`, `category`, `event_date`, `location`, `photographer`, `created_by`, `updated_by`, `external_link`, `has_details`, `image_only`, `is_featured`, `is_published`, `sort_order`, `created_at`, `updated_at`) 
+                        VALUES (:gid, :title, :slug, :short_desc, :desc, :img, :alt, :cat, :edate, :loc, :photo, :c_by, :u_by, :link, :has_det, :img_only, :is_feat, :is_pub, :sort_ord, :c_at, :u_at)
+                        ON DUPLICATE KEY UPDATE 
+                        `title` = VALUES(`title`), `description` = VALUES(`description`), `short_description` = VALUES(`short_description`),
+                        `image` = VALUES(`image`), `category` = VALUES(`category`), `created_by` = VALUES(`created_by`),
+                        `updated_by` = VALUES(`updated_by`), `image_only` = VALUES(`image_only`), `updated_at` = VALUES(`updated_at`)");
+                    $count = 0;
+                    foreach ($seedItems as $item) {
+                        $stmt->execute([
+                            ':gid' => $item['gallery_id'] ?? $item['id'] ?? ('gal-' . uniqid()),
+                            ':title' => $item['title'] ?? null,
+                            ':slug' => $item['slug'] ?? null,
+                            ':short_desc' => $item['short_description'] ?? null,
+                            ':desc' => $item['description'] ?? null,
+                            ':img' => $item['image'] ?? '',
+                            ':alt' => $item['alt_text'] ?? null,
+                            ':cat' => $item['category'] ?? null,
+                            ':edate' => $item['event_date'] ?? null,
+                            ':loc' => $item['location'] ?? null,
+                            ':photo' => $item['photographer'] ?? null,
+                            ':c_by' => $item['created_by'] ?? 'Admin User',
+                            ':u_by' => $item['updated_by'] ?? 'Admin User',
+                            ':link' => $item['external_link'] ?? null,
+                            ':has_det' => !empty($item['has_details']) ? 1 : 0,
+                            ':img_only' => !empty($item['image_only']) ? 1 : 0,
+                            ':is_feat' => !empty($item['is_featured']) ? 1 : 0,
+                            ':is_pub' => isset($item['is_published']) ? ($item['is_published'] ? 1 : 0) : 1,
+                            ':sort_ord' => (int) ($item['sort_order'] ?? 0),
+                            ':c_at' => $item['created_at'] ?? date('Y-m-d H:i:s'),
+                            ':u_at' => $item['updated_at'] ?? date('Y-m-d H:i:s')
+                        ]);
+                        $count++;
+                    }
+                    return $count;
+                }
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('seedGalleryFromJSON Exception: ' . $e->getMessage());
+    }
+    return 0;
 }
 
 function seedCatalogFromJSON(PDO $pdo, bool $force = false): array {

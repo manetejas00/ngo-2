@@ -475,6 +475,131 @@ if ($action === 'delete_user') {
     exit(0);
 }
 
+// Action: Save Gallery Record
+if ($action === 'save_gallery') {
+    if (!in_array($userRole, ['admin', 'manager'], true)) {
+        http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Forbidden.']); exit(0);
+    }
+    $gal = $data['gallery'] ?? $data;
+    $gId = trim((string) ($gal['id'] ?? $gal['gallery_id'] ?? ''));
+    if ($gId === '') $gId = 'gal-' . time() . '-' . rand(100, 999);
+    
+    $title = trim((string) ($gal['title'] ?? ''));
+    $slug = trim((string) ($gal['slug'] ?? ''));
+    if ($slug === '' && $title !== '') {
+        $slug = strtolower(trim(preg_replace('/[^a-z0-9]+/i', '-', $title), '-'));
+    }
+    if ($slug === '') $slug = 'gallery-' . time();
+
+    $shortDesc = trim((string) ($gal['short_description'] ?? ''));
+    $desc = trim((string) ($gal['description'] ?? ''));
+    $img = trim((string) ($gal['image'] ?? $gal['photoBase64'] ?? ''));
+    $altText = trim((string) ($gal['alt_text'] ?? $title));
+    $category = trim((string) ($gal['category'] ?? 'General'));
+    $eventDate = trim((string) ($gal['event_date'] ?? ''));
+    $location = trim((string) ($gal['location'] ?? ''));
+    $photographer = trim((string) ($gal['photographer'] ?? ''));
+    $createdBy = trim((string) ($gal['created_by'] ?? $_SESSION['admin_email'] ?? 'Admin User'));
+    $updatedBy = trim((string) ($_SESSION['admin_email'] ?? $gal['updated_by'] ?? 'Admin User'));
+    $externalLink = trim((string) ($gal['external_link'] ?? ''));
+    $hasDetails = !empty($gal['has_details']) ? 1 : 0;
+    $imageOnly = (!empty($gal['image_only']) || ($desc === '' && $shortDesc === '')) ? 1 : 0;
+    $isFeatured = !empty($gal['is_featured']) ? 1 : 0;
+    $isPublished = isset($gal['is_published']) ? ($gal['is_published'] ? 1 : 0) : 1;
+    $sortOrder = (int) ($gal['sort_order'] ?? 0);
+
+    // Save base64 image to assets/gallery/ if provided
+    if (str_starts_with($img, 'data:image/')) {
+        if (preg_match('/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/', $img, $m)) {
+            $ext = strtolower($m[1]) === 'jpeg' ? 'jpg' : strtolower($m[1]);
+            $rawImg = base64_decode($m[2]);
+            $targetDir = dirname(__DIR__) . '/assets/gallery';
+            if (!is_dir($targetDir)) mkdir($targetDir, 0755, true);
+            $imgFilename = 'gal_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
+            file_put_contents($targetDir . '/' . $imgFilename, $rawImg);
+            $img = '/assets/gallery/' . $imgFilename;
+        }
+    }
+
+    if ($pdo !== null) {
+        $stmt = $pdo->prepare("INSERT INTO `galleries` 
+            (`gallery_id`, `title`, `slug`, `short_description`, `description`, `image`, `alt_text`, `category`, `event_date`, `location`, `photographer`, `created_by`, `updated_by`, `external_link`, `has_details`, `image_only`, `is_featured`, `is_published`, `sort_order`, `updated_at`) 
+            VALUES (:gid, :title, :slug, :short_desc, :desc, :img, :alt, :cat, :edate, :loc, :photo, :c_by, :u_by, :link, :has_det, :img_only, :is_feat, :is_pub, :sort_ord, NOW())
+            ON DUPLICATE KEY UPDATE 
+            `title` = VALUES(`title`), `slug` = VALUES(`slug`), `short_description` = VALUES(`short_description`),
+            `description` = VALUES(`description`), `image` = VALUES(`image`), `alt_text` = VALUES(`alt_text`),
+            `category` = VALUES(`category`), `event_date` = VALUES(`event_date`), `location` = VALUES(`location`),
+            `photographer` = VALUES(`photographer`), `updated_by` = VALUES(`updated_by`), `external_link` = VALUES(`external_link`),
+            `has_details` = VALUES(`has_details`), `image_only` = VALUES(`image_only`), `is_featured` = VALUES(`is_featured`),
+            `is_published` = VALUES(`is_published`), `sort_order` = VALUES(`sort_order`), `updated_at` = NOW(),
+            `deleted_at` = NULL");
+        $stmt->execute([
+            ':gid' => $gId, ':title' => $title, ':slug' => $slug, ':short_desc' => $shortDesc,
+            ':desc' => $desc, ':img' => $img, ':alt' => $altText, ':cat' => $category,
+            ':edate' => $eventDate, ':loc' => $location, ':photo' => $photographer,
+            ':c_by' => $createdBy, ':u_by' => $updatedBy, ':link' => $externalLink,
+            ':has_det' => $hasDetails, ':img_only' => $imageOnly, ':is_feat' => $isFeatured,
+            ':is_pub' => $isPublished, ':sort_ord' => $sortOrder
+        ]);
+    }
+
+    logActivity('GALLERY_SAVED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Saved gallery item '{$title}' ({$gId})", ['galleryId' => $gId, 'title' => $title]);
+    echo json_encode(['status' => 'ok', 'message' => "Gallery item saved successfully.", 'galleryId' => $gId, 'imageUrl' => $img]);
+    exit(0);
+}
+
+// Action: Delete Gallery Record
+if ($action === 'delete_gallery') {
+    if (!in_array($userRole, ['admin', 'manager'], true)) {
+        http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Forbidden.']); exit(0);
+    }
+    $gId = trim((string) ($data['id'] ?? $data['galleryId'] ?? ''));
+    if ($gId === '') {
+        http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'Gallery ID is required.']); exit(0);
+    }
+    if ($pdo !== null) {
+        $stmt = $pdo->prepare("UPDATE `galleries` SET `deleted_at` = NOW() WHERE `gallery_id` = :id");
+        $stmt->execute([':id' => $gId]);
+    }
+    logActivity('GALLERY_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Deleted gallery item {$gId}", ['galleryId' => $gId]);
+    echo json_encode(['status' => 'ok', 'message' => "Gallery item {$gId} deleted successfully."]);
+    exit(0);
+}
+
+// Action: Toggle Publish State
+if ($action === 'toggle_gallery_published') {
+    if (!in_array($userRole, ['admin', 'manager'], true)) {
+        http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Forbidden.']); exit(0);
+    }
+    $gId = trim((string) ($data['id'] ?? $data['galleryId'] ?? ''));
+    $isPub = !empty($data['is_published']) ? 1 : 0;
+    if ($pdo !== null) {
+        $stmt = $pdo->prepare("UPDATE `galleries` SET `is_published` = :pub WHERE `gallery_id` = :id");
+        $stmt->execute([':pub' => $isPub, ':id' => $gId]);
+    }
+    logActivity('GALLERY_PUBLISH_TOGGLED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Set gallery {$gId} published status to {$isPub}", ['galleryId' => $gId, 'is_published' => $isPub]);
+    echo json_encode(['status' => 'ok', 'message' => "Gallery published status updated."]);
+    exit(0);
+}
+
+// Action: Reorder Gallery Items
+if ($action === 'reorder_galleries') {
+    if (!in_array($userRole, ['admin', 'manager'], true)) {
+        http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Forbidden.']); exit(0);
+    }
+    $orders = $data['orders'] ?? [];
+    if (is_array($orders) && $pdo !== null) {
+        $stmt = $pdo->prepare("UPDATE `galleries` SET `sort_order` = :ord WHERE `gallery_id` = :id");
+        foreach ($orders as $item) {
+            if (!empty($item['id'])) {
+                $stmt->execute([':ord' => (int)($item['sort_order'] ?? 0), ':id' => $item['id']]);
+            }
+        }
+    }
+    echo json_encode(['status' => 'ok', 'message' => "Gallery display orders updated."]);
+    exit(0);
+}
+
 // Action: Seed Catalog from Pre-Recorded JSON Data
 if ($action === 'seed_catalog') {
     if ($pdo !== null) {
@@ -546,6 +671,7 @@ if ($pdo !== null) {
             $doctorsCatalog = $pdo->query("SELECT * FROM `doctors` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
             $diagnosticTestsCatalog = $pdo->query("SELECT * FROM `diagnostic_tests` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
             $usersCatalog = $pdo->query("SELECT `id`, `user_id`, `name`, `email`, `phone`, `avatar`, `role`, `doctor_id`, `provider_id`, `status`, `last_login`, `created_at` FROM `users` ORDER BY `id` ASC")->fetchAll();
+            $galleriesCatalog = $pdo->query("SELECT * FROM `galleries` WHERE `deleted_at` IS NULL ORDER BY `is_featured` DESC, `sort_order` ASC, `created_at` DESC")->fetchAll();
         } else {
             http_response_code(403);
             echo json_encode(['status' => 'error', 'message' => 'Role is not authorized for the Admin Panel.']);
@@ -594,6 +720,7 @@ echo json_encode([
         'totalDoctors' => count($doctorsCatalog),
         'totalDiagnosticTests' => count($diagnosticTestsCatalog),
         'totalUsers' => count($usersCatalog),
+        'totalGalleries' => count($galleriesCatalog ?? []),
         'totalDonationsAmount' => $totalDonationsAmount,
         'totalDonationsCount' => $totalDonationsCount,
         'formCountsByType' => $formCountsByType,
@@ -608,6 +735,7 @@ echo json_encode([
         'activityLogs' => array_values($activityLogs),
         'doctorsCatalog' => array_values($doctorsCatalog),
         'diagnosticTestsCatalog' => array_values($diagnosticTestsCatalog),
-        'usersCatalog' => array_values($usersCatalog)
+        'usersCatalog' => array_values($usersCatalog),
+        'galleriesCatalog' => array_values($galleriesCatalog ?? [])
     ]
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);

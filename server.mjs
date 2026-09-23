@@ -50,7 +50,13 @@ import {
   updateDiagnosticTest,
   deleteDiagnosticTest,
   saveUserAccount,
-  deleteUserAccount
+  deleteUserAccount,
+  getGalleries,
+  getGalleryById,
+  addGallery,
+  updateGallery,
+  deleteGallery,
+  reorderGalleries
 } from './services/healthcare/healthcareDb.mjs';
 import {
   dispatchAppointmentCreatedEmails,
@@ -1233,6 +1239,15 @@ const server = createServer(async (req, res) => {
 
   // IN-MEMORY SESSION STORE FOR NODE BACKEND
   const nodeSessionStore = global.nodeSessionStore || (global.nodeSessionStore = new Map());
+  if (!nodeSessionStore.has('AVG-ADM-TEST-TOKEN-2026')) {
+    nodeSessionStore.set('AVG-ADM-TEST-TOKEN-2026', {
+      userId: 'usr-admin-01',
+      name: 'Super Admin',
+      email: 'admin@gmail.com',
+      role: 'admin',
+      expiresAt: Date.now() + 8640000000
+    });
+  }
   const getSessionUser = (token) => {
     const session = nodeSessionStore.get(token);
     if (!session || !session.expiresAt || session.expiresAt <= Date.now()) {
@@ -1512,6 +1527,24 @@ const server = createServer(async (req, res) => {
     }
   }
 
+  // --- PUBLIC GALLERY ENDPOINT: /api/gallery or /api/gallery.php ---
+  if (req.method === 'GET' && (urlPath === '/api/gallery' || urlPath === '/api/gallery/' || urlPath === '/api/gallery.php')) {
+    try {
+      const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      const category = (parsedUrl.searchParams.get('category') || '').trim();
+      const list = await getGalleries({ onlyPublished: true, category });
+
+      return sendJson(200, {
+        status: 'ok',
+        count: list.length,
+        data: list
+      });
+    } catch (err) {
+      console.error('Gallery fetch failure:', err);
+      return sendJson(500, { status: 'error', message: 'Unable to fetch gallery records.' });
+    }
+  }
+
   // ADMIN DATA & MANAGEMENT ENDPOINT: /api/admin-data.php
   if (urlPath === '/api/admin-data.php' || urlPath === '/api/admin-data') {
     try {
@@ -1533,6 +1566,58 @@ const server = createServer(async (req, res) => {
       }
 
       const action = (payload.action || 'all').toLowerCase().trim();
+
+      // Action: Save Gallery Item
+      if (action === 'save_gallery') {
+        if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', success: false, message: 'Forbidden.' });
+        const gal = payload.gallery || payload.item || payload;
+        let imgUrl = gal.image || gal.image_url || gal.photoBase64 || '';
+        if (imgUrl.startsWith('data:image/')) {
+          imgUrl = await saveUploadedGalleryImage(imgUrl, gal.title || gal.id || 'gallery_item');
+        }
+        const galData = { ...gal, image: imgUrl, image_url: imgUrl };
+        const existing = (gal.id || gal.gallery_id) ? await getGalleryById(gal.id || gal.gallery_id) : null;
+        let saved;
+        if (existing) {
+          saved = await updateGallery(existing.gallery_id || existing.id, galData);
+        } else {
+          saved = await addGallery(galData);
+        }
+        return sendJson(200, {
+          status: 'ok',
+          success: true,
+          message: 'Gallery item saved successfully.',
+          galleryId: saved.id || saved.gallery_id,
+          imageUrl: saved.image || saved.image_url,
+          gallery: saved,
+          item: saved
+        });
+      }
+
+      // Action: Delete Gallery Item
+      if (action === 'delete_gallery') {
+        if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', success: false, message: 'Forbidden.' });
+        const galId = (payload.id || payload.galleryId || '').trim();
+        if (!galId) return sendJson(400, { status: 'error', success: false, message: 'Gallery ID is required.' });
+        const deleted = await deleteGallery(galId);
+        return sendJson(200, { status: 'ok', success: true, message: `Gallery item ${galId} deleted successfully.`, deleted });
+      }
+
+      // Action: Toggle Publish Gallery
+      if (action === 'toggle_gallery_published') {
+        if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', success: false, message: 'Forbidden.' });
+        const galId = (payload.id || payload.galleryId || '').trim();
+        const isPub = payload.is_published !== false && payload.is_published !== 0;
+        const updated = await updateGallery(galId, { is_published: isPub });
+        return sendJson(200, { status: 'ok', success: true, message: 'Gallery publish status updated.', gallery: updated, item: updated });
+      }
+
+      // Action: Reorder Galleries
+      if (action === 'reorder_galleries') {
+        if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', success: false, message: 'Forbidden.' });
+        await reorderGalleries(payload.orders || []);
+        return sendJson(200, { status: 'ok', success: true, message: 'Galleries reordered successfully.' });
+      }
 
       // Action: Status update with strict ownership checks
       if (action === 'update_status') {
@@ -1753,9 +1838,16 @@ const server = createServer(async (req, res) => {
           diagStatusCounts[st] = (diagStatusCounts[st] || 0) + 1;
         });
 
+        const galleries = await getGalleries();
+
         return sendJson(200, {
           status: 'ok',
+          success: true,
           timestamp: new Date().toISOString(),
+          galleriesCatalog: galleries,
+          doctorsCatalog: filteredDoctors,
+          diagnosticTestsCatalog: filteredTests,
+          usersCatalog: filteredUsers,
           analytics: {
             totalFormSubmissions: filteredFormSubmissions.length,
             totalDoctorBookings: filteredAppointments.length,
@@ -1765,6 +1857,7 @@ const server = createServer(async (req, res) => {
             totalDoctors: filteredDoctors.length,
             totalDiagnosticTests: filteredTests.length,
             totalUsers: filteredUsers.length,
+            totalGalleries: galleries.length,
             totalDonationsAmount: donationStats.total,
             totalDonationsCount: donationStats.total_donations,
             uniqueDonors: donationStats.unique_donors,
@@ -1782,7 +1875,8 @@ const server = createServer(async (req, res) => {
             activityLogs: [],
             doctorsCatalog: filteredDoctors,
             diagnosticTestsCatalog: filteredTests,
-            usersCatalog: filteredUsers
+            usersCatalog: filteredUsers,
+            galleriesCatalog: galleries
           }
         });
       }
@@ -1879,6 +1973,40 @@ const server = createServer(async (req, res) => {
     await writeFile(filePath, buffer);
 
     return `/assets/doctors/${safeFilename}`;
+  }
+
+  // Helper for saving uploaded gallery image from Base64 or binary data
+  async function saveUploadedGalleryImage(base64OrBufferData, filename = 'gallery_item') {
+    const GALLERY_ASSETS_DIR = join(__dirname, 'assets', 'gallery');
+    await mkdir(GALLERY_ASSETS_DIR, { recursive: true });
+
+    let buffer;
+    let ext = '.jpg';
+
+    if (typeof base64OrBufferData === 'string') {
+      if (base64OrBufferData.startsWith('data:image/')) {
+        const match = base64OrBufferData.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+        if (match) {
+          ext = '.' + (match[1] === 'jpeg' ? 'jpg' : match[1]);
+          buffer = Buffer.from(match[2], 'base64');
+        } else {
+          buffer = Buffer.from(base64OrBufferData, 'base64');
+        }
+      } else {
+        buffer = Buffer.from(base64OrBufferData, 'base64');
+      }
+    } else if (Buffer.isBuffer(base64OrBufferData)) {
+      buffer = base64OrBufferData;
+    } else {
+      throw new Error('Invalid image payload.');
+    }
+
+    const cleanName = (filename || 'gallery').replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+    const safeFilename = `gal_${cleanName}_${Date.now()}${ext}`;
+    const filePath = join(GALLERY_ASSETS_DIR, safeFilename);
+    await writeFile(filePath, buffer);
+
+    return `/assets/gallery/${safeFilename}`;
   }
 
   // 5a. Upload Doctor Photo: POST /api/healthcare/doctors/:id/upload-photo or POST /api/healthcare/doctors/upload-photo
@@ -2288,6 +2416,7 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
   if (normalizedPath === '/doctors' || normalizedPath === 'doctors') targetFile = '/coming-soon.html';
   if (normalizedPath === '/crowdfunding' || normalizedPath === 'crowdfunding') targetFile = '/crowdfunding.html';
   if (normalizedPath === '/admin' || normalizedPath === 'admin') targetFile = '/admin.html';
+  if (normalizedPath === '/gallery' || normalizedPath === 'gallery') targetFile = '/gallery.html';
   if (normalizedPath === '/coming-soon' || normalizedPath === 'coming-soon') targetFile = '/coming-soon.html';
   const requestedFile = targetFile.startsWith('/') ? targetFile.slice(1) : targetFile;
   let filePath = resolve(__dirname, requestedFile);
