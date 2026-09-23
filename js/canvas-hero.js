@@ -10,6 +10,8 @@ class HeroCanvasEngine {
     this.ctx = this.canvas.getContext('2d', { alpha: false }); // Optimize context for fast rendering
 
     this.frameCount = 289;
+    this.isMobile = window.innerWidth <= 768;
+    this.currentFolder = this.isMobile ? 'hero-sequence-mobile' : 'hero-sequence';
     this.images = new Array(this.frameCount);
     this.imagesLoadedCount = 0;
     this.currentFrameIndex = 0;
@@ -63,7 +65,7 @@ class HeroCanvasEngine {
   }
 
   preloadFrames() {
-    const frameFolder = 'hero-sequence';
+    const frameFolder = this.currentFolder;
 
     // Phase 1: Rapid Keyframes (Every 5th frame for instant readiness)
     for (let i = 1; i <= this.frameCount; i += 5) {
@@ -103,6 +105,15 @@ class HeroCanvasEngine {
     this.dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const displayWidth = window.innerWidth;
     const displayHeight = window.innerHeight;
+
+    const newIsMobile = displayWidth <= 768;
+    if (newIsMobile !== this.isMobile) {
+      this.isMobile = newIsMobile;
+      this.currentFolder = this.isMobile ? 'hero-sequence-mobile' : 'hero-sequence';
+      this.images = new Array(this.frameCount);
+      this.imagesLoadedCount = 0;
+      this.preloadFrames();
+    }
 
     this.canvas.width = Math.floor(displayWidth * this.dpr);
     this.canvas.height = Math.floor(displayHeight * this.dpr);
@@ -175,76 +186,34 @@ class HeroCanvasEngine {
         const imgRatio = currentImg.naturalWidth / currentImg.naturalHeight;
         const canvasRatio = width / height;
 
-        // Clear background with deep black
-        this.ctx.fillStyle = '#0A0A0A';
-        this.ctx.fillRect(0, 0, width, height);
+        // Calculate single full-bleed cover fill
+        let drawWidth, drawHeight, offsetX, offsetY;
 
-        if (canvasRatio < 1.05) {
-          // PORTRAIT / MOBILE VIEWPORTS: Responsive Fit-Contain (100% visible, zero frame cutting)
-
-          // Step 1: Background ambient ambient fill (soft cover glow)
-          const bgW = height * imgRatio;
-          const bgH = height;
-          const bgX = (width - bgW) / 2;
-          const bgY = 0;
-
-          this.ctx.save();
-          this.ctx.globalAlpha = 0.35;
-          this.ctx.drawImage(currentImg, bgX, bgY, bgW, bgH);
-          this.ctx.restore();
-
-          // Step 2: Draw main crisp frame (fit horizontally, zero side cropping)
-          const fitWidth = width;
-          const fitHeight = width / imgRatio;
-          const fitX = 0;
-          // Position frame in upper-center (top 42%) so bottom floating text sits cleanly below
-          const fitY = Math.max(height * 0.10, (height * 0.42) - (fitHeight / 2));
-
-          this.ctx.drawImage(currentImg, fitX, fitY, fitWidth, fitHeight);
-
-          // Step 3: Soft subtle edge gradients for organic blending
-          const topFade = this.ctx.createLinearGradient(0, fitY, 0, fitY + (fitHeight * 0.2));
-          topFade.addColorStop(0, 'rgba(10, 10, 10, 0.35)');
-          topFade.addColorStop(1, 'transparent');
-          this.ctx.fillStyle = topFade;
-          this.ctx.fillRect(fitX, fitY, fitWidth, fitHeight * 0.2);
-
-          const bottomFade = this.ctx.createLinearGradient(0, fitY + (fitHeight * 0.8), 0, fitY + fitHeight);
-          bottomFade.addColorStop(0, 'transparent');
-          bottomFade.addColorStop(1, 'rgba(10, 10, 10, 0.55)');
-          this.ctx.fillStyle = bottomFade;
-          this.ctx.fillRect(fitX, fitY + (fitHeight * 0.8), fitWidth, fitHeight * 0.2);
-
+        if (canvasRatio > imgRatio) {
+          drawWidth = width;
+          drawHeight = width / imgRatio;
+          offsetX = 0;
+          offsetY = (height - drawHeight) / 2;
         } else {
-          // LANDSCAPE / DESKTOP WIDESCREEN: Full cover scaling
-          let drawWidth, drawHeight, offsetX, offsetY;
-
-          if (canvasRatio > imgRatio) {
-            drawWidth = width;
-            drawHeight = width / imgRatio;
-            offsetX = 0;
-            offsetY = (height - drawHeight) / 2;
-          } else {
-            drawWidth = height * imgRatio;
-            drawHeight = height;
-            offsetX = (width - drawWidth) / 2;
-            offsetY = 0;
-          }
-
-          // Draw main frame
-          this.ctx.drawImage(currentImg, offsetX, offsetY, drawWidth, drawHeight);
-
-          // Soft edge vignette
-          const vignetteGrad = this.ctx.createRadialGradient(
-            width / 2, height / 2, width * 0.45,
-            width / 2, height / 2, width * 0.9
-          );
-          vignetteGrad.addColorStop(0, 'rgba(11, 13, 12, 0)');
-          vignetteGrad.addColorStop(1, 'rgba(11, 13, 12, 0.35)');
-
-          this.ctx.fillStyle = vignetteGrad;
-          this.ctx.fillRect(0, 0, width, height);
+          drawWidth = height * imgRatio;
+          drawHeight = height;
+          offsetX = (width - drawWidth) / 2;
+          offsetY = 0;
         }
+
+        // Draw image frame in single full-bleed layer
+        this.ctx.drawImage(currentImg, offsetX, offsetY, drawWidth, drawHeight);
+
+        // Soft vignette overlay
+        const vignetteGrad = this.ctx.createRadialGradient(
+          width / 2, height / 2, width * 0.45,
+          width / 2, height / 2, width * 0.9
+        );
+        vignetteGrad.addColorStop(0, 'rgba(11, 13, 12, 0)');
+        vignetteGrad.addColorStop(1, 'rgba(11, 13, 12, 0.35)');
+
+        this.ctx.fillStyle = vignetteGrad;
+        this.ctx.fillRect(0, 0, width, height);
 
         this.lastDrawnFrameIndex = frameToDrawIndex;
         this.needsRedraw = false;
