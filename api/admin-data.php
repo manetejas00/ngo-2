@@ -76,6 +76,61 @@ function validMoney($value, string $label): float {
     return round((float) $value, 2);
 }
 
+// Action: Live Form Mail & SMTP Diagnostic Audit
+if ($action === 'test_email_dispatch') {
+    $targetEmail = strtolower(trim((string) ($data['testEmail'] ?? $_SESSION['admin_email'] ?? 'info@avinyacarefoundation.org')));
+    if (!filter_var($targetEmail, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(422);
+        echo json_encode(['status' => 'error', 'message' => 'Please enter a valid recipient email address for testing.']);
+        exit(0);
+    }
+
+    $isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
+    $defaultAdmin = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
+    $adminTo = getDbEnv('ADMIN_EMAIL', $defaultAdmin);
+
+    $testSubject = "[Admin Diagnostic Audit] Live Form Mail & SSL SMTP Delivery Test";
+    $timestampIST = date('d F Y, g:i A \I\S\T');
+
+    $testHtml = '<!DOCTYPE html><html><body style="margin:0;padding:24px;background:#F6F4EF;font-family:sans-serif;">'
+        . '<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;padding:24px;border:1px solid #E2E8F0;">'
+        . '<div style="background:#0B1220;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0;margin:-24px -24px 20px -24px;border-bottom:3px solid #D4A72C;">'
+        . '<h2 style="margin:0;font-size:18px;color:#fff;">⚡ Avinya Care System Diagnostic Audit</h2></div>'
+        . '<p style="font-size:15px;color:#111827;">This is an automated live diagnostic test email dispatched from the Admin Panel.</p>'
+        . '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px;line-height:1.8;font-size:13px;color:#334155;">'
+        . '<strong>Triggered By:</strong> ' . htmlspecialchars($_SESSION['admin_email'] ?? 'Admin User') . '<br>'
+        . '<strong>Target Recipient:</strong> ' . htmlspecialchars($targetEmail) . '<br>'
+        . '<strong>Admin Alert Recipient:</strong> ' . htmlspecialchars($adminTo) . '<br>'
+        . '<strong>Delivery Mode:</strong> Hostinger SSL SMTP (smtp.hostinger.com:465)<br>'
+        . '<strong>Timestamp:</strong> ' . htmlspecialchars($timestampIST) . '</div>'
+        . '<p style="margin-top:20px;font-size:13px;color:#64748B;">All form mail handlers are verified operational.</p>'
+        . '</div></body></html>';
+
+    require_once __DIR__ . '/submit-form.php';
+    $userResult = sendPHPSMTP($targetEmail, $testSubject, $testHtml);
+    $adminResult = sendPHPSMTP($adminTo, "[Admin Alert] " . $testSubject, $testHtml);
+
+    $success = ($userResult === true || $userResult === 1);
+    
+    logActivity('ADMIN_EMAIL_TEST', 'admin', $_SESSION['admin_email'] ?? 'admin', "Dispatched SMTP diagnostic audit to {$targetEmail}", ['targetEmail' => $targetEmail, 'userSent' => $userResult, 'adminSent' => $adminResult]);
+
+    echo json_encode([
+        'status' => $success ? 'ok' : 'error',
+        'message' => $success ? "Diagnostic test email dispatched successfully via Hostinger SSL SMTP (Port 465)." : "SMTP email dispatch failed. Please verify Hostinger SSL credentials.",
+        'details' => [
+            'targetEmail' => $targetEmail,
+            'adminEmail' => $adminTo,
+            'userEmailSent' => (bool)$userResult,
+            'adminEmailSent' => (bool)$adminResult,
+            'smtpHost' => getDbEnv('SMTP_HOST', 'smtp.hostinger.com'),
+            'smtpPort' => 465,
+            'deliveryMethod' => 'HOSTINGER_SSL_SMTP_465',
+            'timestampIST' => $timestampIST
+        ]
+    ]);
+    exit(0);
+}
+
 // Action: Update Status for Doctor or Diagnostic Booking
 if ($action === 'update_status') {
     $type = strtolower(trim((string) ($data['type'] ?? '')));

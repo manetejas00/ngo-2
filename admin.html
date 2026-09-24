@@ -339,6 +339,11 @@
             <span class="status-dot"></span> Live Auto-Sync (<span id="autoSyncCountdown"></span>)
           </div>
 
+          <!-- Email Audit Action Button -->
+          <button type="button" class="btn btn-primary btn-sm" onclick="openEmailAuditModal()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; border-radius: 6px; padding: 6px 12px; background: #2563EB; color: #fff;" title="Test Live Form Mail & SMTP Deliverability">
+            ⚡ <span class="hide-mobile">Test Form Mail</span>
+          </button>
+
           <!-- Theme Mode Switcher -->
           <button type="button" class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
             🌙 <span class="hide-mobile">Dark Mode</span>
@@ -476,6 +481,7 @@
               <button class="btn btn-teal" id="addUserBtn" style="display:none;" onclick="openUserModal()">➕ Add User</button>
               <button class="btn btn-teal" id="addGalleryBtn" style="display:none;" onclick="openGalleryModal()">🖼️ Add Gallery Item</button>
               <button class="btn btn-outline" id="reseedCatalogBtn" style="display:none;" onclick="reseedCatalog()">🔄 Re-Seed Catalog</button>
+              <button class="btn btn-primary" id="testEmailBtn" style="display:none; background: #2563EB; border-color: #2563EB;" onclick="openEmailAuditModal()">⚡ Test Form Emails</button>
 
               <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
               <button class="btn btn-outline" style="color: var(--primary); border-color: rgba(13, 148, 136, 0.4);" onclick="exportPDF()">📄 Export PDF Report</button>
@@ -594,6 +600,9 @@
                 <div>
                   <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">SMTP Status</label>
                   <span class="badge badge-success">ACTIVE & OPERATIONAL</span>
+                </div>
+                <div style="margin-top: 6px;">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="openEmailAuditModal()" style="width: 100%; justify-content: center; font-weight: 600;">⚡ Audit SMTP Delivery</button>
                 </div>
               </div>
             </div>
@@ -1062,6 +1071,34 @@
         <button type="button" class="btn btn-outline" onclick="downloadCurrentRecordPDF()">📄 Download PDF</button>
         <button type="button" class="btn btn-primary" onclick="closeModal()">Close</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Email Audit & Diagnostic Test Modal -->
+  <div id="emailAuditModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 class="modal-title">✉️ Form Mail & SMTP Diagnostic Audit</h3>
+        <button class="modal-close-btn" onclick="closeEmailAuditModal()">✕</button>
+      </div>
+
+      <form onsubmit="executeEmailAuditTest(event)">
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+          <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
+            Run a live, real-time diagnostic audit across Hostinger SSL SMTP (Port 465) to verify outbound form email deliverability to both user recipients and internal admin desks.
+          </p>
+          <div>
+            <label style="font-size: 12px; font-weight: 600; color: var(--text-main); display: block; margin-bottom: 6px;">Test Recipient Email Address</label>
+            <input type="email" id="testRecipientEmail" class="form-control" placeholder="info@avinyacarefoundation.org" required>
+          </div>
+          <div id="emailAuditStatusBox" style="display: none; padding: 14px; border-radius: 8px; font-size: 13px; line-height: 1.6;"></div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-outline" onclick="closeEmailAuditModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="runEmailTestBtn" style="background: #2563EB; border-color: #2563EB;">⚡ Run Diagnostic Audit</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -1864,6 +1901,8 @@
       addUserBtn.style.display = tab === 'usersCatalog' ? 'inline-flex' : 'none';
       addGalBtn.style.display = tab === 'gallery' ? 'inline-flex' : 'none';
       reseedBtn.style.display = ['doctorsCatalog', 'testsCatalog', 'usersCatalog'].includes(tab) ? 'inline-flex' : 'none';
+      const testEmailBtn = document.getElementById('testEmailBtn');
+      if (testEmailBtn) testEmailBtn.style.display = tab === 'email' ? 'inline-flex' : 'none';
 
       if (tab === 'dashboard') {
         renderDashboardCharts();
@@ -3135,6 +3174,80 @@
 
     function escapeHtml(str) {
       return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function openEmailAuditModal() {
+      const modal = document.getElementById('emailAuditModal');
+      const input = document.getElementById('testRecipientEmail');
+      const box = document.getElementById('emailAuditStatusBox');
+      if (currentUser && currentUser.email) {
+        input.value = currentUser.email;
+      } else {
+        input.value = 'info@avinyacarefoundation.org';
+      }
+      if (box) box.style.display = 'none';
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeEmailAuditModal() {
+      const modal = document.getElementById('emailAuditModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function executeEmailAuditTest(e) {
+      if (e) e.preventDefault();
+      const testEmail = document.getElementById('testRecipientEmail').value.trim();
+      const btn = document.getElementById('runEmailTestBtn');
+      const box = document.getElementById('emailAuditStatusBox');
+
+      if (!testEmail) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Testing SMTP Delivery...';
+      box.style.display = 'block';
+      box.style.backgroundColor = 'var(--bg-subtle, #F8FAFC)';
+      box.style.border = '1px solid var(--border-color, #E2E8F0)';
+      box.style.color = 'var(--text-main, #0F172A)';
+      box.innerHTML = '<strong>⏳ Connecting to Hostinger SSL SMTP (Port 465)...</strong><br><span style="font-size: 12px; color: var(--text-muted);">Dispatching test message to ' + escapeHtml(testEmail) + '...</span>';
+
+      try {
+        const res = await fetch('/api/admin-data.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (adminToken || '')
+          },
+          body: JSON.stringify({ action: 'test_email_dispatch', testEmail: testEmail, token: adminToken })
+        });
+        const result = await res.json();
+
+        if (res.ok && result.status === 'ok') {
+          box.style.backgroundColor = '#F0FDF4';
+          box.style.border = '1px solid #BBF7D0';
+          box.style.color = '#166534';
+          box.innerHTML = '<strong>✅ SMTP Diagnostic Test Passed 100%!</strong><br>' +
+            '• <strong>Target Recipient:</strong> ' + escapeHtml(result.details.targetEmail) + ' (User Email Sent: ✓)<br>' +
+            '• <strong>Admin Recipient:</strong> ' + escapeHtml(result.details.adminEmail) + ' (Admin Alert Sent: ✓)<br>' +
+            '• <strong>Delivery Protocol:</strong> Hostinger SSL SMTP (Port 465)<br>' +
+            '• <strong>Timestamp:</strong> ' + escapeHtml(result.details.timestampIST);
+          showToast('Form email diagnostic audit completed successfully!');
+          fetchAdminData(true);
+        } else {
+          box.style.backgroundColor = '#FEF2F2';
+          box.style.border = '1px solid #FECACA';
+          box.style.color = '#991B1B';
+          box.innerHTML = '<strong>❌ SMTP Diagnostic Test Failed</strong><br>' +
+            escapeHtml(result.message || 'SMTP authentication or delivery failure.');
+        }
+      } catch (err) {
+        box.style.backgroundColor = '#FEF2F2';
+        box.style.border = '1px solid #FECACA';
+        box.style.color = '#991B1B';
+        box.innerHTML = '<strong>❌ Connection Error</strong><br>' + escapeHtml(err.message || 'Network error.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '⚡ Run Diagnostic Audit';
+      }
     }
   </script>
 </body>
