@@ -2552,6 +2552,7 @@
         btn.setAttribute('aria-selected', 'true');
 
         currentCategory = selected;
+        displayedMasonryCount = 12;
         animateCategorySwitch();
       });
     });
@@ -2763,7 +2764,7 @@
   }
 
   // Render 4: Editorial Masonry Archive Grid
-  function renderEditorialMasonry(items) {
+  function renderEditorialMasonry(items, prevCount = 0) {
     const sec = document.getElementById('editorialMasonrySection');
     const grid = document.getElementById('editorialMasonryGrid');
     const loadMoreWrapper = document.getElementById('galleryLoadMoreWrapper');
@@ -2800,14 +2801,38 @@
       `;
     }).join('');
 
+    attachLightboxCardTriggers();
+
+    // GSAP Entrance animation for newly loaded masonry cards on "Explore More Photography"
+    const allCards = Array.from(grid.querySelectorAll('.masonry-card'));
+    if (prevCount > 0 && prevCount < allCards.length && typeof gsap !== 'undefined') {
+      const newCards = allCards.slice(prevCount);
+      gsap.fromTo(newCards,
+        { opacity: 0, y: 50, scale: 0.92, filter: 'brightness(0.7)' },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          filter: 'brightness(1)',
+          duration: 0.8,
+          stagger: 0.08,
+          ease: 'power3.out',
+          clearProps: 'transform,opacity,filter'
+        }
+      );
+      if (typeof ScrollTrigger !== 'undefined') {
+        ScrollTrigger.refresh();
+      }
+    }
+
     // Pagination button
     if (loadMoreWrapper && loadMoreBtn) {
       if (items.length > displayedMasonryCount) {
         loadMoreWrapper.classList.remove('hidden');
         loadMoreBtn.onclick = () => {
+          const currentCount = grid.querySelectorAll('.masonry-card').length;
           displayedMasonryCount += 12;
-          renderEditorialMasonry(items);
-          attachLightboxCardTriggers();
+          renderEditorialMasonry(items, currentCount);
         };
       } else {
         loadMoreWrapper.classList.add('hidden');
