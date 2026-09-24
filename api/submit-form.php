@@ -20,10 +20,13 @@ enforcePhpRateLimit(15, 60);
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/activity-logger.php';
 
+$isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
+$defaultAdmin = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
+
 $brandName = 'Avinya Care Foundation';
-$brandEmail = 'info@avinyacarefoundation.com';
+$brandEmail = getDbEnv('ADMIN_EMAIL', $defaultAdmin);
 $brandPhone = '+91 74474 41116';
-$brandWebsite = 'www.avinyacarefoundation.org';
+$brandWebsite = getDbEnv('SITE_URL', $isStaging ? 'https://test.avinyacarefoundation.org' : 'https://avinyacarefoundation.org');
 
 $rawInput = file_get_contents('php://input');
 $maxPayloadBytes = 64 * 1024;
@@ -74,12 +77,15 @@ if ($formType === 'donation') {
  * Sends authenticated SSL SMTP emails directly via Hostinger (smtp.hostinger.com:465)
  */
 function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
-    $host = 'ssl://' . preg_replace('#^ssl://#', '', getenv('SMTP_HOST') ?: 'smtp.hostinger.com');
-    $port = (int) (getenv('SMTP_PORT') ?: 465);
-    $user = getenv('SMTP_USER') ?: 'info@test.avinyacarefoundation.org';
-    $pass = getenv('SMTP_PASS') ?: '';
-    $from = getenv('SMTP_FROM') ?: $user;
-    $fromName = 'Avinya Care Foundation';
+    $isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
+    $defaultUser = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
+
+    $host = 'ssl://' . preg_replace('#^ssl://#', '', getDbEnv('SMTP_HOST', 'smtp.hostinger.com'));
+    $port = (int) (getDbEnv('SMTP_PORT', '465'));
+    $user = getDbEnv('SMTP_USER', $defaultUser);
+    $pass = getDbEnv('SMTP_PASS', '');
+    $from = getDbEnv('SMTP_FROM', $user);
+    $fromName = getDbEnv('SMTP_FROM_NAME', 'Avinya Care Foundation');
     $boundary = '=_AvinyaLogo_' . bin2hex(random_bytes(8));
     $logoPath = dirname(__DIR__) . '/assets/logo.png';
     $mimeParts = [
@@ -363,11 +369,15 @@ $userEmailSent = ($userSentResult === true || $userSentResult === 1);
 $userEmailError = !$userEmailSent ? "User confirmation email delivery failed via Hostinger SSL SMTP." : null;
 
 // 2. Dispatch Admin Alert HTML Email via Authenticated SSL SMTP
-$adminTo = "info@test.avinyacarefoundation.org";
+$isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
+$defaultAdmin = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
+$defaultAdminRecord = $isStaging ? 'manetejas00@gmail.com' : 'health@avinyacarefoundation.org';
+
+$adminTo = getDbEnv('ADMIN_EMAIL', $defaultAdmin);
 $adminSentResult = sendPHPSMTP($adminTo, $adminSubject, $adminHtmlContent, $email);
 $adminEmailSent = ($adminSentResult === true || $adminSentResult === 1);
 $adminEmailError = !$adminEmailSent ? "Admin operational alert delivery failed via Hostinger SSL SMTP." : null;
-$adminRecordTo = getenv('ADMIN_RECORD_EMAIL') ?: 'manetejas00@gmail.com';
+$adminRecordTo = getDbEnv('ADMIN_RECORD_EMAIL', $defaultAdminRecord);
 $adminRecordEmailSent = true;
 if (filter_var($adminRecordTo, FILTER_VALIDATE_EMAIL) && strcasecmp($adminRecordTo, $adminTo) !== 0) {
     $adminRecordResult = sendPHPSMTP($adminRecordTo, '[Admin Record] ' . $adminSubject, $adminHtmlContent, $email);

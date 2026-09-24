@@ -1,7 +1,14 @@
 <?php
 declare(strict_types=1);
 
-function loadBookingEmailEnv(string $path): void {
+function loadBookingEmailEnv(string $root): void {
+    $hostHeader = $_SERVER['HTTP_HOST'] ?? '';
+    $path = $root . '/.env';
+    if (str_contains($hostHeader, 'test.avinyacarefoundation.org') && is_file($root . '/.env.staging')) {
+        $path = $root . '/.env.staging';
+    } elseif (is_file($root . '/.env.production')) {
+        $path = $root . '/.env.production';
+    }
     if (!is_file($path) || !is_readable($path)) return;
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     if ($lines === false) return;
@@ -9,21 +16,20 @@ function loadBookingEmailEnv(string $path): void {
         $line = trim($line);
         if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) continue;
         [$name, $value] = array_map('trim', explode('=', $line, 2));
-        if (!str_starts_with($name, 'SMTP_') && !in_array($name, ['ADMIN_EMAIL', 'ADMIN_RECORD_EMAIL'], true)) continue;
-        if (getenv($name) !== false) continue;
+        if (!preg_match('/^[A-Z0-9_]+$/i', $name)) continue;
         if (strlen($value) >= 2 && (($value[0] === '"' && substr($value, -1) === '"') || ($value[0] === "'" && substr($value, -1) === "'"))) $value = substr($value, 1, -1);
         putenv($name . '=' . $value);
         $_ENV[$name] = $value;
+        $_SERVER[$name] = $value;
     }
 }
 
-loadBookingEmailEnv(dirname(__DIR__, 2) . '/.env');
+loadBookingEmailEnv(dirname(__DIR__, 2));
 
 function bookingEmailEnv(string $name, string $default = ''): string {
-    $value = getenv($name);
-    if ($value === false && isset($_ENV[$name])) $value = $_ENV[$name];
-    if ($value === false && isset($_SERVER[$name])) $value = $_SERVER[$name];
-    return trim((string) ($value === false ? $default : $value));
+    if (function_exists('getDbEnv')) return getDbEnv($name, $default);
+    $value = $_ENV[$name] ?? $_SERVER[$name] ?? getenv($name);
+    return trim((string) ($value === false || $value === null ? $default : $value));
 }
 
 function emailHtml(string $value): string {
@@ -35,9 +41,14 @@ final class AppointmentEmailService {
         $attemptedAt = nowIso();
         $to = trim((string) ($booking['patientEmail'] ?? ''));
         if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return $this->event('failed', $attemptedAt, 'Invalid patient email address.');
-        $host = bookingEmailEnv('SMTP_HOST');
+        
+        $isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
+        $defaultUser = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
+        $defaultAdminRecord = $isStaging ? 'manetejas00@gmail.com' : 'health@avinyacarefoundation.org';
+
+        $host = bookingEmailEnv('SMTP_HOST', 'smtp.hostinger.com');
         $port = (int) bookingEmailEnv('SMTP_PORT', '465');
-        $user = bookingEmailEnv('SMTP_USER');
+        $user = bookingEmailEnv('SMTP_USER', $defaultUser);
         $pass = bookingEmailEnv('SMTP_PASS');
         $from = bookingEmailEnv('SMTP_FROM', $user);
         $fromName = bookingEmailEnv('SMTP_FROM_NAME', 'Avinya Care Foundation');
@@ -74,7 +85,7 @@ final class AppointmentEmailService {
             fwrite($socket, "QUIT\r\n");
             fclose($socket);
             if ($sendAdminRecord) {
-                $adminRecord = bookingEmailEnv('ADMIN_RECORD_EMAIL');
+                $adminRecord = bookingEmailEnv('ADMIN_RECORD_EMAIL', $defaultAdminRecord);
                 if (filter_var($adminRecord, FILTER_VALIDATE_EMAIL)) {
                     $adminBooking = $booking;
                     $adminBooking['patientEmail'] = $adminRecord;

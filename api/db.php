@@ -28,7 +28,7 @@ if (!function_exists('loadEnvDatabaseVars')) {
             $line = trim($line);
             if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) continue;
             [$name, $value] = array_map('trim', explode('=', $line, 2));
-            if (!str_starts_with($name, 'DB_') && !str_starts_with($name, 'NEWS_') && !str_starts_with($name, 'SMTP_')) continue;
+            if (!preg_match('/^[A-Z0-9_]+$/i', $name)) continue;
             if (strlen($value) >= 2 && (($value[0] === '"' && substr($value, -1) === '"') || ($value[0] === "'" && substr($value, -1) === "'"))) {
                 $value = substr($value, 1, -1);
             }

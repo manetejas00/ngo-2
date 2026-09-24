@@ -77,19 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo json_
 
 
 function diagnosticEnv(string $name, string $default = ''): string {
-    $envFile = dirname(__DIR__) . '/.env';
-    static $loaded = false;
-    if (!$loaded && is_readable($envFile)) {
-        foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
-            $line = trim($line);
-            if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) continue;
-            [$key, $value] = array_map('trim', explode('=', $line, 2));
-            if (getenv($key) === false) putenv($key . '=' . trim($value, "\"'"));
-        }
-        $loaded = true;
-    }
-    $value = getenv($name);
-    return trim((string) ($value === false ? $default : $value));
+    return getDbEnv($name, $default);
 }
 
 function diagnosticHtml(string $value): string { return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
@@ -124,11 +112,15 @@ function diagnosticTemplate(array $booking): string {
 }
 
 function sendDiagnosticEmail(array $booking, bool $sendAdminRecord = true): bool {
-    $host = diagnosticEnv('SMTP_HOST', 'smtp.hostinger.com');
-    $port = (int) diagnosticEnv('SMTP_PORT', '465');
-    $user = diagnosticEnv('SMTP_USER');
-    $pass = diagnosticEnv('SMTP_PASS');
-    $from = diagnosticEnv('SMTP_FROM', $user);
+    $isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
+    $defaultUser = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
+    $defaultAdminRecord = $isStaging ? 'manetejas00@gmail.com' : 'health@avinyacarefoundation.org';
+
+    $host = getDbEnv('SMTP_HOST', 'smtp.hostinger.com');
+    $port = (int) getDbEnv('SMTP_PORT', '465');
+    $user = getDbEnv('SMTP_USER', $defaultUser);
+    $pass = getDbEnv('SMTP_PASS', '');
+    $from = getDbEnv('SMTP_FROM', $user);
     if ($user === '' || $pass === '' || $from === '') return false;
     $socket = @fsockopen('ssl://' . preg_replace('#^ssl://#', '', $host), $port, $errno, $error, 12);
     if (!$socket) return false;
@@ -154,7 +146,7 @@ function sendDiagnosticEmail(array $booking, bool $sendAdminRecord = true): bool
         smtpCommand($socket, $message, [250]);
         fwrite($socket, "QUIT\r\n"); fclose($socket);
         if ($sendAdminRecord) {
-            $adminRecord = diagnosticEnv('ADMIN_RECORD_EMAIL');
+            $adminRecord = getDbEnv('ADMIN_RECORD_EMAIL', $defaultAdminRecord);
             if (filter_var($adminRecord, FILTER_VALIDATE_EMAIL)) {
                 $adminBooking = $booking;
                 $adminBooking['patientEmail'] = $adminRecord;

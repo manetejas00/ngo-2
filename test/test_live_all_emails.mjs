@@ -104,6 +104,7 @@ async function runLiveEmailTests() {
     email: TEST_EMAIL,
     phone: '+91 98765 43210',
     assistance_type: 'Financial Subsidy & Diagnostic Navigation',
+    message: 'Urgent support request for financial assistance and diagnostic navigation.',
     patient_age: '35',
     hospital: 'Tata Memorial Center'
   });
@@ -151,10 +152,11 @@ async function runLiveEmailTests() {
 
   // 8. Healthcare Doctor Appointment Booking
   console.log('\n8. Testing Doctor Appointment Booking Email...');
+  const randomSlotMin = Math.floor(Math.random() * 40) + 10;
   const aptRes = await postJson('/api/booking/index.php', {
     doctorId: 'doc-1',
-    date: '2026-09-28',
-    time: '11:30 AM',
+    date: '2026-10-15',
+    time: `10:00 AM`,
     consultationType: 'in-clinic',
     patientName: 'Tejas Mane Live Test',
     patientPhone: '+91 98765 43210',
@@ -170,8 +172,8 @@ async function runLiveEmailTests() {
   // 9. Diagnostic Test Package Booking
   console.log('\n9. Testing Diagnostic Test Package Booking Email...');
   const diagRes = await postJson('/api/diagnostic-booking.php', {
-    testId: 'test-full-body',
-    date: '2026-09-30',
+    testId: 'test-1',
+    date: '2026-10-20',
     timeSlot: '08:00 AM - 10:00 AM',
     collectionMethod: 'home_collection',
     patientName: 'Tejas Mane Live Test',
