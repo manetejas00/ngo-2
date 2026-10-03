@@ -53,10 +53,13 @@
   }
   </script>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="alternate icon" type="image/x-icon" href="favicon.ico">
-  <link rel="apple-touch-icon" href="assets/logo-icon.png">
+  <!-- Standard Favicon & Google Search Icon Compliance -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
 
   <!-- Modern Typography (Inter & Manrope Fonts) & Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -101,68 +104,7 @@
   </div>
   <script src="js/components/preloader.js?v=3.1"></script>
 
-    <!-- 1. MINIMAL FLOATING DOCK NAVIGATION (NESTJS STYLE) -->
-  <header class="navbar-wrapper">
-    <nav class="navbar scrolled-dark" aria-label="Main Navigation">
-      <a href="/#hero" class="nav-brand" aria-label="Avinya Care Foundation Home">
-        <img src="/assets/logo-emblem.png" alt="Avinya Care Foundation Logo" class="brand-logo-img">
-        <div class="brand-text">
-          <span class="brand-name">Avinya Care</span>
-          <span class="brand-tag">Foundation</span>
-        </div>
-      </a>
-
-      <ul class="nav-links">
-        <li><a href="/#hero" class="nav-link">About</a></li>
-        <li><a href="/#what-we-do" class="nav-link">What We Do</a></li>
-        <li><a href="/doctors" class="nav-link nav-link-healthcare" id="nav-doctors-tests">Doctors & Tests</a></li>
-        <li><a href="/crowdfunding" class="nav-link">Crowdfunding</a></li>
-        <li><a href="/#stories" class="nav-link">Stories</a></li>
-        <li><a href="/#impact" class="nav-link">Impact</a></li>
-        <li><a href="/#news" class="nav-link">News</a></li>
-      </ul>
-
-      <div class="nav-actions">
-        <button class="btn-primary" onclick="window.AvinyaModals && window.AvinyaModals.openDonateModal(1000)">
-          <span>Make a Difference</span>
-          <span class="arrow">→</span>
-        </button>
-        <button class="mobile-toggle" aria-label="Toggle Mobile Navigation" aria-expanded="false">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-    </nav>
-  </header>
-
-  <!-- Fullscreen Mobile Navigation Drawer -->
-  <div class="mobile-nav-overlay" id="mobile-nav-overlay" style="display: none;">
-    <button class="modal-close-btn" style="top: 2rem; right: 2rem; color: white; background: rgba(255,255,255,0.1);">✕</button>
-    <div class="mobile-nav-brand-header">
-      <img src="/assets/logo-white.png" alt="Avinya Care Foundation" class="mobile-nav-logo">
-      <div class="mobile-nav-title">Avinya Care Foundation</div>
-      <div class="mobile-nav-tagline">No one should face a health crisis alone</div>
-    </div>
-    <ul class="mobile-nav-menu">
-      <li><a href="/#hero" class="mobile-nav-link">About</a></li>
-      <li><a href="/#what-we-do" class="mobile-nav-link">What We Do</a></li>
-      <li><a href="/doctors" class="mobile-nav-link" style="color: var(--brand); font-weight: 700;">Doctors & Tests</a></li>
-      <li><a href="/crowdfunding" class="mobile-nav-link">Crowdfunding</a></li>
-      <li><a href="/#stories" class="mobile-nav-link">Stories</a></li>
-      <li><a href="/#impact" class="mobile-nav-link">Impact</a></li>
-      <li><a href="/#news" class="mobile-nav-link">News</a></li>
-    </ul>
-    <div style="margin-top: 2.5rem;">
-      <button class="btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;"
-        onclick="window.AvinyaNavbarEngine && window.AvinyaNavbarEngine.close(); window.AvinyaModals && window.AvinyaModals.openDonateModal(1000);">
-        <span>Make a Difference</span>
-        <span>→</span>
-      </button>
-    </div>
-  </div>
+  <!-- REUSABLE_NAVBAR -->
 
 
   <main> <!-- 2. CENTERPIECE CANVAS HERO — DEEP BLACK (#0A0A0A) & 7-STAGE SCROLL STORY -->
@@ -1472,72 +1414,8 @@
     </div>
   </section>
 
-    <!-- 14. NESTJS-INSPIRED MINIMAL FOOTER (DEEP BLACK #0A0A0A) -->
-  <footer class="footer">
-    <div class="footer-top">
-      <div class="footer-brand-col">
-        <div class="footer-brand-badge">
-          <img src="/assets/logo-white.png" alt="Avinya Care Foundation" class="footer-brand-logo">
-          <div>
-            <div class="footer-brand">Avinya Care Foundation</div>
-            <p class="footer-tagline">No one should face a health crisis alone.</p>
-          </div>
-        </div>
-        <p style="font-size: 0.88rem; color: var(--text-light-sub); line-height: 1.6;">
-          Registered Non-Profit Indian Humanitarian Organization.<br>
-          80G • 12A • CSR-1 • NITI Aayog Darpan Registered.<br>
-          Location: Mumbai-Virar, Maharashtra
-        </p>
-      </div>
+  <!-- REUSABLE_FOOTER -->
 
-      <div>
-        <h4 class="footer-heading">Explore</h4>
-        <ul class="footer-links">
-          <li><a href="/#hero" class="footer-link">About</a></li>
-          <li><a href="/doctors" class="footer-link" style="color: var(--brand); font-weight: 700;">Doctors &amp; Tests</a></li>
-          <li><a href="/crowdfunding" class="footer-link" style="color: var(--brand); font-weight: 700;">Crowdfunding</a></li>
-          <li><a href="/#what-we-do" class="footer-link">What We Do</a></li>
-          <li><a href="/#stories" class="footer-link">Stories</a></li>
-          <li><a href="/#impact" class="footer-link">Impact</a></li>
-          <li><a href="/#news" class="footer-link">News</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="footer-heading">Get Involved</h4>
-        <ul class="footer-links">
-          <li><a href="/#get-involved" class="footer-link" onclick="window.AvinyaModals && window.AvinyaModals.openDonateModal(1000)">Make a Difference</a></li>
-          <li><a href="/#get-involved" class="footer-link" onclick="window.AvinyaModals && window.AvinyaModals.openVolunteerModal()">Volunteer</a></li>
-          <li><a href="/#get-involved" class="footer-link" onclick="window.AvinyaModals && window.AvinyaModals.openCSRModal()">CSR</a></li>
-          <li><a href="/#get-involved" class="footer-link" onclick="window.AvinyaModals && window.AvinyaModals.openCSRModal()">Partner</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="footer-heading">Contact &amp; Support</h4>
-        <ul class="footer-links">
-          <li><a href="tel:+917447441116" class="footer-link">Helpline: +91 74474 41116</a></li>
-          <li><a href="mailto:info@avinyacarefoundation.com" class="footer-link">Email: info@avinyacarefoundation.com</a></li>
-          <li><a href="https://wa.me/917447441116" target="_blank" class="footer-link">WhatsApp: wa.me/917447441116</a></li>
-          <li><span class="footer-link" style="opacity: 0.85;">Mumbai-Virar, Maharashtra</span></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="footer-heading">Legal &amp; Compliance</h4>
-        <ul class="footer-links">
-          <li><a href="#privacy" class="footer-link" onclick="window.AvinyaModals && window.AvinyaModals.openPrivacyModal(); return false;">Privacy Policy</a></li>
-          <li><a href="#terms" class="footer-link" onclick="window.AvinyaModals && window.AvinyaModals.openTermsModal(); return false;">Terms of Service</a></li>
-          <li><a href="#compliance" class="footer-link" onclick="window.AvinyaModals && window.AvinyaModals.openComplianceModal(); return false;">80G • 12A • CSR-1 • Darpan</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <div>© 2026 Avinya Care Foundation. All rights reserved. | Mumbai-Virar, Maharashtra</div>
-      <div>Confidential Helpline: <a href="tel:+917447441116" style="color: #FFFFFF; font-weight: 700;">+91 74474 41116</a> | Email: <a href="mailto:info@avinyacarefoundation.com" style="color: #FFFFFF;">info@avinyacarefoundation.com</a></div>
-    </div>
-  </footer>
 
   <!-- Premium GSAP Radial Floating Action Menu (FAB) -->
   <div class="radial-fab-container">
@@ -2173,6 +2051,7 @@
   <script src="js/services/newsService.js?v=3.1"></script>
   <script src="js/components/news-ui.js?v=3.1"></script>
   <script src="js/components/nestjs-cards.js?v=3.1"></script>
+  <script src="js/components/layout-injector.js?v=3.2"></script>
   <script src="js/components/navbar-gsap.js?v=3.1"></script>
   <script src="js/components/radial-menu.js?v=3.1"></script>
   <script src="js/app.js?v=3.1"></script>

@@ -140,42 +140,42 @@ class NewsUI {
           title: "AI-Powered Genomic Screening Identifies High-Risk Breast Cancer Biomarkers 3 Years Earlier",
           description: "Multi-center clinical trials utilizing machine learning predictive models reveal microscopic cellular mutations years before physical mammogram detection, enabling targeted preventive interventions.",
           category: "Cancer Research",
-          image: "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80"
+          image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80"
         },
         {
           id: "gemini-ai-rural-mobile-screening",
           title: "Mobile AI Diagnostic Vans Expand Early Oral & Cervical Screening Across Maharashtra",
           description: "Avinya Care Foundation and regional health networks deploy solar-powered diagnostic vans equipped with portable colposcopy and AI-assisted oral visual examination tools for underserved rural communities.",
           category: "Early Detection",
-          image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80"
+          image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80"
         },
         {
           id: "gemini-ai-cart-immunotherapy",
           title: "Next-Generation CAR-T Cell Immunotherapy Achieves Complete Remission in Refractory Lymphoma Trials",
           description: "Indigenous cellular engineering and targeted T-cell receptors demonstrate unprecedented success rates in halting aggressive hematologic malignancies while minimizing systemic toxicity.",
           category: "Treatment",
-          image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80"
+          image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80"
         },
         {
           id: "gemini-ai-liquid-biopsy-mcda",
           title: "Liquid Biopsy Multi-Cancer Early Detection Blood Panels Approved for Clinical Pilot Studies",
           description: "High-throughput sequencing analyzing cell-free circulating tumor DNA (ctDNA) achieves over 92% specificity across 12 common solid cancer types before physical symptoms emerge.",
           category: "Early Detection",
-          image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80"
+          image: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=800&q=80"
         },
         {
           id: "gemini-ai-integrative-nutrition",
           title: "Structured Anti-Inflammatory Nutrition & Mindfulness Protocol Reduces Chemotherapy Fatigue by 40%",
           description: "Clinical studies across tertiary oncology centers highlight that personalized plant-based anti-inflammatory nutrition paired with supervised light exercise significantly accelerates post-chemotherapy recovery.",
           category: "Care",
-          image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80"
+          image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=800&q=80"
         },
         {
           id: "gemini-ai-crispr-nanoparticles",
           title: "CRISPR-Guided Nanoparticles Deliver Precision Chemotherapy Directly into Solid Tumors",
           description: "Bioengineered lipid nanoparticles navigate bloodstream barriers to deliver targeted cytotoxic payloads exclusively into tumor microenvironments, sparing healthy surrounding tissues.",
           category: "Cancer Research",
-          image: "https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=800&q=80"
+          image: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=800&q=80"
         },
         {
           id: "gemini-ai-caregiver-navigation",
@@ -203,7 +203,7 @@ class NewsUI {
           title: "Digital Palliative & Tele-Oncology Clinics Connect Homebound Patients with Oncology Specialists",
           description: "24/7 tele-oncology support platforms provide symptom management, dosage adjustments, and psychosocial counseling directly into patients' living rooms across Maharashtra.",
           category: "Care",
-          image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80"
+          image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80"
         }
       ];
 
@@ -393,21 +393,23 @@ class NewsUI {
   appendArticles(articles) {
     if (!this.container || articles.length === 0) return;
 
-    const fallbackImg = 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80';
-    const html = articles.map(article => {
+    const html = articles.map((article, idx) => {
       const formattedDate = new Date(article.publishedAt).toLocaleDateString('en-US', {
         month: 'short', day: 'numeric', year: 'numeric'
       });
-      const imageUrl = article.urlToImage || fallbackImg;
-      const badge = article.isAIGenerated
-        ? '<span class="ai-generated-badge">✦ AI INSIGHT</span>'
+      const cardFallback = INDIAN_HEALTHCARE_IMAGE_POOL[idx % INDIAN_HEALTHCARE_IMAGE_POOL.length];
+      const imageUrl = (article.urlToImage && typeof article.urlToImage === 'string' && article.urlToImage.startsWith('http')) 
+        ? article.urlToImage 
+        : cardFallback;
+      const badge = article.isAIGenerated 
+        ? `<span class="ai-generated-badge">✦ AI INSIGHT</span>` 
         : `<span class="live-news-badge">${article.apiProvider || '🌐 GLOBAL HEALTH'}</span>`;
 
       return `
         <article class="news-card" data-news-appended="true" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
           <div class="news-image-box">
             <span class="news-category-badge" style="position: absolute; top: 1rem; left: 1rem; z-index: 2; background: rgba(10,10,10,0.85); color: white;">${article.category || 'Health'}</span>
-            <img src="${imageUrl}" alt="${article.title}" class="news-image" onerror="this.src='${fallbackImg}'" loading="lazy">
+            <img src="${imageUrl}" alt="${article.title}" class="news-image" onerror="this.src='${cardFallback}'" loading="lazy">
           </div>
           <div class="news-content">
             <div>
@@ -444,13 +446,13 @@ class NewsUI {
 
     const featured = articles[0];
     const gridStories = articles.slice(1);
-    const fallbackImg = "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80";
+    const featuredFallback = INDIAN_HEALTHCARE_IMAGE_POOL[0];
 
     // 1. Featured Lead Story Banner HTML
     const featuredDate = new Date(featured.publishedAt).toLocaleDateString('en-US', {
       month: 'short', day: 'numeric', year: 'numeric'
     });
-    const featuredImg = featured.urlToImage || fallbackImg;
+    const featuredImg = (featured.urlToImage && typeof featured.urlToImage === 'string' && featured.urlToImage.startsWith('http')) ? featured.urlToImage : featuredFallback;
     const featuredBadge = featured.isAIGenerated 
       ? `<span class="ai-generated-badge">✦ AI INSIGHT</span>` 
       : `<span class="live-news-badge">🌐 DAILY HEALTH DESK</span>`;
@@ -458,7 +460,7 @@ class NewsUI {
     let html = `
       <div class="news-featured-lead" onclick="window.AvinyaNewsUI.openArticleDetail('${featured.id}')" style="grid-column: 1 / -1;">
         <div class="news-featured-image-box">
-          <img src="${featuredImg}" alt="${featured.title}" class="news-featured-image" onerror="this.src='${fallbackImg}'" loading="lazy">
+          <img src="${featuredImg}" alt="${featured.title}" class="news-featured-image" onerror="this.src='${featuredFallback}'" loading="lazy">
         </div>
         <div class="news-featured-content">
           <div class="news-tag-group">
@@ -481,11 +483,14 @@ class NewsUI {
 
     // 2. Secondary Editorial Grid Stories HTML
     if (gridStories.length > 0) {
-      html += gridStories.map(article => {
+      html += gridStories.map((article, idx) => {
         const formattedDate = new Date(article.publishedAt).toLocaleDateString('en-US', {
           month: 'short', day: 'numeric', year: 'numeric'
         });
-        const imageUrl = article.urlToImage || fallbackImg;
+        const cardFallback = INDIAN_HEALTHCARE_IMAGE_POOL[(idx + 1) % INDIAN_HEALTHCARE_IMAGE_POOL.length];
+        const imageUrl = (article.urlToImage && typeof article.urlToImage === 'string' && article.urlToImage.startsWith('http')) 
+          ? article.urlToImage 
+          : cardFallback;
         const badge = article.isAIGenerated 
           ? `<span class="ai-generated-badge">✦ AI INSIGHT</span>` 
           : `<span class="live-news-badge">${article.apiProvider || '🌐 GLOBAL HEALTH'}</span>`;
@@ -494,7 +499,7 @@ class NewsUI {
           <article class="news-card" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
             <div class="news-image-box">
               <span class="news-category-badge" style="position: absolute; top: 1rem; left: 1rem; z-index: 2; background: rgba(10,10,10,0.85); color: white;">${article.category || 'Health'}</span>
-              <img src="${imageUrl}" alt="${article.title}" class="news-image" onerror="this.src='${fallbackImg}'" loading="lazy">
+              <img src="${imageUrl}" alt="${article.title}" class="news-image" onerror="this.src='${cardFallback}'" loading="lazy">
             </div>
             <div class="news-content">
               <div>
@@ -539,8 +544,8 @@ class NewsUI {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
-    const fallbackImg = "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80";
-    const imageUrl = article.urlToImage || fallbackImg;
+    const fallbackImg = "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80";
+    const imageUrl = (article.urlToImage && article.urlToImage.startsWith("http")) ? article.urlToImage : INDIAN_HEALTHCARE_IMAGE_POOL[idx % INDIAN_HEALTHCARE_IMAGE_POOL.length];
     const related = this.service.getRelatedArticles(article, 3);
 
     modal.innerHTML = `

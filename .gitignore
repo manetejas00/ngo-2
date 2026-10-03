@@ -11,6 +11,8 @@ cache/
 *.log
 
 # System / OS
+.DS_Store
+scratch/
 # Archives
 *.zip
 

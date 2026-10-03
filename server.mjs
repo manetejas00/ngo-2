@@ -107,7 +107,8 @@ const MIME_TYPES = {
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
-  '.woff2': 'font/woff2'
+  '.woff2': 'font/woff2',
+  '.webmanifest': 'application/manifest+json; charset=utf-8'
 };
 
 // In-Memory News Cache initialized from persistent storage
@@ -173,7 +174,7 @@ const HEALTHCARE_KEYWORDS = [
 
 // Strict Non-Health / Unrelated Rejection Filter
 const STRICT_NON_HEALTH_KEYWORDS = [
-  'politics', 'election', 'trump', 'biden', 'parliament', 'congress', 'minister',
+  'politics', 'election', 'nasa', 'spacex', 'astronaut', 'space station', 'expedition', 'orbit', 'crew-12', 'crew-13', 'trump', 'biden', 'parliament', 'congress', 'minister',
   'nfl', 'nba', 'football', 'basketball', 'cricket', 'ipl', 'premier league',
   'hollywood', 'bollywood', 'celebrity', 'box office', 'actor', 'actress',
   'stocks', 'wall street', 'bitcoin', 'crypto', 'currency', 'stock market',
@@ -339,14 +340,27 @@ Return ONLY a valid JSON object (no markdown, no backticks, no markdown code blo
 
 
 
-// Curated high-res medical imagery by category
+const INDIAN_HEALTHCARE_IMAGE_POOL = [
+  'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=800&q=80'
+];
+
+// Curated high-res medical imagery by category (Authentic Indian Context)
 const HEALTH_CATEGORY_IMAGES = {
-  'Cancer Research': 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80',
-  'Early Detection': 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80',
+  'Cancer Research': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
+  'Early Detection': 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=800&q=80',
   'Prevention': 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80',
-  'Treatment': 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80',
+  'Treatment': 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=800&q=80',
   'Care': 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
-  'Global Health': 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80'
+  'Global Health': 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80'
 };
 
 function getProviderNameFromUrl(url) {
