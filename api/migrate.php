@@ -31,9 +31,8 @@ try {
     // 2. Explicitly re-seed galleries table from data/seed_galleries.json
     $seededCount = seedGalleryFromJSON($pdo, true);
 
-    // Invalidate caches so public endpoints instantly reflect fresh seeded DB records
-    AvinyaCache::invalidateGroup('gallery');
-    AvinyaCache::invalidateGroup('homepage');
+    // Invalidate and purge all application caches completely so endpoints reflect fresh DB state
+    AvinyaCache::clearAll();
 
     // 3. Fetch updated list of active galleries to confirm DB state
     $stmtGal = $pdo->query("SELECT `gallery_id`, `title`, `category`, `image`, `is_published`, `created_at` FROM `galleries` ORDER BY `sort_order` ASC, `created_at` DESC");
