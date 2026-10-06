@@ -62,24 +62,32 @@ function getDatabaseConnection(): ?PDO {
 
     if ($dbname === '' || $user === '') return null;
 
-    try {
-        $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
-        $pdo = new PDO($dsn, $user, $pass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_TIMEOUT => 5
-        ]);
+    $hosts = array_unique([$host, '127.0.0.1', 'localhost']);
+    $lastErr = '';
 
+    foreach ($hosts as $h) {
         try {
-            autoMigrateDatabaseTables($pdo);
-        } catch (Throwable $migrationErr) {
-            error_log('AvinyaCare Auto-Migration Notice: ' . $migrationErr->getMessage());
+            $dsn = "mysql:host={$h};port={$port};dbname={$dbname};charset=utf8mb4";
+            $pdo = new PDO($dsn, $user, $pass, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_TIMEOUT => 5
+            ]);
+
+            try {
+                autoMigrateDatabaseTables($pdo);
+            } catch (Throwable $migrationErr) {
+                error_log('AvinyaCare Auto-Migration Notice: ' . $migrationErr->getMessage());
+            }
+            return $pdo;
+        } catch (Throwable $e) {
+            $lastErr = $e->getMessage();
+            error_log("AvinyaCare Database Connection Attempt ({$h}) Exception: " . $e->getMessage());
         }
-        return $pdo;
-    } catch (Throwable $e) {
-        error_log('AvinyaCare Database Connection Exception: ' . $e->getMessage());
-        return null;
     }
+
+    $GLOBALS['last_db_conn_error'] = $lastErr;
+    return null;
 }
 
 function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {

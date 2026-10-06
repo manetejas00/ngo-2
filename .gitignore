@@ -2,7 +2,8 @@
 node_modules/
 npm-debug.log*
 .env
-.env.*
+!.env.production
+!.env.staging
 !.env.example
 live_admin_credentials.txt
 
