@@ -70,10 +70,14 @@ function getDatabaseConnection(): ?PDO {
             PDO::ATTR_TIMEOUT => 5
         ]);
 
-        autoMigrateDatabaseTables($pdo);
+        try {
+            autoMigrateDatabaseTables($pdo);
+        } catch (Throwable $migrationErr) {
+            error_log('AvinyaCare Auto-Migration Notice: ' . $migrationErr->getMessage());
+        }
         return $pdo;
     } catch (Throwable $e) {
-        error_log('AvinyaCare Database Connection/Migration Exception: ' . $e->getMessage());
+        error_log('AvinyaCare Database Connection Exception: ' . $e->getMessage());
         return null;
     }
 }
