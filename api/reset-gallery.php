@@ -18,7 +18,18 @@ try {
         $pdo->exec("TRUNCATE TABLE `galleries`");
     }
 
+    if (function_exists('apcu_clear_cache')) {
+        @apcu_clear_cache();
+    }
+
+    $cacheFile = dirname(__DIR__) . '/cache/avinya_app_cache.json';
+    if (file_exists($cacheFile)) {
+        @unlink($cacheFile);
+    }
+
     AvinyaCache::clearAll();
+    AvinyaCache::invalidateGroup('gallery');
+    AvinyaCache::invalidateGroup('homepage');
 
     echo json_encode([
         'status' => 'ok',
