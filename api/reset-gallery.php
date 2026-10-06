@@ -14,8 +14,9 @@ require_once __DIR__ . '/cache-manager.php';
 
 try {
     $pdo = getDatabaseConnection();
+    $seeded = 0;
     if ($pdo !== null) {
-        $pdo->exec("TRUNCATE TABLE `galleries`");
+        $seeded = seedGalleryFromJSON($pdo, true);
     }
 
     if (function_exists('apcu_clear_cache')) {
@@ -33,7 +34,8 @@ try {
 
     echo json_encode([
         'status' => 'ok',
-        'message' => 'Galleries table truncated and cache purged cleanly.',
+        'message' => "Galleries table seeded with {$seeded} fresh photos created today and cache purged cleanly.",
+        'count' => $seeded,
         'timestamp' => date(DATE_ATOM)
     ], JSON_PRETTY_PRINT);
 } catch (Throwable $e) {
