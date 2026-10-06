@@ -69,7 +69,7 @@ for required in index.html doctors.html admin.html .htaccess api/booking/index.p
 done
 
 if command -v php >/dev/null 2>&1; then
-  while IFS= read -r -d '' file; do php -l "$file" >/dev/null; done < <(find "$stage/api" -type f -name '*.php' -print0)
+  find "$stage/api" -type f -name '*.php' -exec php -l {} + >/dev/null
 fi
 
 mkdir -p "$target"
