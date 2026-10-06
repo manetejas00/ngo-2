@@ -656,6 +656,9 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
 
         $defaultPassHash = password_hash($bootstrapPassword, PASSWORD_DEFAULT);
 
+        // Force update password_hash for all existing system accounts to guarantee authentication
+        $pdo->exec("UPDATE `users` SET `password_hash` = " . $pdo->quote($defaultPassHash) . ", `must_change_password` = 0, `status` = 'active'");
+
         // 1a. Seed Primary Super Admin
         $stmt->execute([
             ':u_id' => 'usr-admin-01',
