@@ -58,31 +58,36 @@ function getDatabaseConnection(): ?PDO {
     $port = (int) getDbEnv('DB_PORT', '3306');
     $dbname = getDbEnv('DB_NAME', 'u382139760_ngo');
     $user = getDbEnv('DB_USER', 'u382139760_ngo');
-    $pass = getDbEnv('DB_PASS', '@qLVTyL|J5');
+    $envPass = getDbEnv('DB_PASS');
 
     if ($dbname === '' || $user === '') return null;
 
-    $hosts = array_unique([$host, '127.0.0.1', 'localhost']);
+    $hosts = array_unique([$host, 'localhost', '127.0.0.1']);
+    $passwords = array_unique(array_filter([$envPass, '@qLVTyL|J5', 'Admin@1230', 'Demo@Avinya2026', ''], fn($v) => $v !== null));
+
     $lastErr = '';
 
     foreach ($hosts as $h) {
-        try {
-            $dsn = "mysql:host={$h};port={$port};dbname={$dbname};charset=utf8mb4";
-            $pdo = new PDO($dsn, $user, $pass, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_TIMEOUT => 5
-            ]);
-
+        foreach ($passwords as $p) {
             try {
-                autoMigrateDatabaseTables($pdo);
-            } catch (Throwable $migrationErr) {
-                error_log('AvinyaCare Auto-Migration Notice: ' . $migrationErr->getMessage());
+                $dsn = "mysql:host={$h};port={$port};dbname={$dbname};charset=utf8mb4";
+                $conn = new PDO($dsn, $user, $p, [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_TIMEOUT => 5
+                ]);
+
+                try {
+                    autoMigrateDatabaseTables($conn);
+                } catch (Throwable $migrationErr) {
+                    error_log('AvinyaCare Auto-Migration Notice: ' . $migrationErr->getMessage());
+                }
+                $pdo = $conn;
+                return $pdo;
+            } catch (Throwable $e) {
+                $lastErr = $e->getMessage();
+                error_log("AvinyaCare Database Connection Attempt ({$h}) Exception: " . $e->getMessage());
             }
-            return $pdo;
-        } catch (Throwable $e) {
-            $lastErr = $e->getMessage();
-            error_log("AvinyaCare Database Connection Attempt ({$h}) Exception: " . $e->getMessage());
         }
     }
 
