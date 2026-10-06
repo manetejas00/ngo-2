@@ -17,12 +17,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/cache-manager.php';
 
 $pdo = getDatabaseConnection();
-
 $category = strtolower(trim((string) ($_GET['category'] ?? '')));
 
-if ($pdo !== null) {
+$cacheKey = 'gallery:pub:' . md5($category);
+
+$galleries = AvinyaCache::remember($cacheKey, ['gallery', 'homepage'], 1800, function() use ($pdo, $category) {
+    if ($pdo === null) return null;
     try {
         $sql = "SELECT 
                     gallery_id AS id,
@@ -63,7 +66,7 @@ if ($pdo !== null) {
         $rows = $stmt->fetchAll();
 
         // Cast boolean types properly
-        $galleries = array_map(function($r) {
+        return array_map(function($r) {
             $r['has_details'] = (bool) $r['has_details'];
             $r['image_only'] = (bool) ($r['image_only'] ?? false);
             $r['is_featured'] = (bool) $r['is_featured'];
@@ -71,17 +74,20 @@ if ($pdo !== null) {
             $r['sort_order'] = (int) $r['sort_order'];
             return $r;
         }, $rows);
-
-        echo json_encode([
-            'status' => 'ok',
-            'count' => count($galleries),
-            'data' => $galleries
-        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        exit(0);
-
     } catch (Throwable $e) {
-        error_log('Gallery API Error: ' . $e->getMessage());
+        error_log('Gallery API DB Error: ' . $e->getMessage());
+        return null;
     }
+});
+
+if ($galleries !== null && is_array($galleries)) {
+    echo json_encode([
+        'status' => 'ok',
+        'count' => count($galleries),
+        'cached' => true,
+        'data' => $galleries
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    exit(0);
 }
 
 // Fallback to seed_galleries.json if DB unavailable

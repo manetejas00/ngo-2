@@ -12,22 +12,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/db.php';
+require_once dirname(__DIR__) . '/cache-manager.php';
 require_once dirname(__DIR__) . '/rate_limiter.php';
 enforcePhpRateLimit(60, 60);
 
 try {
     $pdo = getDatabaseConnection();
-    if ($pdo !== null) {
-        // Ensure catalog table is populated if empty
+
+    $tests = AvinyaCache::remember('tests:pub:active', ['tests', 'homepage'], 1800, function() use ($pdo) {
+        if ($pdo === null) return null;
         seedCatalogFromJSON($pdo);
 
         $stmt = $pdo->query("SELECT * FROM `diagnostic_tests` WHERE `is_active` = 1 ORDER BY `id` ASC");
         $rows = $stmt->fetchAll();
-        $tests = [];
+        $list = [];
 
         foreach ($rows as $r) {
             $tId = $r['test_id'] ?? $r['id'];
-            $tests[] = [
+            $list[] = [
                 'id' => $tId,
                 'name' => $r['name'],
                 'category' => $r['category'],
@@ -47,7 +49,10 @@ try {
                 'badge' => $r['badge']
             ];
         }
+        return $list;
+    });
 
+    if ($tests !== null && is_array($tests)) {
         echo json_encode([
             'status' => 'ok',
             'tests' => $tests,

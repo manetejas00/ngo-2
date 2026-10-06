@@ -67,6 +67,25 @@
           🔒 Sign In
         </button>
       </form>
+
+      <!-- Optional Demo Credentials Information Section (Enabled via SHOW_DEMO_LOGIN config) -->
+      <div id="demoLoginSection" style="display: none; margin-top: 20px; padding: 14px; background: rgba(13, 148, 136, 0.08); border: 1px dashed var(--primary); border-radius: var(--radius-md); font-size: 13px;">
+        <div style="font-weight: 600; color: var(--primary); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+          <span>⚡ Demo Access Credentials</span>
+          <span style="font-size: 11px; background: var(--primary); color: #fff; padding: 2px 6px; border-radius: 4px;">DEMO</span>
+        </div>
+        <div style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;">Configured demo access info. Real production passwords remain one-way hashed.</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-family: monospace; font-size: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.7); padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05);">
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Email: <strong id="demoEmailField">admin@avinyacarefoundation.org</strong></span>
+            <button type="button" onclick="copyDemoValue('admin@avinyacarefoundation.org', 'Email')" class="btn btn-sm" style="padding: 2px 8px; font-size: 11px; background: var(--primary); color: #fff; border: 0; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Copy Email</button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.7); padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05);">
+            <span>Password: <strong>Demo@Avinya2026</strong></span>
+            <button type="button" onclick="copyDemoValue('Demo@Avinya2026', 'Password')" class="btn btn-sm" style="padding: 2px 8px; font-size: 11px; background: var(--primary); color: #fff; border: 0; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Copy Password</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -300,6 +319,10 @@
         <button class="sidebar-nav-link" data-tab="settings" data-tooltip="Platform Settings" onclick="switchTab('settings')">
           <span class="nav-icon">⚙️</span>
           <span class="nav-text">Platform Settings</span>
+        </button>
+        <button class="sidebar-nav-link" data-tab="cacheManagement" data-tooltip="System / Cache Management" onclick="switchTab('cacheManagement')">
+          <span class="nav-icon">⚡</span>
+          <span class="nav-text">Cache Management</span>
         </button>
       </div>
 
@@ -632,6 +655,109 @@
               <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">💾 Save Platform Settings</button>
             </div>
           </form>
+        </div>
+
+        <!-- Cache Management Panel -->
+        <div id="cacheManagementPanel" class="table-card" style="display:none; padding: 28px;">
+          <div style="margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 style="font-family: var(--font-heading); font-size: 20px; color: var(--text-main); margin-bottom: 6px;">⚡ System / Cache Management</h2>
+              <p style="color: var(--text-muted); font-size: 13px;">Manage application, route, view, and config caches with safe server-side invalidation.</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="fetchCacheDiagnostics()" style="font-weight: 600;">🔄 Refresh Status</button>
+              <button type="button" class="btn btn-danger btn-sm" onclick="openClearAllCacheModal()" style="font-weight: 600; background: #DC2626; border-color: #DC2626; color: #fff;">💣 Clear All Cache</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 20px; margin-bottom: 28px;">
+            <!-- Application Cache -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span style="font-weight: 700; font-size: 15px; color: var(--text-main);">Application Cache</span>
+                  <span class="badge badge-success" id="appCacheStatusBadge">Active</span>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+                  <div><strong>Driver:</strong> <span id="appCacheDriver">Atomic JSON File</span></div>
+                  <div><strong>Active Items:</strong> <span id="appCacheActiveCount">0</span></div>
+                  <div><strong>Total Cached:</strong> <span id="appCacheTotalCount">0</span></div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm" onclick="executeCacheClear('clear_app', 'Application Cache')" style="width: 100%; justify-content: center; margin-top: 8px;">Clear Application Cache</button>
+            </div>
+
+            <!-- Config Cache -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span style="font-weight: 700; font-size: 15px; color: var(--text-main);">Config Cache</span>
+                  <span class="badge badge-success" id="configCacheStatusBadge">Active</span>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+                  <div><strong>Environment:</strong> <span id="configCacheEnv">production</span></div>
+                  <div><strong>Source:</strong> .env / Hostinger ENV</div>
+                  <div><strong>Reload:</strong> On Demand</div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm" onclick="executeCacheClear('clear_config', 'Config Cache')" style="width: 100%; justify-content: center; margin-top: 8px;">Clear Config Cache</button>
+            </div>
+
+            <!-- Route Cache -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span style="font-weight: 700; font-size: 15px; color: var(--text-main);">Route Cache</span>
+                  <span class="badge badge-success" id="routeCacheStatusBadge">Active</span>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+                  <div><strong>Engine:</strong> LiteSpeed / Apache</div>
+                  <div><strong>Rewrite Rules:</strong> Clean URLs</div>
+                  <div><strong>Status:</strong> Optimized</div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm" onclick="executeCacheClear('clear_route', 'Route Cache')" style="width: 100%; justify-content: center; margin-top: 8px;">Clear Route Cache</button>
+            </div>
+
+            <!-- View Cache -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span style="font-weight: 700; font-size: 15px; color: var(--text-main);">View Cache</span>
+                  <span class="badge badge-success" id="viewCacheStatusBadge">Active</span>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+                  <div><strong>Templates:</strong> HTML Static Views</div>
+                  <div><strong>OPcache:</strong> PHP 8.3 Active</div>
+                  <div><strong>Components:</strong> Dynamic API</div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm" onclick="executeCacheClear('clear_view', 'View Cache')" style="width: 100%; justify-content: center; margin-top: 8px;">Clear View Cache</button>
+            </div>
+          </div>
+
+          <!-- Driver Infrastructure & Audit Summary -->
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px;">
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 16px;">🖥️ Storage Driver & Infrastructure Status</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; font-size: 13px;">
+              <div style="background: var(--bg-card); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-weight: 600; color: var(--text-main); margin-bottom: 4px;">Memory Cache (Redis Status)</div>
+                <div style="color: var(--text-muted); font-size: 12px;" id="redisDriverStatus">Not Configured (Hostinger PHP 8.3 Shared Instance)</div>
+              </div>
+              <div style="background: var(--bg-card); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-weight: 600; color: var(--text-main); margin-bottom: 4px;">Active Cache Engine</div>
+                <div style="color: var(--text-muted); font-size: 12px;" id="activeCacheEngineText">APCu Memory / File-Backed Atomic JSON</div>
+              </div>
+              <div style="background: var(--bg-card); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-weight: 600; color: var(--text-main); margin-bottom: 4px;">Last Manual Clear Timestamp</div>
+                <div style="color: var(--primary); font-weight: 600; font-size: 13px;" id="lastManualClearText">07 Oct 2026, 01:30 AM IST</div>
+              </div>
+            </div>
+            <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-outline" onclick="executeCacheClear('clear_data', 'Website/Data Cache')">Clear Website/Data Cache</button>
+              <button type="button" class="btn btn-danger" onclick="openClearAllCacheModal()" style="background: #DC2626; border-color: #DC2626; color: #fff;">Clear All Cache</button>
+            </div>
+          </div>
         </div>
 
       </div> <!-- /workspace-body -->
@@ -1153,6 +1279,21 @@
     </div>
   </div>
 
+  <!-- Clear All Cache Confirmation Modal -->
+  <div id="clearAllCacheModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 460px; padding: 28px;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #FEE2E2; color: #DC2626; font-size: 28px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto;">⚠️</div>
+        <h3 style="font-family: var(--font-heading); font-size: 19px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Clear Website Cache</h3>
+        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Are you sure you want to clear the website cache? The cache will rebuild automatically as visitors access the website.</p>
+      </div>
+      <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <button type="button" class="btn btn-outline" onclick="closeClearAllCacheModal()">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmClearAllCacheBtn" onclick="executeClearAllCacheConfirm()" style="background: #DC2626; border-color: #DC2626; color: #fff; font-weight: 600;">Clear Cache</button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- ==========================================================================
        4. JAVASCRIPT LOGIC & HANDLERS
@@ -1204,6 +1345,7 @@
       initTheme();
       initSidebarCollapse();
       initDoctorPresets();
+      initDemoLoginVisibility();
 
       const urlParams = new URLSearchParams(window.location.search);
       const resetToken = urlParams.get('reset_token');
@@ -1878,7 +2020,8 @@
         email: 'Email Audit Logs',
         activity: 'System Activity Logs',
         usersCatalog: 'User Management',
-        settings: 'Platform Settings'
+        settings: 'Platform Settings',
+        cacheManagement: 'System / Cache Management'
       };
 
       document.getElementById('pageTitle').innerText = titleMap[tab] || 'Dashboard Overview';
@@ -1888,6 +2031,7 @@
       const dashPanel = document.getElementById('dashboardOverviewPanel');
       const tableCard = document.getElementById('tableCard');
       const settingsPanel = document.getElementById('settingsPanel');
+      const cachePanel = document.getElementById('cacheManagementPanel');
       const addDocBtn = document.getElementById('addDoctorBtn');
       const addTestBtn = document.getElementById('addTestBtn');
       const addUserBtn = document.getElementById('addUserBtn');
@@ -1896,7 +2040,8 @@
 
       dashPanel.style.display = tab === 'dashboard' ? 'grid' : 'none';
       settingsPanel.style.display = tab === 'settings' ? 'block' : 'none';
-      tableCard.style.display = (tab !== 'dashboard' && tab !== 'settings') ? 'flex' : 'none';
+      if (cachePanel) cachePanel.style.display = tab === 'cacheManagement' ? 'block' : 'none';
+      tableCard.style.display = (tab !== 'dashboard' && tab !== 'settings' && tab !== 'cacheManagement') ? 'flex' : 'none';
 
       addDocBtn.style.display = tab === 'doctorsCatalog' ? 'inline-flex' : 'none';
       addTestBtn.style.display = tab === 'testsCatalog' ? 'inline-flex' : 'none';
@@ -1908,6 +2053,8 @@
 
       if (tab === 'dashboard') {
         renderDashboardCharts();
+      } else if (tab === 'cacheManagement') {
+        fetchCacheDiagnostics();
       } else if (tab !== 'settings') {
         renderCurrentTab();
       }
@@ -1937,9 +2084,105 @@
         email: 'System > Email Logs',
         activity: 'System > Activity Logs',
         usersCatalog: 'Admin > User Management',
-        settings: 'Admin > Platform Settings'
+        settings: 'Admin > Platform Settings',
+        cacheManagement: 'System > Cache Management'
       };
       el.innerText = `Admin > ${catMap[tab] || 'Overview'}`;
+    }
+
+    // --- CACHE MANAGEMENT & DIAGNOSTICS ---
+    async function fetchCacheDiagnostics() {
+      const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token') || '';
+      if (!token) return;
+      try {
+        const res = await fetch('/api/admin-cache.php?action=status', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.status === 'ok' && data.diagnostics) {
+          const d = data.diagnostics;
+          
+          const appDriver = document.getElementById('appCacheDriver');
+          const appActive = document.getElementById('appCacheActiveCount');
+          const appTotal = document.getElementById('appCacheTotalCount');
+          const configEnv = document.getElementById('configCacheEnv');
+          const redisStatus = document.getElementById('redisDriverStatus');
+          const activeEngine = document.getElementById('activeCacheEngineText');
+          const lastClear = document.getElementById('lastManualClearText');
+
+          if (appDriver) appDriver.innerText = d.appCache?.driver || 'Atomic JSON File';
+          if (appActive) appActive.innerText = d.appCache?.activeEntries ?? 0;
+          if (appTotal) appTotal.innerText = d.appCache?.totalEntries ?? 0;
+          if (configEnv) configEnv.innerText = d.configCache?.environment || 'production';
+          if (redisStatus) redisStatus.innerText = d.redis?.status || 'Not Configured';
+          if (activeEngine) activeEngine.innerText = d.appCache?.driver || 'APCu Memory / File-Backed Atomic JSON';
+          if (lastClear) lastClear.innerText = d.lastManualClear || 'Never / System Startup';
+        }
+      } catch (e) {
+        console.error('Fetch Cache Diagnostics Exception:', e);
+      }
+    }
+
+    async function executeCacheClear(action, cacheName) {
+      const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token') || '';
+      if (!token) {
+        showToast('Authorization token missing. Please sign in again.', 'danger');
+        return;
+      }
+      try {
+        showToast(`Clearing ${cacheName}...`, 'info');
+        const res = await fetch('/api/admin-cache.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ action, token })
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+          showToast(data.message || `${cacheName} cleared successfully.`, 'success');
+          fetchCacheDiagnostics();
+        } else {
+          showToast(data.message || `Failed to clear ${cacheName}.`, 'danger');
+        }
+      } catch (e) {
+        console.error('Cache Clear Error:', e);
+        showToast(`Network error clearing ${cacheName}.`, 'danger');
+      }
+    }
+
+    function openClearAllCacheModal() {
+      const modal = document.getElementById('clearAllCacheModal');
+      if (modal) modal.classList.add('active');
+    }
+
+    function closeClearAllCacheModal() {
+      const modal = document.getElementById('clearAllCacheModal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    async function executeClearAllCacheConfirm() {
+      closeClearAllCacheModal();
+      await executeCacheClear('clear_all', 'Website Cache');
+    }
+
+    function copyDemoValue(val, label) {
+      navigator.clipboard.writeText(val).then(() => {
+        showToast(`${label} copied to clipboard!`, 'success');
+      }).catch(() => {
+        showToast(`Copy failed. Value: ${val}`, 'info');
+      });
+    }
+
+    function initDemoLoginVisibility() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isDemoUrl = urlParams.get('demo') === '1' || urlParams.get('demo') === 'true';
+      const showDemoEnv = window.SHOW_DEMO_LOGIN === true;
+      const demoBox = document.getElementById('demoLoginSection');
+      if (demoBox) {
+        demoBox.style.display = (showDemoEnv || isDemoUrl) ? 'block' : 'none';
+      }
     }
 
     // --- SEARCH & ADVANCED FILTERS ---

@@ -19,6 +19,7 @@ ini_set('session.use_strict_mode', '1');
 session_set_cookie_params(['lifetime' => 1800, 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly' => true, 'samesite' => 'Strict', 'path' => '/']);
 session_start();
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/cache-manager.php';
 require_once __DIR__ . '/activity-logger.php';
 
 // Verify Admin Token
@@ -350,6 +351,8 @@ if ($action === 'save_doctor') {
         ]);
     }
 
+    AvinyaCache::invalidateGroup('doctors');
+    AvinyaCache::invalidateGroup('homepage');
     logActivity('DOCTOR_SAVED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Saved doctor profile for {$name} ({$docId})", ['doctorId' => $docId, 'name' => $name]);
     echo json_encode(['status' => 'ok', 'message' => "Doctor profile for {$name} saved successfully.", 'doctorId' => $docId]);
     exit(0);
@@ -365,6 +368,8 @@ if ($action === 'delete_doctor') {
         $stmt = $pdo->prepare("DELETE FROM `doctors` WHERE `doctor_id` = :id");
         $stmt->execute([':id' => $docId]);
     }
+    AvinyaCache::invalidateGroup('doctors');
+    AvinyaCache::invalidateGroup('homepage');
     logActivity('DOCTOR_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Deleted doctor profile {$docId}", ['doctorId' => $docId]);
     echo json_encode(['status' => 'ok', 'message' => "Doctor {$docId} deleted successfully."]);
     exit(0);
@@ -409,6 +414,8 @@ if ($action === 'save_test') {
         ]);
     }
 
+    AvinyaCache::invalidateGroup('tests');
+    AvinyaCache::invalidateGroup('homepage');
     logActivity('TEST_PACKAGE_SAVED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Saved diagnostic test package {$name} ({$tId})", ['testId' => $tId, 'name' => $name]);
     echo json_encode(['status' => 'ok', 'message' => "Diagnostic test package {$name} saved successfully.", 'testId' => $tId]);
     exit(0);
@@ -424,6 +431,8 @@ if ($action === 'delete_test') {
         $stmt = $pdo->prepare("DELETE FROM `diagnostic_tests` WHERE `test_id` = :id");
         $stmt->execute([':id' => $tId]);
     }
+    AvinyaCache::invalidateGroup('tests');
+    AvinyaCache::invalidateGroup('homepage');
     logActivity('TEST_PACKAGE_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Deleted diagnostic test package {$tId}", ['testId' => $tId]);
     echo json_encode(['status' => 'ok', 'message' => "Diagnostic test package {$tId} deleted successfully."]);
     exit(0);
@@ -598,6 +607,8 @@ if ($action === 'save_gallery') {
         ]);
     }
 
+    AvinyaCache::invalidateGroup('gallery');
+    AvinyaCache::invalidateGroup('homepage');
     logActivity('GALLERY_SAVED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Saved gallery item '{$title}' ({$gId})", ['galleryId' => $gId, 'title' => $title]);
     echo json_encode(['status' => 'ok', 'message' => "Gallery item saved successfully.", 'galleryId' => $gId, 'imageUrl' => $img]);
     exit(0);
@@ -616,6 +627,8 @@ if ($action === 'delete_gallery') {
         $stmt = $pdo->prepare("UPDATE `galleries` SET `deleted_at` = NOW() WHERE `gallery_id` = :id");
         $stmt->execute([':id' => $gId]);
     }
+    AvinyaCache::invalidateGroup('gallery');
+    AvinyaCache::invalidateGroup('homepage');
     logActivity('GALLERY_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Deleted gallery item {$gId}", ['galleryId' => $gId]);
     echo json_encode(['status' => 'ok', 'message' => "Gallery item {$gId} deleted successfully."]);
     exit(0);
@@ -632,6 +645,8 @@ if ($action === 'toggle_gallery_published') {
         $stmt = $pdo->prepare("UPDATE `galleries` SET `is_published` = :pub WHERE `gallery_id` = :id");
         $stmt->execute([':pub' => $isPub, ':id' => $gId]);
     }
+    AvinyaCache::invalidateGroup('gallery');
+    AvinyaCache::invalidateGroup('homepage');
     logActivity('GALLERY_PUBLISH_TOGGLED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Set gallery {$gId} published status to {$isPub}", ['galleryId' => $gId, 'is_published' => $isPub]);
     echo json_encode(['status' => 'ok', 'message' => "Gallery published status updated."]);
     exit(0);
@@ -651,6 +666,8 @@ if ($action === 'reorder_galleries') {
             }
         }
     }
+    AvinyaCache::invalidateGroup('gallery');
+    AvinyaCache::invalidateGroup('homepage');
     echo json_encode(['status' => 'ok', 'message' => "Gallery display orders updated."]);
     exit(0);
 }
@@ -660,6 +677,10 @@ if ($action === 'seed_catalog') {
     if ($pdo !== null) {
         $res = seedCatalogFromJSON($pdo, true);
         seedDefaultUsers($pdo, true);
+        AvinyaCache::invalidateGroup('doctors');
+        AvinyaCache::invalidateGroup('tests');
+        AvinyaCache::invalidateGroup('gallery');
+        AvinyaCache::invalidateGroup('homepage');
         logActivity('CATALOG_SEEDED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Seeded doctors, tests & users catalog tables", $res);
         echo json_encode(['status' => 'ok', 'message' => "Catalog seeded successfully: {$res['doctors_seeded']} doctors, {$res['tests_seeded']} diagnostic tests.", 'details' => $res]);
     } else {
