@@ -87,7 +87,7 @@ function getDatabaseConnection(): ?PDO {
                         $pdo = $conn;
                         return $pdo;
                     } catch (Throwable $e) {
-                        $lastErr = "{$u}@{$h}/{$db}: " . $e->getMessage();
+                        $lastErr .= " [{$u}@{$h}/{$db}: " . $e->getMessage() . "]";
                     }
                 }
             }
