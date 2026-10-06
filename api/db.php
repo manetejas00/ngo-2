@@ -436,6 +436,10 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
 
 function seedGalleryFromJSON(PDO $pdo, bool $force = false): int {
     try {
+        if ($force) {
+            $pdo->exec("TRUNCATE TABLE `galleries`");
+        }
+
         $seedFile = dirname(__DIR__) . '/data/seed_galleries.json';
         if (!file_exists($seedFile)) return 0;
 
@@ -444,10 +448,7 @@ function seedGalleryFromJSON(PDO $pdo, bool $force = false): int {
 
         $galCount = (int) $pdo->query("SELECT COUNT(*) FROM `galleries`")->fetchColumn();
         if ($galCount !== count($seedItems) || $force) {
-            // Truncate table completely when force is true to guarantee fresh new seed
-            if ($force) {
-                $pdo->exec("TRUNCATE TABLE `galleries`");
-            } else {
+            if (!$force) {
                 $validIds = array_map(fn($item) => $item['gallery_id'] ?? $item['id'] ?? '', $seedItems);
                 $validIds = array_filter($validIds);
                 if (!empty($validIds)) {

@@ -68,14 +68,17 @@
 
   // 1. Fetch Published Gallery Items from API
   async function fetchGalleryData() {
+    let apiSuccess = false;
     try {
       const res = await fetch('/api/gallery');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       if (json.status === 'ok' && Array.isArray(json.data)) {
         galleryItems = json.data;
+        apiSuccess = true;
       } else if (Array.isArray(json)) {
         galleryItems = json;
+        apiSuccess = true;
       } else {
         throw new Error('Invalid API response');
       }
@@ -86,25 +89,25 @@
         const fallbackJson = await fallbackRes.json();
         if (fallbackJson.status === 'ok' && Array.isArray(fallbackJson.data)) {
           galleryItems = fallbackJson.data;
-        } else {
-          galleryItems = getFallbackDemoData();
+          apiSuccess = true;
         }
       } catch (e) {
         console.error('[Gallery API Error] Failed to load gallery dataset:', e);
-        galleryItems = getFallbackDemoData();
       }
     }
 
-    if (!galleryItems || galleryItems.length === 0) {
+    if (!apiSuccess && (!galleryItems || galleryItems.length === 0)) {
       galleryItems = getFallbackDemoData();
     }
 
     // Ensure items are sorted latest first by updated_at or created_at
-    galleryItems.sort((a, b) => {
-      const dA = new Date(a.updated_at || a.created_at || a.event_date || 0);
-      const dB = new Date(b.updated_at || b.created_at || b.event_date || 0);
-      return dB - dA;
-    });
+    if (galleryItems && galleryItems.length > 0) {
+      galleryItems.sort((a, b) => {
+        const dA = new Date(a.updated_at || a.created_at || a.event_date || 0);
+        const dB = new Date(b.updated_at || b.created_at || b.event_date || 0);
+        return dB - dA;
+      });
+    }
   }
 
   // Fallback demo dataset with 30 high-impact gallery records
