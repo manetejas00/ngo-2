@@ -444,14 +444,18 @@ function seedGalleryFromJSON(PDO $pdo, bool $force = false): int {
 
         $galCount = (int) $pdo->query("SELECT COUNT(*) FROM `galleries`")->fetchColumn();
         if ($galCount !== count($seedItems) || $force) {
-            // Purge old demo items not present in seed_galleries.json
-            $validIds = array_map(fn($item) => $item['gallery_id'] ?? $item['id'] ?? '', $seedItems);
-            $validIds = array_filter($validIds);
-            if (!empty($validIds)) {
-                $inClause = implode(',', array_map(fn($id) => $pdo->quote($id), $validIds));
-                $pdo->exec("DELETE FROM `galleries` WHERE `gallery_id` NOT IN ({$inClause})");
-            } else {
+            // Truncate table completely when force is true to guarantee fresh new seed
+            if ($force) {
                 $pdo->exec("TRUNCATE TABLE `galleries`");
+            } else {
+                $validIds = array_map(fn($item) => $item['gallery_id'] ?? $item['id'] ?? '', $seedItems);
+                $validIds = array_filter($validIds);
+                if (!empty($validIds)) {
+                    $inClause = implode(',', array_map(fn($id) => $pdo->quote($id), $validIds));
+                    $pdo->exec("DELETE FROM `galleries` WHERE `gallery_id` NOT IN ({$inClause})");
+                } else {
+                    $pdo->exec("TRUNCATE TABLE `galleries`");
+                }
             }
 
             $stmt = $pdo->prepare("INSERT INTO `galleries` 
