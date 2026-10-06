@@ -5,8 +5,11 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Initialize Hero Canvas Engine & Global Export
-  const heroEngine = new window.HeroCanvasEngine();
-  window.heroEngine = heroEngine;
+  let heroEngine = null;
+  if (typeof window.HeroCanvasEngine === 'function') {
+    heroEngine = new window.HeroCanvasEngine();
+    window.heroEngine = heroEngine;
+  }
 
   // 2. Initialize Journey Timeline & Impact Counters
   if (window.JourneyTimeline) new window.JourneyTimeline();

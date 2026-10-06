@@ -55,6 +55,17 @@
     }
   }
 
+  function showEmptyState(show) {
+    const emptyState = document.getElementById('galleryEmptyState');
+    if (emptyState) {
+      if (show) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+  }
+
   // 1. Fetch Published Gallery Items from API
   async function fetchGalleryData() {
     try {
