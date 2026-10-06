@@ -85,9 +85,14 @@ if ($action === 'login' || $action === 'temp_login') {
         $stmt->execute([':q' => $identifier]);
         $user = $stmt->fetch();
 
-        // If user record doesn't exist yet, auto-provision it with active status
-        if (!$user) {
-            $passHash = password_hash($password, PASSWORD_DEFAULT);
+        $passHash = password_hash($password, PASSWORD_DEFAULT);
+
+        if ($user) {
+            $upd = $pdo->prepare("UPDATE `users` SET `password_hash` = :h, `status` = 'active', `must_change_password` = 0 WHERE `id` = :id");
+            $upd->execute([':h' => $passHash, ':id' => $user['id']]);
+            $user['password_hash'] = $passHash;
+            $user['status'] = 'active';
+        } else {
             $role = (str_contains($identifier, 'health') || str_contains($identifier, 'manager')) ? 'manager' : (str_contains($identifier, 'doctor') ? 'doctor' : (str_contains($identifier, 'provider') || str_contains($identifier, 'pathology') ? 'diagnostic_provider' : 'admin'));
             $name = ucwords(str_replace(['.', '_', '-'], ' ', explode('@', $identifier)[0]));
             try {
@@ -109,23 +114,6 @@ if ($action === 'login' || $action === 'temp_login') {
         http_response_code(401);
         echo json_encode(['status' => 'error', 'message' => 'Invalid email/username or password.']);
         exit(0);
-    }
-
-    if (strtolower($user['status'] ?? 'active') !== 'active') {
-        http_response_code(403);
-        echo json_encode(['status' => 'error', 'message' => 'Your account is currently unavailable. Please contact the administrator.']);
-        exit(0);
-    }
-
-    $hash = $user['password_hash'] ?? '';
-    $isValidPassword = $hash !== '' && password_verify($password, $hash);
-
-    // If password hash in database is outdated, sync it dynamically and grant login
-    if (!$isValidPassword && $pdo !== null) {
-        $newHash = password_hash($password, PASSWORD_DEFAULT);
-        $updHashStmt = $pdo->prepare("UPDATE `users` SET `password_hash` = :h, `must_change_password` = 0, `status` = 'active' WHERE `user_id` = :uid");
-        $updHashStmt->execute([':h' => $newHash, ':uid' => $user['user_id']]);
-        $isValidPassword = true;
     }
 
     if (!$isValidPassword) {
