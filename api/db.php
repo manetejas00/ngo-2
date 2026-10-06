@@ -48,6 +48,82 @@ function getDbEnv(string $key, string $default = ''): string {
     return trim((string) ($val === false || $val === null ? $default : $val));
 }
 
+function getBearerToken(): string {
+    $headers = function_exists('getallheaders') ? (getallheaders() ?: []) : [];
+    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] 
+        ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] 
+        ?? $_SERVER['HTTP_X_AUTHORIZATION'] 
+        ?? $headers['Authorization'] 
+        ?? $headers['authorization'] 
+        ?? '';
+
+    if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+        return trim($matches[1]);
+    }
+    
+    $rawInput = file_get_contents('php://input');
+    $data = json_decode((string) $rawInput, true) ?: $_POST;
+    return trim((string) ($data['token'] ?? $_GET['token'] ?? $_POST['token'] ?? ''));
+}
+
+function verifyAndRehydrateAdminToken(?PDO $pdo, string $token): bool {
+    $token = trim($token);
+    if (empty($token)) return false;
+
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        @session_start();
+    }
+
+    if (!empty($_SESSION['admin_token']) && hash_equals((string)$_SESSION['admin_token'], $token)) {
+        if (!empty($_SESSION['auth_started_at']) && (time() - (int)$_SESSION['auth_started_at']) <= 86400) {
+            return true;
+        }
+    }
+
+    if ($pdo !== null) {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM `users` WHERE `session_token` = :tok AND (`session_expires` IS NULL OR `session_expires` > NOW()) AND (`status` IS NULL OR LOWER(`status`) = 'active') LIMIT 1");
+            $stmt->execute([':tok' => $token]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user) {
+                $_SESSION['admin_token'] = $token;
+                $_SESSION['user_id'] = $user['user_id'];
+                $_SESSION['user_email'] = $user['email'];
+                $_SESSION['user_name'] = $user['name'];
+                $_SESSION['user_role'] = strtolower($user['role']);
+                $_SESSION['user_doc_id'] = $user['doctor_id'] ?? null;
+                $_SESSION['user_prov_id'] = $user['provider_id'] ?? null;
+                $_SESSION['auth_started_at'] = time();
+                return true;
+            }
+        } catch (Throwable $e) {}
+    }
+
+    $sessionFile = dirname(__DIR__) . '/cache/sessions.json';
+    if (file_exists($sessionFile)) {
+        try {
+            $sessions = json_decode((string)file_get_contents($sessionFile), true);
+            if (is_array($sessions) && isset($sessions[$token])) {
+                $sess = $sessions[$token];
+                if (($sess['expires_at'] ?? 0) > time()) {
+                    $_SESSION['admin_token'] = $token;
+                    $_SESSION['user_id'] = $sess['user_id'] ?? 'usr-admin-01';
+                    $_SESSION['user_email'] = $sess['user_email'] ?? 'admin@avinyacarefoundation.org';
+                    $_SESSION['user_name'] = $sess['user_name'] ?? 'Super Admin';
+                    $_SESSION['user_role'] = strtolower($sess['user_role'] ?? 'admin');
+                    $_SESSION['user_doc_id'] = $sess['user_doc_id'] ?? null;
+                    $_SESSION['user_prov_id'] = $sess['user_prov_id'] ?? null;
+                    $_SESSION['auth_started_at'] = time();
+                    return true;
+                }
+            }
+        } catch (Throwable $e) {}
+    }
+
+    return false;
+}
+
 function getDatabaseConnection(): ?PDO {
     static $pdo = null;
     static $attempted = false;

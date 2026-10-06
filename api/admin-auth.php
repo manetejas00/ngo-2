@@ -189,15 +189,33 @@ if ($action === 'login' || $action === 'temp_login') {
         exit(0);
     }
 
+    session_regenerate_id(true);
+    $token = 'AVG-SESS-' . bin2hex(random_bytes(32));
+
     if ($pdo !== null) {
         try {
-            $updStmt = $pdo->prepare("UPDATE `users` SET `last_login` = NOW() WHERE `user_id` = :uid");
-            $updStmt->execute([':uid' => $user['user_id']]);
+            $updStmt = $pdo->prepare("UPDATE `users` SET `last_login` = NOW(), `session_token` = :tok, `session_expires` = DATE_ADD(NOW(), INTERVAL 7 DAY) WHERE `user_id` = :uid");
+            $updStmt->execute([':tok' => $token, ':uid' => $user['user_id']]);
         } catch (Throwable $e) {}
     }
 
-    session_regenerate_id(true);
-    $token = 'AVG-SESS-' . bin2hex(random_bytes(32));
+    $sessionFile = dirname(__DIR__) . '/cache/sessions.json';
+    try {
+        $sessions = file_exists($sessionFile) ? json_decode((string)file_get_contents($sessionFile), true) : [];
+        if (!is_array($sessions)) $sessions = [];
+        $sessions[$token] = [
+            'user_id' => $user['user_id'],
+            'user_email' => $user['email'],
+            'user_name' => $user['name'],
+            'user_role' => strtolower($user['role']),
+            'user_doc_id' => $user['doctor_id'] ?? null,
+            'user_prov_id' => $user['provider_id'] ?? null,
+            'created_at' => time(),
+            'expires_at' => time() + (7 * 86400)
+        ];
+        @file_put_contents($sessionFile, json_encode($sessions, JSON_PRETTY_PRINT), LOCK_EX);
+    } catch (Throwable $e) {}
+
     $_SESSION['admin_token'] = $token;
     $_SESSION['user_id'] = $user['user_id'];
     $_SESSION['user_email'] = $user['email'];

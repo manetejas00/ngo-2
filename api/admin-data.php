@@ -22,23 +22,12 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/cache-manager.php';
 require_once __DIR__ . '/activity-logger.php';
 
-// Verify Admin Token
-$headers = getallheaders();
-$authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
-$token = '';
-if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
-    $token = trim($matches[1]);
-}
-
+$pdo = getDatabaseConnection();
+$token = getBearerToken();
 $rawInput = file_get_contents('php://input');
 $data = json_decode((string) $rawInput, true) ?: $_POST;
-if (!$token) $token = trim((string) ($data['token'] ?? ''));
 
-$userRole = $_SESSION['user_role'] ?? '';
-$userDocId = $_SESSION['user_doc_id'] ?? null;
-$userProvId = $_SESSION['user_prov_id'] ?? null;
-
-$isAuthenticated = !empty($_SESSION['admin_token']) && !empty($_SESSION['auth_started_at']) && (time() - (int) $_SESSION['auth_started_at']) <= 1800 && $token !== '' && hash_equals((string) $_SESSION['admin_token'], $token);
+$isAuthenticated = verifyAndRehydrateAdminToken($pdo, $token);
 
 if (!$isAuthenticated) {
     http_response_code(401);
@@ -48,6 +37,10 @@ if (!$isAuthenticated) {
     ]);
     exit(0);
 }
+
+$userRole = $_SESSION['user_role'] ?? '';
+$userDocId = $_SESSION['user_doc_id'] ?? null;
+$userProvId = $_SESSION['user_prov_id'] ?? null;
 
 $action = strtolower(trim((string) ($data['action'] ?? $_GET['action'] ?? 'all')));
 

@@ -23,6 +23,11 @@ Options -Indexes
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # Pass HTTP Authorization Header to PHP CGI / FastCGI
+  SetEnvIfAuthorization "(.*)" HTTP_AUTHORIZATION=$1
+  RewriteCond %{HTTP:Authorization} ^(.*)
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]
+
   # Force HTTPS
   RewriteCond %{HTTPS} off
   RewriteCond %{HTTP_HOST} !^localhost [NC]

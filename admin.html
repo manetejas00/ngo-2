@@ -1420,6 +1420,8 @@
       adminToken = '';
       localStorage.removeItem('avinya_admin_token');
       sessionStorage.removeItem('avinya_admin_token');
+      localStorage.removeItem('admin_token');
+      sessionStorage.removeItem('admin_token');
     }
 
     // --- THEMING & RESPONSIVE SIDEBAR ---
@@ -2205,7 +2207,7 @@
 
     // --- CACHE MANAGEMENT & DIAGNOSTICS ---
     async function fetchCacheDiagnostics() {
-      const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token') || '';
+      const token = adminToken || localStorage.getItem('avinya_admin_token') || sessionStorage.getItem('avinya_admin_token') || localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || '';
       if (!token) return;
       try {
         const res = await fetch('/api/admin-cache.php?action=status', {
@@ -2237,7 +2239,7 @@
     }
 
     async function executeCacheClear(action, cacheName) {
-      const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token') || '';
+      const token = adminToken || localStorage.getItem('avinya_admin_token') || sessionStorage.getItem('avinya_admin_token') || localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || '';
       if (!token) {
         showToast('Authorization token missing. Please sign in again.', 'danger');
         return;
