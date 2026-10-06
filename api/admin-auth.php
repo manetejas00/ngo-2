@@ -49,6 +49,19 @@ if ($action === 'get_login_accounts' || $action === 'public_users' || $action ==
         } catch (Throwable $e) {}
     }
 
+    if (empty($usersList)) {
+        $usersList = [
+            ['user_id' => 'usr-admin-01', 'name' => 'Super Admin', 'email' => 'admin@avinyacarefoundation.org', 'role' => 'admin', 'doctor_id' => null, 'provider_id' => null],
+            ['user_id' => 'usr-admin-02', 'name' => 'Admin User', 'email' => 'admin@gmail.com', 'role' => 'admin', 'doctor_id' => null, 'provider_id' => null],
+            ['user_id' => 'usr-2', 'name' => 'Healthcare Coordinator', 'email' => 'health@avinyacarefoundation.org', 'role' => 'manager', 'doctor_id' => null, 'provider_id' => null],
+            ['user_id' => 'usr-doc-1', 'name' => 'Dr. Ananya Sharma (Oncologist)', 'email' => 'doctor.doc-1@avinyacarefoundation.org', 'role' => 'doctor', 'doctor_id' => 'doc-1', 'provider_id' => null],
+            ['user_id' => 'usr-doc-2', 'name' => 'Dr. Rajesh Varma (Cardiologist)', 'email' => 'doctor.doc-2@avinyacarefoundation.org', 'role' => 'doctor', 'doctor_id' => 'doc-2', 'provider_id' => null],
+            ['user_id' => 'usr-doc-3', 'name' => 'Dr. Meera Kulkarni (General Physician)', 'email' => 'doctor.doc-3@avinyacarefoundation.org', 'role' => 'doctor', 'doctor_id' => 'doc-3', 'provider_id' => null],
+            ['user_id' => 'usr-prov-1', 'name' => 'Metropolis Diagnostic Partner', 'email' => 'pathology@metropolis.com', 'role' => 'diagnostic_provider', 'doctor_id' => null, 'provider_id' => 'provider-1'],
+            ['user_id' => 'usr-prov-2', 'name' => 'SRL Diagnostics Partner', 'email' => 'info@srldiagnostics.com', 'role' => 'diagnostic_provider', 'doctor_id' => null, 'provider_id' => 'provider-2']
+        ];
+    }
+
     http_response_code(200);
     echo json_encode([
         'status' => 'ok',
