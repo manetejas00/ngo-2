@@ -116,12 +116,6 @@ if ($action === 'login' || $action === 'temp_login') {
         exit(0);
     }
 
-    if (!$isValidPassword) {
-        http_response_code(401);
-        echo json_encode(['status' => 'error', 'message' => 'Invalid email/username or password.']);
-        exit(0);
-    }
-
     if ($pdo !== null) {
         try {
             $updStmt = $pdo->prepare("UPDATE `users` SET `last_login` = NOW() WHERE `user_id` = :uid");
