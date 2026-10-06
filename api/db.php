@@ -655,15 +655,19 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
     try {
         if ($force) {
             try {
+                $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
                 $pdo->exec("TRUNCATE TABLE `users`");
+                $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
             } catch (Throwable $e) {
-                $pdo->exec("DELETE FROM `users`");
+                try {
+                    $pdo->exec("DELETE FROM `users`");
+                } catch (Throwable $e2) {}
             }
         }
 
         $defaultPassHash = password_hash($bootstrapPassword, PASSWORD_DEFAULT);
 
-        // Safely update existing users' password hash to guarantee Demo@Avinya2026 works
+        // Update any remaining user password hashes
         try {
             $pdo->exec("UPDATE `users` SET `password_hash` = " . $pdo->quote($defaultPassHash) . ", `must_change_password` = 0, `status` = 'active'");
         } catch (Throwable $e) {}
@@ -675,8 +679,8 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
                 $del->execute([':e' => strtolower($email), ':u' => $uid]);
                 
                 $stmt = $pdo->prepare("INSERT INTO `users`
-                    (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`, `must_change_password`, `last_login`, `created_at`, `updated_at`)
-                    VALUES (:u_id, :name, :email, :pass_hash, :role, :doc_id, :prov_id, 'active', 0, NOW(), NOW(), NOW())");
+                    (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`, `must_change_password`, `created_at`, `updated_at`)
+                    VALUES (:u_id, :name, :email, :pass_hash, :role, :doc_id, :prov_id, 'active', 0, NOW(), NOW())");
 
                 $stmt->execute([
                     ':u_id' => $uid,
@@ -689,7 +693,7 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
                 ]);
                 return true;
             } catch (Throwable $e) {
-                $GLOBALS['last_user_seed_error'] = $e->getMessage();
+                $GLOBALS['last_user_seed_error'] = "{$email}: " . $e->getMessage();
                 error_log("Failed to upsert user {$email}: " . $e->getMessage());
                 return false;
             }
@@ -703,16 +707,18 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
         // 2. Doctor Accounts
         try {
             $doctors = $pdo->query("SELECT `doctor_id`, `name` FROM `doctors`")->fetchAll();
-            foreach ($doctors as $d) {
-                $docId = $d['doctor_id'];
-                $cleanDocId = preg_replace('/[^a-zA-Z0-9_-]/', '', $docId);
-                $email = "doctor.{$cleanDocId}@avinyacarefoundation.org";
-                $userId = "usr-doc-{$cleanDocId}";
-                if ($upsertUser($userId, $d['name'], $email, 'doctor', $docId)) $seeded++;
+            if (is_array($doctors) && count($doctors) > 0) {
+                foreach ($doctors as $d) {
+                    $docId = $d['doctor_id'];
+                    $cleanDocId = preg_replace('/[^a-zA-Z0-9_-]/', '', $docId);
+                    $email = "doctor.{$cleanDocId}@avinyacarefoundation.org";
+                    $userId = "usr-doc-{$cleanDocId}";
+                    if ($upsertUser($userId, $d['name'], $email, 'doctor', $docId)) $seeded++;
+                }
             }
         } catch (Throwable $e) {}
 
-        // Fallback doctors if doctors query was empty
+        // Fallback doctors if doctors query was empty or failed
         if ($seeded <= 3) {
             if ($upsertUser('usr-doc-1', 'Dr. Ananya Sharma (Oncologist)', 'doctor.doc-1@avinyacarefoundation.org', 'doctor', 'doc-1')) $seeded++;
             if ($upsertUser('usr-doc-2', 'Dr. Rajesh Varma (Cardiologist)', 'doctor.doc-2@avinyacarefoundation.org', 'doctor', 'doc-2')) $seeded++;
@@ -722,18 +728,20 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
         // 3. Diagnostic Provider Accounts
         try {
             $providers = $pdo->query("SELECT `provider_id`, `name`, `email` FROM `diagnostic_providers`")->fetchAll();
-            foreach ($providers as $p) {
-                $provId = $p['provider_id'];
-                $cleanProvId = preg_replace('/[^a-zA-Z0-9_-]/', '', $provId);
-                $userId = "usr-prov-{$cleanProvId}";
-                $email = !empty($p['email']) ? strtolower(trim($p['email'])) : "provider.{$cleanProvId}@avinyacarefoundation.org";
-                if ($upsertUser($userId, $p['name'], $email, 'diagnostic_provider', null, $provId)) $seeded++;
+            if (is_array($providers) && count($providers) > 0) {
+                foreach ($providers as $p) {
+                    $provId = $p['provider_id'];
+                    $cleanProvId = preg_replace('/[^a-zA-Z0-9_-]/', '', $provId);
+                    $userId = "usr-prov-{$cleanProvId}";
+                    $email = !empty($p['email']) ? strtolower(trim($p['email'])) : "provider.{$cleanProvId}@avinyacarefoundation.org";
+                    if ($upsertUser($userId, $p['name'], $email, 'diagnostic_provider', null, $provId)) $seeded++;
+                }
             }
         } catch (Throwable $e) {}
 
-        // Fallback providers if providers query was empty
-        $upsertUser('usr-prov-1', 'Metropolis Diagnostic Partner', 'pathology@metropolis.com', 'diagnostic_provider', null, 'provider-1');
-        $upsertUser('usr-prov-2', 'SRL Diagnostics Partner', 'info@srldiagnostics.com', 'diagnostic_provider', null, 'provider-2');
+        // Fallback providers
+        if ($upsertUser('usr-prov-1', 'Metropolis Diagnostic Partner', 'pathology@metropolis.com', 'diagnostic_provider', null, 'provider-1')) $seeded++;
+        if ($upsertUser('usr-prov-2', 'SRL Diagnostics Partner', 'info@srldiagnostics.com', 'diagnostic_provider', null, 'provider-2')) $seeded++;
 
         // Always sync password hashes to Demo@Avinya2026
         try {
@@ -741,6 +749,7 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
         } catch (Throwable $e) {}
 
     } catch (Throwable $e) {
+        $GLOBALS['last_user_seed_error'] = "Outer: " . $e->getMessage();
         error_log('Error seeding default users: ' . $e->getMessage());
     }
     return $seeded;
