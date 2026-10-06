@@ -711,7 +711,7 @@
     });
   }
 
-  // 6. GSAP Exhibition Animations (ScrollTrigger Scrubbed & Parallax)
+  // 6. GSAP Exhibition Animations (ScrollTrigger Scrubbed & Parallax with matchMedia)
   function initGSAPExhibition() {
     const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined' || isReducedMotion) {
@@ -722,147 +722,224 @@
     gsap.registerPlugin(ScrollTrigger);
 
     gsapCtx = gsap.context(() => {
+      const mm = gsap.matchMedia();
 
-      // A. Hero Word-by-Word Reveal Animation
-      const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      heroTl.fromTo('.hero-word',
-        { opacity: 0, y: 50, rotateX: -30 },
-        { opacity: 1, y: 0, rotateX: 0, duration: 1, stagger: 0.15 }
-      )
-      .fromTo('.hero-divider',
-        { scaleX: 0 },
-        { scaleX: 1, duration: 0.8 },
-        '-=0.6'
-      )
-      .fromTo('.gallery-hero-subtitle, .gallery-category-bar',
-        { opacity: 0, y: 24 },
-        { opacity: 1, y: 0, duration: 0.8, stagger: 0.15 },
-        '-=0.4'
-      );
+      // DESKTOP (>= 1024px)
+      mm.add("(min-width: 1024px)", () => {
+        // A. Hero Reveal Animation
+        gsap.timeline({ defaults: { ease: 'power3.out' } })
+          .fromTo('.hero-word',
+            { opacity: 0, y: 50, rotateX: -30 },
+            { opacity: 1, y: 0, rotateX: 0, duration: 1, stagger: 0.15 }
+          )
+          .fromTo('.hero-divider',
+            { scaleX: 0 },
+            { scaleX: 1, duration: 0.8 },
+            '-=0.6'
+          )
+          .fromTo('.gallery-hero-subtitle, .gallery-category-bar',
+            { opacity: 0, y: 24 },
+            { opacity: 1, y: 0, duration: 0.8, stagger: 0.15 },
+            '-=0.4'
+          );
 
-      // B. Intro Scattered Collage -> Docking Animation
-      const collageCards = gsap.utils.toArray('#introCollageGrid .collage-card');
-      if (collageCards.length > 0) {
-        const transforms = [
-          { rotate: -8, y: 50, x: -30, scale: 0.94 },
-          { rotate: 6, y: 70, x: 20, scale: 0.92 },
-          { rotate: -5, y: 40, x: 40, scale: 0.95 },
-          { rotate: 7, y: 60, x: -20, scale: 0.93 },
-          { rotate: -6, y: 50, x: 30, scale: 0.94 }
-        ];
+        // B. Intro Scattered Collage -> Docking Animation
+        const collageCards = gsap.utils.toArray('#introCollageGrid .collage-card');
+        if (collageCards.length > 0) {
+          const transforms = [
+            { rotate: -8, y: 50, x: -30, scale: 0.94 },
+            { rotate: 6, y: 70, x: 20, scale: 0.92 },
+            { rotate: -5, y: 40, x: 40, scale: 0.95 },
+            { rotate: 7, y: 60, x: -20, scale: 0.93 },
+            { rotate: -6, y: 50, x: 30, scale: 0.94 }
+          ];
 
-        collageCards.forEach((card, i) => {
-          const t = transforms[i % transforms.length];
-          gsap.set(card, { rotate: t.rotate, y: t.y, x: t.x, scale: t.scale, opacity: 0.8 });
+          collageCards.forEach((card, i) => {
+            const t = transforms[i % transforms.length];
+            gsap.set(card, { rotate: t.rotate, y: t.y, x: t.x, scale: t.scale, opacity: 0.8 });
 
-          gsap.to(card, {
-            rotate: 0,
-            y: 0,
-            x: 0,
-            scale: 1,
-            opacity: 1,
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 90%',
-              end: 'top 40%',
-              scrub: 1.2
-            }
-          });
-        });
-      }
-
-      // C. GSAP Scrubbed Bento Gallery (Mask, Scale 1.08 -> 1, Differential Speed)
-      const bentoCards = gsap.utils.toArray('#scrubbedBentoGrid .bento-card');
-      bentoCards.forEach((card, idx) => {
-        const img = card.querySelector('.bento-card-img');
-
-        // Clip path & scale reveal scrub
-        if (img) {
-          gsap.fromTo(img,
-            { scale: 1.15, filter: 'brightness(0.7)' },
-            {
+            gsap.to(card, {
+              rotate: 0,
+              y: 0,
+              x: 0,
               scale: 1,
-              filter: 'brightness(1)',
+              opacity: 1,
               scrollTrigger: {
                 trigger: card,
-                start: 'top 88%',
-                end: 'bottom 45%',
-                scrub: 1
+                start: 'top 90%',
+                end: 'top 40%',
+                scrub: 1.2,
+                invalidateOnRefresh: true
+              }
+            });
+          });
+        }
+
+        // C. GSAP Scrubbed Bento Gallery
+        const bentoCards = gsap.utils.toArray('#scrubbedBentoGrid .bento-card');
+        bentoCards.forEach((card, idx) => {
+          const img = card.querySelector('.bento-card-img');
+          if (img) {
+            gsap.fromTo(img,
+              { scale: 1.15, filter: 'brightness(0.7)' },
+              {
+                scale: 1,
+                filter: 'brightness(1)',
+                scrollTrigger: {
+                  trigger: card,
+                  start: 'top 88%',
+                  end: 'bottom 45%',
+                  scrub: 1,
+                  invalidateOnRefresh: true
+                }
+              }
+            );
+          }
+
+          const parallaxY = (idx % 2 === 0) ? -35 : 35;
+          gsap.fromTo(card,
+            { y: (idx % 3 === 0) ? 40 : 0 },
+            {
+              y: parallaxY,
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 95%',
+                end: 'bottom 15%',
+                scrub: 1.5,
+                invalidateOnRefresh: true
               }
             }
           );
-        }
+        });
 
-        // Differential vertical parallax offsets for visual rhythm
-        const parallaxY = (idx % 2 === 0) ? -35 : 35;
-        gsap.fromTo(card,
-          { y: (idx % 3 === 0) ? 40 : 0 },
-          {
-            y: parallaxY,
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 95%',
-              end: 'bottom 15%',
-              scrub: 1.5
+        // D. Full-Bleed Expanding Featured Moments (78vw -> 94vw)
+        [1, 2].forEach(num => {
+          const container = document.getElementById(`fullBleedContainer${num}`);
+          if (!container) return;
+
+          gsap.fromTo(container,
+            { width: '78vw', borderRadius: '36px' },
+            {
+              width: '94vw',
+              borderRadius: '12px',
+              ease: 'none',
+              scrollTrigger: {
+                trigger: container,
+                start: 'top 85%',
+                end: 'center 45%',
+                scrub: 1,
+                invalidateOnRefresh: true
+              }
             }
-          }
-        );
+          );
+        });
       });
 
-      // D. Full-Bleed Expanding Featured Moments (78vw -> 94vw & border-radius 36px -> 12px)
-      [1, 2].forEach(num => {
-        const container = document.getElementById(`fullBleedContainer${num}`);
-        if (!container) return;
+      // TABLET (768px – 1023px)
+      mm.add("(min-width: 768px) and (max-width: 1023px)", () => {
+        gsap.timeline({ defaults: { ease: 'power3.out' } })
+          .fromTo('.hero-word', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.12 })
+          .fromTo('.gallery-hero-subtitle, .gallery-category-bar', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 }, '-=0.3');
 
-        gsap.fromTo(container,
-          { width: '78vw', borderRadius: '36px' },
-          {
-            width: '94vw',
-            borderRadius: '12px',
-            ease: 'none',
-            scrollTrigger: {
-              trigger: container,
-              start: 'top 85%',
-              end: 'center 45%',
-              scrub: 1
-            }
+        const collageCards = gsap.utils.toArray('#introCollageGrid .collage-card');
+        collageCards.forEach((card) => {
+          gsap.fromTo(card,
+            { opacity: 0, y: 30, scale: 0.95 },
+            { opacity: 1, y: 0, scale: 1, scrollTrigger: { trigger: card, start: 'top 90%', end: 'top 55%', scrub: 1, invalidateOnRefresh: true } }
+          );
+        });
+
+        const bentoCards = gsap.utils.toArray('#scrubbedBentoGrid .bento-card');
+        bentoCards.forEach((card) => {
+          const img = card.querySelector('.bento-card-img');
+          if (img) {
+            gsap.fromTo(img,
+              { scale: 1.1, filter: 'brightness(0.8)' },
+              { scale: 1, filter: 'brightness(1)', scrollTrigger: { trigger: card, start: 'top 90%', end: 'bottom 50%', scrub: 1, invalidateOnRefresh: true } }
+            );
           }
-        );
+        });
+
+        [1, 2].forEach(num => {
+          const container = document.getElementById(`fullBleedContainer${num}`);
+          if (!container) return;
+          gsap.fromTo(container,
+            { width: '88vw', borderRadius: '24px' },
+            { width: '96vw', borderRadius: '12px', ease: 'none', scrollTrigger: { trigger: container, start: 'top 88%', end: 'center 50%', scrub: 1, invalidateOnRefresh: true } }
+          );
+        });
       });
 
-      // E. Editorial Masonry Batch Fade Reveal
+      // MOBILE (< 768px)
+      mm.add("(max-width: 767px)", () => {
+        gsap.timeline({ defaults: { ease: 'power3.out' } })
+          .fromTo('.hero-word', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.1 })
+          .fromTo('.gallery-hero-subtitle, .gallery-category-bar', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, '-=0.3');
+
+        const collageCards = gsap.utils.toArray('#introCollageGrid .collage-card');
+        collageCards.forEach((card) => {
+          gsap.fromTo(card,
+            { opacity: 0, y: 25, scale: 0.96 },
+            { opacity: 1, y: 0, scale: 1, scrollTrigger: { trigger: card, start: 'top 92%', end: 'top 65%', scrub: 0.8, invalidateOnRefresh: true } }
+          );
+        });
+
+        const bentoCards = gsap.utils.toArray('#scrubbedBentoGrid .bento-card');
+        bentoCards.forEach((card) => {
+          const img = card.querySelector('.bento-card-img');
+          if (img) {
+            gsap.fromTo(img,
+              { scale: 1.08, filter: 'brightness(0.85)' },
+              { scale: 1, filter: 'brightness(1)', scrollTrigger: { trigger: card, start: 'top 92%', end: 'top 60%', scrub: 0.8, invalidateOnRefresh: true } }
+            );
+          }
+        });
+
+        [1, 2].forEach(num => {
+          const container = document.getElementById(`fullBleedContainer${num}`);
+          if (!container) return;
+          gsap.fromTo(container,
+            { width: '92vw', borderRadius: '20px' },
+            { width: '98vw', borderRadius: '10px', ease: 'none', scrollTrigger: { trigger: container, start: 'top 90%', end: 'center 55%', scrub: 0.8, invalidateOnRefresh: true } }
+          );
+        });
+      });
+
+      // E. Editorial Masonry Batch Fade Reveal (All Screen Sizes)
       const masonryCards = gsap.utils.toArray('#editorialMasonryGrid .masonry-card');
       if (masonryCards.length > 0) {
         ScrollTrigger.batch(masonryCards, {
           interval: 0.1,
           batchMax: 6,
           onEnter: batch => gsap.fromTo(batch,
-            { opacity: 0, y: 40, scale: 0.95 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.1, ease: 'power2.out', overwrite: 'auto' }
+            { opacity: 0, y: 30, scale: 0.96 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.08, ease: 'power2.out', overwrite: 'auto', clearProps: 'transform,opacity' }
           )
         });
       }
 
-      // F. Scroll Velocity Skew Effect during fast scroll
-      let proxy = { skew: 0 };
-      let skewSetter = gsap.quickSetter('.gallery-item', 'skewY', 'deg');
-      let clamp = gsap.utils.clamp(-3, 3);
+      // F. Scroll Velocity Skew Effect during fast scroll (Desktop & Tablet)
+      if (window.innerWidth >= 768) {
+        let proxy = { skew: 0 };
+        let skewSetter = gsap.quickSetter('.gallery-item', 'skewY', 'deg');
+        let clamp = gsap.utils.clamp(-3, 3);
 
-      ScrollTrigger.create({
-        onUpdate: (self) => {
-          let skew = clamp(self.getVelocity() / -400);
-          if (Math.abs(skew) > Math.abs(proxy.skew)) {
-            proxy.skew = skew;
-            gsap.to(proxy, {
-              skew: 0,
-              duration: 0.8,
-              ease: 'power3.out',
-              overwrite: true,
-              onUpdate: () => skewSetter(proxy.skew)
-            });
+        ScrollTrigger.create({
+          onUpdate: (self) => {
+            let skew = clamp(self.getVelocity() / -400);
+            if (Math.abs(skew) > Math.abs(proxy.skew)) {
+              proxy.skew = skew;
+              gsap.to(proxy, {
+                skew: 0,
+                duration: 0.8,
+                ease: 'power3.out',
+                overwrite: true,
+                onUpdate: () => skewSetter(proxy.skew)
+              });
+            }
           }
-        }
-      });
+        });
+      }
 
       ScrollTrigger.refresh();
     });

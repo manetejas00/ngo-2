@@ -893,10 +893,11 @@ body.gallery-page, body {
   .editorial-masonry-grid,
   .intro-collage-wrapper {
     grid-template-columns: repeat(6, 1fr);
+    gap: 20px;
   }
 
-  .bento-span-8-wide, .bento-span-12-banner, .masonry-span-8, .masonry-span-12 { grid-column: span 6; height: 380px; }
-  .bento-span-4-portrait, .bento-span-4-square, .bento-span-4-tall, .bento-span-6-wide, .masonry-span-4, .masonry-span-6 { grid-column: span 3; height: 340px; }
+  .bento-span-8-wide, .bento-span-12-banner, .masonry-span-8, .masonry-span-12 { grid-column: span 6; height: 360px; }
+  .bento-span-4-portrait, .bento-span-4-square, .bento-span-4-tall, .bento-span-6-wide, .masonry-span-4, .masonry-span-6 { grid-column: span 3; height: 320px; }
 
   .collage-item-1, .collage-item-2, .collage-item-3, .collage-item-4, .collage-item-5 {
     grid-column: span 3;
@@ -906,29 +907,43 @@ body.gallery-page, body {
 
   .full-bleed-container {
     width: 90vw;
-    height: 480px;
+    min-height: 440px;
+    height: auto;
   }
 }
 
 @media (max-width: 768px) {
   .gallery-hero {
-    padding: 110px 16px 36px;
+    padding: clamp(95px, 12vh, 120px) 16px 32px;
+  }
+
+  .hero-pill {
+    font-size: 11px;
+    padding: 6px 16px;
+    letter-spacing: 1px;
+    margin-bottom: 18px;
   }
 
   .gallery-hero-title {
-    font-size: clamp(36px, 10vw, 56px);
-    gap: 12px;
+    font-size: clamp(32px, 8.5vw, 56px);
+    gap: 10px;
   }
 
   .hero-divider {
-    width: 40px;
+    width: 36px;
     height: 3px;
+  }
+
+  .gallery-hero-subtitle {
+    font-size: clamp(14px, 3.6vw, 17px);
+    margin-bottom: 24px;
   }
 
   .section-header-editorial {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+    margin: 40px 0 24px;
   }
 
   .scrubbed-bento-grid,
@@ -942,25 +957,54 @@ body.gallery-page, body {
   .masonry-span-4, .masonry-span-8, .masonry-span-6, .masonry-span-12,
   .collage-item-1, .collage-item-2, .collage-item-3, .collage-item-4, .collage-item-5 {
     grid-column: span 1;
-    height: 280px;
+    height: clamp(240px, 45vh, 320px);
     margin-top: 0;
   }
 
   .full-bleed-container {
-    width: 95vw;
-    height: 380px;
+    width: 94vw;
+    min-height: 360px;
+    height: auto;
     border-radius: 20px;
   }
 
+  .full-bleed-overlay {
+    padding: 24px 20px;
+  }
+
+  .full-bleed-title {
+    font-size: clamp(22px, 5.5vw, 32px);
+  }
+
+  .full-bleed-sub {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
   .lightbox-container {
-    max-height: 96vh;
+    max-height: 94dvh;
+    max-height: 94vh;
     border-radius: 16px;
+  }
+
+  .lightbox-media-wrap {
+    min-height: 220px;
+    max-height: 380px;
+  }
+
+  .lightbox-details {
+    padding: 20px 22px;
+  }
+
+  .lightbox-title {
+    font-size: 20px;
   }
 
   .lightbox-nav {
     width: 42px;
     height: 42px;
     font-size: 16px;
+    top: 35%;
   }
   .lightbox-nav.prev { left: 10px; }
   .lightbox-nav.next { right: 10px; }
@@ -970,19 +1014,40 @@ body.gallery-page, body {
   .gallery-category-bar {
     border-radius: 20px;
     padding: 4px;
+    gap: 6px;
   }
 
   .gallery-category-pill {
-    padding: 8px 16px;
-    font-size: 13px;
+    padding: 7px 14px;
+    font-size: 12px;
   }
 
   .full-bleed-overlay {
-    padding: 20px;
+    padding: 18px 16px;
+  }
+
+  .full-bleed-badge {
+    font-size: 10px;
+    padding: 4px 12px;
+    margin-bottom: 10px;
   }
 
   .full-bleed-title {
-    font-size: 24px;
+    font-size: 20px;
+  }
+
+  .full-bleed-btn {
+    padding: 9px 20px;
+    font-size: 13px;
+  }
+
+  .lightbox-details {
+    padding: 16px;
+  }
+
+  .lightbox-meta-row {
+    gap: 10px;
+    font-size: 12px;
   }
 }
 
