@@ -32,10 +32,14 @@ try {
     AvinyaCache::invalidateGroup('gallery');
     AvinyaCache::invalidateGroup('homepage');
 
+    $seedFile = dirname(__DIR__) . '/data/seed_galleries.json';
     echo json_encode([
         'status' => 'ok',
         'message' => "Galleries table seeded with {$seeded} fresh photos created today and cache purged cleanly.",
         'count' => $seeded,
+        'seed_file' => $seedFile,
+        'file_exists' => file_exists($seedFile),
+        'file_size' => file_exists($seedFile) ? filesize($seedFile) : 0,
         'timestamp' => date(DATE_ATOM)
     ], JSON_PRETTY_PRINT);
 } catch (Throwable $e) {
