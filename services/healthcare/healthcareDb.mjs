@@ -68,7 +68,7 @@ export async function getDb() {
     const raw = await readFile(DB_FILE, 'utf-8');
     dbCache = JSON.parse(raw);
     if (!dbCache.diagnosticProviders) dbCache.diagnosticProviders = await loadData('diagnostic_providers');
-    if (!dbCache.galleries || dbCache.galleries.length < 100) dbCache.galleries = await loadData('galleries');
+    if (!dbCache.galleries || dbCache.galleries.length === 0) dbCache.galleries = await loadData('galleries');
     if (!dbCache.users) dbCache.users = buildUsersCatalog(dbCache.doctors || await loadData('doctors'), dbCache.diagnosticProviders);
   } catch (err) {
     const docs = await loadData('doctors');
@@ -1099,7 +1099,7 @@ export async function adminToggleUserStatus(targetUserId, status) {
 
 export async function getGalleries(filters = {}) {
   const db = await getDb();
-  if (!Array.isArray(db.galleries) || db.galleries.length < 100) {
+  if (!Array.isArray(db.galleries) || db.galleries.length === 0) {
     try {
       const p = join(__dirname, '../../data', 'seed_galleries.json');
       db.galleries = JSON.parse(await readFile(p, 'utf-8'));

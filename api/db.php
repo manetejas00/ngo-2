@@ -436,49 +436,57 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
 
 function seedGalleryFromJSON(PDO $pdo, bool $force = false): int {
     try {
+        $seedFile = dirname(__DIR__) . '/data/seed_galleries.json';
+        if (!file_exists($seedFile)) return 0;
+
+        $seedItems = json_decode((string) file_get_contents($seedFile), true);
+        if (!is_array($seedItems) || count($seedItems) === 0) return 0;
+
         $galCount = (int) $pdo->query("SELECT COUNT(*) FROM `galleries`")->fetchColumn();
-        if ($galCount < 100 || $force) {
-            $seedFile = dirname(__DIR__) . '/data/seed_galleries.json';
-            if (file_exists($seedFile)) {
-                $seedItems = json_decode((string) file_get_contents($seedFile), true);
-                if (is_array($seedItems) && count($seedItems) > 0) {
-                    $stmt = $pdo->prepare("INSERT INTO `galleries` 
-                        (`gallery_id`, `title`, `slug`, `short_description`, `description`, `image`, `alt_text`, `category`, `event_date`, `location`, `photographer`, `created_by`, `updated_by`, `external_link`, `has_details`, `image_only`, `is_featured`, `is_published`, `sort_order`, `created_at`, `updated_at`) 
-                        VALUES (:gid, :title, :slug, :short_desc, :desc, :img, :alt, :cat, :edate, :loc, :photo, :c_by, :u_by, :link, :has_det, :img_only, :is_feat, :is_pub, :sort_ord, :c_at, :u_at)
-                        ON DUPLICATE KEY UPDATE 
-                        `title` = VALUES(`title`), `description` = VALUES(`description`), `short_description` = VALUES(`short_description`),
-                        `image` = VALUES(`image`), `category` = VALUES(`category`), `created_by` = VALUES(`created_by`),
-                        `updated_by` = VALUES(`updated_by`), `image_only` = VALUES(`image_only`), `updated_at` = VALUES(`updated_at`)");
-                    $count = 0;
-                    foreach ($seedItems as $item) {
-                        $stmt->execute([
-                            ':gid' => $item['gallery_id'] ?? $item['id'] ?? ('gal-' . uniqid()),
-                            ':title' => $item['title'] ?? null,
-                            ':slug' => $item['slug'] ?? null,
-                            ':short_desc' => $item['short_description'] ?? null,
-                            ':desc' => $item['description'] ?? null,
-                            ':img' => $item['image'] ?? '',
-                            ':alt' => $item['alt_text'] ?? null,
-                            ':cat' => $item['category'] ?? null,
-                            ':edate' => $item['event_date'] ?? null,
-                            ':loc' => $item['location'] ?? null,
-                            ':photo' => $item['photographer'] ?? null,
-                            ':c_by' => $item['created_by'] ?? 'Admin User',
-                            ':u_by' => $item['updated_by'] ?? 'Admin User',
-                            ':link' => $item['external_link'] ?? null,
-                            ':has_det' => !empty($item['has_details']) ? 1 : 0,
-                            ':img_only' => !empty($item['image_only']) ? 1 : 0,
-                            ':is_feat' => !empty($item['is_featured']) ? 1 : 0,
-                            ':is_pub' => isset($item['is_published']) ? ($item['is_published'] ? 1 : 0) : 1,
-                            ':sort_ord' => (int) ($item['sort_order'] ?? 0),
-                            ':c_at' => $item['created_at'] ?? date('Y-m-d H:i:s'),
-                            ':u_at' => $item['updated_at'] ?? date('Y-m-d H:i:s')
-                        ]);
-                        $count++;
-                    }
-                    return $count;
-                }
+        if ($galCount !== count($seedItems) || $force) {
+            // Purge old demo items not present in seed_galleries.json
+            $validIds = array_map(fn($item) => $item['gallery_id'] ?? $item['id'] ?? '', $seedItems);
+            $validIds = array_filter($validIds);
+            if (!empty($validIds)) {
+                $inClause = implode(',', array_map(fn($id) => $pdo->quote($id), $validIds));
+                $pdo->exec("DELETE FROM `galleries` WHERE `gallery_id` NOT IN ({$inClause})");
             }
+
+            $stmt = $pdo->prepare("INSERT INTO `galleries` 
+                (`gallery_id`, `title`, `slug`, `short_description`, `description`, `image`, `alt_text`, `category`, `event_date`, `location`, `photographer`, `created_by`, `updated_by`, `external_link`, `has_details`, `image_only`, `is_featured`, `is_published`, `sort_order`, `created_at`, `updated_at`) 
+                VALUES (:gid, :title, :slug, :short_desc, :desc, :img, :alt, :cat, :edate, :loc, :photo, :c_by, :u_by, :link, :has_det, :img_only, :is_feat, :is_pub, :sort_ord, :c_at, :u_at)
+                ON DUPLICATE KEY UPDATE 
+                `title` = VALUES(`title`), `description` = VALUES(`description`), `short_description` = VALUES(`short_description`),
+                `image` = VALUES(`image`), `category` = VALUES(`category`), `created_by` = VALUES(`created_by`),
+                `updated_by` = VALUES(`updated_by`), `image_only` = VALUES(`image_only`), `updated_at` = VALUES(`updated_at`)");
+            $count = 0;
+            foreach ($seedItems as $item) {
+                $stmt->execute([
+                    ':gid' => $item['gallery_id'] ?? $item['id'] ?? ('gal-' . uniqid()),
+                    ':title' => $item['title'] ?? null,
+                    ':slug' => $item['slug'] ?? null,
+                    ':short_desc' => $item['short_description'] ?? null,
+                    ':desc' => $item['description'] ?? null,
+                    ':img' => $item['image'] ?? '',
+                    ':alt' => $item['alt_text'] ?? null,
+                    ':cat' => $item['category'] ?? null,
+                    ':edate' => $item['event_date'] ?? null,
+                    ':loc' => $item['location'] ?? null,
+                    ':photo' => $item['photographer'] ?? null,
+                    ':c_by' => $item['created_by'] ?? 'Admin User',
+                    ':u_by' => $item['updated_by'] ?? 'Admin User',
+                    ':link' => $item['external_link'] ?? null,
+                    ':has_det' => !empty($item['has_details']) ? 1 : 0,
+                    ':img_only' => !empty($item['image_only']) ? 1 : 0,
+                    ':is_feat' => !empty($item['is_featured']) ? 1 : 0,
+                    ':is_pub' => isset($item['is_published']) ? ($item['is_published'] ? 1 : 0) : 1,
+                    ':sort_ord' => (int) ($item['sort_order'] ?? 0),
+                    ':c_at' => $item['created_at'] ?? date('Y-m-d H:i:s'),
+                    ':u_at' => $item['updated_at'] ?? date('Y-m-d H:i:s')
+                ]);
+                $count++;
+            }
+            return $count;
         }
     } catch (Throwable $e) {
         error_log('seedGalleryFromJSON Exception: ' . $e->getMessage());
