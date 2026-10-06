@@ -44,6 +44,13 @@ if ($action === 'get_login_accounts' || $action === 'public_users' || $action ==
         if ($stmt) {
             $usersList = $stmt->fetchAll();
         }
+        if (empty($usersList)) {
+            seedDefaultUsers($pdo, true);
+            $stmt = $pdo->query("SELECT `user_id`, `name`, `email`, `role`, `doctor_id`, `provider_id` FROM `users` WHERE `status` = 'active' ORDER BY FIELD(`role`, 'admin', 'manager', 'doctor', 'diagnostic_provider'), `name` ASC");
+            if ($stmt) {
+                $usersList = $stmt->fetchAll();
+            }
+        }
     }
 
     http_response_code(200);
