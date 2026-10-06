@@ -487,8 +487,8 @@
 
     grid.innerHTML = items.map((item, idx) => {
       const id = item.gallery_id || item.id || `col-${idx}`;
-      const title = escapeHtml(item.title || item.category || 'Avinya Care Gallery');
-      const cat = escapeHtml(item.category || 'Impact');
+      const title = escapeHtml(item.title || '');
+      const cat = escapeHtml(item.category || '');
       const img = escapeHtml(item.image);
       const alt = escapeHtml(item.alt_text || title);
       const date = escapeHtml(item.event_date ? new Date(item.event_date).getFullYear() : '');
@@ -497,8 +497,8 @@
         <div class="collage-card collage-item-${idx + 1} gallery-item" data-gallery-id="${id}" role="button" tabindex="0" aria-label="${alt}">
           <img src="${img}" alt="${alt}" class="collage-card-img" loading="lazy">
           <div class="gallery-hover-overlay">
-            <span class="hover-cat">${cat}</span>
-            <h3 class="hover-title">${title}</h3>
+            ${cat ? `<span class="hover-cat">${cat}</span>` : ''}
+            ${title ? `<h3 class="hover-title">${title}</h3>` : ''}
             ${date ? `<div class="hover-meta"><span>${date}</span></div>` : ''}
           </div>
         </div>
@@ -529,8 +529,8 @@
 
     grid.innerHTML = items.map((item, idx) => {
       const id = item.gallery_id || item.id || `bento-${idx}`;
-      const title = escapeHtml(item.title || item.category || 'Healthcare Drive');
-      const cat = escapeHtml(item.category || 'Exhibition');
+      const title = escapeHtml(item.title || '');
+      const cat = escapeHtml(item.category || '');
       const img = escapeHtml(item.image);
       const alt = escapeHtml(item.alt_text || title);
       const date = escapeHtml(item.event_date ? new Date(item.event_date).getFullYear() : '');
@@ -541,8 +541,8 @@
           <div class="bento-card-media">
             <img src="${img}" alt="${alt}" class="bento-card-img" loading="lazy">
             <div class="gallery-hover-overlay">
-              <span class="hover-cat">${cat}</span>
-              <h3 class="hover-title">${title}</h3>
+              ${cat ? `<span class="hover-cat">${cat}</span>` : ''}
+              ${title ? `<h3 class="hover-title">${title}</h3>` : ''}
               ${date ? `<div class="hover-meta"><span><i class="fa-regular fa-calendar"></i> ${date}</span></div>` : ''}
             </div>
           </div>
@@ -579,12 +579,12 @@
     const container = document.getElementById(`fullBleedContainer${num}`);
 
     const id = item.gallery_id || item.id || `fullbleed-${num}`;
-    const title = item.title || 'Key Healthcare Milestone';
-    const cat = item.category || 'Featured Highlight';
-    const sub = item.short_description || item.description || 'Impactful healthcare outreach across our communities.';
+    const title = item.title || '';
+    const cat = item.category || 'FEATURED';
+    const sub = item.short_description || item.description || '';
 
     if (imgEl) { imgEl.src = item.image; imgEl.alt = item.alt_text || title; }
-    if (badgeEl) badgeEl.innerHTML = `<i class="fa-solid fa-star"></i> ${escapeHtml(cat)} SPOTLIGHT`;
+    if (badgeEl) badgeEl.innerHTML = `<i class="fa-solid fa-star"></i> ${escapeHtml(cat.toUpperCase())} SPOTLIGHT`;
     if (titleEl) titleEl.innerText = title;
     if (subEl) subEl.innerText = sub;
 
@@ -619,8 +619,8 @@
 
     grid.innerHTML = visibleItems.map((item, idx) => {
       const id = item.gallery_id || item.id || `masonry-${idx}`;
-      const title = escapeHtml(item.title || item.category || 'Healthcare Outreach');
-      const cat = escapeHtml(item.category || 'Collection');
+      const title = escapeHtml(item.title || '');
+      const cat = escapeHtml(item.category || '');
       const img = escapeHtml(item.image);
       const alt = escapeHtml(item.alt_text || title);
       const date = escapeHtml(item.event_date ? new Date(item.event_date).getFullYear() : '');
@@ -630,8 +630,8 @@
         <div class="masonry-card ${spanClass} gallery-item" data-gallery-id="${id}" role="button" tabindex="0" aria-label="${alt}">
           <img src="${img}" alt="${alt}" class="masonry-card-img" loading="lazy">
           <div class="gallery-hover-overlay">
-            <span class="hover-cat">${cat}</span>
-            <h3 class="hover-title">${title}</h3>
+            ${cat ? `<span class="hover-cat">${cat}</span>` : ''}
+            ${title ? `<h3 class="hover-title">${title}</h3>` : ''}
             ${date ? `<div class="hover-meta"><span>${date}</span></div>` : ''}
           </div>
         </div>
