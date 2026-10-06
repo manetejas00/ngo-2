@@ -492,8 +492,8 @@ function seedGalleryFromJSON(PDO $pdo, bool $force = false): int {
                     ':is_feat' => !empty($item['is_featured']) ? 1 : 0,
                     ':is_pub' => isset($item['is_published']) ? ($item['is_published'] ? 1 : 0) : 1,
                     ':sort_ord' => (int) ($item['sort_order'] ?? 0),
-                    ':c_at' => $item['created_at'] ?? date('Y-m-d H:i:s'),
-                    ':u_at' => $item['updated_at'] ?? date('Y-m-d H:i:s')
+                    ':c_at' => !empty($item['created_at']) ? date('Y-m-d H:i:s', strtotime((string)$item['created_at'])) : date('Y-m-d H:i:s'),
+                    ':u_at' => !empty($item['updated_at']) ? date('Y-m-d H:i:s', strtotime((string)$item['updated_at'])) : date('Y-m-d H:i:s')
                 ]);
                 $count++;
             }
