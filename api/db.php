@@ -689,6 +689,7 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
                 ]);
                 return true;
             } catch (Throwable $e) {
+                $GLOBALS['last_user_seed_error'] = $e->getMessage();
                 error_log("Failed to upsert user {$email}: " . $e->getMessage());
                 return false;
             }

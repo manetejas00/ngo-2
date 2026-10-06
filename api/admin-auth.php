@@ -130,6 +130,7 @@ if ($action === 'reset_users' || $action === 'reseed_users') {
         'message' => "Users table truncated and re-seeded with {$seeded} active system accounts.",
         'count' => $seeded,
         'defaultPassword' => 'Demo@Avinya2026',
+        'error' => $GLOBALS['last_user_seed_error'] ?? null,
         'timestamp' => date(DATE_ATOM)
     ], JSON_PRETTY_PRINT);
     exit(0);
