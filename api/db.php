@@ -670,14 +670,13 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
 
         $upsertUser = function(string $uid, string $name, string $email, string $role, ?string $docId = null, ?string $provId = null) use ($pdo, $defaultPassHash): bool {
             try {
-                // Delete conflicting records with same email or user_id that have a different user_id
-                $pdo->exec("DELETE FROM `users` WHERE (LOWER(`email`) = " . $pdo->quote(strtolower($email)) . " OR `user_id` = " . $pdo->quote($uid) . ") AND `user_id` != " . $pdo->quote($uid));
+                // Delete existing matching record by email or user_id
+                $del = $pdo->prepare("DELETE FROM `users` WHERE LOWER(`email`) = :e OR `user_id` = :u");
+                $del->execute([':e' => strtolower($email), ':u' => $uid]);
                 
                 $stmt = $pdo->prepare("INSERT INTO `users`
                     (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`, `must_change_password`, `last_login`, `created_at`, `updated_at`)
-                    VALUES (:u_id, :name, :email, :pass_hash, :role, :doc_id, :prov_id, 'active', 0, NOW(), NOW(), NOW())
-                    ON DUPLICATE KEY UPDATE
-                    `name` = VALUES(`name`), `email` = VALUES(`email`), `password_hash` = VALUES(`password_hash`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = 'active', `must_change_password` = 0");
+                    VALUES (:u_id, :name, :email, :pass_hash, :role, :doc_id, :prov_id, 'active', 0, NOW(), NOW(), NOW())");
 
                 $stmt->execute([
                     ':u_id' => $uid,
