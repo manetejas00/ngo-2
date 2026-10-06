@@ -83,7 +83,7 @@ body.gallery-page, body {
 .gallery-container {
   max-width: 1360px;
   margin: 0 auto;
-  padding: 0 28px;
+  padding-inline: clamp(24px, 5vw, 64px);
   width: 100%;
   box-sizing: border-box;
 }
@@ -469,7 +469,8 @@ body.gallery-page, body {
 }
 
 .full-bleed-container {
-  width: 82vw;
+  max-width: 1360px;
+  width: min(85vw, calc(100% - clamp(32px, 8vw, 128px)));
   height: clamp(420px, 60vh, 680px);
   border-radius: 36px;
   overflow: hidden;
