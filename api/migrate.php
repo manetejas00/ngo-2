@@ -15,9 +15,15 @@ require_once __DIR__ . '/cache-manager.php';
 try {
     $pdo = getDatabaseConnection();
     if (!$pdo) {
+        $root = dirname(__DIR__);
+        $envUsed = is_file($root . '/.env') ? '.env' : (is_file($root . '/.env.production') ? '.env.production' : 'none');
         http_response_code(500);
         echo json_encode([
             'status' => 'error',
+            'envUsed' => $envUsed,
+            'dbUser' => getDbEnv('DB_USER'),
+            'dbName' => getDbEnv('DB_NAME'),
+            'dbPassLen' => strlen(getDbEnv('DB_PASS')),
             'message' => 'Unable to establish Hostinger MySQL connection: ' . ($GLOBALS['last_db_conn_error'] ?? 'Unknown error')
         ]);
         exit;
