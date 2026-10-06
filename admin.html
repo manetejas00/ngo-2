@@ -1373,6 +1373,7 @@
       initSidebarCollapse();
       initDoctorPresets();
       initDemoLoginVisibility();
+      loadRealLoginAccounts();
 
       const urlParams = new URLSearchParams(window.location.search);
       const resetToken = urlParams.get('reset_token');
@@ -1400,6 +1401,7 @@
 
     function showLoginOverlay() {
       document.getElementById('loginOverlay').style.display = 'flex';
+      loadRealLoginAccounts();
     }
 
     function resetStateAndTables() {
@@ -1673,6 +1675,61 @@
       }
     }
 
+    async function loadRealLoginAccounts() {
+      const selectEl = document.getElementById('quickAccountSelect');
+      if (!selectEl) return;
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-auth.php?action=get_login_accounts');
+        const data = await res.json();
+        if (res.ok && data.status === 'ok' && Array.isArray(data.users) && data.users.length > 0) {
+          const defaultPass = data.defaultPassword || 'Demo@Avinya2026';
+          
+          const admins = data.users.filter(u => u.role === 'admin');
+          const managers = data.users.filter(u => u.role === 'manager');
+          const doctors = data.users.filter(u => u.role === 'doctor');
+          const providers = data.users.filter(u => u.role === 'diagnostic_provider' || u.role === 'provider');
+
+          let html = `<option value="">-- Choose Account to Auto-Fill Email & Password --</option>`;
+
+          if (admins.length > 0) {
+            html += `<optgroup label="👑 Super Admin & System Accounts">`;
+            admins.forEach(u => {
+              html += `<option value="${u.email}|${defaultPass}">${u.name} (${u.email})</option>`;
+            });
+            html += `</optgroup>`;
+          }
+
+          if (managers.length > 0) {
+            html += `<optgroup label="🏥 Staff & Coordinators">`;
+            managers.forEach(u => {
+              html += `<option value="${u.email}|${defaultPass}">${u.name} (${u.email})</option>`;
+            });
+            html += `</optgroup>`;
+          }
+
+          if (doctors.length > 0) {
+            html += `<optgroup label="🩺 Doctors & Specialists (${doctors.length})">`;
+            doctors.forEach(u => {
+              html += `<option value="${u.email}|${defaultPass}">${u.name} (${u.email})</option>`;
+            });
+            html += `</optgroup>`;
+          }
+
+          if (providers.length > 0) {
+            html += `<optgroup label="🧪 Diagnostic Providers (${providers.length})">`;
+            providers.forEach(u => {
+              html += `<option value="${u.email}|${defaultPass}">${u.name} (${u.email})</option>`;
+            });
+            html += `</optgroup>`;
+          }
+
+          selectEl.innerHTML = html;
+        }
+      } catch (err) {
+        console.warn('Could not load real login users dynamically, using default options:', err);
+      }
+    }
+
     function handleQuickAccountSelect(selectEl) {
       const val = selectEl ? selectEl.value : '';
       if (!val) return;
@@ -1681,12 +1738,16 @@
         const emailInput = document.getElementById('loginEmail');
         const passInput = document.getElementById('loginPassword');
         const errorDiv = document.getElementById('loginError');
+        const demoEmailField = document.getElementById('demoEmailField');
         if (emailInput) emailInput.value = parts[0];
         if (passInput) passInput.value = parts[1];
+        if (demoEmailField) demoEmailField.innerText = parts[0];
         if (errorDiv) errorDiv.style.display = 'none';
         if (typeof showToast === 'function') {
           showToast(`Account (${parts[0]}) auto-filled! Click Sign In.`, 'info');
         }
+        const btn = document.getElementById('loginBtn');
+        if (btn) btn.focus();
       }
     }
 
@@ -2220,12 +2281,9 @@
     }
 
     function initDemoLoginVisibility() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const isDemoUrl = urlParams.get('demo') === '1' || urlParams.get('demo') === 'true';
-      const showDemoEnv = window.SHOW_DEMO_LOGIN === true;
       const demoBox = document.getElementById('demoLoginSection');
       if (demoBox) {
-        demoBox.style.display = (showDemoEnv || isDemoUrl) ? 'block' : 'none';
+        demoBox.style.display = 'block';
       }
     }
 

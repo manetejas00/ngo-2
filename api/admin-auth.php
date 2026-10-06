@@ -28,9 +28,40 @@ $action = strtolower(trim((string) ($_GET['action'] ?? $data['action'] ?? $_POST
 
 $pdo = getDatabaseConnection();
 
+// Debug check
+// echo json_encode(['debug' => true, 'action' => $action, 'data' => $data, 'pdo' => ($pdo !== null)]); exit(0);
+
 if (!empty($_SESSION['auth_started_at']) && (time() - (int) $_SESSION['auth_started_at']) > 1800) {
     $_SESSION = [];
     session_destroy();
+}
+
+// Action: Get Public Login Users list (for dropdown selection in login modal)
+if ($action === 'get_login_accounts' || $action === 'public_users' || $action === 'login_accounts') {
+    $usersList = [];
+    if ($pdo !== null) {
+        $stmt = $pdo->query("SELECT `user_id`, `name`, `email`, `role`, `doctor_id`, `provider_id` FROM `users` WHERE `status` = 'active' ORDER BY FIELD(`role`, 'admin', 'manager', 'doctor', 'diagnostic_provider'), `name` ASC");
+        if ($stmt) {
+            $usersList = $stmt->fetchAll();
+        }
+    }
+
+    http_response_code(200);
+    echo json_encode([
+        'status' => 'ok',
+        'defaultPassword' => 'Demo@Avinya2026',
+        'users' => array_map(function($u) {
+            return [
+                'userId' => $u['user_id'],
+                'name' => $u['name'],
+                'email' => $u['email'],
+                'role' => strtolower($u['role']),
+                'doctorId' => $u['doctor_id'],
+                'providerId' => $u['provider_id']
+            ];
+        }, $usersList)
+    ]);
+    exit(0);
 }
 
 // Action: Get Temporary Dev Users list grouped by role
