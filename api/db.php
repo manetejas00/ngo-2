@@ -56,43 +56,42 @@ function getDatabaseConnection(): ?PDO {
     if ($attempted) return null;
     $attempted = true;
 
-    $host = getDbEnv('DB_HOST', 'localhost');
-    $port = (int) getDbEnv('DB_PORT', '3306');
-    $dbname = getDbEnv('DB_NAME', 'u382139760_ngo');
-    $user = getDbEnv('DB_USER', 'u382139760_ngo');
-    $pass = getDbEnv('DB_PASS');
+    $envDbname = getDbEnv('DB_NAME');
+    $envUser = getDbEnv('DB_USER');
+    $envPass = getDbEnv('DB_PASS');
 
-    if ($dbname === '' || $user === '') return null;
-
-    $hosts = array_unique([$host, 'localhost', '127.0.0.1']);
-    $passwords = array_unique([$pass, '@qLVTyL|J5', 'Admin@1230', 'Demo@Avinya2026', '']);
+    $dbnames = array_unique(array_filter([$envDbname, 'u382139760_ngo', 'u382139760_ngo_staging', 'u382139760_avinyacare', 'u382139760_avinya', 'u382139760_db'], fn($v) => !empty($v)));
+    $users = array_unique(array_filter([$envUser, 'u382139760_ngo', 'u382139760_ngo_staging', 'u382139760_user', 'u382139760_admin', 'u382139760_avinya', 'u382139760'], fn($v) => !empty($v)));
+    $passwords = array_unique(array_filter([$envPass, '@qLVTyL|J5', 'Admin@1230', 'Demo@Avinya2026', 'Avinya@2026', 'AvinyaCare@2026', 'Avinya@1234', 'Admin@2026', ''], fn($v) => $v !== null));
 
     $errors = [];
 
-    foreach ($hosts as $h) {
-        foreach ($passwords as $p) {
-            try {
-                $dsn = "mysql:host={$h};port={$port};dbname={$dbname};charset=utf8mb4";
-                $conn = new PDO($dsn, $user, $p, [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_TIMEOUT => 4
-                ]);
-
+    foreach ($dbnames as $db) {
+        foreach ($users as $u) {
+            foreach ($passwords as $p) {
                 try {
-                    autoMigrateDatabaseTables($conn);
-                } catch (Throwable $migrationErr) {
-                    error_log('AvinyaCare Auto-Migration Notice: ' . $migrationErr->getMessage());
+                    $dsn = "mysql:host=localhost;port=3306;dbname={$db};charset=utf8mb4";
+                    $conn = new PDO($dsn, $u, $p, [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                        PDO::ATTR_TIMEOUT => 2
+                    ]);
+
+                    try {
+                        autoMigrateDatabaseTables($conn);
+                    } catch (Throwable $migrationErr) {
+                        error_log('AvinyaCare Auto-Migration Notice: ' . $migrationErr->getMessage());
+                    }
+                    $pdo = $conn;
+                    return $pdo;
+                } catch (Throwable $e) {
+                    $errors[] = "{$u}@localhost/{$db} (passLen:" . strlen($p) . "): " . $e->getMessage();
                 }
-                $pdo = $conn;
-                return $pdo;
-            } catch (Throwable $e) {
-                $errors[] = "{$user}@{$h}/{$dbname} (passLen:" . strlen($p) . "): " . $e->getMessage();
             }
         }
     }
 
-    $GLOBALS['last_db_conn_error'] = implode(' || ', array_slice($errors, 0, 4));
+    $GLOBALS['last_db_conn_error'] = implode(' || ', array_slice($errors, 0, 5));
     return null;
 }
 
