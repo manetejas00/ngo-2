@@ -55,6 +55,8 @@ Options -Indexes
   RewriteRule ^api/submit-form/?$ api/submit-form.php [L,NC]
   RewriteRule ^api/security-health/?$ api/security-health.php [L,NC]
   RewriteRule ^api/gallery/?$ api/gallery.php [L,NC]
+  RewriteRule ^api/reset-gallery(\.php)?/?$ api/reset-gallery.php [L,NC]
+  RewriteRule ^api/migrate(\.php)?/?$ api/migrate.php [L,NC]
   RewriteRule ^api/donations/stats/?$ api/donations.php?action=stats [QSA,L,NC]
   RewriteRule ^api/donations(/recent)?/?$ api/donations.php [L,NC]
 
