@@ -42,14 +42,17 @@ if ($action === 'get_login_accounts' || $action === 'public_users' || $action ==
     if ($pdo !== null) {
         seedDefaultUsers($pdo);
         try {
-            $stmt = $pdo->query("SELECT `user_id`, `name`, `email`, `role`, `doctor_id`, `provider_id` FROM `users` WHERE `status` = 'active' ORDER BY `role` ASC, `name` ASC");
+            $stmt = $pdo->query("SELECT `user_id`, `name`, `email`, `role`, `doctor_id`, `provider_id` FROM `users` WHERE `status` IS NULL OR LOWER(`status`) = 'active' ORDER BY `role` ASC, `name` ASC");
             if ($stmt) {
-                $usersList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if (is_array($rows) && count($rows) > 0) {
+                    $usersList = $rows;
+                }
             }
         } catch (Throwable $e) {}
     }
 
-    if (empty($usersList)) {
+    if (empty($usersList) || count($usersList) === 0) {
         $usersList = [
             ['user_id' => 'usr-admin-01', 'name' => 'Super Admin', 'email' => 'admin@avinyacarefoundation.org', 'role' => 'admin', 'doctor_id' => null, 'provider_id' => null],
             ['user_id' => 'usr-admin-02', 'name' => 'Admin User', 'email' => 'admin@gmail.com', 'role' => 'admin', 'doctor_id' => null, 'provider_id' => null],
