@@ -26,7 +26,10 @@ $defaultAdmin = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinya
 $brandName = 'Avinya Care Foundation';
 $brandEmail = getDbEnv('ADMIN_EMAIL', $defaultAdmin);
 $brandPhone = '+91 74474 41116';
-$brandWebsite = getDbEnv('SITE_URL', $isStaging ? 'https://test.avinyacarefoundation.org' : 'https://avinyacarefoundation.org');
+$isDirectFormSubmission = (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === 'submit-form.php' || basename($_SERVER['SCRIPT_NAME'] ?? '') === 'submit-form.php');
+if (!$isDirectFormSubmission) {
+    return;
+}
 
 $rawInput = file_get_contents('php://input');
 $maxPayloadBytes = 64 * 1024;
