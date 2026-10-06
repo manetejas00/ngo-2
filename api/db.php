@@ -501,6 +501,7 @@ function seedGalleryFromJSON(PDO $pdo, bool $force = false): int {
         }
     } catch (Throwable $e) {
         error_log('seedGalleryFromJSON Exception: ' . $e->getMessage());
+        throw $e;
     }
     return 0;
 }
