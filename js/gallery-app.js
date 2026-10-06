@@ -44,6 +44,17 @@
     initLightboxListeners();
   }
 
+  function showSkeleton(show) {
+    const skeleton = document.getElementById('gallerySkeleton');
+    if (skeleton) {
+      if (show) {
+        skeleton.classList.remove('hidden');
+      } else {
+        skeleton.classList.add('hidden');
+      }
+    }
+  }
+
   // 1. Fetch Published Gallery Items from API
   async function fetchGalleryData() {
     try {
@@ -64,6 +75,8 @@
         const fallbackJson = await fallbackRes.json();
         if (fallbackJson.status === 'ok' && Array.isArray(fallbackJson.data)) {
           galleryItems = fallbackJson.data;
+        } else {
+          galleryItems = getFallbackDemoData();
         }
       } catch (e) {
         console.error('[Gallery API Error] Failed to load gallery dataset:', e);
@@ -71,16 +84,9 @@
       }
     }
 
-    // Ensure full 30 seed gallery items dataset is populated
-    const fallback = getFallbackDemoData();
-    const existingIds = new Set(galleryItems.map(i => i.gallery_id || i.id));
-    fallback.forEach(item => {
-      const itemId = item.gallery_id || item.id;
-      if (!existingIds.has(itemId)) {
-        galleryItems.push(item);
-        existingIds.add(itemId);
-      }
-    });
+    if (!galleryItems || galleryItems.length === 0) {
+      galleryItems = getFallbackDemoData();
+    }
 
     // Ensure items are sorted latest first by updated_at or created_at
     galleryItems.sort((a, b) => {
@@ -430,23 +436,28 @@
     }
     showEmptyState(false);
 
-    // Section 1: Intro Scattered Collage (5 items)
-    const collageItems = currentFilteredItems.slice(0, 5);
+    const totalItems = currentFilteredItems.length;
+
+    // Section 1: Intro Scattered Collage (first 5 items)
+    const collageItems = currentFilteredItems.slice(0, Math.min(5, totalItems));
     renderIntroCollage(collageItems);
 
-    // Section 2: GSAP Scrubbed Bento Exhibition (items 5 -> 11)
-    const bentoItems = currentFilteredItems.slice(5, 11);
-    const fallbackBentoItems = bentoItems.length > 0 ? bentoItems : currentFilteredItems.slice(0, 6);
-    renderScrubbedBento(fallbackBentoItems);
+    // Section 2: GSAP Scrubbed Bento Exhibition (items 5 -> 10)
+    const bentoItems = totalItems > 5 ? currentFilteredItems.slice(5, 11) : [];
+    renderScrubbedBento(bentoItems);
 
-    // Section 3 & 5: Full-Bleed Featured Moments
-    const featuredItems = currentFilteredItems.filter(i => i.is_featured) || currentFilteredItems;
-    renderFullBleedSections(featuredItems);
+    // Section 3: Full-Bleed Featured Moments
+    const featuredItems = currentFilteredItems.filter(i => i.is_featured);
+    renderFullBleedSections(featuredItems.length > 0 ? featuredItems : currentFilteredItems.slice(0, 2));
 
-    // Section 4: Editorial Masonry Archive
-    const masonryItems = currentFilteredItems.slice(11);
-    const fallbackMasonryItems = masonryItems.length > 0 ? masonryItems : currentFilteredItems;
-    renderEditorialMasonry(fallbackMasonryItems);
+    // Section 4: Editorial Masonry Archive (items 11 onwards)
+    const masonryItems = totalItems > 10 ? currentFilteredItems.slice(10) : [];
+    if (masonryItems.length > 0) {
+      renderEditorialMasonry(masonryItems);
+    } else {
+      const masonrySec = document.getElementById('editorialMasonrySection');
+      if (masonrySec) masonrySec.classList.add('hidden');
+    }
 
     // Attach card click handlers for fullscreen lightbox
     attachLightboxCardTriggers();
