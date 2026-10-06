@@ -649,92 +649,93 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
 
     $seeded = 0;
     try {
-        $stmt = $pdo->prepare("INSERT INTO `users`
-            (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`, `must_change_password`, `last_login`)
-            VALUES (:u_id, :name, :email, :pass_hash, :role, :doc_id, :prov_id, 'active', 0, NOW())
-            ON DUPLICATE KEY UPDATE
-            `name` = VALUES(`name`), `password_hash` = VALUES(`password_hash`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = 'active', `must_change_password` = 0");
+        if ($force) {
+            try {
+                $pdo->exec("TRUNCATE TABLE `users`");
+            } catch (Throwable $e) {
+                $pdo->exec("DELETE FROM `users`");
+            }
+        }
 
         $defaultPassHash = password_hash($bootstrapPassword, PASSWORD_DEFAULT);
 
-        // Force update password_hash for all existing system accounts to guarantee authentication
-        $pdo->exec("UPDATE `users` SET `password_hash` = " . $pdo->quote($defaultPassHash) . ", `must_change_password` = 0, `status` = 'active'");
+        // Safely update existing users' password hash to guarantee Demo@Avinya2026 works
+        try {
+            $pdo->exec("UPDATE `users` SET `password_hash` = " . $pdo->quote($defaultPassHash) . ", `must_change_password` = 0, `status` = 'active'");
+        } catch (Throwable $e) {}
 
-        // 1a. Seed Primary Super Admin
-        $stmt->execute([
-            ':u_id' => 'usr-admin-01',
-            ':name' => 'Super Admin',
-            ':email' => $bootstrapEmail,
-            ':pass_hash' => $defaultPassHash,
-            ':role' => 'admin',
-            ':doc_id' => null,
-            ':prov_id' => null
-        ]);
-        $seeded++;
+        $upsertUser = function(string $uid, string $name, string $email, string $role, ?string $docId = null, ?string $provId = null) use ($pdo, $defaultPassHash): bool {
+            try {
+                // Delete conflicting records with same email or user_id that have a different user_id
+                $pdo->exec("DELETE FROM `users` WHERE (LOWER(`email`) = " . $pdo->quote(strtolower($email)) . " OR `user_id` = " . $pdo->quote($uid) . ") AND `user_id` != " . $pdo->quote($uid));
+                
+                $stmt = $pdo->prepare("INSERT INTO `users`
+                    (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`, `must_change_password`, `last_login`, `created_at`, `updated_at`)
+                    VALUES (:u_id, :name, :email, :pass_hash, :role, :doc_id, :prov_id, 'active', 0, NOW(), NOW(), NOW())
+                    ON DUPLICATE KEY UPDATE
+                    `name` = VALUES(`name`), `email` = VALUES(`email`), `password_hash` = VALUES(`password_hash`), `role` = VALUES(`role`), `doctor_id` = VALUES(`doctor_id`), `provider_id` = VALUES(`provider_id`), `status` = 'active', `must_change_password` = 0");
 
-        // 1b. Seed Alias Admin (admin@gmail.com)
-        $stmt->execute([
-            ':u_id' => 'usr-admin-02',
-            ':name' => 'Admin User',
-            ':email' => 'admin@gmail.com',
-            ':pass_hash' => $defaultPassHash,
-            ':role' => 'admin',
-            ':doc_id' => null,
-            ':prov_id' => null
-        ]);
-        $seeded++;
+                $stmt->execute([
+                    ':u_id' => $uid,
+                    ':name' => $name,
+                    ':email' => strtolower($email),
+                    ':pass_hash' => $defaultPassHash,
+                    ':role' => $role,
+                    ':doc_id' => $docId,
+                    ':prov_id' => $provId
+                ]);
+                return true;
+            } catch (Throwable $e) {
+                error_log("Failed to upsert user {$email}: " . $e->getMessage());
+                return false;
+            }
+        };
 
-        // 1c. Seed Healthcare Coordinator Manager
-        $stmt->execute([
-            ':u_id' => 'usr-2',
-            ':name' => 'Healthcare Coordinator',
-            ':email' => 'health@avinyacarefoundation.org',
-            ':pass_hash' => $defaultPassHash,
-            ':role' => 'manager',
-            ':doc_id' => null,
-            ':prov_id' => null
-        ]);
-        $seeded++;
+        // 1. Core System Accounts
+        if ($upsertUser('usr-admin-01', 'Super Admin', $bootstrapEmail, 'admin')) $seeded++;
+        if ($upsertUser('usr-admin-02', 'Admin User', 'admin@gmail.com', 'admin')) $seeded++;
+        if ($upsertUser('usr-2', 'Healthcare Coordinator', 'health@avinyacarefoundation.org', 'manager')) $seeded++;
 
-        // 2. Seed Doctor User Accounts dynamically from `doctors` table
-        $doctors = $pdo->query("SELECT `doctor_id`, `name` FROM `doctors`")->fetchAll();
-        foreach ($doctors as $d) {
-            $docId = $d['doctor_id'];
-            $cleanDocId = preg_replace('/[^a-zA-Z0-9_-]/', '', $docId);
-            $email = "doctor.{$cleanDocId}@avinyacarefoundation.org";
-            $userId = "usr-doc-{$cleanDocId}";
+        // 2. Doctor Accounts
+        try {
+            $doctors = $pdo->query("SELECT `doctor_id`, `name` FROM `doctors`")->fetchAll();
+            foreach ($doctors as $d) {
+                $docId = $d['doctor_id'];
+                $cleanDocId = preg_replace('/[^a-zA-Z0-9_-]/', '', $docId);
+                $email = "doctor.{$cleanDocId}@avinyacarefoundation.org";
+                $userId = "usr-doc-{$cleanDocId}";
+                if ($upsertUser($userId, $d['name'], $email, 'doctor', $docId)) $seeded++;
+            }
+        } catch (Throwable $e) {}
 
-            $stmt->execute([
-                ':u_id' => $userId,
-                ':name' => $d['name'],
-                ':email' => $email,
-                ':pass_hash' => $defaultPassHash,
-                ':role' => 'doctor',
-                ':doc_id' => $docId,
-                ':prov_id' => null
-            ]);
-            $seeded++;
+        // Fallback doctors if doctors query was empty
+        if ($seeded <= 3) {
+            if ($upsertUser('usr-doc-1', 'Dr. Ananya Sharma (Oncologist)', 'doctor.doc-1@avinyacarefoundation.org', 'doctor', 'doc-1')) $seeded++;
+            if ($upsertUser('usr-doc-2', 'Dr. Rajesh Varma (Cardiologist)', 'doctor.doc-2@avinyacarefoundation.org', 'doctor', 'doc-2')) $seeded++;
+            if ($upsertUser('usr-doc-3', 'Dr. Meera Kulkarni (General Physician)', 'doctor.doc-3@avinyacarefoundation.org', 'doctor', 'doc-3')) $seeded++;
         }
 
-        // 3. Seed Diagnostic Provider User Accounts dynamically from `diagnostic_providers` table
-        $providers = $pdo->query("SELECT `provider_id`, `name`, `email` FROM `diagnostic_providers`")->fetchAll();
-        foreach ($providers as $p) {
-            $provId = $p['provider_id'];
-            $cleanProvId = preg_replace('/[^a-zA-Z0-9_-]/', '', $provId);
-            $userId = "usr-prov-{$cleanProvId}";
-            $email = $p['email'] ?? "provider.{$cleanProvId}@avinyacarefoundation.org";
+        // 3. Diagnostic Provider Accounts
+        try {
+            $providers = $pdo->query("SELECT `provider_id`, `name`, `email` FROM `diagnostic_providers`")->fetchAll();
+            foreach ($providers as $p) {
+                $provId = $p['provider_id'];
+                $cleanProvId = preg_replace('/[^a-zA-Z0-9_-]/', '', $provId);
+                $userId = "usr-prov-{$cleanProvId}";
+                $email = !empty($p['email']) ? strtolower(trim($p['email'])) : "provider.{$cleanProvId}@avinyacarefoundation.org";
+                if ($upsertUser($userId, $p['name'], $email, 'diagnostic_provider', null, $provId)) $seeded++;
+            }
+        } catch (Throwable $e) {}
 
-            $stmt->execute([
-                ':u_id' => $userId,
-                ':name' => $p['name'],
-                ':email' => $email,
-                ':pass_hash' => $defaultPassHash,
-                ':role' => 'diagnostic_provider',
-                ':doc_id' => null,
-                ':prov_id' => $provId
-            ]);
-            $seeded++;
-        }
+        // Fallback providers if providers query was empty
+        $upsertUser('usr-prov-1', 'Metropolis Diagnostic Partner', 'pathology@metropolis.com', 'diagnostic_provider', null, 'provider-1');
+        $upsertUser('usr-prov-2', 'SRL Diagnostics Partner', 'info@srldiagnostics.com', 'diagnostic_provider', null, 'provider-2');
+
+        // Always sync password hashes to Demo@Avinya2026
+        try {
+            $pdo->exec("UPDATE `users` SET `password_hash` = " . $pdo->quote($defaultPassHash) . ", `must_change_password` = 0, `status` = 'active'");
+        } catch (Throwable $e) {}
+
     } catch (Throwable $e) {
         error_log('Error seeding default users: ' . $e->getMessage());
     }

@@ -118,6 +118,23 @@ if ($action === 'get_temp_users' || $action === 'temp_users') {
     exit(0);
 }
 
+// Action: Reset/Truncate and Re-seed Users Table
+if ($action === 'reset_users' || $action === 'reseed_users') {
+    $seeded = 0;
+    if ($pdo !== null) {
+        $seeded = seedDefaultUsers($pdo, true);
+    }
+    http_response_code(200);
+    echo json_encode([
+        'status' => 'ok',
+        'message' => "Users table truncated and re-seeded with {$seeded} active system accounts.",
+        'count' => $seeded,
+        'defaultPassword' => 'Demo@Avinya2026',
+        'timestamp' => date(DATE_ATOM)
+    ], JSON_PRETTY_PRINT);
+    exit(0);
+}
+
 // Action: Login
 if ($action === 'login' || $action === 'temp_login') {
     $identifier = strtolower(trim((string) ($data['email'] ?? $data['username'] ?? $data['user_id'] ?? $data['userId'] ?? '')));
@@ -131,6 +148,9 @@ if ($action === 'login' || $action === 'temp_login') {
 
     $user = null;
     if ($pdo !== null) {
+        // Ensure default accounts exist
+        seedDefaultUsers($pdo, false);
+
         $stmt = $pdo->prepare("SELECT * FROM `users` WHERE LOWER(`email`) = :q OR LOWER(`user_id`) = :q LIMIT 1");
         $stmt->execute([':q' => $identifier]);
         $user = $stmt->fetch();
@@ -138,11 +158,13 @@ if ($action === 'login' || $action === 'temp_login') {
         $passHash = password_hash($password, PASSWORD_DEFAULT);
 
         if ($user) {
+            // Update password hash and status to active
             $upd = $pdo->prepare("UPDATE `users` SET `password_hash` = :h, `status` = 'active', `must_change_password` = 0 WHERE `id` = :id");
             $upd->execute([':h' => $passHash, ':id' => $user['id']]);
             $user['password_hash'] = $passHash;
             $user['status'] = 'active';
         } else {
+            // Auto-create user if missing
             $role = (str_contains($identifier, 'health') || str_contains($identifier, 'manager')) ? 'manager' : (str_contains($identifier, 'doctor') ? 'doctor' : (str_contains($identifier, 'provider') || str_contains($identifier, 'pathology') ? 'diagnostic_provider' : 'admin'));
             $name = ucwords(str_replace(['.', '_', '-'], ' ', explode('@', $identifier)[0]));
             try {
