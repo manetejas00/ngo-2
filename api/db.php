@@ -78,9 +78,9 @@ function getDatabaseConnection(): ?PDO {
     }
 }
 
-function autoMigrateDatabaseTables(PDO $pdo): bool {
+function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
     static $migrated = false;
-    if ($migrated) return true;
+    if ($migrated && !$force) return true;
 
     $queries = [
         // 1. Form Submissions Table (Contact, Newsletter, Volunteer, Support, Donation, CSR, Feedback)
@@ -426,9 +426,9 @@ function autoMigrateDatabaseTables(PDO $pdo): bool {
     }
 
     seedDiagnosticProviders($pdo);
-    seedCatalogFromJSON($pdo);
+    seedCatalogFromJSON($pdo, $force);
     seedDefaultUsers($pdo);
-    seedGalleryFromJSON($pdo);
+    seedGalleryFromJSON($pdo, $force);
 
     $migrated = true;
     return true;
@@ -450,15 +450,21 @@ function seedGalleryFromJSON(PDO $pdo, bool $force = false): int {
             if (!empty($validIds)) {
                 $inClause = implode(',', array_map(fn($id) => $pdo->quote($id), $validIds));
                 $pdo->exec("DELETE FROM `galleries` WHERE `gallery_id` NOT IN ({$inClause})");
+            } else {
+                $pdo->exec("TRUNCATE TABLE `galleries`");
             }
 
             $stmt = $pdo->prepare("INSERT INTO `galleries` 
                 (`gallery_id`, `title`, `slug`, `short_description`, `description`, `image`, `alt_text`, `category`, `event_date`, `location`, `photographer`, `created_by`, `updated_by`, `external_link`, `has_details`, `image_only`, `is_featured`, `is_published`, `sort_order`, `created_at`, `updated_at`) 
                 VALUES (:gid, :title, :slug, :short_desc, :desc, :img, :alt, :cat, :edate, :loc, :photo, :c_by, :u_by, :link, :has_det, :img_only, :is_feat, :is_pub, :sort_ord, :c_at, :u_at)
                 ON DUPLICATE KEY UPDATE 
-                `title` = VALUES(`title`), `description` = VALUES(`description`), `short_description` = VALUES(`short_description`),
-                `image` = VALUES(`image`), `category` = VALUES(`category`), `created_by` = VALUES(`created_by`),
-                `updated_by` = VALUES(`updated_by`), `image_only` = VALUES(`image_only`), `updated_at` = VALUES(`updated_at`)");
+                `title` = VALUES(`title`), `slug` = VALUES(`slug`), `short_description` = VALUES(`short_description`),
+                `description` = VALUES(`description`), `image` = VALUES(`image`), `alt_text` = VALUES(`alt_text`),
+                `category` = VALUES(`category`), `event_date` = VALUES(`event_date`), `location` = VALUES(`location`),
+                `photographer` = VALUES(`photographer`), `created_by` = VALUES(`created_by`), `updated_by` = VALUES(`updated_by`),
+                `external_link` = VALUES(`external_link`), `has_details` = VALUES(`has_details`), `image_only` = VALUES(`image_only`),
+                `is_featured` = VALUES(`is_featured`), `is_published` = VALUES(`is_published`), `sort_order` = VALUES(`sort_order`),
+                `updated_at` = VALUES(`updated_at`)");
             $count = 0;
             foreach ($seedItems as $item) {
                 $stmt->execute([
