@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 2. Initialize Journey Timeline & Impact Counters
-  if (window.JourneyTimeline) new window.JourneyTimeline();
-  if (window.ImpactCounters) new window.ImpactCounters();
+  if (typeof window.JourneyTimeline === 'function') new window.JourneyTimeline();
+  if (typeof window.ImpactCounters === 'function') new window.ImpactCounters();
 
   // 3. Scroll & Floating Navbar Controller
   const heroContainer = document.querySelector('.hero-scroll-container');
