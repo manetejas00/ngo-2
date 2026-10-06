@@ -18,7 +18,7 @@ try {
         http_response_code(500);
         echo json_encode([
             'status' => 'error',
-            'message' => 'Unable to establish Hostinger MySQL connection. Check DB credentials in .env.'
+            'message' => 'Unable to establish Hostinger MySQL connection: ' . ($GLOBALS['last_db_conn_error'] ?? 'Unknown error')
         ]);
         exit;
     }
