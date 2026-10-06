@@ -86,8 +86,14 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
     $host = 'ssl://' . preg_replace('#^ssl://#', '', getDbEnv('SMTP_HOST', 'smtp.hostinger.com'));
     $port = (int) (getDbEnv('SMTP_PORT', '465'));
     $user = getDbEnv('SMTP_USER', $defaultUser);
-    $pass = getDbEnv('SMTP_PASS', '');
+    if (!$isStaging && str_contains($user, 'test.avinyacarefoundation.org')) {
+        $user = 'info@avinyacarefoundation.org';
+    }
+    $pass = getDbEnv('SMTP_PASS', '@qLVTyL|J5');
     $from = getDbEnv('SMTP_FROM', $user);
+    if (!$isStaging && str_contains($from, 'test.avinyacarefoundation.org')) {
+        $from = 'info@avinyacarefoundation.org';
+    }
     $fromName = getDbEnv('SMTP_FROM_NAME', 'Avinya Care Foundation');
     $boundary = '=_AvinyaLogo_' . bin2hex(random_bytes(8));
     $logoPath = dirname(__DIR__) . '/assets/logo.png';
