@@ -14,29 +14,30 @@ if (!function_exists('loadEnvDatabaseVars')) {
         $root = dirname(__DIR__);
         $hostHeader = $_SERVER['HTTP_HOST'] ?? '';
         
-        $envFile = $root . '/.env';
-        if (!is_file($envFile)) {
-            if (str_contains($hostHeader, 'test.avinyacarefoundation.org') && is_file($root . '/.env.staging')) {
-                $envFile = $root . '/.env.staging';
-            } elseif (is_file($root . '/.env.production')) {
-                $envFile = $root . '/.env.production';
-            }
+        $filesToLoad = [];
+        if (str_contains($hostHeader, 'test.avinyacarefoundation.org')) {
+            if (is_file($root . '/.env.staging')) $filesToLoad[] = $root . '/.env.staging';
+        } else {
+            if (is_file($root . '/.env.production')) $filesToLoad[] = $root . '/.env.production';
         }
+        if (is_file($root . '/.env')) $filesToLoad[] = $root . '/.env';
 
-        if (!is_file($envFile) || !is_readable($envFile)) return;
-        $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if ($lines === false) return;
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) continue;
-            [$name, $value] = array_map('trim', explode('=', $line, 2));
-            if (!preg_match('/^[A-Z0-9_]+$/i', $name)) continue;
-            if (strlen($value) >= 2 && (($value[0] === '"' && substr($value, -1) === '"') || ($value[0] === "'" && substr($value, -1) === "'"))) {
-                $value = substr($value, 1, -1);
+        foreach ($filesToLoad as $envFile) {
+            if (!is_file($envFile) || !is_readable($envFile)) continue;
+            $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            if ($lines === false) continue;
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) continue;
+                [$name, $value] = array_map('trim', explode('=', $line, 2));
+                if (!preg_match('/^[A-Z0-9_]+$/i', $name)) continue;
+                if (strlen($value) >= 2 && (($value[0] === '"' && substr($value, -1) === '"') || ($value[0] === "'" && substr($value, -1) === "'"))) {
+                    $value = substr($value, 1, -1);
+                }
+                putenv($name . '=' . $value);
+                $_ENV[$name] = $value;
+                $_SERVER[$name] = $value;
             }
-            putenv($name . '=' . $value);
-            $_ENV[$name] = $value;
-            $_SERVER[$name] = $value;
         }
     }
 }
