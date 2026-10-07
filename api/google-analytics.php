@@ -35,11 +35,21 @@ function gaAccessToken(string $email, string $privateKey): string {
     return (string) $data['access_token'];
 }
 
+$measurementId = getDbEnv('GA4_MEASUREMENT_ID');
 $propertyId = preg_replace('/\D/', '', getDbEnv('GA4_PROPERTY_ID'));
 $email = getDbEnv('GA4_SERVICE_ACCOUNT_EMAIL');
 $privateKey = str_replace('\\n', "\n", getDbEnv('GA4_SERVICE_ACCOUNT_PRIVATE_KEY'));
 if ($propertyId === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $privateKey === '') {
-    echo json_encode(['status' => 'not_configured', 'message' => 'GA4 reporting has not been configured yet.']); exit;
+    $hasTag = preg_match('/^G-[A-Z0-9]+$/i', $measurementId);
+    $msg = $hasTag 
+        ? "Public GA4 tag ($measurementId) is active and tracking visitors on all pages. Service account credentials (GA4_PROPERTY_ID & GA4_SERVICE_ACCOUNT_EMAIL) are required to load live Reporting API metrics here."
+        : "Connect GA4 by adding the property and service-account settings to the server environment. Website tracking remains off until a Measurement ID is provided.";
+    echo json_encode([
+        'status' => 'not_configured',
+        'measurementId' => $measurementId,
+        'message' => $msg
+    ]); 
+    exit;
 }
 
 $cacheFile = dirname(__DIR__) . '/cache/ga4-dashboard.json';

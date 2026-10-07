@@ -1514,11 +1514,21 @@ const server = createServer(async (req, res) => {
   }
 
   if (urlPath === '/api/google-analytics' || urlPath === '/api/google-analytics.php') {
+    const measurementId = (process.env.GA4_MEASUREMENT_ID || '').trim();
     const propertyId = (process.env.GA4_PROPERTY_ID || '').replace(/\D/g, '');
     const email = (process.env.GA4_SERVICE_ACCOUNT_EMAIL || '').trim();
     const privateKey = (process.env.GA4_SERVICE_ACCOUNT_PRIVATE_KEY || '').trim();
-    if (!propertyId || !email || !privateKey || email.includes('your-project') || privateKey.includes('PRIVATE KEY')) {
-      return sendJson(200, { status: 'not_configured', message: 'GA4 reporting has not been configured yet.' });
+    const hasCredentials = propertyId && email && privateKey && !email.includes('your-project') && !privateKey.includes('PRIVATE KEY');
+    if (!hasCredentials) {
+      const hasTag = /^G-[A-Z0-9]+$/i.test(measurementId);
+      const msg = hasTag
+        ? `Public GA4 tag (${measurementId}) is active and tracking visitors on all pages. Service account credentials (GA4_PROPERTY_ID & GA4_SERVICE_ACCOUNT_EMAIL) are required to load live Reporting API metrics here.`
+        : 'Connect GA4 by adding the property and service-account settings to the server environment. Website tracking remains off until a Measurement ID is provided.';
+      return sendJson(200, {
+        status: 'not_configured',
+        measurementId: measurementId,
+        message: msg
+      });
     }
     return sendJson(200, {
       status: 'ok',

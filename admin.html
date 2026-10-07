@@ -2113,7 +2113,10 @@
         const res = await fetch(getApiBaseUrl() + '/api/google-analytics.php', { headers: { 'Authorization': `Bearer ${adminToken}` }, cache: 'no-store' });
         const data = await res.json();
         if (data.status === 'not_configured') {
-          notice.hidden = false; notice.textContent = 'Connect GA4 by adding the property and service-account settings to the server environment. Website tracking remains off until a Measurement ID is provided.'; updated.textContent = 'GA4 is not connected'; return;
+          notice.hidden = false;
+          notice.textContent = data.message || 'Connect GA4 by adding the property and service-account settings to the server environment.';
+          updated.textContent = data.measurementId ? `Tracking Tag Active (${data.measurementId})` : 'GA4 is not connected';
+          return;
         }
         if (data.status !== 'ok') throw new Error(data.message || 'Unable to load Google Analytics.');
         notice.hidden = true;
