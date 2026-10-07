@@ -73,14 +73,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     const settings = payload?.settings;
     if (!response.ok || !settings) return;
     document.querySelectorAll('[data-site-setting]').forEach((node) => {
-      const value = settings[node.dataset.siteSetting];
+      const key = node.dataset.siteSetting;
+      const value = settings[key];
       if (!value) return;
-      if (node.dataset.siteSetting === 'phone') {
+      if (key === 'phone') {
         node.textContent = value;
         if (node.tagName === 'A') node.href = `tel:${value.replace(/[^+\d]/g, '')}`;
-      } else if (node.dataset.siteSetting === 'email') {
+      } else if (key === 'email') {
         node.textContent = value;
         if (node.tagName === 'A') node.href = `mailto:${value}`;
+      } else if (key === 'whatsapp') {
+        if (node.tagName === 'A') {
+          const rawDigits = value.replace(/\D/g, '');
+          node.href = value.startsWith('http') ? value : `https://wa.me/${rawDigits}`;
+          if (node.textContent.includes('wa.me/') || node.textContent.includes('WhatsApp:')) {
+            node.textContent = `WhatsApp: wa.me/${rawDigits}`;
+          }
+        } else {
+          node.textContent = value;
+        }
+      } else if (['instagram_url', 'facebook_url', 'linkedin_url', 'youtube_url'].includes(key)) {
+        if (node.tagName === 'A') {
+          node.href = value;
+        } else {
+          node.textContent = value;
+        }
       } else {
         node.textContent = value;
       }
