@@ -1,12 +1,12 @@
 /**
- * Avinya Care Foundation - Healthcare Email Template Generator
+ * AvinyaCareFoundation - Healthcare Email Template Generator
  * Produces responsive, branded HTML & Plain Text emails for Appointments & Diagnostic Tests.
  */
 
 import { escapeHTML } from '../email/emailTemplate.mjs';
 
 const CONTACT = Object.freeze({
-  name: 'Avinya Care Foundation',
+  name: 'AvinyaCareFoundation',
   phone: '+91 74474 41116',
   email: 'info@avinyacarefoundation.com',
   website: 'www.avinyacarefoundation.org'
@@ -36,7 +36,7 @@ function renderEmailLayout(title, preheader, contentHtml) {
                 <tr>
                   <td align="center">
                     <div style="display: inline-block; background-color: #FFFFFF; border-radius: 50%; padding: 6px; box-shadow: 0 4px 12px rgba(244, 117, 40, 0.3);">
-                      <img src="${logoUrl}" alt="Avinya Care Foundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;" />
+                      <img src="${logoUrl}" alt="AvinyaCareFoundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;" />
                     </div>
                   </td>
                 </tr>
@@ -95,7 +95,7 @@ function renderEmailLayout(title, preheader, contentHtml) {
  * 1. Patient Appointment Confirmation Email
  */
 export function renderPatientAppointmentEmail(apt) {
-  const subject = `Appointment Booking Confirmation – Avinyacare [${apt.id}]`;
+  const subject = `Appointment Booking Confirmation – AvinyaCareFoundation [${apt.id}]`;
   const isOnline = apt.consultationType === 'online';
 
   const contentHtml = `
@@ -103,7 +103,7 @@ export function renderPatientAppointmentEmail(apt) {
       Dear <strong>${escapeHTML(apt.patientName)}</strong>,
     </p>
     <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #334155;">
-      Your appointment with <strong>${escapeHTML(apt.doctorName)}</strong> has been successfully booked and confirmed through Avinyacare Foundation.
+      Your appointment with <strong>${escapeHTML(apt.doctorName)}</strong> has been successfully booked and confirmed through AvinyaCareFoundation.
     </p>
 
     <!-- Appointment Summary Card -->
@@ -163,7 +163,7 @@ export function renderPatientAppointmentEmail(apt) {
     </div>
   `;
 
-  const text = `Avinya Care Foundation - Appointment Confirmation
+  const text = `AvinyaCareFoundation - Appointment Confirmation
 Appointment ID: ${apt.id}
 Doctor: ${apt.doctorName} (${apt.doctorSpeciality})
 Date: ${apt.date} at ${apt.time}
@@ -177,7 +177,7 @@ Helpline: ${CONTACT.phone}`;
 
   return {
     subject,
-    html: renderEmailLayout('Appointment Confirmed', 'Your appointment booking confirmation with Avinyacare', contentHtml),
+    html: renderEmailLayout('Appointment Confirmed', 'Your appointment booking confirmation with AvinyaCareFoundation', contentHtml),
     text
   };
 }
@@ -186,7 +186,7 @@ Helpline: ${CONTACT.phone}`;
  * 2. Doctor Notification Email
  */
 export function renderDoctorAppointmentEmail(apt) {
-  const subject = `New Patient Appointment – Avinyacare [${apt.id}]`;
+  const subject = `New Patient Appointment – AvinyaCareFoundation [${apt.id}]`;
   const isOnline = apt.consultationType === 'online';
 
   const contentHtml = `
@@ -194,7 +194,7 @@ export function renderDoctorAppointmentEmail(apt) {
       Dear <strong>${escapeHTML(apt.doctorName)}</strong>,
     </p>
     <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #334155;">
-      A new patient consultation has been scheduled with you through the Avinyacare healthcare portal.
+      A new patient consultation has been scheduled with you through the AvinyaCareFoundation healthcare portal.
     </p>
 
     <!-- Patient Case Summary -->
@@ -246,7 +246,7 @@ export function renderDoctorAppointmentEmail(apt) {
     </table>
   `;
 
-  const text = `Avinya Care Foundation - New Patient Scheduled
+  const text = `AvinyaCareFoundation - New Patient Scheduled
 Appointment ID: ${apt.id}
 Doctor: ${apt.doctorName}
 Patient: ${apt.patientName} (${apt.patientAge} Y, ${apt.patientGender})
@@ -257,7 +257,7 @@ Reason: ${apt.reason}`;
 
   return {
     subject,
-    html: renderEmailLayout('New Patient Appointment', 'New patient consultation booked on Avinyacare', contentHtml),
+    html: renderEmailLayout('New Patient Appointment', 'New patient consultation booked on AvinyaCareFoundation', contentHtml),
     text
   };
 }
@@ -348,7 +348,7 @@ export function renderAppointmentStatusEmail(apt, statusType, notes = '') {
     badgeColor = '#16A34A';
   }
 
-  const subject = `Appointment ${statusType.toUpperCase()} – Avinyacare [${apt.id}]`;
+  const subject = `Appointment ${statusType.toUpperCase()} – AvinyaCareFoundation [${apt.id}]`;
 
   const contentHtml = `
     <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #0F172A;">
@@ -388,7 +388,7 @@ export function renderAppointmentStatusEmail(apt, statusType, notes = '') {
     </table>
   `;
 
-  const text = `Avinya Care Foundation - Appointment Status: ${statusType.toUpperCase()}
+  const text = `AvinyaCareFoundation - Appointment Status: ${statusType.toUpperCase()}
 ID: ${apt.id}
 Doctor: ${apt.doctorName}
 Schedule: ${apt.date} at ${apt.time}
@@ -406,7 +406,7 @@ Remarks: ${notes}`;
  */
 export function renderTestBookingEmail(booking) {
   const isHome = booking.collectionMethod === 'home_collection';
-  const subject = `Diagnostic Test Booking Confirmation – Avinyacare [${booking.id}]`;
+  const subject = `Diagnostic Test Booking Confirmation – AvinyaCareFoundation [${booking.id}]`;
 
   const contentHtml = `
     <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #0F172A;">
@@ -462,7 +462,7 @@ export function renderTestBookingEmail(booking) {
     </table>
   `;
 
-  const text = `Avinya Care Foundation - Test Booking Confirmation
+  const text = `AvinyaCareFoundation - Test Booking Confirmation
 Booking ID: ${booking.id}
 Test: ${booking.testName}
 Collection: ${booking.collectionMethod}

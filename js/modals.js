@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Interactive Modals & Form Manager
+ * AvinyaCareFoundation - Interactive Modals & Form Manager
  * Manages Donation, Volunteer, Patient Support, Contact, Partnership, Newsletter, and Feedback forms.
  * All submissions communicate server-side with /api/submit-form and display live email delivery status.
  */
@@ -49,6 +49,7 @@ class ModalManager {
   }
 
   openModal(modalId) {
+    const requestedModalId = modalId;
     if (modalId === 'donate-modal') {
       modalId = 'coming-soon-modal';
     }
@@ -64,6 +65,10 @@ class ModalManager {
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
       this.activeModal = modal;
+
+      if (requestedModalId === 'donate-modal' && window.AvinyaAnalytics) {
+        window.AvinyaAnalytics.event('donation_started');
+      }
 
       if (modalId === 'donate-modal') {
         this.selectAmount(this.selectedAmount || 1000);
@@ -196,7 +201,7 @@ class ModalManager {
     container.innerHTML = `
       <div style="text-align: center; padding: 3rem 1.5rem;">
         <div style="width: 56px; height: 56px; border: 4px solid rgba(8, 127, 115, 0.2); border-top-color: #087F73; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1.5rem;"></div>
-        <h3 style="font-size: 1.5rem; color: #111817; margin-bottom: 0.5rem;">Avinya Care Email Dispatch Engine</h3>
+        <h3 style="font-size: 1.5rem; color: #111817; margin-bottom: 0.5rem;">AvinyaCareFoundation Email Dispatch Engine</h3>
         <p style="color: var(--text-dark-muted); font-size: 0.95rem; line-height: 1.5;">
           Generating personalized confirmation & notifying our operations desk...
         </p>
@@ -232,6 +237,7 @@ class ModalManager {
 
         // Dispatch real-time donation event for live activity ticker
         if (formType === 'donation' && String(resData.paymentStatus || '').toUpperCase() === 'SUCCESS') {
+          if (window.AvinyaAnalytics) window.AvinyaAnalytics.event('donation_completed');
           try {
             window.dispatchEvent(new CustomEvent('avinya:donation_success', {
               detail: {
@@ -242,6 +248,10 @@ class ModalManager {
               }
             }));
           } catch (_) {}
+        }
+
+        if (formType === 'contact' && window.AvinyaAnalytics) {
+          window.AvinyaAnalytics.event('contact_form_submitted');
         }
 
         const isUserSent = delivery.userEmailSent !== false;

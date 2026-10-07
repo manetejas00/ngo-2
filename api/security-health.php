@@ -1,6 +1,6 @@
 <?php
 /**
- * Avinya Care Foundation - Security Monitoring & Health Status API
+ * AvinyaCareFoundation - Security Monitoring & Health Status API
  * Serves real-time security status, active rate limiting metrics, and defense score.
  */
 

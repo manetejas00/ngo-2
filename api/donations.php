@@ -1,6 +1,6 @@
 <?php
 /**
- * Avinya Care Foundation - Public Donations Feed API
+ * AvinyaCareFoundation - Public Donations Feed API
  * Serves real verified donation records from MySQL / persistent storage.
  * Sorted latest first, with no timestamps (for live activity ticker).
  */

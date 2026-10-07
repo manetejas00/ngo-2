@@ -1,12 +1,12 @@
-# Avinya Care Foundation — Website Summary & Design System
+# AvinyaCareFoundation — Website Summary & Design System
 
-A complete overview of the **Avinya Care Foundation** web application, including its brand identity, color tokens, typography scale, section-by-section breakdown, interactive modal systems, and technical architecture.
+A complete overview of the **AvinyaCareFoundation** web application, including its brand identity, color tokens, typography scale, section-by-section breakdown, interactive modal systems, and technical architecture.
 
 ---
 
 ## 1. Brand Identity & Purpose
 
-* **Organization:** Avinya Care Foundation
+* **Organization:** AvinyaCareFoundation
 * **Tagline:** *"No one should face cancer alone."*
 * **Mission:** A humanitarian Indian oncology non-profit dedicated to cancer awareness, early screening drives, patient navigation, and caregiver support.
 * **Tax Status:** 80G & 12A Tax Exempted under the Indian IT Act.

@@ -1,5 +1,5 @@
 /**
- * Complete Multi-Step Live Browser Automation Test for Avinya Care Foundation
+ * Complete Multi-Step Live Browser Automation Test for AvinyaCareFoundation
  * Target URL: https://test.avinyacarefoundation.org/doctors.html
  */
 

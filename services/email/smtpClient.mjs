@@ -3,7 +3,7 @@ import tls from 'node:tls';
 import { readFileSync } from 'node:fs';
 
 /**
- * Avinya Care Foundation - Native Zero-Dependency SMTP/TLS Client
+ * AvinyaCareFoundation - Native Zero-Dependency SMTP/TLS Client
  * Connects directly to SMTP servers (Hostinger, Gmail, SendGrid, MailHog, etc.)
  * Supports direct SSL/TLS (port 465), plain text (port 1025/25/587), and AUTH LOGIN authentication.
  */
@@ -18,9 +18,9 @@ export function sendSmtpSocket(options, ...legacyArgs) {
       user,
       pass,
       from = 'info@test.avinyacarefoundation.org',
-      fromName = 'Avinya Care Foundation',
+      fromName = 'AvinyaCareFoundation',
       to,
-      subject = 'Avinya Care Notification',
+      subject = 'AvinyaCareFoundation Notification',
       htmlContent = '',
       textContent = '',
       replyTo,
@@ -35,7 +35,7 @@ export function sendSmtpSocket(options, ...legacyArgs) {
     subject = legacyArgs[3] || '';
     htmlContent = legacyArgs[4] || '';
     secure = port === 465;
-    fromName = 'Avinya Care Foundation';
+    fromName = 'AvinyaCareFoundation';
     attachments = [];
   }
 
@@ -103,7 +103,7 @@ export function sendSmtpSocket(options, ...legacyArgs) {
       `Message-ID: ${msgId}`,
       replyTo ? `Reply-To: <${replyTo}>` : `Reply-To: <${from}>`,
       `MIME-Version: 1.0`,
-      `X-Mailer: AvinyaCare-Native-SMTP/2.0`,
+      `X-Mailer: AvinyaCareFoundation-Native-SMTP/2.0`,
       `Content-Type: ${hasAttachments ? `multipart/related; boundary="${relatedBoundary}"` : `multipart/alternative; boundary="${boundary}"`}`,
       ``
     ];

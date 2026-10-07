@@ -1,6 +1,6 @@
 <?php
 /**
- * Avinya Care Foundation - High-Performance Cache Architecture & Invalidation Engine
+ * AvinyaCareFoundation - High-Performance Cache Architecture & Invalidation Engine
  * 
  * Multi-layer caching system supporting APCu memory cache with file-based JSON atomic fallback.
  * Provides tag/group invalidation, cache warming, and diagnostic health monitoring.

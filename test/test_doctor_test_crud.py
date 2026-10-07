@@ -58,7 +58,7 @@ def main():
             'specialityName': 'Radiation Oncology',
             'qualification': 'MBBS, MD',
             'experienceYears': 12,
-            'hospitalName': 'Avinya Care Center',
+            'hospitalName': 'AvinyaCareFoundation Center',
             'location': 'Mumbai',
             'consultationFee': 500,
             'feeDisplay': '₹500 (Subsidy)',

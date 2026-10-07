@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Form & AI Email System Test Suite
+ * AvinyaCareFoundation - Form & AI Email System Test Suite
  * Executes end-to-end verification of all 7 form types against the server API.
  */
 
@@ -145,7 +145,7 @@ function makePostRequest(urlStr, data) {
 
 async function runTestSuite() {
   console.log('=====================================================');
-  console.log('AVINYA CARE — AI EMAIL SYSTEM VERIFICATION TEST SUITE');
+  console.log('AvinyaCareFoundation — AI EMAIL SYSTEM VERIFICATION TEST SUITE');
   console.log('=====================================================\n');
 
   let passed = 0;
@@ -166,8 +166,8 @@ async function runTestSuite() {
         const adminSubj = d.adminEmail?.subject || '';
 
         // Validation Checks
-        const hasValidUserSubject = userSubj.endsWith('— Avinya Care Foundation');
-        const hasValidAdminSubject = adminSubj.startsWith('[Avinya Care]');
+        const hasValidUserSubject = userSubj.endsWith('— AvinyaCareFoundation');
+        const hasValidAdminSubject = adminSubj.startsWith('[AvinyaCareFoundation]');
         const hasSubmissionId = Boolean(d.submissionId && d.submissionId.startsWith('SUB-'));
         const hasTimestamp = Boolean(d.timestampIST && d.timestampIST.includes('IST'));
 

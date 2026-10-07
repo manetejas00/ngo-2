@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard — Avinya Care Foundation</title>
+  <title>Admin Dashboard — AvinyaCareFoundation</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
@@ -15,13 +15,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Admin Design System CSS -->
-  <link rel="stylesheet" href="css/admin.css?v=3.4">
+  <link rel="stylesheet" href="css/admin.css?v=4.0">
 
   <!-- External Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="js/services/pdf-service.js?v=3.4"></script>
+  <script src="js/services/pdf-service.js?v=3.5"></script>
 </head>
 <body>
 
@@ -33,7 +33,7 @@
   <div id="loginOverlay" class="login-overlay">
     <div class="login-card" style="max-width: 440px; padding: 32px;">
       <div style="text-align: center; margin-bottom: 24px;">
-        <img src="assets/logo.png" alt="Avinya Care Logo" style="width: 56px; height: 56px; border-radius: 50%; background: #FFF; padding: 4px; box-shadow: var(--shadow-md); margin-bottom: 12px;" onerror="this.src='favicon.svg'">
+        <img src="assets/logo.png" alt="AvinyaCareFoundation Logo" style="width: 56px; height: 56px; border-radius: 50%; background: #FFF; padding: 4px; box-shadow: var(--shadow-md); margin-bottom: 12px;" onerror="this.src='favicon.svg'">
         <h2 style="font-family: var(--font-heading); font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">Sign In to Admin Portal</h2>
         <p style="font-size: 13px; color: var(--text-muted);">Enter your credentials to access your dashboard</p>
       </div>
@@ -235,9 +235,9 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <a href="/" class="sidebar-logo">
-          <img src="assets/logo.png" alt="Avinya Care Logo" onerror="this.src='favicon.svg'">
+          <img src="assets/logo.png" alt="AvinyaCareFoundation Logo" onerror="this.src='favicon.svg'">
           <div class="sidebar-logo-text">
-            <div class="brand-name">Avinya Care</div>
+            <div class="brand-name">AvinyaCareFoundation</div>
             <div class="brand-tag">ADMIN DASHBOARD</div>
           </div>
         </a>
@@ -625,7 +625,7 @@
               <div style="display: flex; flex-direction: column; gap: 12px;">
                 <div>
                   <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Organization Name</label>
-                  <input type="text" id="setOrgName" class="form-control" value="Avinya Care Foundation">
+                  <input type="text" id="setOrgName" class="form-control" value="AvinyaCareFoundation">
                 </div>
                 <div>
                   <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Platform Tagline</label>
@@ -1158,7 +1158,7 @@
 
           <div class="form-group">
             <label>Photographer Credit</label>
-            <input type="text" id="galPhotographer" class="form-control" placeholder="Avinya Care Media Team">
+            <input type="text" id="galPhotographer" class="form-control" placeholder="AvinyaCareFoundation Media Team">
           </div>
 
           <div class="form-group">
@@ -1371,6 +1371,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
       initTheme();
       initSidebarCollapse();
+      initModalScrollCoordinator();
       initDoctorPresets();
       initDemoLoginVisibility();
       loadRealLoginAccounts();
@@ -1474,6 +1475,25 @@
       }
     }
 
+    // All admin dialogs use the same visibility contract, even though legacy
+    // handlers open some with an `active` class and others with display:flex.
+    // This observer keeps page scrolling locked only while one is visible and
+    // immediately restores it once the final dialog closes.
+    function initModalScrollCoordinator() {
+      const overlays = () => Array.from(document.querySelectorAll('.modal-overlay, .login-overlay'));
+      const isOpen = overlay => overlay.classList.contains('active') || overlay.style.display === 'flex' || overlay.style.display === 'block';
+      const sync = () => {
+        document.body.classList.toggle('modal-open', overlays().some(isOpen));
+      };
+
+      const observer = new MutationObserver(sync);
+      overlays().forEach(overlay => observer.observe(overlay, {
+        attributes: true,
+        attributeFilter: ['class', 'style']
+      }));
+      sync();
+    }
+
     function toggleMobileSidebar() {
       const sidebar = document.getElementById('sidebar');
       const overlay = document.getElementById('sidebarOverlay');
@@ -1484,7 +1504,7 @@
       } else {
         sidebar.classList.add('mobile-open');
         overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        document.body.classList.add('sidebar-open');
       }
     }
 
@@ -1493,7 +1513,7 @@
       const overlay = document.getElementById('sidebarOverlay');
       if (sidebar) sidebar.classList.remove('mobile-open');
       if (overlay) overlay.classList.remove('active');
-      document.body.style.overflow = '';
+      document.body.classList.remove('sidebar-open');
     }
 
     function toggleUserDropdown(event) {
@@ -3391,7 +3411,7 @@
 
     function exportPDF() {
       let data = [];
-      const title = `Avinya Care Foundation - ${currentTab.toUpperCase()} Official Report`;
+      const title = `AvinyaCareFoundation - ${currentTab.toUpperCase()} Official Report`;
 
       if (currentTab.startsWith('forms')) {
         data = rawData.formSubmissions || [];
@@ -3420,7 +3440,7 @@
 
     function exportCSV() {
       let data = [];
-      let filename = `AvinyaCare_${currentTab}_export.csv`;
+      let filename = `AvinyaCareFoundation_${currentTab}_export.csv`;
 
       if (currentTab.startsWith('forms')) {
         data = rawData.formSubmissions;

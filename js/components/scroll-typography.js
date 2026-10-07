@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - NestJS Cinematic Scroll Typography & Floating Particle Engine
+ * AvinyaCareFoundation - NestJS Cinematic Scroll Typography & Floating Particle Engine
  * Word-by-word scroll-controlled text illumination with smooth sentence cross-fading & particle parallax.
  */
 

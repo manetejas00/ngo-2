@@ -85,7 +85,7 @@ $articles = [];
 
 foreach ($defaultEndpoints as $url => $providerName) {
     try {
-        $context = stream_context_create(['http' => ['timeout' => 3, 'header' => "User-Agent: AvinyaCareGlobalNews/1.0\r\n"]]);
+        $context = stream_context_create(['http' => ['timeout' => 3, 'header' => "User-Agent: AvinyaCareFoundationGlobalNews/1.0\r\n"]]);
         $jsonStr = @file_get_contents($url, false, $context);
         if ($jsonStr) {
             $data = json_decode($jsonStr, true);
@@ -108,7 +108,10 @@ foreach ($defaultEndpoints as $url => $providerName) {
                             'apiProvider' => $providerName,
                             'publishedAt' => $art['publishedAt'] ?? date('c'),
                             'url' => $artUrl,
-                            'urlToImage' => !empty($art['urlToImage']) ? $art['urlToImage'] : 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=800&q=80',
+                            // Keep the external API image value untouched. The
+                            // frontend validates it and uses its single branded
+                            // template when it is missing or cannot load.
+                            'urlToImage' => isset($art['urlToImage']) && is_string($art['urlToImage']) ? trim($art['urlToImage']) : null,
                             'isAIGenerated' => false
                         ];
                     }

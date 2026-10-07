@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - NestJS Champion CTA Manifesto Engine
+ * AvinyaCareFoundation - NestJS Champion CTA Manifesto Engine
  * Handles word-by-word scroll text illumination, 5-stage node sequence, central organic heart glow, and interactive particle depth.
  */
 

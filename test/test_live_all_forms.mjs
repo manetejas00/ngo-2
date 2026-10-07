@@ -1,5 +1,5 @@
 /**
- * Comprehensive Live End-to-End Test Suite for Avinya Care Foundation
+ * Comprehensive Live End-to-End Test Suite for AvinyaCareFoundation
  * Tests all form submissions and booking endpoints against live production servers:
  * - test.avinyacarefoundation.org
  * - avinyacarefoundation.org

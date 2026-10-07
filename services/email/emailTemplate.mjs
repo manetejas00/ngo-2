@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - HTML & Plain Text Email Template Engine
+ * AvinyaCareFoundation - HTML & Plain Text Email Template Engine
  * Wraps AI-generated content in brand-aligned, responsive HTML templates with strict security escaping.
  */
 
@@ -19,7 +19,7 @@ export function escapeHTML(str) {
 }
 
 const BRAND = Object.freeze({
-  name: 'Avinya Care Foundation',
+  name: 'AvinyaCareFoundation',
   trust: 'Registered Public Charitable Trust',
   email: 'info@avinyacarefoundation.com',
   phone: '+91 74474 41116',
@@ -57,11 +57,11 @@ function formatBodyParagraphs(text) {
  */
 export function renderUserEmail(emailContent, formData, formType) {
   const rawSubject = emailContent.subject || 'Thank You for Reaching Out';
-  const formattedSubject = `${rawSubject.replace(/\s*—\s*Avinya Care Foundation$/i, '')} — Avinya Care Foundation`;
+  const formattedSubject = `${rawSubject.replace(/\s*—\s*AvinyaCareFoundation$/i, '')} — AvinyaCareFoundation`;
 
   const greeting = escapeHTML(emailContent.greeting || `Hello ${formData.name || 'Friend'},`);
   const bodyHTML = formatBodyParagraphs(emailContent.body);
-  const closingHTML = formatBodyParagraphs(emailContent.closing || 'With care,\nAvinya Care Foundation');
+  const closingHTML = formatBodyParagraphs(emailContent.closing || 'With care,\nAvinyaCareFoundation');
   const donationSummaryHTML = renderDonationSummary(formData, formType);
 
   const html = `<!DOCTYPE html>
@@ -84,7 +84,7 @@ export function renderUserEmail(emailContent, formData, formType) {
                 <tr>
                   <td align="center">
                     <div style="display: inline-block; background-color: #FFFFFF; border-radius: 50%; padding: 6px; box-shadow: 0 4px 12px rgba(245, 130, 32, 0.3);">
-                      <img src="cid:avinya-logo" alt="Avinya Care Foundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;" />
+                      <img src="cid:avinya-logo" alt="AvinyaCareFoundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;" />
                     </div>
                   </td>
                 </tr>
@@ -121,7 +121,7 @@ export function renderUserEmail(emailContent, formData, formType) {
                 Email: <a href="mailto:${BRAND.email}" style="color: #F58220; text-decoration: none; font-weight: 500;">${BRAND.email}</a> | Helpline: <a href="tel:${BRAND.phone.replace(/\s/g, '')}" style="color: #F58220; text-decoration: none; font-weight: 500;">${BRAND.phone}</a><br>${BRAND.website}
               </p>
               <p style="margin: 0; font-size: 11px; color: #737373; border-top: 1px dashed #404040; padding-top: 10px;">
-                <strong>Medical & Legal Disclaimer:</strong> Avinya Care Foundation communications provide general cancer awareness and support navigation. We do not provide medical diagnoses, treatment prescriptions, or clinical medical advice. Please consult a registered medical oncologist for health concerns.
+                <strong>Medical & Legal Disclaimer:</strong> AvinyaCareFoundation communications provide general cancer awareness and support navigation. We do not provide medical diagnoses, treatment prescriptions, or clinical medical advice. Please consult a registered medical oncologist for health concerns.
               </p>
             </td>
           </tr>
@@ -133,14 +133,14 @@ export function renderUserEmail(emailContent, formData, formType) {
 </body>
 </html>`;
 
-  const text = `AVINYA CARE FOUNDATION
+  const text = `AvinyaCareFoundation
 ${formattedSubject}
 
 ${emailContent.greeting || `Hello ${formData.name || 'Friend'},`}
 
 ${emailContent.body || ''}
 
-${emailContent.closing || 'With care,\nAvinya Care Foundation'}
+${emailContent.closing || 'With care,\nAvinyaCareFoundation'}
 
 ------------------------------------------------
 Cancer Awareness • Support • Care • Community
@@ -166,12 +166,12 @@ Medical Disclaimer: General cancer awareness and support navigation only. Not me
  */
 export function renderAdminEmail(emailContent, formData, formType, submissionId, timestampIST) {
   const rawSubject = emailContent.subject || `New ${formType} Submission — ${formData.name || 'Website User'}`;
-  const cleanSubject = rawSubject.replace(/^\[Avinya Care\]\s*/i, '');
-  const formattedSubject = `[Avinya Care] ${cleanSubject}`;
+  const cleanSubject = rawSubject.replace(/^\[AvinyaCareFoundation\]\s*/i, '');
+  const formattedSubject = `[AvinyaCareFoundation] ${cleanSubject}`;
 
   const summaryHTML = formatBodyParagraphs(emailContent.summary);
   const actionHTML = formatBodyParagraphs(emailContent.recommendedAction || 'Review submission and follow up as necessary.');
-  const closingHTML = formatBodyParagraphs(emailContent.closing || 'Avinya Care Operations System');
+  const closingHTML = formatBodyParagraphs(emailContent.closing || 'AvinyaCareFoundation Operations System');
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -193,7 +193,7 @@ export function renderAdminEmail(emailContent, formData, formType, submissionId,
                 <tr>
                   <td valign="middle" style="width: 44px;">
                     <div style="background-color: #FFFFFF; border-radius: 50%; padding: 4px; display: inline-block;">
-                      <img src="cid:avinya-logo" alt="Avinya Care" width="36" height="36" style="display: block; width: 36px; height: 36px; border: 0; border-radius: 50%; object-fit: contain;" />
+                      <img src="cid:avinya-logo" alt="AvinyaCareFoundation" width="36" height="36" style="display: block; width: 36px; height: 36px; border: 0; border-radius: 50%; object-fit: contain;" />
                     </div>
                   </td>
                   <td valign="middle" style="padding-left: 12px;">
@@ -250,7 +250,7 @@ export function renderAdminEmail(emailContent, formData, formType, submissionId,
 </body>
 </html>`;
 
-  const text = `AVINYA CARE OPERATIONAL ALERT
+  const text = `AvinyaCareFoundation OPERATIONAL ALERT
 ${formattedSubject}
 
 Form Type: ${formType.toUpperCase()}
@@ -264,7 +264,7 @@ ${emailContent.summary || ''}
 RECOMMENDED ACTION:
 ${emailContent.recommendedAction || ''}
 
-${emailContent.closing || 'Avinya Care Operations Desk'}`;
+${emailContent.closing || 'AvinyaCareFoundation Operations Desk'}`;
 
   return {
     subject: formattedSubject,

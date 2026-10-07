@@ -1,7 +1,31 @@
 /**
- * Avinya Care Foundation - Modern Editorial Health & Cancer Newsroom
+ * AvinyaCareFoundation - Modern Editorial Health & Cancer Newsroom
  * NestJS Red + Black + White Editorial Layout featuring Lead Banner Article, Grid Stories, Gemini AI Synthesizer, Category Tabs, and Full-Screen Reader Modal.
  */
+
+// News visuals are API-first. This is the one deliberately local asset and is
+// used only when an API-supplied image is missing, malformed, or fails to load.
+const NEWS_TEMPLATE_IMAGE = '/assets/images/news/news-placeholder.webp';
+
+function resolveNewsImage(apiImage) {
+  if (typeof apiImage !== 'string' || !apiImage.trim()) return NEWS_TEMPLATE_IMAGE;
+
+  try {
+    const url = new URL(apiImage.trim(), window.location.origin);
+    // HTTP images would be blocked as mixed content on HTTPS pages. Do not
+    // silently substitute a different article image; use the single template.
+    return url.protocol === 'https:' ? url.href : NEWS_TEMPLATE_IMAGE;
+  } catch (_) {
+    return NEWS_TEMPLATE_IMAGE;
+  }
+}
+
+function renderNewsImage(apiImage, alt, className) {
+  const imageUrl = resolveNewsImage(apiImage);
+  return `<img src="${imageUrl}" alt="${alt}" class="${className}" loading="lazy" decoding="async"
+    onload="this.closest('.news-image-box, .news-featured-image-box, .news-detail-image-box')?.classList.remove('is-loading')"
+    onerror="if (this.dataset.fallbackApplied) return; this.dataset.fallbackApplied = 'true'; this.src = '${NEWS_TEMPLATE_IMAGE}';">`;
+}
 
 class NewsUI {
   constructor() {
@@ -145,7 +169,7 @@ class NewsUI {
         {
           id: "gemini-ai-rural-mobile-screening",
           title: "Mobile AI Diagnostic Vans Expand Early Oral & Cervical Screening Across Maharashtra",
-          description: "Avinya Care Foundation and regional health networks deploy solar-powered diagnostic vans equipped with portable colposcopy and AI-assisted oral visual examination tools for underserved rural communities.",
+          description: "AvinyaCareFoundation and regional health networks deploy solar-powered diagnostic vans equipped with portable colposcopy and AI-assisted oral visual examination tools for underserved rural communities.",
           category: "Early Detection",
           image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80"
         },
@@ -393,23 +417,19 @@ class NewsUI {
   appendArticles(articles) {
     if (!this.container || articles.length === 0) return;
 
-    const html = articles.map((article, idx) => {
+    const html = articles.map((article) => {
       const formattedDate = new Date(article.publishedAt).toLocaleDateString('en-US', {
         month: 'short', day: 'numeric', year: 'numeric'
       });
-      const cardFallback = INDIAN_HEALTHCARE_IMAGE_POOL[idx % INDIAN_HEALTHCARE_IMAGE_POOL.length];
-      const imageUrl = (article.urlToImage && typeof article.urlToImage === 'string' && article.urlToImage.startsWith('http')) 
-        ? article.urlToImage 
-        : cardFallback;
       const badge = article.isAIGenerated 
         ? `<span class="ai-generated-badge">✦ AI INSIGHT</span>` 
         : `<span class="live-news-badge">${article.apiProvider || '🌐 GLOBAL HEALTH'}</span>`;
 
       return `
         <article class="news-card" data-news-appended="true" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
-          <div class="news-image-box">
+          <div class="news-image-box is-loading">
             <span class="news-category-badge" style="position: absolute; top: 1rem; left: 1rem; z-index: 2; background: rgba(10,10,10,0.85); color: white;">${article.category || 'Health'}</span>
-            <img src="${imageUrl}" alt="${article.title}" class="news-image" onerror="this.src='${cardFallback}'" loading="lazy">
+            ${renderNewsImage(article.urlToImage, article.title, 'news-image')}
           </div>
           <div class="news-content">
             <div>
@@ -446,21 +466,19 @@ class NewsUI {
 
     const featured = articles[0];
     const gridStories = articles.slice(1);
-    const featuredFallback = INDIAN_HEALTHCARE_IMAGE_POOL[0];
 
     // 1. Featured Lead Story Banner HTML
     const featuredDate = new Date(featured.publishedAt).toLocaleDateString('en-US', {
       month: 'short', day: 'numeric', year: 'numeric'
     });
-    const featuredImg = (featured.urlToImage && typeof featured.urlToImage === 'string' && featured.urlToImage.startsWith('http')) ? featured.urlToImage : featuredFallback;
     const featuredBadge = featured.isAIGenerated 
       ? `<span class="ai-generated-badge">✦ AI INSIGHT</span>` 
       : `<span class="live-news-badge">🌐 DAILY HEALTH DESK</span>`;
 
     let html = `
       <div class="news-featured-lead" onclick="window.AvinyaNewsUI.openArticleDetail('${featured.id}')" style="grid-column: 1 / -1;">
-        <div class="news-featured-image-box">
-          <img src="${featuredImg}" alt="${featured.title}" class="news-featured-image" onerror="this.src='${featuredFallback}'" loading="lazy">
+        <div class="news-featured-image-box is-loading">
+          ${renderNewsImage(featured.urlToImage, featured.title, 'news-featured-image')}
         </div>
         <div class="news-featured-content">
           <div class="news-tag-group">
@@ -483,23 +501,19 @@ class NewsUI {
 
     // 2. Secondary Editorial Grid Stories HTML
     if (gridStories.length > 0) {
-      html += gridStories.map((article, idx) => {
+      html += gridStories.map((article) => {
         const formattedDate = new Date(article.publishedAt).toLocaleDateString('en-US', {
           month: 'short', day: 'numeric', year: 'numeric'
         });
-        const cardFallback = INDIAN_HEALTHCARE_IMAGE_POOL[(idx + 1) % INDIAN_HEALTHCARE_IMAGE_POOL.length];
-        const imageUrl = (article.urlToImage && typeof article.urlToImage === 'string' && article.urlToImage.startsWith('http')) 
-          ? article.urlToImage 
-          : cardFallback;
         const badge = article.isAIGenerated 
           ? `<span class="ai-generated-badge">✦ AI INSIGHT</span>` 
           : `<span class="live-news-badge">${article.apiProvider || '🌐 GLOBAL HEALTH'}</span>`;
 
         return `
           <article class="news-card" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
-            <div class="news-image-box">
+            <div class="news-image-box is-loading">
               <span class="news-category-badge" style="position: absolute; top: 1rem; left: 1rem; z-index: 2; background: rgba(10,10,10,0.85); color: white;">${article.category || 'Health'}</span>
-              <img src="${imageUrl}" alt="${article.title}" class="news-image" onerror="this.src='${cardFallback}'" loading="lazy">
+              ${renderNewsImage(article.urlToImage, article.title, 'news-image')}
             </div>
             <div class="news-content">
               <div>
@@ -525,6 +539,8 @@ class NewsUI {
     if (!article) article = this.service.getArticleById(articleId);
     if (!article) return;
 
+    if (window.AvinyaAnalytics) window.AvinyaAnalytics.event('news_article_viewed');
+
     window.history.pushState(null, '', `#news/${encodeURIComponent(article.id)}`);
     this.renderDetailModal(article);
   }
@@ -544,8 +560,6 @@ class NewsUI {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
-    const fallbackImg = "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80";
-    const imageUrl = (article.urlToImage && article.urlToImage.startsWith("http")) ? article.urlToImage : INDIAN_HEALTHCARE_IMAGE_POOL[idx % INDIAN_HEALTHCARE_IMAGE_POOL.length];
     const related = this.service.getRelatedArticles(article, 3);
 
     modal.innerHTML = `
@@ -565,13 +579,13 @@ class NewsUI {
             ${article.url && article.url !== '#' ? `<a href="${article.url}" target="_blank" rel="noopener noreferrer" style="color: var(--brand); font-weight: 700;">View Original Article ↗</a>` : ''}
           </div>
 
-          <div style="width: 100%; height: 360px; border-radius: 16px; overflow: hidden; margin-bottom: 2.2rem; background: var(--black);">
-            <img src="${imageUrl}" alt="${article.title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='${fallbackImg}'">
+          <div class="news-detail-image-box is-loading">
+            ${renderNewsImage(article.urlToImage, article.title, 'news-detail-image')}
           </div>
 
           <div style="font-size: 1.12rem; line-height: 1.8; color: var(--gray-900); margin-bottom: 2.5rem;">
             <p style="margin-bottom: 1.5rem; font-weight: 600; font-size: 1.2rem; color: var(--gray-900);">${article.description}</p>
-            <p style="margin-bottom: 1.5rem;">Clinical awareness and timely diagnostic interventions form the cornerstone of effective oncology care. At Avinya Care Foundation, our mission is ensuring every individual has access to reliable health guidance, early screening facilities, and compassionate support throughout their journey.</p>
+            <p style="margin-bottom: 1.5rem;">Clinical awareness and timely diagnostic interventions form the cornerstone of effective oncology care. At AvinyaCareFoundation, our mission is ensuring every individual has access to reliable health guidance, early screening facilities, and compassionate support throughout their journey.</p>
             <p>Through community health programs and medical partnerships across India, early detection rates continue to improve, helping patients receive targeted therapy when it is most effective.</p>
           </div>
 

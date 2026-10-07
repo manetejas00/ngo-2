@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Doctors & Diagnostic Page Microscopic Canvas Engine
+ * AvinyaCareFoundation - Doctors & Diagnostic Page Microscopic Canvas Engine
  * High-Performance, Anti-Jitter 60FPS Frame-by-Frame Scroll Renderer
  */
 

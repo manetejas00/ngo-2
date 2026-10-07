@@ -1,6 +1,6 @@
 <?php
 /**
- * Avinya Care Foundation - Shared PHP Rate Limiter
+ * AvinyaCareFoundation - Shared PHP Rate Limiter
  * Enforces IP-based rate limits across all PHP API endpoints.
  */
 

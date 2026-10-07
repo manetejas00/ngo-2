@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - NestJS 3D Overlapping Card Deck Controller (#journey)
+ * AvinyaCareFoundation - NestJS 3D Overlapping Card Deck Controller (#journey)
  * Uses GSAP ScrollTrigger + matchMedia for responsive desktop/tablet/mobile horizontal pin animation.
  */
 

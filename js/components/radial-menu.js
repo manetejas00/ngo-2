@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Premium GSAP Radial Floating Action Menu (FAB)
+ * AvinyaCareFoundation - Premium GSAP Radial Floating Action Menu (FAB)
  * Includes 6 Radial Spring Actions: WhatsApp, Instagram, Facebook, LinkedIn, Scroll to Top, Scroll to Bottom.
  * High-Contrast Crisp Icons, Compact Radial Arc, & Full Page GSAP Smooth Scroll.
  */
@@ -359,7 +359,7 @@ class RadialMenuEngine {
    */
   async handleShare() {
     const shareData = {
-      title: document.title || 'Avinya Care Foundation',
+      title: document.title || 'AvinyaCareFoundation',
       text: 'Empowering communities through accessible healthcare & compassionate aid.',
       url: window.location.href
     };

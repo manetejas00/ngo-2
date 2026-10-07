@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - GSAP Dynamic Island Orchestrated Navbar Controller
+ * AvinyaCareFoundation - GSAP Dynamic Island Orchestrated Navbar Controller
  * Inspired by GreenSock (GreenSock/pen/JoRMPLg) - Asymmetric easeReverse Navigation Engine
  */
 

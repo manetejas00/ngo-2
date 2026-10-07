@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Unified PDF Generator Service
+ * AvinyaCareFoundation - Unified PDF Generator Service
  * Renders high-resolution, pixel-perfect official documents on the brand letterhead.
  * Supports:
  * 1. Cancer Awareness Guide & Health Screening Checklist
@@ -12,7 +12,7 @@
 class AvinyaPdfService {
   constructor() {
     this.brand = {
-      name: 'Avinya Care Foundation',
+      name: 'AvinyaCareFoundation',
       trust: 'Registered Public Charitable Trust',
       verification: 'NITI Aayog NGO Darpan Verified',
       address: '12 Yehsubal Apt, Narangi Phata, Virar East, Palghar, Maharashtra – 401303',
@@ -225,7 +225,7 @@ class AvinyaPdfService {
     return `
       <div class="avinya-document-header">
         <table role="presentation"><tr>
-          <td class="brand-mark"><img src="assets/logo.png" alt="Avinya Care Foundation logo"></td>
+          <td class="brand-mark"><img src="assets/logo.png" alt="AvinyaCareFoundation logo"></td>
           <td>
             <div class="brand-name">${this.brand.name}</div>
             <div class="brand-meta">${this.brand.trust} · ${this.brand.verification}<br>${this.brand.address}</div>
@@ -401,7 +401,7 @@ class AvinyaPdfService {
       </div>
 
       <div style="background: #EFF6FF; border: 1.5px dashed #93C5FD; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;">
-        <div style="font-weight: 800; color: #1E40AF; font-size: 12.5px; margin-bottom: 4px;">📞 Avinya Care Free Patient Navigation & Subsidized Screening Helpline:</div>
+        <div style="font-weight: 800; color: #1E40AF; font-size: 12.5px; margin-bottom: 4px;">📞 AvinyaCareFoundation Free Patient Navigation & Subsidized Screening Helpline:</div>
         <div style="font-size: 11.5px; color: #1E3A8A; line-height: 1.5;">
           Need clinical consultation or subsidized diagnostic tests? Contact our Virar-Mumbai care desk at <strong>${this.brand.phone}</strong> or email <strong>${this.brand.email}</strong>.
         </div>
@@ -409,7 +409,7 @@ class AvinyaPdfService {
 
       <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 14px; font-size: 10px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 8px;">
         <div>
-          <div>Avinya Care Foundation • Reg. Public Charitable Trust • NITI Aayog NGO Darpan Verified</div>
+          <div>AvinyaCareFoundation • Reg. Public Charitable Trust • NITI Aayog NGO Darpan Verified</div>
           <div>12 Yehsubal Apt, Narangi Phata, Virar East, Palghar, Maharashtra - 401303</div>
         </div>
         <div style="text-align: right; font-weight: 700; color: #087F73;">
@@ -418,7 +418,7 @@ class AvinyaPdfService {
       </div>
     `;
 
-    this.showPreviewModal(sheetHtml, `AvinyaCare_Cancer_Awareness_Checklist.pdf`);
+    this.showPreviewModal(sheetHtml, `AvinyaCareFoundation_Cancer_Awareness_Checklist.pdf`);
   }
 
   // -------------------------------------------------------------
@@ -483,12 +483,12 @@ class AvinyaPdfService {
       <!-- Statutory Exemption Details -->
       <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; padding: 8px 12px; margin-bottom: 14px; font-size: 11px; color: #92400E; line-height: 1.5;">
         <strong>🏛️ Statutory Tax Exemption Declaration:</strong><br>
-        Donations made to Avinya Care Foundation are eligible for deduction under <strong>Section 80G(5)(vi)</strong> of the Income Tax Act, 1961. This receipt qualifies for Form 10BE statutory filing with the Income Tax Department of India.
+        Donations made to AvinyaCareFoundation are eligible for deduction under <strong>Section 80G(5)(vi)</strong> of the Income Tax Act, 1961. This receipt qualifies for Form 10BE statutory filing with the Income Tax Department of India.
       </div>
 
       <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; margin-top: 10px; align-items: flex-end;">
         <div style="font-size: 10.5px; color: #64748B; line-height: 1.5;">
-          <strong>Avinya Care Foundation Statutory Particulars:</strong><br>
+          <strong>AvinyaCareFoundation Statutory Particulars:</strong><br>
           • <strong>PAN:</strong> ${this.brand.pan} | <strong>12A Reg:</strong> ${this.brand.reg12a}<br>
           • <strong>80G URN:</strong> ${this.brand.urn80g} | <strong>CSR-1 Reg:</strong> ${this.brand.csr}<br>
           • <strong>NITI Aayog NGO Darpan ID:</strong> ${this.brand.ngoId}
@@ -498,12 +498,12 @@ class AvinyaPdfService {
             Tejas S. Mane
           </div>
           <div style="font-size: 11px; font-weight: 700; color: #0f172a;">Authorized Trustee & Signatory</div>
-          <div style="font-size: 9.5px; color: #64748B;">Avinya Care Foundation</div>
+          <div style="font-size: 9.5px; color: #64748B;">AvinyaCareFoundation</div>
         </div>
       </div>
       ${this.getDocumentFooterHtml('Donation receipt')}`;
 
-    this.showPreviewModal(sheetHtml, `AvinyaCare_80G_Receipt_${receiptNo}.pdf`);
+    this.showPreviewModal(sheetHtml, `AvinyaCareFoundation_80G_Receipt_${receiptNo}.pdf`);
   }
 
   // -------------------------------------------------------------
@@ -569,16 +569,16 @@ class AvinyaPdfService {
         <strong>📋 Instructions for Consultation:</strong><br>
         1. Please arrive 15 minutes prior to the scheduled slot.<br>
         2. Bring all prior investigation reports, prescriptions, biopsy findings, and medical history documents.<br>
-        3. For assistance or rescheduling, contact Avinya Care Helpline at <strong>${this.brand.phone}</strong>.
+        3. For assistance or rescheduling, contact AvinyaCareFoundation Helpline at <strong>${this.brand.phone}</strong>.
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E2E8F0; padding-top: 8px; font-size: 10px; color: #64748B;">
-        <div>Avinya Care Foundation • Healthcare Coordination Desk</div>
+        <div>AvinyaCareFoundation • Healthcare Coordination Desk</div>
         <div>System Verified Pass • ID: ${aptId}</div>
       </div>
     `;
 
-    this.showPreviewModal(sheetHtml, `AvinyaCare_Appointment_${aptId}.pdf`);
+    this.showPreviewModal(sheetHtml, `AvinyaCareFoundation_Appointment_${aptId}.pdf`);
   }
 
   // -------------------------------------------------------------
@@ -651,18 +651,18 @@ class AvinyaPdfService {
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E2E8F0; padding-top: 8px; font-size: 10px; color: #64748B;">
-        <div>Avinya Care Diagnostic Network • NABL Accredited Partner Labs</div>
+        <div>AvinyaCareFoundation Diagnostic Network • NABL Accredited Partner Labs</div>
         <div>Order Ref: ${orderId}</div>
       </div>
     `;
 
-    this.showPreviewModal(sheetHtml, `AvinyaCare_Diagnostic_Order_${orderId}.pdf`);
+    this.showPreviewModal(sheetHtml, `AvinyaCareFoundation_Diagnostic_Order_${orderId}.pdf`);
   }
 
   // -------------------------------------------------------------
   // 5. ADMIN SUMMARY REPORT & MEMORANDUM PDF
   // -------------------------------------------------------------
-  generateReportPDF(title = 'Avinya Care Platform Report', columns = [], rows = []) {
+  generateReportPDF(title = 'AvinyaCareFoundation Platform Report', columns = [], rows = []) {
     const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
     const sheetHtml = `
       ${this.getLetterheadDataHtml()}
@@ -674,7 +674,7 @@ class AvinyaPdfService {
         </div>
         <div style="text-align: right;">
           <div style="font-size: 10px; font-weight: 700; color: #475569;">CONFIDENTIAL</div>
-          <div style="font-size: 10px; color: #087F73; font-weight: 700;">Avinya Care Foundation</div>
+          <div style="font-size: 10px; color: #087F73; font-weight: 700;">AvinyaCareFoundation</div>
         </div>
       </div>
 
@@ -698,7 +698,7 @@ class AvinyaPdfService {
       ${rows.length > 15 ? `<div style="font-size: 10px; color: #64748B; margin-bottom: 12px; font-style: italic;">* Showing top 15 records of ${rows.length} total entries. Complete dataset exported in system logs.</div>` : ''}
 
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E2E8F0; padding-top: 8px; font-size: 10px; color: #64748B;">
-        <div>Avinya Care Foundation • Central Operational Audit & Intelligence</div>
+        <div>AvinyaCareFoundation • Central Operational Audit & Intelligence</div>
         <div>Page 1 of 1</div>
       </div>
     `;
@@ -751,12 +751,12 @@ class AvinyaPdfService {
       </table>
 
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E2E8F0; padding-top: 8px; font-size: 10px; color: #64748B;">
-        <div>Avinya Care Foundation • Official Registry</div>
+        <div>AvinyaCareFoundation • Official Registry</div>
         <div>System Verified</div>
       </div>
     `;
 
-    this.showPreviewModal(sheetHtml, `AvinyaCare_${category}_${id}.pdf`);
+    this.showPreviewModal(sheetHtml, `AvinyaCareFoundation_${category}_${id}.pdf`);
   }
 }
 

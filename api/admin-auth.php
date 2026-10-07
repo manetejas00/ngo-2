@@ -1,6 +1,6 @@
 <?php
 /**
- * Avinya Care Foundation - Admin & Role-Based Authentication Endpoint
+ * AvinyaCareFoundation - Admin & Role-Based Authentication Endpoint
  * Supports Super Admin, Doctor, and Diagnostic Provider Accounts
  */
 
@@ -380,7 +380,7 @@ if ($action === 'forgot_password') {
             $log = $pdo->prepare("INSERT INTO `email_logs` (`reference_id`, `form_or_booking_type`, `recipient_role`, `recipient_email`, `subject`, `smtp_status`, `delivery_method`, `error_message`) VALUES (:ref, 'PASSWORD_RESET', 'user', :email, :subject, :status, 'HOSTINGER_SSL_SMTP', :error)");
             $log->execute([
                 ':ref' => 'RESET-' . bin2hex(random_bytes(8)), ':email' => $email,
-                ':subject' => $mail['subject'] ?? 'Password Reset — Avinya Care Foundation', ':status' => $smtpStatus,
+                ':subject' => $mail['subject'] ?? 'Password Reset — AvinyaCareFoundation', ':status' => $smtpStatus,
                 ':error' => $mail['error'] ?? null
             ]);
             if (empty($mail['sent'])) {

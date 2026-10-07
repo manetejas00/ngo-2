@@ -5,7 +5,7 @@ if (!/^https:\/\//.test(base)) {
 }
 
 const checks = [
-  { path: '/', type: 'text', contains: 'Avinya Care' },
+  { path: '/', type: 'text', contains: 'AvinyaCareFoundation' },
   { path: '/doctors.html', type: 'text', contains: 'Doctors & Diagnostic Tests' },
   { path: '/admin.html', type: 'text', contains: 'Admin Dashboard' },
   { path: '/assets/logo.png', type: 'asset' },

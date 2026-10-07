@@ -51,7 +51,7 @@ final class AppointmentEmailService {
         $user = bookingEmailEnv('SMTP_USER', $defaultUser);
         $pass = bookingEmailEnv('SMTP_PASS');
         $from = bookingEmailEnv('SMTP_FROM', $user);
-        $fromName = bookingEmailEnv('SMTP_FROM_NAME', 'Avinya Care Foundation');
+        $fromName = bookingEmailEnv('SMTP_FROM_NAME', 'AvinyaCareFoundation');
         if ($host === '' || $user === '' || $pass === '' || $from === '') return $this->event('skipped', $attemptedAt, 'Email provider is not configured.');
 
         $secure = filter_var(bookingEmailEnv('SMTP_SECURE', $port === 465 ? 'true' : 'false'), FILTER_VALIDATE_BOOLEAN);
@@ -70,13 +70,13 @@ final class AppointmentEmailService {
             $this->command($socket, 'RCPT TO:<' . $to . '>', [250, 251]);
             $this->command($socket, 'DATA', [354]);
 
-            $subject = (!empty($booking['_adminRecord']) ? '[Admin Record] ' : '') . 'Appointment Confirmed — ' . (string) ($booking['id'] ?? 'Avinya Care');
+            $subject = (!empty($booking['_adminRecord']) ? '[Admin Record] ' : '') . 'Appointment Confirmed — ' . (string) ($booking['id'] ?? 'AvinyaCareFoundation');
             $boundary = '=_AvinyaLogo_' . bin2hex(random_bytes(8));
             $headers = [
                 'From: ' . $fromName . ' <' . $from . '>', 'To: <' . $to . '>',
                 'Subject: =?UTF-8?B?' . base64_encode($subject) . '?=', 'MIME-Version: 1.0',
                 'Content-Type: multipart/related; boundary="' . $boundary . '"',
-                'X-Mailer: AvinyaCare-Booking/1.0'
+                'X-Mailer: AvinyaCareFoundation-Booking/1.0'
             ];
             $body = $this->template($booking);
             $mimeBody = $this->inlineLogoMimeBody($body, $boundary);
@@ -150,20 +150,20 @@ final class AppointmentEmailService {
     private function template(array $booking): string {
         $name = emailHtml((string) ($booking['patientName'] ?? 'Patient'));
         $id = emailHtml((string) ($booking['id'] ?? ''));
-        $doctor = emailHtml((string) ($booking['doctorName'] ?? 'Avinya Care Specialist'));
+        $doctor = emailHtml((string) ($booking['doctorName'] ?? 'AvinyaCareFoundation Specialist'));
         $speciality = emailHtml((string) ($booking['doctorSpeciality'] ?? 'Medical Consultation'));
         $date = emailHtml((string) ($booking['date'] ?? ''));
         $time = emailHtml((string) ($booking['time'] ?? $booking['slot'] ?? ''));
         $mode = emailHtml((string) ($booking['consultationType'] ?? 'in-clinic'));
-        $hospital = emailHtml((string) ($booking['doctorHospital'] ?? 'Avinya Care Foundation'));
+        $hospital = emailHtml((string) ($booking['doctorHospital'] ?? 'AvinyaCareFoundation'));
         return '<!doctype html><html><body style="margin:0;background:#F6F4EF;font-family:Arial,sans-serif;color:#111817">'
             . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:28px 14px;background:#F6F4EF"><tr><td align="center">'
             . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#fff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">'
-            . '<tr><td style="background:#0A0A0A;padding:28px 32px;text-align:center;color:#fff;border-bottom:3px solid #F47528"><div style="display:inline-block;background:#fff;border-radius:50%;padding:6px;margin-bottom:12px;box-shadow:0 4px 12px rgba(244,117,40,.3)"><img src="cid:avinya-logo" alt="Avinya Care Foundation" width="56" height="56" style="display:block;width:56px;height:56px;border:0;border-radius:50%;object-fit:contain"></div><div style="color:#F58220;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase">AVINYA CARE HEALTHCARE PLATFORM</div><h1 style="margin:6px 0 0;font-size:20px">Appointment Confirmed</h1></td></tr>'
+            . '<tr><td style="background:#0A0A0A;padding:28px 32px;text-align:center;color:#fff;border-bottom:3px solid #F47528"><div style="display:inline-block;background:#fff;border-radius:50%;padding:6px;margin-bottom:12px;box-shadow:0 4px 12px rgba(244,117,40,.3)"><img src="cid:avinya-logo" alt="AvinyaCareFoundation" width="56" height="56" style="display:block;width:56px;height:56px;border:0;border-radius:50%;object-fit:contain"></div><div style="color:#F58220;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase">AvinyaCareFoundation HEALTHCARE PLATFORM</div><h1 style="margin:6px 0 0;font-size:20px">Appointment Confirmed</h1></td></tr>'
             . '<tr><td style="padding:34px"><p style="font-size:18px;font-weight:700;color:#087F73">Hi ' . $name . ',</p><p style="line-height:1.7">Your appointment has been successfully confirmed. Please keep the booking ID below for future reference.</p>'
             . '<div style="background:#F0FDFA;border-left:4px solid #087F73;border-radius:9px;padding:20px;margin:24px 0;line-height:1.9"><strong>Booking ID:</strong> ' . $id . '<br><strong>Doctor:</strong> ' . $doctor . '<br><strong>Service:</strong> ' . $speciality . '<br><strong>Date:</strong> ' . $date . '<br><strong>Time:</strong> ' . $time . '<br><strong>Mode:</strong> ' . $mode . '<br><strong>Location:</strong> ' . $hospital . '</div>'
-            . '<p style="line-height:1.7">If you need assistance, reply to this email or contact the Avinya Care team.</p><p style="margin-top:28px;color:#5F6865">With care,<br><strong style="color:#087F73">Avinya Care Foundation Team</strong></p></td></tr>'
-            . '<tr><td style="background:#0A0A0A;padding:24px 32px;text-align:center;color:#A3A3A3;font-size:11px;border-top:1px solid #262626"><strong style="display:block;color:#fff;font-size:13px;margin-bottom:6px">Avinya Care Foundation</strong>A humanitarian oncology and healthcare initiative.<br>80G &amp; 12A Tax Exempted under the Indian IT Act.</td></tr>'
+            . '<p style="line-height:1.7">If you need assistance, reply to this email or contact the AvinyaCareFoundation team.</p><p style="margin-top:28px;color:#5F6865">With care,<br><strong style="color:#087F73">AvinyaCareFoundation Team</strong></p></td></tr>'
+            . '<tr><td style="background:#0A0A0A;padding:24px 32px;text-align:center;color:#A3A3A3;font-size:11px;border-top:1px solid #262626"><strong style="display:block;color:#fff;font-size:13px;margin-bottom:6px">AvinyaCareFoundation</strong>A humanitarian oncology and healthcare initiative.<br>80G &amp; 12A Tax Exempted under the Indian IT Act.</td></tr>'
             . '</table></td></tr></table></body></html>';
     }
 }

@@ -1,7 +1,7 @@
 {
   "name": "avinya-care-ngo",
   "version": "3.3.0",
-  "description": "Avinya Care Foundation - Modern Healthcare & Cancer Awareness Platform",
+  "description": "AvinyaCareFoundation - Modern Healthcare & Cancer Awareness Platform",
   "main": "server.mjs",
   "type": "module",
   "scripts": {
@@ -20,7 +20,7 @@
     "healthcare",
     "node"
   ],
-  "author": "Avinya Care Foundation",
+  "author": "AvinyaCareFoundation",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"

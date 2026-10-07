@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Impact Metric Counter Animations
+ * AvinyaCareFoundation - Impact Metric Counter Animations
  */
 
 class ImpactCounters {

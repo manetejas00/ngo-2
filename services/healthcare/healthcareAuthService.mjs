@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Healthcare Authentication Service
+ * AvinyaCareFoundation - Healthcare Authentication Service
  * Cryptographic Password Hashing, Validation, and Password Reset Tokens
  */
 

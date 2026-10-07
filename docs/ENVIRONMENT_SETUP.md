@@ -1,6 +1,6 @@
-# Avinya Care Foundation — Official Branch & Environment Deployment Reference
+# AvinyaCareFoundation — Official Branch & Environment Deployment Reference
 
-This document defines the official Git Branching strategy, Environment Configuration rules, Hostinger MySQL parameters, and Deployment Workflow for the **Avinya Care Foundation** healthcare platform.
+This document defines the official Git Branching strategy, Environment Configuration rules, Hostinger MySQL parameters, and Deployment Workflow for the **AvinyaCareFoundation** healthcare platform.
 
 ---
 

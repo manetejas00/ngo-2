@@ -1,6 +1,6 @@
 <?php
 /**
- * Avinya Care Foundation - Public Gallery API
+ * AvinyaCareFoundation - Public Gallery API
  * Serves published gallery records with optional category filtering.
  */
 

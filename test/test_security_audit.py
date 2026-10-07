@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Avinya Care Foundation - Security & RBAC Audit Test Suite (Python)
+AvinyaCareFoundation - Security & RBAC Audit Test Suite (Python)
 """
 
 import sys
@@ -45,7 +45,7 @@ def make_request(path, method="GET", headers=None, data=None):
 
 def run_tests():
     print("====================================================")
-    print("  AVINYA CARE SECURITY & PRIVACY AUDIT TEST SUITE   ")
+    print("  AvinyaCareFoundation SECURITY & PRIVACY AUDIT TEST SUITE   ")
     print("====================================================\n")
 
     passed = 0

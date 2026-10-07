@@ -1,6 +1,6 @@
 <?php
 /**
- * Avinya Care Foundation - Auto-Migration & Re-seed Runner Endpoint
+ * AvinyaCareFoundation - Auto-Migration & Re-seed Runner Endpoint
  * Can be triggered via HTTP GET /api/migrate.php or deployment scripts
  */
 

@@ -12,7 +12,7 @@ function sendPasswordResetEmail(string $to, string $name, string $resetUrl, int 
     $user = resetMailEnv('SMTP_USER');
     $pass = resetMailEnv('SMTP_PASS');
     $from = resetMailEnv('SMTP_FROM', $user);
-    $fromName = resetMailEnv('SMTP_FROM_NAME', 'Avinya Care Foundation');
+    $fromName = resetMailEnv('SMTP_FROM_NAME', 'AvinyaCareFoundation');
 
     if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return ['sent' => false, 'error' => 'Invalid recipient address.'];
     if ($host === '' || $user === '' || $pass === '' || !filter_var($from, FILTER_VALIDATE_EMAIL)) {
@@ -42,16 +42,16 @@ function sendPasswordResetEmail(string $to, string $name, string $resetUrl, int 
 
     $safeName = htmlspecialchars($name !== '' ? $name : 'there', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $safeUrl = htmlspecialchars($resetUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-    $subject = 'Password Reset — Avinya Care Foundation';
+    $subject = 'Password Reset — AvinyaCareFoundation';
     $html = '<!doctype html><html><body style="margin:0;background:#f6f4ef;font-family:Arial,sans-serif;color:#111817">'
         . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:28px 14px"><tr><td align="center">'
         . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#fff;border:1px solid #e2e8f0;border-radius:16px">'
-        . '<tr><td style="background:#0a0a0a;padding:28px;text-align:center;color:#fff"><div style="color:#f58220;font-weight:700;letter-spacing:1px">AVINYA CARE FOUNDATION</div><h1 style="font-size:22px">Reset your password</h1></td></tr>'
+        . '<tr><td style="background:#0a0a0a;padding:28px;text-align:center;color:#fff"><div style="color:#f58220;font-weight:700;letter-spacing:1px">AvinyaCareFoundation</div><h1 style="font-size:22px">Reset your password</h1></td></tr>'
         . '<tr><td style="padding:34px"><p>Hello ' . $safeName . ',</p><p>We received a request to reset your Admin Panel password.</p>'
         . '<p style="margin:28px 0;text-align:center"><a href="' . $safeUrl . '" style="background:#0d9488;color:#fff;padding:13px 24px;text-decoration:none;border-radius:7px;font-weight:700">Reset Password</a></p>'
         . '<p style="font-size:13px">This link expires in ' . $expiryMinutes . ' minutes and can be used once. If you did not request it, you can ignore this email.</p>'
         . '<p style="font-size:12px;color:#64748b;word-break:break-all">If the button does not work, open:<br>' . $safeUrl . '</p>'
-        . '<p>With care,<br><strong>Avinya Care Foundation Team</strong></p></td></tr></table></td></tr></table></body></html>';
+        . '<p>With care,<br><strong>AvinyaCareFoundation Team</strong></p></td></tr></table></td></tr></table></body></html>';
 
     try {
         $expect($socket, [220]);
@@ -70,7 +70,7 @@ function sendPasswordResetEmail(string $to, string $name, string $resetUrl, int 
             'MIME-Version: 1.0',
             'Content-Type: text/html; charset=UTF-8',
             'Message-ID: ' . $messageId,
-            'X-Mailer: AvinyaCare-PasswordReset/1.0'
+            'X-Mailer: AvinyaCareFoundation-PasswordReset/1.0'
         ];
         $payload = implode("\r\n", $headers) . "\r\n\r\n" . preg_replace('/(?m)^\./', '..', $html) . "\r\n.";
         $response = $command($socket, $payload, [250]);

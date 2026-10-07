@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - NestJS Sticky Stacked Overlapping Stage Panels
+ * AvinyaCareFoundation - NestJS Sticky Stacked Overlapping Stage Panels
  * Pins panels as sticky layers and applies 3D card-deck scaling, dimming, and depth blur as following panels slide over.
  */
 

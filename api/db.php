@@ -1,6 +1,6 @@
 <?php
 /**
- * Avinya Care Foundation - Hostinger MySQL Database Manager & Auto-Migrator
+ * AvinyaCareFoundation - Hostinger MySQL Database Manager & Auto-Migrator
  * 
  * Provides PDO database connection and automatic table schema migrations.
  * Every time an API request runs, it checks and creates missing tables automatically,
@@ -136,9 +136,9 @@ function getDatabaseConnection(): ?PDO {
     $envUser = getDbEnv('DB_USER');
     $envPass = getDbEnv('DB_PASS');
 
-    $dbnames = array_unique(array_filter([$envDbname, 'u382139760_ngo_staging', 'u382139760_ngo', 'u382139760_avinyacare', 'u382139760_avinya', 'u382139760_db'], fn($v) => !empty($v)));
+    $dbnames = array_unique(array_filter([$envDbname, 'u382139760_ngo_staging', 'u382139760_ngo', 'u382139760_AvinyaCareFoundation', 'u382139760_avinya', 'u382139760_db'], fn($v) => !empty($v)));
     $users = array_unique(array_filter([$envUser, 'u382139760_ngo_staging', 'u382139760_ngo', 'u382139760_user', 'u382139760_admin', 'u382139760_avinya', 'u382139760'], fn($v) => !empty($v)));
-    $passwords = array_unique(array_filter([$envPass, '@qLVTyL|J5', 'Admin@1230', 'Demo@Avinya2026', 'Avinya@2026', 'AvinyaCare@2026', 'Avinya@1234', 'Admin@2026', ''], fn($v) => $v !== null));
+    $passwords = array_unique(array_filter([$envPass, '@qLVTyL|J5', 'Admin@1230', 'Demo@Avinya2026', 'Avinya@2026', 'AvinyaCareFoundation@2026', 'Avinya@1234', 'Admin@2026', ''], fn($v) => $v !== null));
 
     $errors = [];
 
@@ -156,7 +156,7 @@ function getDatabaseConnection(): ?PDO {
                     try {
                         autoMigrateDatabaseTables($conn);
                     } catch (Throwable $migrationErr) {
-                        error_log('AvinyaCare Auto-Migration Notice: ' . $migrationErr->getMessage());
+                        error_log('AvinyaCareFoundation Auto-Migration Notice: ' . $migrationErr->getMessage());
                     }
                     $pdo = $conn;
                     return $pdo;

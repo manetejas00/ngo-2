@@ -1,6 +1,6 @@
-# Avinya Care Foundation
+# AvinyaCareFoundation
 
-Avinya Care Foundation is a healthcare-awareness and community-support website
+AvinyaCareFoundation is a healthcare-awareness and community-support website
 with doctor discovery, diagnostic booking, donation, contact, and protected
 operations features.
 
@@ -91,7 +91,7 @@ PHP is available.
 ## Deployment
 
 The website supports Hostinger shared hosting. See
-[`HOSTINGER_DEPLOYMENT.md`](HOSTINGER_DEPLOYMENT.md) for deployment guidance.
+[`docs/HOSTINGER_DEPLOYMENT.md`](docs/HOSTINGER_DEPLOYMENT.md) for deployment guidance.
 Before production deployment, configure HTTPS, SMTP, database access, and
 environment secrets on the host.
 
@@ -100,7 +100,9 @@ environment secrets on the host.
 ```text
 api/             PHP API endpoints and database helpers
 assets/          Images, video, logos, and other media
+components/      Modular HTML components (navbar, footer)
 css/             Website styling
+docs/            Project documentation and setup guides
 js/              Browser-side functionality
 services/        Node email, AI, and healthcare services
 scripts/         Validation, deployment, and maintenance scripts

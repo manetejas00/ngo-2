@@ -1,12 +1,12 @@
 /**
- * Avinya Care Foundation - AI Email Generation Engine
+ * AvinyaCareFoundation - AI Email Generation Engine
  * Generates personalized, context-aware user and admin emails using Gemini AI with fallback protection.
  */
 
 import { callGeminiAI } from './aiProvider.mjs';
 import { generateFallbackEmails } from './fallbackGenerator.mjs';
 
-const SYSTEM_INSTRUCTION = `You are the email communication assistant for Avinya Care Foundation, an Indian NGO focused on cancer awareness, support, education, care and community impact.
+const SYSTEM_INSTRUCTION = `You are the email communication assistant for AvinyaCareFoundation, an Indian NGO focused on cancer awareness, support, education, care and community impact.
 
 Generate professional, compassionate and trustworthy email content based ONLY on the supplied form data.
 
@@ -63,7 +63,7 @@ ${JSON.stringify(cleanedContext, null, 2)}
 
 Instructions for Form Type "${formTypeLower}":
 - User Email: Acknowledge the ${formTypeLower} submission warmly, thank the individual, address them respectfully using Indian English, and outline general next steps supported by the application.
-- Admin Email: Summarize the submission clearly for the Avinya Care team and recommend an appropriate operational next action.
+- Admin Email: Summarize the submission clearly for the AvinyaCareFoundation team and recommend an appropriate operational next action.
 
 Generate the JSON response now.`;
 

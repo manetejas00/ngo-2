@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Email Dispatch & Delivery Service
+ * AvinyaCareFoundation - Email Dispatch & Delivery Service
  * Sends dual emails (User confirmation & Admin operational notification).
  * Integrates SMTP delivery via Nodemailer (with connection pooling) + Native TLS Socket fallback.
  * Automatically dispatches error alert emails to info@test.avinyacarefoundation.org if any email fails.
@@ -76,7 +76,7 @@ async function sendDeliveryErrorAlertToAdmin(details) {
   } = details;
 
   try {
-    const errorSubject = `[Avinya Care ALERT] Email Delivery Failed — ${metadata.formType?.toUpperCase()} (ID: ${metadata.submissionId})`;
+    const errorSubject = `[AvinyaCareFoundation ALERT] Email Delivery Failed — ${metadata.formType?.toUpperCase()} (ID: ${metadata.submissionId})`;
     const errorHtml = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><title>${errorSubject}</title></head>
@@ -84,7 +84,7 @@ async function sendDeliveryErrorAlertToAdmin(details) {
   <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 620px; margin: 0 auto; background: #FFFFFF; border-radius: 12px; border: 1px solid #FECACA; overflow: hidden; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.08);">
     <tr>
       <td style="background-color: #DC2626; color: #FFFFFF; padding: 20px 24px;">
-        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; color: #FEE2E2;">Avinya Care System Diagnostics</div>
+        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; color: #FEE2E2;">AvinyaCareFoundation System Diagnostics</div>
         <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: #FFFFFF;">⚠️ Outbound Email Delivery Failed</h2>
       </td>
     </tr>
@@ -116,7 +116,7 @@ async function sendDeliveryErrorAlertToAdmin(details) {
 </body>
 </html>`;
 
-    const errorText = `[AVINYA CARE ALERT] Email Delivery Failed\n\nSubmission ID: ${metadata.submissionId}\nForm Type: ${metadata.formType}\nTarget Recipient: ${metadata.userEmail}\nError: ${userEmailError || deliveryError}\nTimestamp: ${metadata.timestampIST}\nSMTP Server: ${smtpHost}:${smtpPort}`;
+    const errorText = `[AvinyaCareFoundation ALERT] Email Delivery Failed\n\nSubmission ID: ${metadata.submissionId}\nForm Type: ${metadata.formType}\nTarget Recipient: ${metadata.userEmail}\nError: ${userEmailError || deliveryError}\nTimestamp: ${metadata.timestampIST}\nSMTP Server: ${smtpHost}:${smtpPort}`;
 
     const { sendSmtpSocket } = await import('./smtpClient.mjs');
     await sendSmtpSocket({
@@ -126,7 +126,7 @@ async function sendDeliveryErrorAlertToAdmin(details) {
       user: smtpUser,
       pass: smtpPass,
       from: senderEmail,
-      fromName: 'Avinya Care System Alerts',
+      fromName: 'AvinyaCareFoundation System Alerts',
       to: adminEmail,
       subject: errorSubject,
       htmlContent: errorHtml,
@@ -151,7 +151,7 @@ async function sendDeliveryErrorAlertToAdmin(details) {
 export async function sendFormEmails(userEmailPayload, adminEmailPayload, metadata) {
   const messageId = `MSG-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
   const senderEmail = process.env.SMTP_FROM || 'info@test.avinyacarefoundation.org';
-  const senderName = process.env.SMTP_FROM_NAME || 'Avinya Care Foundation';
+  const senderName = process.env.SMTP_FROM_NAME || 'AvinyaCareFoundation';
   const adminEmail = process.env.ADMIN_EMAIL || 'info@test.avinyacarefoundation.org';
   const recipientUser = metadata.userEmail;
 
@@ -198,7 +198,7 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
       if (!adminEmailSent && !skipAdmin) {
         try {
           const adminRes = await transporter.sendMail({
-            from: `"Avinya Care Operations" <${senderEmail}>`,
+            from: `"AvinyaCareFoundation Operations" <${senderEmail}>`,
             to: adminEmail,
             subject: adminEmailPayload.subject,
             text: adminEmailPayload.text,
@@ -263,7 +263,7 @@ export async function sendFormEmails(userEmailPayload, adminEmailPayload, metada
             user: smtpUser,
             pass: smtpPass,
             from: senderEmail,
-            fromName: 'Avinya Care Operations',
+            fromName: 'AvinyaCareFoundation Operations',
             to: adminEmail,
             subject: adminEmailPayload.subject,
             htmlContent: adminEmailPayload.html,

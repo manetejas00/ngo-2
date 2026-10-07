@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Health & Cancer News Service
+ * AvinyaCareFoundation - Health & Cancer News Service
  * Handles API calls, multi-tier fallback (/api/news -> /api/news.json -> local cache -> embedded payload),
  * 1-hour client/server caching, deduplication, and related story querying.
  */

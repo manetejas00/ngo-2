@@ -1,6 +1,6 @@
 <?php
 /**
- * Avinya Care Foundation - Hostinger SSL SMTP Email Dispatch Handler
+ * AvinyaCareFoundation - Hostinger SSL SMTP Email Dispatch Handler
  * Authenticates via Hostinger SMTP (smtp.hostinger.com:465 SSL) for 100% email deliverability.
  */
 
@@ -23,7 +23,7 @@ require_once __DIR__ . '/activity-logger.php';
 $isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
 $defaultAdmin = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
 
-$brandName = 'Avinya Care Foundation';
+$brandName = 'AvinyaCareFoundation';
 $brandEmail = getDbEnv('ADMIN_EMAIL', $defaultAdmin);
 $brandPhone = '+91 74474 41116';
 $isDirectFormSubmission = (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === 'submit-form.php' || basename($_SERVER['SCRIPT_NAME'] ?? '') === 'submit-form.php');
@@ -94,7 +94,7 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
     if (!$isStaging && str_contains($from, 'test.avinyacarefoundation.org')) {
         $from = 'info@avinyacarefoundation.org';
     }
-    $fromName = getDbEnv('SMTP_FROM_NAME', 'Avinya Care Foundation');
+    $fromName = getDbEnv('SMTP_FROM_NAME', 'AvinyaCareFoundation');
     $boundary = '=_AvinyaLogo_' . bin2hex(random_bytes(8));
     $logoPath = dirname(__DIR__) . '/assets/logo.png';
     $mimeParts = [
@@ -163,7 +163,7 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
         "Reply-To: " . ($replyTo ?: $from),
         "MIME-Version: 1.0",
         "Content-Type: multipart/related; boundary=\"{$boundary}\"",
-        "X-Mailer: AvinyaCare-PHP-SMTP/2.0"
+        "X-Mailer: AvinyaCareFoundation-PHP-SMTP/2.0"
     ];
 
     fputs($socket, implode("\r\n", $headers) . "\r\n\r\n" . $mimeBody . "\r\n.\r\n");
@@ -183,48 +183,48 @@ $paymentStatus = strtoupper((string)($data['payment_status'] ?? 'PENDING'));
 $isConfirmedPayment = in_array($paymentStatus, ['SUCCESS', 'CONFIRMED', 'PAID'], true);
 
 if ($formType === 'donation') {
-    $userSubject = $isConfirmedPayment ? "Thank You for Your Generous Support of ₹{$formattedAmount} — Avinya Care Foundation" : "Donation Payment Verification Pending — Avinya Care Foundation";
+    $userSubject = $isConfirmedPayment ? "Thank You for Your Generous Support of ₹{$formattedAmount} — AvinyaCareFoundation" : "Donation Payment Verification Pending — AvinyaCareFoundation";
     $greeting = "Dear {$name},";
-    $bodyText = $isConfirmedPayment ? "Dhanyawad for your generous contribution of <strong>₹{$formattedAmount}</strong> ({$frequency}) towards Avinya Care Foundation. Your compassionate gift directly funds our life-saving mobile cancer screening camps, diagnostic navigation, and vital clinical nutrition for patients across underserved communities in India." : "We have recorded your donation pledge of <strong>₹{$formattedAmount}</strong>. It will not be counted or receipted until the payment provider verifies the transaction.";
-    $adminSubject = "[Avinya Care] New Donation Received — {$name} (₹{$formattedAmount})";
+    $bodyText = $isConfirmedPayment ? "Dhanyawad for your generous contribution of <strong>₹{$formattedAmount}</strong> ({$frequency}) towards AvinyaCareFoundation. Your compassionate gift directly funds our life-saving mobile cancer screening camps, diagnostic navigation, and vital clinical nutrition for patients across underserved communities in India." : "We have recorded your donation pledge of <strong>₹{$formattedAmount}</strong>. It will not be counted or receipted until the payment provider verifies the transaction.";
+    $adminSubject = "[AvinyaCareFoundation] New Donation Received — {$name} (₹{$formattedAmount})";
 } elseif ($formType === 'volunteer') {
-    $userSubject = "Thank You for Wanting to Volunteer with Avinya Care — Avinya Care Foundation";
+    $userSubject = "Thank You for Wanting to Volunteer with AvinyaCareFoundation — AvinyaCareFoundation";
     $greeting = "Dear {$name},";
-    $bodyText = "Thank you for stepping forward to volunteer with Avinya Care Foundation. Volunteers like you form the heartbeat of our community outreach, early cancer awareness campaigns, and patient navigation efforts.";
-    $adminSubject = "[Avinya Care] New Volunteer Application — {$name}";
+    $bodyText = "Thank you for stepping forward to volunteer with AvinyaCareFoundation. Volunteers like you form the heartbeat of our community outreach, early cancer awareness campaigns, and patient navigation efforts.";
+    $adminSubject = "[AvinyaCareFoundation] New Volunteer Application — {$name}";
 } elseif ($formType === 'support') {
-    $userSubject = "Avinya Care Support Helpline — We Have Received Your Request — Avinya Care Foundation";
+    $userSubject = "AvinyaCareFoundation Support Helpline — We Have Received Your Request — AvinyaCareFoundation";
     $greeting = "Dear {$name},";
     $bodyText = "We have received your patient care inquiry. Facing cancer can feel overwhelming, but please know you are not alone. Our compassionate patient support navigators will review your details with the utmost confidentiality.";
-    $adminSubject = "[Avinya Care] URGENT: Patient Support Inquiry — {$name}";
+    $adminSubject = "[AvinyaCareFoundation] URGENT: Patient Support Inquiry — {$name}";
 } elseif ($formType === 'partnership') {
-    $userSubject = "Partnership & Corporate CSR Inquiry — Avinya Care Foundation";
+    $userSubject = "Partnership & Corporate CSR Inquiry — AvinyaCareFoundation";
     $greeting = "Dear {$name},";
-    $bodyText = "Thank you for reaching out regarding partnership and CSR collaboration with Avinya Care Foundation on behalf of <strong>" . ($organization ?: 'your organization') . "</strong>. Our leadership team will review your proposal.";
-    $adminSubject = "[Avinya Care] New CSR & Partnership Lead — " . ($organization ?: $name);
+    $bodyText = "Thank you for reaching out regarding partnership and CSR collaboration with AvinyaCareFoundation on behalf of <strong>" . ($organization ?: 'your organization') . "</strong>. Our leadership team will review your proposal.";
+    $adminSubject = "[AvinyaCareFoundation] New CSR & Partnership Lead — " . ($organization ?: $name);
 } elseif ($formType === 'newsletter') {
-    $userSubject = "Welcome to the Avinya Care Community Newsletter — Avinya Care Foundation";
+    $userSubject = "Welcome to the AvinyaCareFoundation Community Newsletter — AvinyaCareFoundation";
     $greeting = "Hello {$name},";
-    $bodyText = "Welcome to the Avinya Care Foundation community! You are now subscribed to our health bulletin, featuring verified oncology research, early detection screening guidelines, and patient stories.";
-    $adminSubject = "[Avinya Care] New Newsletter Subscriber — {$name}";
+    $bodyText = "Welcome to the AvinyaCareFoundation community! You are now subscribed to our health bulletin, featuring verified oncology research, early detection screening guidelines, and patient stories.";
+    $adminSubject = "[AvinyaCareFoundation] New Newsletter Subscriber — {$name}";
 } elseif ($formType === 'feedback') {
-    $userSubject = "Thank You for Sharing Your Feedback with Avinya Care — Avinya Care Foundation";
+    $userSubject = "Thank You for Sharing Your Feedback with AvinyaCareFoundation — AvinyaCareFoundation";
     $greeting = "Hello {$name},";
     $bodyText = "Thank you for sharing your valuable feedback regarding our healthcare services and awareness initiatives. Your insights help us continuously elevate our care and community reach.";
-    $adminSubject = "[Avinya Care] Website Feedback Received — {$name}";
+    $adminSubject = "[AvinyaCareFoundation] Website Feedback Received — {$name}";
 } elseif ($formType === 'coming_soon_feedback') {
-    $userSubject = "Thank You for Your Interest in Avinya Care — Avinya Care Foundation";
+    $userSubject = "Thank You for Your Interest in AvinyaCareFoundation — AvinyaCareFoundation";
     $greeting = "Hello {$name},";
     $bodyText = "Thank you for reaching out! We are currently working hard behind the scenes to launch our new healthcare platform. We have securely recorded your contact details and will notify you the moment our services go live.";
-    $adminSubject = "[Avinya Care] Coming Soon Subscription/Feedback — {$name}";
+    $adminSubject = "[AvinyaCareFoundation] Coming Soon Subscription/Feedback — {$name}";
 } else {
-    $userSubject = "We Have Received Your Message — Avinya Care Foundation";
+    $userSubject = "We Have Received Your Message — AvinyaCareFoundation";
     $greeting = "Hello {$name},";
-    $bodyText = "Thank you for getting in touch with Avinya Care Foundation. Our team has received your message and will connect with you shortly.";
-    $adminSubject = "[Avinya Care] New Website Contact Inquiry — {$name}";
+    $bodyText = "Thank you for getting in touch with AvinyaCareFoundation. Our team has received your message and will connect with you shortly.";
+    $adminSubject = "[AvinyaCareFoundation] New Website Contact Inquiry — {$name}";
 }
 
-$closingText = "With deepest gratitude and care,<br><strong>Avinya Care Foundation Team</strong>";
+$closingText = "With deepest gratitude and care,<br><strong>AvinyaCareFoundation Team</strong>";
 
 // Build User Email HTML Template
 $donationBoxHtml = '';
@@ -258,7 +258,7 @@ $userHtmlContent = '<!DOCTYPE html>
           <!-- Header Banner -->
           <tr>
             <td style="background-color: #0A0A0A; padding: 28px 32px; text-align: center; border-bottom: 3px solid #F47528;">
-              <div style="display: inline-block; background: #FFFFFF; border-radius: 50%; padding: 6px; margin-bottom: 12px;"><img src="cid:avinya-logo" alt="Avinya Care Foundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;"></div>
+              <div style="display: inline-block; background: #FFFFFF; border-radius: 50%; padding: 6px; margin-bottom: 12px;"><img src="cid:avinya-logo" alt="AvinyaCareFoundation" width="56" height="56" style="display: block; width: 56px; height: 56px; border: 0; border-radius: 50%; object-fit: contain;"></div>
               <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">' . $brandName . '</div>
               <h1 style="color: #FFFFFF; font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">Healthcare Dignity & Cancer Awareness</h1>
             </td>
@@ -302,7 +302,7 @@ $userHtmlContent = '<!DOCTYPE html>
                 Email: <a href="mailto:' . $brandEmail . '" style="color: #F58220; text-decoration: none; font-weight: 600;">' . $brandEmail . '</a> | Helpline: <a href="tel:+917447441116" style="color: #F58220; text-decoration: none; font-weight: 600;">' . $brandPhone . '</a><br>' . $brandWebsite . '
               </p>
               <p style="margin: 0; font-size: 11px; color: #737373; border-top: 1px dashed #404040; padding-top: 12px;">
-                <strong>Medical & Legal Disclaimer:</strong> Avinya Care Foundation communications provide general health awareness and screening navigation. We do not provide medical prescriptions, diagnoses, or direct clinical medical advice.
+                <strong>Medical & Legal Disclaimer:</strong> AvinyaCareFoundation communications provide general health awareness and screening navigation. We do not provide medical prescriptions, diagnoses, or direct clinical medical advice.
               </p>
             </td>
           </tr>
@@ -334,8 +334,8 @@ $adminHtmlContent = '<!DOCTYPE html>
           <!-- Header Banner -->
           <tr>
             <td style="background-color: #0A0A0A; padding: 24px 32px; border-bottom: 3px solid #F47528;">
-              <div style="display: inline-block; background: #FFFFFF; border-radius: 50%; padding: 5px; margin: 0 12px 8px 0; vertical-align: middle;"><img src="cid:avinya-logo" alt="Avinya Care Foundation" width="40" height="40" style="display: block; width: 40px; height: 40px; border: 0; border-radius: 50%; object-fit: contain;"></div>
-              <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">Avinya Care Internal Desk</div>
+              <div style="display: inline-block; background: #FFFFFF; border-radius: 50%; padding: 5px; margin: 0 12px 8px 0; vertical-align: middle;"><img src="cid:avinya-logo" alt="AvinyaCareFoundation" width="40" height="40" style="display: block; width: 40px; height: 40px; border: 0; border-radius: 50%; object-fit: contain;"></div>
+              <div style="color: #F58220; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;">AvinyaCareFoundation Internal Desk</div>
               <h2 style="color: #FFFFFF; font-size: 20px; font-weight: 700; margin: 0;">Operational Alert: ' . strtoupper(htmlspecialchars($formType)) . '</h2>
             </td>
           </tr>
@@ -395,7 +395,7 @@ if (filter_var($adminRecordTo, FILTER_VALIDATE_EMAIL) && strcasecmp($adminRecord
 
 // 3. If any email delivery failed, automatically dispatch error diagnostic alert to admin
 if (!$userEmailSent) {
-    $errorAlertSubject = "[Avinya Care ALERT] Email Delivery Failed — " . strtoupper($formType) . " (ID: {$submissionId})";
+    $errorAlertSubject = "[AvinyaCareFoundation ALERT] Email Delivery Failed — " . strtoupper($formType) . " (ID: {$submissionId})";
     $errorAlertHtml = '<!DOCTYPE html>
     <html lang="en">
     <head><meta charset="UTF-8"><title>' . htmlspecialchars($errorAlertSubject) . '</title></head>
@@ -403,7 +403,7 @@ if (!$userEmailSent) {
       <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 620px; margin: 0 auto; background: #FFFFFF; border-radius: 12px; border: 1px solid #FECACA; overflow: hidden;">
         <tr>
           <td style="background-color: #DC2626; color: #FFFFFF; padding: 20px 24px;">
-            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; color: #FEE2E2;">Avinya Care System Diagnostics</div>
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; color: #FEE2E2;">AvinyaCareFoundation System Diagnostics</div>
             <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: #FFFFFF;">⚠️ Outbound Email Delivery Failed</h2>
           </td>
         </tr>
@@ -581,7 +581,7 @@ echo json_encode([
         'subject' => $userSubject,
         'greeting' => $greeting,
         'body' => $bodyText,
-        'closing' => "With deepest gratitude and care,\nAvinya Care Foundation Team"
+        'closing' => "With deepest gratitude and care,\nAvinyaCareFoundation Team"
     ],
     'message' => "Thank you, {$name}. Your {$formType} submission has been received and confirmed via email."
 ]);

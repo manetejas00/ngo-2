@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - NestJS 7-Card Interactive Overlapping Stack
+ * AvinyaCareFoundation - NestJS 7-Card Interactive Overlapping Stack
  * Controls Section 4 (#what-we-do - "Support at every step of the journey.")
  * Provides physical card lift, zero-rotation alignment, neighbor pushback,
  * 3D tilt tracking, mobile touch-tap activation & mobile scroll-snap center detection.

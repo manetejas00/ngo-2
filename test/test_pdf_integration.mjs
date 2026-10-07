@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 
 console.log('======================================================');
-console.log('  AVINYA CARE LETTERHEAD PDF INTEGRATION AUDIT');
+console.log('  AvinyaCareFoundation LETTERHEAD PDF INTEGRATION AUDIT');
 console.log('======================================================\n');
 
 let allPassed = true;

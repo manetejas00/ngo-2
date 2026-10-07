@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation — Dedicated Healthcare & Appointment Platform Controller
+ * AvinyaCareFoundation — Dedicated Healthcare & Appointment Platform Controller
  * Manages Framer-style scroll stages, Doctor Directory, Slot Generation, Real-Time Booking,
  * Diagnostic Tests Catalog, Role-Based Dashboards (Patient, Doctor, Admin), and Calendar Export.
  */
@@ -524,7 +524,7 @@ class HealthcarePlatform {
     }
 
     let tag = rawTag;
-    if (rawTag.includes('50% Avinya Care Concession')) tag = '50% Concession';
+    if (rawTag.includes('50% AvinyaCareFoundation Concession')) tag = '50% Concession';
     else if (rawTag.includes('Avinya Supported')) tag = 'Avinya Supported';
     else if (rawTag.includes('Community Clinic')) tag = 'Community Clinic';
     else if (rawTag.includes('Partner Rate')) tag = 'Partner Rate';
@@ -1703,10 +1703,10 @@ class HealthcarePlatform {
   downloadCalendarInvite(aptId) {
     const apt = this.bookingState.confirmedAppointment || {
       id: aptId,
-      doctorName: 'Avinya Care Specialist',
+      doctorName: 'AvinyaCareFoundation Specialist',
       date: new Date().toISOString().split('T')[0],
       time: '10:00 AM',
-      location: 'Avinya Care Clinic / Telehealth',
+      location: 'AvinyaCareFoundation Clinic / Telehealth',
       reason: 'Medical Consultation'
     };
 
@@ -1714,14 +1714,14 @@ class HealthcarePlatform {
     const icsContent = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//Avinya Care Foundation//Appointment System//EN',
+      'PRODID:-//AvinyaCareFoundation//Appointment System//EN',
       'BEGIN:VEVENT',
       `UID:${apt.id}@avinyacarefoundation.org`,
       `DTSTAMP:${cleanDate}T000000Z`,
       `DTSTART:${cleanDate}T090000Z`,
       `DTEND:${cleanDate}T093000Z`,
-      `SUMMARY:Medical Consultation: ${apt.doctorName} (Avinyacare)`,
-      `DESCRIPTION:Avinya Care Appointment ID: ${apt.id}\\nSpecialist: ${apt.doctorName}\\nReason: ${apt.reason || 'Consultation'}`,
+      `SUMMARY:Medical Consultation: ${apt.doctorName} (AvinyaCareFoundation)`,
+      `DESCRIPTION:AvinyaCareFoundation Appointment ID: ${apt.id}\\nSpecialist: ${apt.doctorName}\\nReason: ${apt.reason || 'Consultation'}`,
       `LOCATION:${apt.location}`,
       'STATUS:CONFIRMED',
       'END:VEVENT',
@@ -1732,7 +1732,7 @@ class HealthcarePlatform {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Avinyacare_Appointment_${apt.id}.ics`;
+    link.download = `AvinyaCareFoundation_Appointment_${apt.id}.ics`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

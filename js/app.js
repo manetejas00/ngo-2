@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Master Application Controller
+ * AvinyaCareFoundation - Master Application Controller
  * NestJS-inspired scroll controller, 7-stage canvas hero cards, text reveal animation, & navbar themes.
  */
 

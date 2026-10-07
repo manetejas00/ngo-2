@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Automated Security & RBAC Audit Test Suite
+ * AvinyaCareFoundation - Automated Security & RBAC Audit Test Suite
  */
 
 import http from 'http';
@@ -37,7 +37,7 @@ function makeRequest(path, options = {}, body = null) {
 
 async function runSecurityAuditTests() {
   console.log('====================================================');
-  console.log('  AVINYA CARE SECURITY & PRIVACY AUDIT TEST SUITE   ');
+  console.log('  AvinyaCareFoundation SECURITY & PRIVACY AUDIT TEST SUITE   ');
   console.log('====================================================\n');
 
   let passed = 0;

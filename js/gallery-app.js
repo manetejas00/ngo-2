@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Immersive GSAP Digital Photography Exhibition Controller
+ * AvinyaCareFoundation - Immersive GSAP Digital Photography Exhibition Controller
  * Features:
  * - Dynamic API integration with /api/gallery
  * - Hero Word Reveal & Editorial Typography GSAP Entrance
@@ -37,6 +37,7 @@
       showEmptyState(true);
       return;
     }
+
 
     renderCategoryFilters();
     initCustomCursor();
@@ -101,6 +102,15 @@
     }
 
     // Ensure items are sorted latest first by updated_at or created_at
+    // Normalize display fields from existing records without touching slugs,
+    // asset URLs, IDs, or historical database records.
+    galleryItems.forEach(item => {
+      ['title', 'short_description', 'description', 'alt_text', 'photographer'].forEach(field => {
+        if (typeof item[field] === 'string') {
+          item[field] = item[field].replace(/\bAvinya\s*Care(?:\s*(?:Foundation|Founation|Foundatation))?\b(?![.@/_-])/gi, 'AvinyaCareFoundation');
+        }
+      });
+    });
     if (galleryItems && galleryItems.length > 0) {
       galleryItems.sort((a, b) => {
         const dA = new Date(a.updated_at || a.created_at || a.event_date || 0);
@@ -805,7 +815,7 @@
     const authorEl = document.getElementById('lightboxAuthor');
     const descEl = document.getElementById('lightboxDescription');
 
-    const title = item.title || item.category || 'Avinya Care Foundation Photo';
+    const title = item.title || item.category || 'AvinyaCareFoundation Photo';
     const cat = item.category || 'Impact Story';
     const currentNum = String(index + 1).padStart(2, '0');
     const totalNum = String(dataset.length).padStart(2, '0');

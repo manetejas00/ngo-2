@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
-console.log('--- AVINYA CARE FOUNDATION PRELOADER AUDIT ---');
+console.log('--- AvinyaCareFoundation PRELOADER AUDIT ---');
 
 const checks = [];
 

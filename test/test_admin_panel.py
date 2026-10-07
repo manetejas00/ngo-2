@@ -28,7 +28,7 @@ def post_json(endpoint, payload, headers_extra=None):
 
 def run_admin_tests():
     print("====================================================")
-    print("AVINYA CARE ADMIN PANEL & AUTHENTICATION TEST SUITE")
+    print("AvinyaCareFoundation ADMIN PANEL & AUTHENTICATION TEST SUITE")
     print("====================================================\n")
 
     # 1. Test Valid Admin Login (admin@gmail.com / Admin@1230)

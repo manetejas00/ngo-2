@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Server-Side Gemini AI Provider Client
+ * AvinyaCareFoundation - Server-Side Gemini AI Provider Client
  * Communicates directly with Gemini API (gemini-2.5-flash / gemini-1.5-flash) via Node.js native https.
  * Enforces a strict 5-second timeout and structured JSON response mode.
  */

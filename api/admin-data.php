@@ -1,6 +1,6 @@
 <?php
 /**
- * Avinya Care Foundation - Admin Data & Management API
+ * AvinyaCareFoundation - Admin Data & Management API
  * Protected endpoint supplying analytics summary, data tables, and status updates
  */
 
@@ -89,7 +89,7 @@ if ($action === 'test_email_dispatch') {
     $testHtml = '<!DOCTYPE html><html><body style="margin:0;padding:24px;background:#F6F4EF;font-family:sans-serif;">'
         . '<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;padding:24px;border:1px solid #E2E8F0;">'
         . '<div style="background:#0B1220;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0;margin:-24px -24px 20px -24px;border-bottom:3px solid #D4A72C;">'
-        . '<h2 style="margin:0;font-size:18px;color:#fff;">⚡ Avinya Care System Diagnostic Audit</h2></div>'
+        . '<h2 style="margin:0;font-size:18px;color:#fff;">⚡ AvinyaCareFoundation System Diagnostic Audit</h2></div>'
         . '<p style="font-size:15px;color:#111827;">This is an automated live diagnostic test email dispatched from the Admin Panel.</p>'
         . '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px;line-height:1.8;font-size:13px;color:#334155;">'
         . '<strong>Triggered By:</strong> ' . htmlspecialchars($_SESSION['admin_email'] ?? 'Admin User') . '<br>'

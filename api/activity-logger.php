@@ -1,6 +1,6 @@
 <?php
 /**
- * Avinya Care Foundation - Central Activity Audit Logger
+ * AvinyaCareFoundation - Central Activity Audit Logger
  * Records user, admin, and system activities into Hostinger MySQL `activity_logs` table
  * with fallback to local JSON file ledger.
  */

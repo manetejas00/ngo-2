@@ -1,4 +1,4 @@
-# Avinya Care Foundation — Hostinger Deployment Guide
+# AvinyaCareFoundation — Hostinger Deployment Guide
 
 This guide provides SSH details, key setup instructions, and deployment commands for Hostinger shared hosting (`avinyacarefoundation.org` and `test.avinyacarefoundation.org`).
 

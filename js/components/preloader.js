@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation — Premium Healthcare Website Preloader Controller
+ * AvinyaCareFoundation — Premium Healthcare Website Preloader Controller
  * Orchestrates resource readiness, progress interpolation, and smooth dismissal.
  */
 

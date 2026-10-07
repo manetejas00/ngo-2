@@ -1,6 +1,6 @@
 # Architecture guide
 
-Avinya Care is a progressively enhanced static website with two compatible backend entry points:
+AvinyaCareFoundation is a progressively enhanced static website with two compatible backend entry points:
 
 - `index.html`, `crowdfunding.html`, `doctors.html`, and `admin.html` are the public/admin page shells.
 - `js/components/` owns page-focused presentation behavior; `js/services/` owns browser integrations such as PDFs and news.

@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Healthcare Persistence & Database Engine
+ * AvinyaCareFoundation - Healthcare Persistence & Database Engine
  * Manages Doctors, Specialities, Hospitals, Availability, Appointments, Diagnostic Tests,
  * Test Bookings, Concurrency Locks, Status History, and Notification Audit Logs.
  */
@@ -184,7 +184,7 @@ export async function addDoctor(doctorData) {
     qualification: doctorData.qualification || 'MBBS, MD',
     experienceYears: Number(doctorData.experienceYears) || 5,
     hospitalId: doctorData.hospitalId || 'avinya-clinic-mumbai',
-    hospitalName: doctorData.hospitalName || 'Avinya Care Community Clinic, Mumbai',
+    hospitalName: doctorData.hospitalName || 'AvinyaCareFoundation Community Clinic, Mumbai',
     location: doctorData.location || 'Mumbai',
     consultationFee: Number(doctorData.consultationFee) || 0,
     feeDisplay: doctorData.feeDisplay || (Number(doctorData.consultationFee) === 0 ? '₹0 (Avinya Supported / Free)' : `₹${doctorData.consultationFee}`),
@@ -193,7 +193,7 @@ export async function addDoctor(doctorData) {
     reviewsCount: Number(doctorData.reviewsCount) || 1,
     badge: doctorData.badge || 'Consultant Specialist',
     avatar: doctorData.avatar || '/assets/doctors/default-doctor.jpg',
-    about: doctorData.about || 'Specialist Doctor at Avinya Care Foundation partner network.',
+    about: doctorData.about || 'Specialist Doctor at AvinyaCareFoundation partner network.',
     areasOfExpertise: Array.isArray(doctorData.areasOfExpertise) ? doctorData.areasOfExpertise : ['Patient Care', 'Clinical Consultation'],
     languages: Array.isArray(doctorData.languages) ? doctorData.languages : ['English', 'Hindi'],
     schedule: doctorData.schedule || {
@@ -411,7 +411,7 @@ export async function createAppointment(appointmentData) {
           patientGender: patientGender || 'Unspecified',
           consultationType,
           location: consultationType === 'online' 
-            ? 'Encrypted Telehealth Video Room (Avinya Care Connect)' 
+            ? 'Encrypted Telehealth Video Room (AvinyaCareFoundation Connect)'
             : `${doctor.hospitalName}, ${doctor.location}`,
           date,
           time: normalizedTime,
@@ -1160,7 +1160,7 @@ export async function addGallery(data) {
     short_description: (data.short_description || '').trim(),
     description: (data.description || '').trim(),
     image: data.image || '',
-    alt_text: (data.alt_text || data.title || 'Avinya Care Gallery Image').trim(),
+    alt_text: (data.alt_text || data.title || 'AvinyaCareFoundation Gallery Image').trim(),
     category: (data.category || 'General').trim(),
     event_date: (data.event_date || '').trim(),
     location: (data.location || '').trim(),

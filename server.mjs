@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Production Node.js Backend Server
+ * AvinyaCareFoundation - Production Node.js Backend Server
  * 100% Node.js / ES Modules (Hostinger Compatible)
  * Serves static assets, health news API (/api/news), Gemini AI topic generator (/api/news/generate), persistent 1-hour cache, and cron refresh (/api/news/refresh).
  */
@@ -104,6 +104,7 @@ const MIME_TYPES = {
   '.txt': 'text/plain; charset=utf-8',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
@@ -272,7 +273,7 @@ async function generateGeminiNewsTopic(userTopicHint = "") {
   
   if (apiKey) {
     try {
-      const promptText = `You are a senior medical communicator for Avinya Care Foundation (a cancer awareness NGO).
+      const promptText = `You are a senior medical communicator for AvinyaCareFoundation (a cancer awareness NGO).
 Generate 1 groundbreaking, medically accurate, inspiring health/cancer news article ${userTopicHint ? `focusing on: "${userTopicHint}"` : 'on early screening or oncology research'}.
 Return ONLY a valid JSON object (no markdown, no backticks, no markdown code blocks):
 {
@@ -340,51 +341,21 @@ Return ONLY a valid JSON object (no markdown, no backticks, no markdown code blo
 
 
 
-const INDIAN_HEALTHCARE_IMAGE_POOL = [
-  'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=800&q=80'
-];
-
-// Curated high-res medical imagery by category (Authentic Indian Context)
-const HEALTH_CATEGORY_IMAGES = {
-  'Cancer Research': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
-  'Early Detection': 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=800&q=80',
-  'Prevention': 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80',
-  'Treatment': 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=800&q=80',
-  'Care': 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
-  'Global Health': 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80'
-};
-
-function getProviderNameFromUrl(url) {
-  if (url.includes('health/in.json')) return '🇮🇳 India Health Desk';
-  if (url.includes('health/us.json')) return '🇺🇸 US Medical Desk';
-  if (url.includes('health/gb.json')) return '🇬🇧 UK Health Service';
-  if (url.includes('health/ca.json')) return '🇨🇦 Canada Health';
-  if (url.includes('health/au.json')) return '🇦🇺 Australia Health';
-  if (url.includes('science/in.json')) return '🇮🇳 India Medical Research';
-  if (url.includes('science/us.json')) return '🌐 Global Medical Science';
-  if (url.includes('newsapi.org')) return '🌐 Global Health Network';
-  return '🌐 Global Healthcare Media';
-}
-
-function fetchSingleNewsUrl(url) {
+function fetchNewsDataHealthArticles(apiKey) {
   return new Promise((resolve) => {
-    const providerName = getProviderNameFromUrl(url);
-    const req = https.get(url, { timeout: 4000 }, (res) => {
+    const url = new URL('https://newsdata.io/api/1/latest');
+    url.searchParams.set('apikey', apiKey);
+    url.searchParams.set('category', 'health');
+    url.searchParams.set('language', 'en');
+    url.searchParams.set('size', '10');
+
+    const req = https.get(url, { timeout: 5000 }, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          const rawList = parsed.articles || parsed.results || parsed.data || [];
+          const rawList = parsed.results || [];
           if (Array.isArray(rawList)) {
             const formatted = rawList.map((item, idx) => {
               const titleLower = (item.title || '').toLowerCase();
@@ -396,18 +367,19 @@ function fetchSingleNewsUrl(url) {
               else if (titleLower.includes('care') || titleLower.includes('palliative') || titleLower.includes('patient')) category = 'Care';
               else category = 'Global Health';
 
-              const fallbackImg = HEALTH_CATEGORY_IMAGES[category] || HEALTH_CATEGORY_IMAGES['Global Health'];
-
               return {
                 id: `api-news-${Math.random().toString(36).substring(2, 7)}-${idx}`,
                 title: item.title ? item.title.split(' - ')[0].trim() : 'Health Update',
                 description: item.description || item.summary || item.content || 'Read clinical details regarding this global healthcare development.',
                 category,
-                source: item.source?.name || item.newsSite || providerName,
-                apiProvider: providerName,
-                publishedAt: item.publishedAt || item.published_at || new Date().toISOString(),
-                url: item.url || '#',
-                urlToImage: (item.urlToImage && item.urlToImage.startsWith('http')) ? item.urlToImage : fallbackImg,
+                source: item.source_name || item.source_id || 'NewsData Health Desk',
+                apiProvider: 'NewsData.io Health',
+                publishedAt: item.pubDate || new Date().toISOString(),
+                url: item.link || '#',
+                // Preserve the upstream value verbatim. The client is solely
+                // responsible for API-image validation and its one template
+                // fallback, so an article never acquires a random substitute.
+                urlToImage: typeof item.image_url === 'string' ? item.image_url.trim() : null,
                 isAIGenerated: false
               };
             });
@@ -425,51 +397,17 @@ function fetchSingleNewsUrl(url) {
 }
 
 async function fetchExternalNews() {
-  const rawNewsKey = process.env.NEWS_API_KEY;
-  const apiKey = (rawNewsKey && !rawNewsKey.startsWith('YOUR_') && rawNewsKey.trim().length > 10) ? rawNewsKey.trim() : null;
-
-  // Worldwide Daily Healthcare News Feed Endpoints (India, US, UK, Canada, Australia, Global)
-  const defaultUrls = [
-    'https://saurav.tech/NewsAPI/top-headlines/category/health/in.json',
-    'https://saurav.tech/NewsAPI/top-headlines/category/health/us.json',
-    'https://saurav.tech/NewsAPI/top-headlines/category/health/gb.json',
-    'https://saurav.tech/NewsAPI/top-headlines/category/health/ca.json',
-    'https://saurav.tech/NewsAPI/top-headlines/category/health/au.json',
-    'https://saurav.tech/NewsAPI/top-headlines/category/science/in.json',
-    'https://saurav.tech/NewsAPI/top-headlines/category/science/us.json'
-  ];
-
-  const envUrls = [];
-  if (process.env.NEWS_API_URLS) {
-    process.env.NEWS_API_URLS.split(',').forEach(u => {
-      const trimmed = u.trim();
-      if (trimmed && !trimmed.startsWith('YOUR_') && !envUrls.includes(trimmed)) envUrls.push(trimmed);
-    });
+  const apiKey = (process.env.NEWSDATA_API_KEY || '').trim();
+  if (!apiKey || apiKey.startsWith('YOUR_')) {
+    console.warn('[News Sync] NEWSDATA_API_KEY is not configured; using AI news only.');
+    return [];
   }
-
-  const targetUrls = envUrls.length > 0 ? [...envUrls, ...defaultUrls] : defaultUrls;
-
-  if (apiKey) {
-    targetUrls.unshift(`https://newsapi.org/v2/top-headlines?category=health&country=in&apiKey=${apiKey}`);
-    targetUrls.unshift(`https://newsapi.org/v2/top-headlines?category=health&country=us&apiKey=${apiKey}`);
-  }
-
-  // Fetch ALL global healthcare news APIs concurrently
-  const resultsList = await Promise.allSettled(targetUrls.map(fetchSingleNewsUrl));
-  const allArticles = [];
-
-  for (const res of resultsList) {
-    if (res.status === 'fulfilled' && Array.isArray(res.value)) {
-      allArticles.push(...res.value);
-    }
-  }
-
-  return allArticles;
+  return fetchNewsDataHealthArticles(apiKey);
 }
 
 async function refreshNewsCache(force = false) {
   const now = Date.now();
-  if (!force && newsCache.articles.length > 0 && (now - newsCache.timestamp) < CACHE_TTL_MS) {
+  if (!force && newsCache.provider === 'newsdata' && newsCache.articles.length > 0 && (now - newsCache.timestamp) < CACHE_TTL_MS) {
     return {
       status: "ok",
       cached: true,
@@ -506,7 +444,9 @@ async function refreshNewsCache(force = false) {
     let deduplicatedNewBatch = deduplicateArticles(filtered);
     
     // Merge logic: Update existing cache with new batch to prevent duplicates and keep fields fresh
-    let mergedArticles = [...newsCache.articles];
+    // Do not carry forward articles from the retired provider. AI insights are
+    // generated by this service and remain part of the blended health feed.
+    let mergedArticles = newsCache.articles.filter(article => article.isAIGenerated);
     for (const newArticle of deduplicatedNewBatch) {
       if (!newArticle.title || !newArticle.url) continue;
       
@@ -523,7 +463,7 @@ async function refreshNewsCache(force = false) {
           ...mergedArticles[existingIndex],
           title: newArticle.title,
           description: newArticle.description || mergedArticles[existingIndex].description,
-          urlToImage: newArticle.urlToImage || mergedArticles[existingIndex].urlToImage,
+          urlToImage: newArticle.urlToImage || null,
           publishedAt: newArticle.publishedAt || mergedArticles[existingIndex].publishedAt,
           apiProvider: newArticle.apiProvider || mergedArticles[existingIndex].apiProvider
         };
@@ -548,6 +488,7 @@ async function refreshNewsCache(force = false) {
 
     newsCache = {
       timestamp: now,
+      provider: 'newsdata',
       articles: finalArticles
     };
 
@@ -863,6 +804,19 @@ const server = createServer(async (req, res) => {
       'Cache-Control': 'public, max-age=31536000'
     });
     res.end();
+    return;
+  }
+
+  // Security Monitoring & Health Status API: /api/security-health
+  if (urlPath === '/api/public-config' && req.method === 'GET') {
+    const googleAnalyticsId = /^G-[A-Z0-9]+$/i.test(process.env.GOOGLE_ANALYTICS_ID || '')
+      ? process.env.GOOGLE_ANALYTICS_ID
+      : '';
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store, max-age=0'
+    });
+    res.end(JSON.stringify({ googleAnalyticsId }));
     return;
   }
 
@@ -1371,11 +1325,11 @@ const server = createServer(async (req, res) => {
         const resetResult = await createPasswordResetToken(email);
         if (resetResult.userFound && resetResult.user) {
           const resetUrl = `http://${req.headers.host || 'localhost:8080'}/admin.html#reset-password?token=${resetResult.token}`;
-          const emailSubject = '🔐 Reset Your Avinya Care Password';
+          const emailSubject = '🔐 Reset Your AvinyaCareFoundation Password';
           const emailBody = `
             <h2>Password Reset Request</h2>
             <p>Hello ${resetResult.user.name},</p>
-            <p>We received a request to reset your password for your Avinya Care account.</p>
+            <p>We received a request to reset your password for your AvinyaCareFoundation account.</p>
             <p style="margin: 20px 0;">
               <a href="${resetUrl}" style="background:#0D9488;color:#FFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:600;display:inline-block;">Reset Password</a>
             </p>
@@ -2304,7 +2258,7 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
       const tests = await getDiagnosticTests();
       let urls = '';
       
-      const staticPages = ['', '/doctors', '/crowdfunding'];
+      const staticPages = ['', '/gallery', '/doctors', '/crowdfunding'];
       for (const page of staticPages) {
         urls += `  <url>\n    <loc>${BASE_URL}${page}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${page === '' ? '1.0' : '0.8'}</priority>\n  </url>\n`;
       }
@@ -2331,7 +2285,7 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
       const doc = docs.find(d => d.id === docId);
       if (doc) {
         let html = await readFile(resolve(__dirname, 'doctors.html'), 'utf-8');
-        const title = `${doc.name} - ${doc.specialityName} | Avinya Care Foundation`;
+        const title = `${doc.name} - ${doc.specialityName} | AvinyaCareFoundation`;
         const desc = `Book an appointment with ${doc.name}, ${doc.specialityName} at ${doc.hospitalName}.`;
         const schema = {
           "@context": "https://schema.org",
@@ -2382,7 +2336,7 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
       const test = tests.find(t => t.id === testId);
       if (test) {
         let html = await readFile(resolve(__dirname, 'doctors.html'), 'utf-8');
-        const title = `${test.name} | Diagnostic Tests | Avinya Care Foundation`;
+        const title = `${test.name} | Diagnostic Tests | AvinyaCareFoundation`;
         const desc = test.description || `Book ${test.name} - ${test.tagline}`;
         const schema = {
           "@context": "https://schema.org",
@@ -2514,7 +2468,7 @@ const listenHost = typeof PORT === 'number' ? '0.0.0.0' : undefined;
 
 if (listenHost) {
   server.listen(PORT, listenHost, async () => {
-    console.log(`Avinya Care Node.js server running on http://${listenHost}:${PORT}`);
+    console.log(`AvinyaCareFoundation Node.js server running on http://${listenHost}:${PORT}`);
     if (process.env.ENABLE_MAILHOG === 'true' || process.env.ENVIRONMENT === 'development') {
       try {
         await startMailHogServer();
@@ -2525,7 +2479,7 @@ if (listenHost) {
   });
 } else {
   server.listen(PORT, async () => {
-    console.log(`Avinya Care Node.js server running on socket ${PORT}`);
+    console.log(`AvinyaCareFoundation Node.js server running on socket ${PORT}`);
     if (process.env.ENABLE_MAILHOG === 'true' || process.env.ENVIRONMENT === 'development') {
       try {
         await startMailHogServer();

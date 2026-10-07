@@ -21,7 +21,7 @@
       "reviewsCount": 342,
       "badge": "Senior Medical Oncologist & Lead Volunteer",
       "avatar": "/assets/doctors/doc-1-priya-sharma.jpg",
-      "about": "Dr. Priya Sharma is a distinguished Medical Oncologist with 16+ years of clinical and research excellence in breast, lung, and gastrointestinal cancers. A passionate advocate for early screening, she heads Avinya Care's clinical advisory board and conducts volunteer consultation clinics.",
+      "about": "Dr. Priya Sharma is a distinguished Medical Oncologist with 16+ years of clinical and research excellence in breast, lung, and gastrointestinal cancers. A passionate advocate for early screening, she heads AvinyaCareFoundation's clinical advisory board and conducts volunteer consultation clinics.",
       "areasOfExpertise": [
         "Targeted & Immunotherapy Protocols",
         "Early Breast & Ovarian Cancer Screening",
@@ -60,7 +60,7 @@
       "hospitalName": "Indraprastha Apollo Hospitals, New Delhi",
       "location": "New Delhi",
       "consultationFee": 1200,
-      "feeDisplay": "₹1,200 (50% Avinya Care Concession)",
+      "feeDisplay": "₹1,200 (50% AvinyaCareFoundation Concession)",
       "consultationTypes": [
         "in-clinic",
         "online"
@@ -198,7 +198,7 @@
       "qualification": "MBBS, MD (General Medicine), DNB",
       "experienceYears": 12,
       "hospitalId": "avinya-clinic-mumbai",
-      "hospitalName": "Avinya Care Community Clinic, Mumbai",
+      "hospitalName": "AvinyaCareFoundation Community Clinic, Mumbai",
       "location": "Mumbai",
       "consultationFee": 0,
       "feeDisplay": "₹0 (Avinya Community Clinic)",
@@ -210,7 +210,7 @@
       "reviewsCount": 410,
       "badge": "Chief Medical Officer - Avinya Clinics",
       "avatar": "/assets/doctors/doc-5-meera-nambiar.jpg",
-      "about": "Dr. Meera Nambiar serves as the Chief Medical Officer at Avinya Care Foundation. She leads early diagnostic triage, primary healthcare consultations, metabolic health management, and community screening camps.",
+      "about": "Dr. Meera Nambiar serves as the Chief Medical Officer at AvinyaCareFoundation. She leads early diagnostic triage, primary healthcare consultations, metabolic health management, and community screening camps.",
       "areasOfExpertise": [
         "Comprehensive Symptom & Health Triage",
         "Diabetes & Metabolic Syndrome Control",

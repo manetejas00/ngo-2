@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Avinya Care Admin Panel - Modern SaaS Design System (Royal Navy & Slate)
+   AvinyaCareFoundation Admin Panel - Modern SaaS Design System (Royal Navy & Slate)
    Visual System: Deep Navy Sidebar (#0B1220) + Light Slate Body (#F8FAFC) + 
                   Pure White Surface (#FFFFFF) + Royal Blue Primary (#2563EB) +
                   Subtle Gold Accent (#D4A72C)
@@ -178,7 +178,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color var(--transition-normal), color var(--transition-normal);
-  overflow-x: hidden;
+}
+
+/* A scroll lock is applied only while an overlay is actually open.  It is not
+   used as a substitute for fixing wide content (tables keep their own scroller). */
+body.modal-open,
+body.sidebar-open {
+  overflow: hidden !important;
 }
 
 a {
@@ -804,6 +810,7 @@ body.sidebar-collapsed .admin-user-card {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
+  min-width: 0;
 }
 
 .chart-card {
@@ -816,6 +823,7 @@ body.sidebar-collapsed .admin-user-card {
   gap: 16px;
   box-shadow: var(--shadow-sm);
   transition: border-color var(--transition-normal);
+  min-width: 0;
 }
 
 .chart-card:hover {
@@ -842,6 +850,11 @@ body.sidebar-collapsed .admin-user-card {
   position: relative;
   height: 240px;
   width: 100%;
+  min-width: 0;
+}
+
+.chart-container canvas {
+  max-width: 100%;
 }
 
 /* --------------------------------------------------------------------------
@@ -1251,13 +1264,14 @@ textarea.form-control {
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(6px);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--transition-normal);
@@ -1275,10 +1289,13 @@ textarea.form-control {
   box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 600px;
-  max-height: 90vh;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  max-height: min(100%, calc(100dvh - 32px));
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
   transform: scale(0.96) translateY(8px);
   transition: transform var(--transition-normal);
 }
@@ -1325,6 +1342,38 @@ textarea.form-control {
   padding: 24px;
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Forms are the middle flex item in most dialogs. Giving that item a bounded
+   height is what allows its .modal-body (rather than the clipped card) to own
+   the one intended scroll area. */
+.modal-card > form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.modal-header,
+.modal-footer {
+  flex: 0 0 auto;
+}
+
+/* Authentication and confirmation dialogs do not use .modal-body. They are
+   deliberately the scroll container themselves, avoiding content clipping. */
+#loginOverlay .login-card,
+#forgotPasswordModal .modal-card,
+#forcePasswordModal .modal-card,
+#resetPasswordModal .modal-card,
+#clearAllCacheModal .modal-card {
+  display: block;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-footer {
@@ -1449,7 +1498,7 @@ textarea.form-control {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .hide-mobile {
     display: none !important;
   }
@@ -1467,12 +1516,49 @@ textarea.form-control {
     transform: translateX(0);
   }
 
+  /* Do not retain the desktop collapsed rail state when the off-canvas menu
+     is being used. */
+  body.sidebar-collapsed .sidebar {
+    width: var(--sidebar-width);
+  }
+
+  body.sidebar-collapsed .brand-name,
+  body.sidebar-collapsed .brand-tag,
+  body.sidebar-collapsed .menu-group-label,
+  body.sidebar-collapsed .nav-text,
+  body.sidebar-collapsed .nav-badge,
+  body.sidebar-collapsed .user-info-text,
+  body.sidebar-collapsed .sidebar-actions {
+    display: block !important;
+  }
+
+  body.sidebar-collapsed .sidebar-header { padding: 18px 20px; }
+  body.sidebar-collapsed .sidebar-footer { padding: 16px 12px; }
+  body.sidebar-collapsed .admin-user-card {
+    justify-content: flex-start;
+  }
+  body.sidebar-collapsed .sidebar-nav-link {
+    padding: 10px 12px;
+    position: static;
+    justify-content: flex-start;
+  }
+  body.sidebar-collapsed .sidebar-actions { display: flex !important; }
+
   .mobile-close-btn {
     display: block;
   }
 
   .top-header {
     padding: 0 16px;
+  }
+
+  #roleUserPill {
+    gap: 0;
+    padding: 4px;
+  }
+
+  #roleUserPill > span:last-child {
+    display: none;
   }
 
   .workspace-body {
@@ -1495,16 +1581,125 @@ textarea.form-control {
 
   .search-box {
     width: 100%;
+    min-width: 0;
+  }
+
+  .table-wrapper {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+  }
+
+  .table-wrapper table {
+    min-width: 680px;
+  }
+
+  .modal-overlay, .login-overlay {
+    align-items: flex-end;
+    padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+  }
+
+  .modal-card, .login-card {
+    width: 100%;
+    max-width: none !important;
+    max-height: calc(100dvh - 16px);
+    max-height: min(100%, calc(100dvh - 16px));
+    border-radius: var(--radius-lg) var(--radius-lg) var(--radius-md) var(--radius-md);
+  }
+
+  .modal-header,
+  .modal-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-body[style*="grid-template-columns"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .modal-footer {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .modal-footer .btn {
+    flex: 1 1 140px;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .detail-label {
+    width: auto;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 480px) {
+  .admin-status-pill {
+    display: none;
+  }
+
   .page-title {
     font-size: 16px;
   }
 
   .modal-card {
-    max-height: 95vh;
-    border-radius: var(--radius-md);
+    max-height: calc(100dvh - 16px);
+    max-height: min(100%, calc(100dvh - 16px));
+  }
+
+  .top-header {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .header-left,
+  .header-right {
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .header-left { flex: 1 1 auto; }
+  .header-right { flex: 0 0 auto; }
+
+  .page-title-group {
+    min-width: 0;
+  }
+
+  .breadcrumbs,
+  .page-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .user-dropdown-menu {
+    position: fixed;
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-width: none;
+  }
+
+  .toast-container {
+    top: max(12px, env(safe-area-inset-top));
+    right: 12px;
+    left: 12px;
+  }
+
+  .toast-item {
+    min-width: 0;
+    max-width: none;
   }
 }

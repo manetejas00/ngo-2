@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Client-Side Layout Injector
+ * AvinyaCareFoundation - Client-Side Layout Injector
  * 
  * Safely injects reusable Navbar and Footer components into the DOM when the site 
  * is served statically (e.g. Hostinger LiteSpeed) where Node.js SSI is bypassed.

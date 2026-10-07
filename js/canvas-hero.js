@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Real Image-Sequence Canvas Scrollytelling Engine
+ * AvinyaCareFoundation - Real Image-Sequence Canvas Scrollytelling Engine
  * High-Performance, Anti-Jitter, Liquid 60FPS Frame Renderer
  */
 

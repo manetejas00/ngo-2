@@ -47,7 +47,7 @@ function startSmtpServer() {
         headers: {}
       };
 
-      socket.write('220 Avinya Care MailHog ESMTP Server Ready\r\n');
+      socket.write('220 AvinyaCareFoundation MailHog ESMTP Server Ready\r\n');
 
       socket.on('data', async (chunk) => {
         const lines = chunk.toString().split('\r\n');
@@ -71,7 +71,7 @@ function startSmtpServer() {
 
           const cmd = line.trim().toUpperCase();
           if (cmd.startsWith('HELO') || cmd.startsWith('EHLO')) {
-            socket.write('250-Avinya Care MailHog Server\r\n250-PIPELINING\r\n250-8BITMIME\r\n250 OK\r\n');
+            socket.write('250-AvinyaCareFoundation MailHog Server\r\n250-PIPELINING\r\n250-8BITMIME\r\n250 OK\r\n');
           } else if (cmd.startsWith('MAIL FROM:')) {
             const match = line.match(/MAIL FROM:\s*<([^>]+)>/i) || line.match(/MAIL FROM:\s*(\S+)/i);
             currentMsg.from = match ? match[1] : line.replace(/MAIL FROM:/i, '').trim();
@@ -198,7 +198,7 @@ function getMailHogHtml() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MailHog - Avinya Care Local Email Testing</title>
+  <title>MailHog - AvinyaCareFoundation Local Email Testing</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>

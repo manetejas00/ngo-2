@@ -1,5 +1,5 @@
 /**
- * Avinya Care Foundation - Healthcare Email Dispatcher
+ * AvinyaCareFoundation - Healthcare Email Dispatcher
  * Sends multi-party notifications for Appointments and Tests.
  * Ensures that email transport failures never invalidate database booking operations.
  */

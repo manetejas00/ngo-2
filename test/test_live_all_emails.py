@@ -32,7 +32,7 @@ def post_json(endpoint, payload):
         data=data,
         headers={
             'Content-Type': 'application/json; charset=UTF-8',
-            'User-Agent': 'AvinyaCare-EmailTester/1.0'
+            'User-Agent': 'AvinyaCareFoundation-EmailTester/1.0'
         },
         method='POST'
     )

@@ -1,6 +1,6 @@
 <?php
 /**
- * Avinya Care Foundation - Admin Cache Management API
+ * AvinyaCareFoundation - Admin Cache Management API
  * Authorized endpoint providing real-time cache diagnostics and safe cache clearing operations.
  */
 
