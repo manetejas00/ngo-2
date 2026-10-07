@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Admin Design System CSS -->
-  <link rel="stylesheet" href="css/admin.css?v=4.0">
+  <link rel="stylesheet" href="css/admin.css?v=4.1">
 
   <!-- External Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -433,7 +433,7 @@
       <div class="workspace-body">
 
         <!-- Overview Metrics Cards Grid (Visible on Dashboard Tab) -->
-        <div class="stats-grid">
+        <div class="stats-grid" id="dashboardStatsGrid">
           <div class="stat-card">
             <div class="stat-header">
               <div class="stat-title">Total Submissions</div>
@@ -479,7 +479,7 @@
           </div>
         </div>
 
-        <section class="ga4-section" id="ga4Section" aria-labelledby="ga4Title">
+        <section class="ga4-section" id="ga4Section" aria-labelledby="ga4Title" style="display:none;">
           <div class="ga4-section-header">
             <div><div class="ga4-eyebrow">Google Analytics 4</div><h2 id="ga4Title">Website performance</h2><p id="ga4Updated">Loading the last 30 days…</p></div>
             <button class="btn btn-outline" type="button" onclick="loadGoogleAnalytics(true)">↻ Refresh</button>
@@ -2254,6 +2254,7 @@
 
       // Hide/Show containers
       const dashPanel = document.getElementById('dashboardOverviewPanel');
+      const dashboardStatsGrid = document.getElementById('dashboardStatsGrid');
       const ga4Section = document.getElementById('ga4Section');
       const tableCard = document.getElementById('tableCard');
       const settingsPanel = document.getElementById('settingsPanel');
@@ -2265,6 +2266,7 @@
       const reseedBtn = document.getElementById('reseedCatalogBtn');
 
       dashPanel.style.display = tab === 'dashboard' ? 'grid' : 'none';
+      dashboardStatsGrid.style.display = tab === 'dashboard' ? 'grid' : 'none';
       ga4Section.style.display = tab === 'websiteAnalytics' ? 'block' : 'none';
       settingsPanel.style.display = tab === 'settings' ? 'block' : 'none';
       if (tab === 'settings') loadSiteSettings();
