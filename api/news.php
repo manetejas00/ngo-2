@@ -70,30 +70,24 @@ function isHealthcareOnly(string $title, string $desc, array $posKeys, array $ne
     return false;
 }
 
-// Worldwide Daily Healthcare Feed Endpoints
-$defaultEndpoints = [
-    'https://saurav.tech/NewsAPI/top-headlines/category/health/in.json' => '🇮🇳 India Health Desk',
-    'https://saurav.tech/NewsAPI/top-headlines/category/health/us.json' => '🇺🇸 US Medical Desk',
-    'https://saurav.tech/NewsAPI/top-headlines/category/health/gb.json' => '🇬🇧 UK Health Service',
-    'https://saurav.tech/NewsAPI/top-headlines/category/health/ca.json' => '🇨🇦 Canada Health',
-    'https://saurav.tech/NewsAPI/top-headlines/category/health/au.json' => '🇦🇺 Australia Health',
-    'https://saurav.tech/NewsAPI/top-headlines/category/science/in.json' => '🇮🇳 India Medical Research',
-    'https://saurav.tech/NewsAPI/top-headlines/category/science/us.json' => '🌐 Global Medical Science'
-];
-
+// NewsData's free health feed returns the upstream image_url field directly.
+// Configure NEWSDATA_API_KEY in the PHP host environment; never expose it to
+// the client or add it to source control.
+$newsDataKey = trim((string)(getenv('NEWSDATA_API_KEY') ?: ''));
 $articles = [];
 
-foreach ($defaultEndpoints as $url => $providerName) {
+if ($newsDataKey !== '' && !str_starts_with($newsDataKey, 'YOUR_')) {
     try {
+        $url = 'https://newsdata.io/api/1/latest?apikey=' . rawurlencode($newsDataKey) . '&category=health&language=en&size=10';
         $context = stream_context_create(['http' => ['timeout' => 3, 'header' => "User-Agent: AvinyaCareFoundationGlobalNews/1.0\r\n"]]);
         $jsonStr = @file_get_contents($url, false, $context);
         if ($jsonStr) {
             $data = json_decode($jsonStr, true);
-            if (isset($data['articles']) && is_array($data['articles'])) {
-                foreach (array_slice($data['articles'], 0, 5) as $art) {
+            if (isset($data['results']) && is_array($data['results'])) {
+                foreach ($data['results'] as $art) {
                     $title = trim((string)($art['title'] ?? ''));
                     $desc = trim((string)($art['description'] ?? ''));
-                    $artUrl = trim((string)($art['url'] ?? ''));
+                    $artUrl = trim((string)($art['link'] ?? ''));
 
                     if (!empty($title) && !empty($artUrl) && isHealthcareOnly($title, $desc, $healthKeywords, $strictNonHealthKeywords)) {
                         $cleanTitle = explode(' - ', $title)[0];
@@ -104,23 +98,21 @@ foreach ($defaultEndpoints as $url => $providerName) {
                             'title' => $cleanTitle,
                             'description' => !empty($desc) ? $desc : 'Read clinical update from worldwide healthcare sources.',
                             'category' => $cat,
-                            'source' => $art['source']['name'] ?? $providerName,
-                            'apiProvider' => $providerName,
-                            'publishedAt' => $art['publishedAt'] ?? date('c'),
+                            'source' => $art['source_name'] ?? $art['source_id'] ?? 'NewsData Health Desk',
+                            'apiProvider' => 'NewsData.io Health',
+                            'publishedAt' => $art['pubDate'] ?? date('c'),
                             'url' => $artUrl,
                             // Keep the external API image value untouched. The
                             // frontend validates it and uses its single branded
                             // template when it is missing or cannot load.
-                            'urlToImage' => isset($art['urlToImage']) && is_string($art['urlToImage']) ? trim($art['urlToImage']) : null,
+                            'urlToImage' => isset($art['image_url']) && is_string($art['image_url']) ? trim($art['image_url']) : null,
                             'isAIGenerated' => false
                         ];
                     }
                 }
             }
         }
-    } catch (Throwable $e) {
-        // Continue to next endpoint
-    }
+    } catch (Throwable $e) {}
 }
 
 // Load static fallback articles (AI stories) and combine
