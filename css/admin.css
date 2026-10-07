@@ -805,6 +805,20 @@ body.sidebar-collapsed .admin-user-card {
 .stat-trend.up { background: var(--admin-success-bg); color: var(--admin-success); }
 .stat-trend.down { background: var(--admin-danger-bg); color: var(--admin-danger); }
 
+/* Google Analytics 4 dashboard */
+.ga4-section { margin: 24px 0; padding: 22px; background: var(--admin-card); border: 1px solid var(--admin-border); border-radius: var(--radius-lg); }
+.ga4-section-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.ga4-eyebrow { color: var(--admin-primary); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.ga4-section h2 { margin: 3px 0; font-size: 19px; color: var(--admin-text); }
+.ga4-section-header p, .ga4-notice { margin: 0; color: var(--admin-text-subtle); font-size: 12px; }
+.ga4-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.ga4-card { padding: 16px; border: 1px solid var(--admin-border); border-radius: var(--radius-md); background: var(--admin-bg); }
+.ga4-card span, .ga4-card small { display: block; color: var(--admin-text-subtle); font-size: 12px; }
+.ga4-card strong { display: block; margin: 7px 0 5px; color: var(--admin-text); font-size: 24px; line-height: 1.1; }
+.ga4-notice { margin-top: 14px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--admin-warning-bg); color: var(--admin-warning); }
+@media (max-width: 900px) { .ga4-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 540px) { .ga4-section-header { align-items: flex-start; flex-direction: column; } .ga4-grid { grid-template-columns: 1fr; } }
+
 /* Charts Panel */
 .charts-grid {
   display: grid;
