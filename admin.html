@@ -2118,10 +2118,10 @@
             notice.className = 'ga4-notice ga4-notice-info';
             notice.innerHTML = `<strong>✓ GA4 Public Measurement ID Connected (${data.measurementId}):</strong> Website tracking is active on all pages and logging traffic to Google Analytics dashboard. <em>(To stream live reporting charts directly into this admin panel, configure <code>GA4_PROPERTY_ID</code> and <code>GA4_SERVICE_ACCOUNT_EMAIL</code> in your server <code>.env</code> file).</em>`;
             updated.textContent = `Tracking Tag Active (${data.measurementId})`;
-            document.getElementById('ga4ActiveUsers').textContent = 'Active';
-            document.getElementById('ga4Sessions').textContent = 'Active';
-            document.getElementById('ga4PageViews').textContent = 'Active';
-            document.getElementById('ga4Engagement').textContent = 'Active';
+            document.getElementById('ga4ActiveUsers').innerHTML = '<span class="live-pulse-dot"></span> Active';
+            document.getElementById('ga4Sessions').innerHTML = '<span class="live-pulse-dot"></span> Active';
+            document.getElementById('ga4PageViews').innerHTML = '<span class="live-pulse-dot"></span> Active';
+            document.getElementById('ga4Engagement').innerHTML = '<span class="live-pulse-dot"></span> Active';
             document.getElementById('ga4ActiveUsersTrend').textContent = 'Logging to Google Analytics';
             document.getElementById('ga4SessionsTrend').textContent = 'Logging to Google Analytics';
             document.getElementById('ga4PageViewsTrend').textContent = 'Logging to Google Analytics';
