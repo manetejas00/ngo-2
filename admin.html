@@ -629,11 +629,37 @@
                 </div>
                 <div>
                   <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Platform Tagline</label>
-                  <input type="text" id="setTagline" class="form-control" value="Humanitarian Oncology & Free Healthcare Initiative">
+                  <input type="text" id="setTagline" class="form-control" value="No one should face a health crisis alone.">
                 </div>
                 <div>
                   <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Emergency Helpline Phone</label>
-                  <input type="text" id="setHelpline" class="form-control" value="+91 91361 57321">
+                  <input type="text" id="setHelpline" class="form-control" value="+91 74474 41116">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">WhatsApp Number</label>
+                  <input type="text" id="setWhatsApp" class="form-control" value="+91 74474 41116">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Location / Address</label>
+                  <input type="text" id="setAddress" class="form-control" value="Mumbai-Virar, Maharashtra">
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 style="font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">📱 Social Media Links</h3>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Instagram Profile URL</label>
+                  <input type="url" id="setInstagram" class="form-control" value="https://www.instagram.com/avinyacare_foundation/">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Facebook Page URL</label>
+                  <input type="url" id="setFacebook" class="form-control" value="https://facebook.com">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">LinkedIn Page URL</label>
+                  <input type="url" id="setLinkedIn" class="form-control" value="https://linkedin.com">
                 </div>
               </div>
             </div>
@@ -643,7 +669,7 @@
               <div style="display: flex; flex-direction: column; gap: 12px;">
                 <div>
                   <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Primary Admin Email</label>
-                  <input type="email" id="setAdminEmail" class="form-control" value="info@avinyacarefoundation.org">
+                  <input type="email" id="setAdminEmail" class="form-control" value="info@avinyacarefoundation.com">
                 </div>
                 <div>
                   <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">SMTP Server (Hostinger Port 465 SSL)</label>
@@ -3537,10 +3563,15 @@
         const data = await res.json();
         if (!res.ok || !data.settings) return;
         const settings = data.settings;
-        document.getElementById('setOrgName').value = settings.organization_name || '';
-        document.getElementById('setTagline').value = settings.tagline || '';
-        document.getElementById('setHelpline').value = settings.phone || '';
-        document.getElementById('setAdminEmail').value = settings.email || '';
+        if (settings.organization_name !== undefined && document.getElementById('setOrgName')) document.getElementById('setOrgName').value = settings.organization_name;
+        if (settings.tagline !== undefined && document.getElementById('setTagline')) document.getElementById('setTagline').value = settings.tagline;
+        if (settings.phone !== undefined && document.getElementById('setHelpline')) document.getElementById('setHelpline').value = settings.phone;
+        if (settings.email !== undefined && document.getElementById('setAdminEmail')) document.getElementById('setAdminEmail').value = settings.email;
+        if (settings.whatsapp !== undefined && document.getElementById('setWhatsApp')) document.getElementById('setWhatsApp').value = settings.whatsapp;
+        if (settings.address !== undefined && document.getElementById('setAddress')) document.getElementById('setAddress').value = settings.address;
+        if (settings.instagram_url !== undefined && document.getElementById('setInstagram')) document.getElementById('setInstagram').value = settings.instagram_url;
+        if (settings.facebook_url !== undefined && document.getElementById('setFacebook')) document.getElementById('setFacebook').value = settings.facebook_url;
+        if (settings.linkedin_url !== undefined && document.getElementById('setLinkedIn')) document.getElementById('setLinkedIn').value = settings.linkedin_url;
       } catch (_) { /* The static defaults remain available if settings cannot be read. */ }
     }
 
@@ -3550,7 +3581,12 @@
         organization_name: document.getElementById('setOrgName').value.trim(),
         tagline: document.getElementById('setTagline').value.trim(),
         phone: document.getElementById('setHelpline').value.trim(),
-        email: document.getElementById('setAdminEmail').value.trim()
+        email: document.getElementById('setAdminEmail').value.trim(),
+        whatsapp: document.getElementById('setWhatsApp') ? document.getElementById('setWhatsApp').value.trim() : '',
+        address: document.getElementById('setAddress') ? document.getElementById('setAddress').value.trim() : '',
+        instagram_url: document.getElementById('setInstagram') ? document.getElementById('setInstagram').value.trim() : '',
+        facebook_url: document.getElementById('setFacebook') ? document.getElementById('setFacebook').value.trim() : '',
+        linkedin_url: document.getElementById('setLinkedIn') ? document.getElementById('setLinkedIn').value.trim() : ''
       };
       try {
         const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
@@ -3559,8 +3595,10 @@
         });
         const data = await res.json();
         if (!res.ok || data.status !== 'ok') throw new Error(data.message || 'Unable to save settings.');
-        localStorage.setItem('avinya_poll_interval', document.getElementById('setPollInterval').value);
-        startAutoPolling();
+        if (document.getElementById('setPollInterval')) {
+          localStorage.setItem('avinya_poll_interval', document.getElementById('setPollInterval').value);
+          startAutoPolling();
+        }
         showToast('Public site settings saved and published.', 'success');
       } catch (error) {
         showToast(error.message || 'Unable to save platform settings.', 'error');
