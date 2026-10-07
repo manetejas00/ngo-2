@@ -27,7 +27,9 @@ for (const relative of requiredFiles) {
 }
 
 const tracked = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 })
-  .split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  .split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+  // Validate the working tree, including files deleted before their changes are staged.
+  .filter((relative) => existsSync(resolve(root, relative)));
 
 function collectFiles(directory, extensions) {
   if (!existsSync(directory)) return [];

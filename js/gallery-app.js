@@ -135,11 +135,20 @@
       const catKey = cat.toLowerCase();
       const isActive = currentCategory === catKey;
       let icon = 'fa-layer-group';
-      if (catKey.includes('health') || catKey.includes('medical')) icon = 'fa-stethoscope';
+      if (catKey.includes('health') || catKey.includes('medical') || catKey.includes('cancer')) icon = 'fa-stethoscope';
+      else if (catKey.includes('tree') || catKey.includes('plant') || catKey.includes('environ')) icon = 'fa-seedling';
+      else if (catKey.includes('food') || catKey.includes('hunger') || catKey.includes('ration') || catKey.includes('nutrit')) icon = 'fa-bowl-food';
+      else if (catKey.includes('dog') || catKey.includes('animal') || catKey.includes('pet')) icon = 'fa-dog';
+      else if (catKey.includes('educat') || catKey.includes('child') || catKey.includes('school')) icon = 'fa-graduation-cap';
+      else if (catKey.includes('women') || catKey.includes('mother')) icon = 'fa-person-dress';
+      else if (catKey.includes('blood')) icon = 'fa-droplet';
+      else if (catKey.includes('disaster') || catKey.includes('relief')) icon = 'fa-hand-holding-hand';
+      else if (catKey.includes('volunteer')) icon = 'fa-hands-holding-child';
+      else if (catKey.includes('donation') || catKey.includes('fund')) icon = 'fa-hand-holding-dollar';
       else if (catKey.includes('event')) icon = 'fa-calendar-star';
       else if (catKey.includes('awareness')) icon = 'fa-bullhorn';
-      else if (catKey.includes('campaign')) icon = 'fa-flag';
-      else if (catKey.includes('community')) icon = 'fa-hand-holding-heart';
+      else if (catKey.includes('campaign') || catKey.includes('drive')) icon = 'fa-flag';
+      else if (catKey.includes('community') || catKey.includes('outreach')) icon = 'fa-hand-holding-heart';
 
       return `
         <button class="gallery-category-pill ${isActive ? 'active' : ''}" data-category="${catKey}" role="tab" aria-selected="${isActive}">

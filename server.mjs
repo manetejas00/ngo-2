@@ -808,19 +808,6 @@ const server = createServer(async (req, res) => {
   }
 
   // Security Monitoring & Health Status API: /api/security-health
-  if (urlPath === '/api/public-config' && req.method === 'GET') {
-    const googleAnalyticsId = /^G-[A-Z0-9]+$/i.test(process.env.GOOGLE_ANALYTICS_ID || '')
-      ? process.env.GOOGLE_ANALYTICS_ID
-      : '';
-    res.writeHead(200, {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store, max-age=0'
-    });
-    res.end(JSON.stringify({ googleAnalyticsId }));
-    return;
-  }
-
-  // Security Monitoring & Health Status API: /api/security-health
   if (urlPath === '/api/security-health') {
     res.writeHead(200, {
       'Content-Type': 'application/json; charset=utf-8',

@@ -59,7 +59,6 @@ Options -Indexes
   # Route /api/submit-form to submit-form.php on Apache/PHP hosts
   RewriteRule ^api/submit-form/?$ api/submit-form.php [L,NC]
   RewriteRule ^api/security-health/?$ api/security-health.php [L,NC]
-  RewriteRule ^api/public-config/?$ api/public-config.php [L,NC]
   RewriteRule ^api/gallery/?$ api/gallery.php [L,NC]
   RewriteRule ^api/reset-gallery(\.php)?/?$ api/reset-gallery.php [L,NC]
   RewriteRule ^api/migrate(\.php)?/?$ api/migrate.php [L,NC]
