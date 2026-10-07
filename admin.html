@@ -2052,24 +2052,46 @@
     }
 
     function updateStats(analytics) {
-      if (!analytics) return;
-      document.getElementById('statSubmissions').innerText = analytics.totalSubmissions || 0;
-      document.getElementById('statDonations').innerText = `₹${(analytics.totalDonationsAmount || 0).toLocaleString('en-IN')}`;
-      document.getElementById('statDoctorBookings').innerText = analytics.totalDoctorBookings || 0;
-      document.getElementById('statDiagnosticBookings').innerText = analytics.totalDiagnosticBookings || 0;
+      analytics = analytics || {};
+      const formSubs = rawData.formSubmissions || [];
+      const docBookings = rawData.doctorBookings || [];
+      const diagBookings = rawData.diagnosticBookings || [];
 
-      // Nav badges
-      document.getElementById('sideDoctorCount').innerText = analytics.totalDoctorBookings || 0;
-      document.getElementById('sideDiagCount').innerText = analytics.totalDiagnosticBookings || 0;
-      document.getElementById('sideFormContactCount').innerText = analytics.formCounts?.contact || 0;
-      document.getElementById('sideFormNewsletterCount').innerText = analytics.formCounts?.newsletter || 0;
-      document.getElementById('sideFormVolunteerCount').innerText = analytics.formCounts?.volunteer || 0;
-      document.getElementById('sideFormSupportCount').innerText = analytics.formCounts?.patient_support || 0;
-      document.getElementById('sideFormDonationCount').innerText = analytics.formCounts?.donation || 0;
-      document.getElementById('sideFormComingSoonFeedbackCount').innerText = analytics.formCounts?.coming_soon_feedback || 0;
-      document.getElementById('sideFormPartnershipCount').innerText = analytics.formCounts?.csr_partnership || 0;
-      document.getElementById('sideFormFeedbackCount').innerText = analytics.formCounts?.feedback || 0;
-      document.getElementById('sideFormsCount').innerText = analytics.totalSubmissions || 0;
+      const countsByType = analytics.formCountsByType || analytics.formCounts || {};
+
+      const getFormCount = (type) => {
+        if (countsByType[type] !== undefined) return countsByType[type];
+        return formSubs.filter(f => (f.form_type || 'contact').toLowerCase() === type.toLowerCase()).length;
+      };
+
+      const totalForms = analytics.totalFormSubmissions || analytics.totalSubmissions || formSubs.length;
+      const totalDocs = analytics.totalDoctorBookings || docBookings.length;
+      const totalDiags = analytics.totalDiagnosticBookings || diagBookings.length;
+
+      let totalDonationsSum = analytics.totalDonationsAmount || 0;
+      if (!totalDonationsSum && formSubs.length > 0) {
+        totalDonationsSum = formSubs
+          .filter(f => (f.form_type || '').toLowerCase() === 'donation')
+          .reduce((sum, f) => sum + (parseFloat(f.donation_amount || f.amount || 0) || 0), 0);
+      }
+
+      document.getElementById('statSubmissions').innerText = totalForms;
+      document.getElementById('statDonations').innerText = `₹${totalDonationsSum.toLocaleString('en-IN')}`;
+      document.getElementById('statDoctorBookings').innerText = totalDocs;
+      document.getElementById('statDiagnosticBookings').innerText = totalDiags;
+
+      // Nav sidebar badges
+      document.getElementById('sideDoctorCount').innerText = totalDocs;
+      document.getElementById('sideDiagCount').innerText = totalDiags;
+      document.getElementById('sideFormContactCount').innerText = getFormCount('contact');
+      document.getElementById('sideFormNewsletterCount').innerText = getFormCount('newsletter');
+      document.getElementById('sideFormVolunteerCount').innerText = getFormCount('volunteer');
+      document.getElementById('sideFormSupportCount').innerText = getFormCount('patient_support');
+      document.getElementById('sideFormDonationCount').innerText = getFormCount('donation');
+      document.getElementById('sideFormComingSoonFeedbackCount').innerText = getFormCount('coming_soon_feedback');
+      document.getElementById('sideFormPartnershipCount').innerText = getFormCount('csr_partnership');
+      document.getElementById('sideFormFeedbackCount').innerText = getFormCount('feedback');
+      document.getElementById('sideFormsCount').innerText = totalForms;
       document.getElementById('sideEmailCount').innerText = (rawData.emailLogs || []).length;
       document.getElementById('sideActivityCount').innerText = (rawData.activityLogs || []).length;
       document.getElementById('sideDoctorsCatalogCount').innerText = (rawData.doctorsCatalog || []).length;

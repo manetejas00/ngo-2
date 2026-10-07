@@ -1835,6 +1835,7 @@ const server = createServer(async (req, res) => {
             uniqueDonors: donationStats.unique_donors,
             pendingDonationsCount: donationStats.pending_donations,
             failedDonationsCount: donationStats.failed_donations,
+            formCounts: formCountsByType,
             formCountsByType,
             doctorStatusCounts,
             diagStatusCounts

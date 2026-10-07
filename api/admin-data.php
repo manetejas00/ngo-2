@@ -809,6 +809,7 @@ echo json_encode([
     'timestamp' => date(DATE_ATOM),
     'analytics' => [
         'totalFormSubmissions' => count($formSubmissions),
+        'totalSubmissions' => count($formSubmissions),
         'totalDoctorBookings' => count($doctorBookings),
         'totalDiagnosticBookings' => count($diagnosticBookings),
         'totalEmailLogs' => count($emailLogs),
@@ -819,6 +820,7 @@ echo json_encode([
         'totalGalleries' => count($galleriesCatalog ?? []),
         'totalDonationsAmount' => $totalDonationsAmount,
         'totalDonationsCount' => $totalDonationsCount,
+        'formCounts' => $formCountsByType,
         'formCountsByType' => $formCountsByType,
         'doctorStatusCounts' => $doctorStatusCounts,
         'diagStatusCounts' => $diagStatusCounts
