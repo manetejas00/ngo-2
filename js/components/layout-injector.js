@@ -64,4 +64,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (footerInjected && typeof window.initRadialMenu === 'function') {
     window.initRadialMenu();
   }
+
+  // Apply only administrator-managed identity/contact values.  Page copy,
+  // navigation and API/system data intentionally remain outside this setting.
+  try {
+    const response = await fetch('/api/site-settings.php', { cache: 'no-store' });
+    const payload = await response.json();
+    const settings = payload?.settings;
+    if (!response.ok || !settings) return;
+    document.querySelectorAll('[data-site-setting]').forEach((node) => {
+      const value = settings[node.dataset.siteSetting];
+      if (!value) return;
+      if (node.dataset.siteSetting === 'phone') {
+        node.textContent = value;
+        if (node.tagName === 'A') node.href = `tel:${value.replace(/[^+\d]/g, '')}`;
+      } else if (node.dataset.siteSetting === 'email') {
+        node.textContent = value;
+        if (node.tagName === 'A') node.href = `mailto:${value}`;
+      } else {
+        node.textContent = value;
+      }
+    });
+  } catch (_) {
+    // Defaults embedded in the layout keep the public site usable if storage is down.
+  }
 });

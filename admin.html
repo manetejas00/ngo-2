@@ -936,6 +936,9 @@
             <label>About Doctor Bio</label>
             <textarea id="docAbout" class="form-control" placeholder="Write a short summary of doctor credentials and specialized treatments..."></textarea>
           </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label><input type="checkbox" id="docIsActive" checked> Visible on the public doctor directory</label>
+          </div>
         </div>
 
         <div class="modal-footer">
@@ -1021,6 +1024,9 @@
           <div class="form-group" style="grid-column: 1 / -1;">
             <label>Detailed Description</label>
             <textarea id="testDescription" class="form-control" placeholder="Detailed explanation of what this diagnostic test package covers..."></textarea>
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label><input type="checkbox" id="testIsActive" checked> Visible on the public test catalogue</label>
           </div>
         </div>
 
@@ -2182,6 +2188,7 @@
 
       dashPanel.style.display = tab === 'dashboard' ? 'grid' : 'none';
       settingsPanel.style.display = tab === 'settings' ? 'block' : 'none';
+      if (tab === 'settings') loadSiteSettings();
       if (cachePanel) cachePanel.style.display = tab === 'cacheManagement' ? 'block' : 'none';
       tableCard.style.display = (tab !== 'dashboard' && tab !== 'settings' && tab !== 'cacheManagement') ? 'flex' : 'none';
 
@@ -2443,7 +2450,38 @@
       }
     }
 
+    function updateTypeFilterDropdown() {
+      const select = document.getElementById('typeFilter');
+      if (!select) return;
+      const currentVal = select.value;
+      const categoriesSet = new Set();
+
+      let items = [];
+      if (currentTab.startsWith('forms')) items = rawData.formSubmissions || [];
+      else if (currentTab === 'gallery') items = rawData.galleriesCatalog || [];
+      else if (currentTab === 'testsCatalog') items = rawData.diagnosticTestsCatalog || [];
+      else if (currentTab === 'doctor') items = rawData.doctorBookings || [];
+      else if (currentTab === 'diagnostic') items = rawData.diagnosticBookings || [];
+
+      items.forEach(item => {
+        const cat = item.category || item.form_type || item.speciality || item.interest;
+        if (cat && String(cat).trim()) categoriesSet.add(String(cat).trim());
+      });
+
+      if (currentTab === 'gallery') {
+        ['General', 'Medical Camps', 'Tree Plantation', 'Food Donation', 'Animal Welfare', 'Education', 'Women Health', 'Blood Donation', 'Disaster Relief', 'Donation Drives', 'Volunteers', 'Events'].forEach(c => categoriesSet.add(c));
+      }
+
+      const options = ['<option value="all">All Categories</option>'];
+      Array.from(categoriesSet).sort().forEach(cat => {
+        options.push(`<option value="${escapeHtml(cat)}"${cat.toLowerCase() === currentVal.toLowerCase() ? ' selected' : ''}>${escapeHtml(cat)}</option>`);
+      });
+
+      select.innerHTML = options.join('');
+    }
+
     function renderCurrentTab() {
+      updateTypeFilterDropdown();
       filterTable();
     }
 
@@ -2653,6 +2691,7 @@
             <td><img src="${avatar}" alt="${name}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid var(--border-color);" onerror="this.src='/assets/doctors/default-doctor.jpg'"></td>
             <td>
               <div style="font-weight:700;color:var(--text-main);">${name}</div>
+              <div style="font-size:11px;margin-top:3px;"><span class="badge ${(d.is_active !== false && d.is_active !== 0 && d.isActive !== false) ? 'badge-success' : 'badge-warning'}">${(d.is_active !== false && d.is_active !== 0 && d.isActive !== false) ? 'ACTIVE' : 'INACTIVE'}</span></div>
               <div style="font-size:11px;color:var(--text-subtle);">ID: ${id}</div>
             </td>
             <td><span class="badge badge-teal">${spec}</span></td>
@@ -2688,6 +2727,7 @@
             <td style="font-size:22px;">${icon}</td>
             <td>
               <div style="font-weight:700;color:var(--text-main);">${name}</div>
+              <div style="font-size:11px;margin-top:3px;"><span class="badge ${(t.is_active !== false && t.is_active !== 0 && t.isActive !== false) ? 'badge-success' : 'badge-warning'}">${(t.is_active !== false && t.is_active !== 0 && t.isActive !== false) ? 'ACTIVE' : 'INACTIVE'}</span></div>
               <div style="font-size:11px;color:var(--text-subtle);">ID: ${id}</div>
             </td>
             <td><span class="badge badge-info">${cat}</span></td>
@@ -2894,6 +2934,7 @@
           document.getElementById('docAvatar').value = currentAvatar;
           updateDoctorAvatarPreview(currentAvatar);
           document.getElementById('docAbout').value = doc.about || '';
+          document.getElementById('docIsActive').checked = doc.is_active !== false && doc.is_active !== 0 && doc.isActive !== false;
         }
       } else {
         title.innerText = 'Add New Doctor Profile';
@@ -2901,6 +2942,7 @@
         document.getElementById('docIdDisplay').value = '';
         document.getElementById('docIdDisplay').readOnly = false;
         document.getElementById('docAvatar').value = '/assets/doctors/default-doctor.jpg';
+        document.getElementById('docIsActive').checked = true;
         updateDoctorAvatarPreview('/assets/doctors/default-doctor.jpg');
       }
       modal.style.display = 'flex';
@@ -2928,7 +2970,8 @@
         badge: document.getElementById('docBadge').value.trim(),
         avatar: avatarVal || '/assets/doctors/default-doctor.jpg',
         photoBase64: photoBase64 || undefined,
-        about: document.getElementById('docAbout').value.trim()
+        about: document.getElementById('docAbout').value.trim(),
+        isActive: document.getElementById('docIsActive').checked
       };
 
       try {
@@ -2993,12 +3036,15 @@
           document.getElementById('testSampleType').value = t.sample_type || t.sampleType || 'Blood / Serum Sample';
           document.getElementById('testIcon').value = t.icon || '🧪';
           document.getElementById('testDescription').value = t.description || '';
+          document.getElementById('testIncluded').value = Array.isArray(t.tests_included) ? t.tests_included.join(', ') : (Array.isArray(t.testsIncluded) ? t.testsIncluded.join(', ') : (t.tests_included || ''));
+          document.getElementById('testIsActive').checked = t.is_active !== false && t.is_active !== 0 && t.isActive !== false;
         }
       } else {
         title.innerText = 'Add New Diagnostic Test Package';
         document.getElementById('testId').value = '';
         document.getElementById('testIdDisplay').value = '';
         document.getElementById('testIdDisplay').readOnly = false;
+        document.getElementById('testIsActive').checked = true;
       }
       modal.style.display = 'flex';
     }
@@ -3020,7 +3066,9 @@
         reportTurnaround: document.getElementById('testTurnaround').value.trim(),
         sampleType: document.getElementById('testSampleType').value.trim(),
         icon: document.getElementById('testIcon').value.trim(),
-        description: document.getElementById('testDescription').value.trim()
+        description: document.getElementById('testDescription').value.trim(),
+        testsIncluded: document.getElementById('testIncluded').value.split(',').map(item => item.trim()).filter(Boolean),
+        isActive: document.getElementById('testIsActive').checked
       };
 
       try {
@@ -3483,22 +3531,40 @@
       showToast(`Exported ${filename}`, 'success');
     }
 
-    function savePlatformSettings(event) {
+    async function loadSiteSettings() {
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/site-settings.php', { cache: 'no-store' });
+        const data = await res.json();
+        if (!res.ok || !data.settings) return;
+        const settings = data.settings;
+        document.getElementById('setOrgName').value = settings.organization_name || '';
+        document.getElementById('setTagline').value = settings.tagline || '';
+        document.getElementById('setHelpline').value = settings.phone || '';
+        document.getElementById('setAdminEmail').value = settings.email || '';
+      } catch (_) { /* The static defaults remain available if settings cannot be read. */ }
+    }
+
+    async function savePlatformSettings(event) {
       event.preventDefault();
-      const orgName = document.getElementById('setOrgName').value;
-      const tagline = document.getElementById('setTagline').value;
-      const helpline = document.getElementById('setHelpline').value;
-      const adminEmail = document.getElementById('setAdminEmail').value;
-      const pollMs = document.getElementById('setPollInterval').value;
-
-      localStorage.setItem('avinya_org_name', orgName);
-      localStorage.setItem('avinya_tagline', tagline);
-      localStorage.setItem('avinya_helpline', helpline);
-      localStorage.setItem('avinya_admin_email', adminEmail);
-      localStorage.setItem('avinya_poll_interval', pollMs);
-
-      startAutoPolling();
-      showToast('Platform settings saved successfully!', 'success');
+      const settings = {
+        organization_name: document.getElementById('setOrgName').value.trim(),
+        tagline: document.getElementById('setTagline').value.trim(),
+        phone: document.getElementById('setHelpline').value.trim(),
+        email: document.getElementById('setAdminEmail').value.trim()
+      };
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'save_site_settings', settings })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'ok') throw new Error(data.message || 'Unable to save settings.');
+        localStorage.setItem('avinya_poll_interval', document.getElementById('setPollInterval').value);
+        startAutoPolling();
+        showToast('Public site settings saved and published.', 'success');
+      } catch (error) {
+        showToast(error.message || 'Unable to save platform settings.', 'error');
+      }
     }
 
     let syncCountdownInterval = null;

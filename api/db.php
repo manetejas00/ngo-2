@@ -449,6 +449,15 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
             INDEX `idx_gal_cat` (`category`),
             INDEX `idx_gal_pub` (`is_published`),
             INDEX `idx_gal_sort` (`sort_order`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
+        // 12. Public organization settings.  This deliberately holds only
+        // administrator-owned presentation/contact data, never infrastructure
+        // credentials or payment/analytics facts.
+        "CREATE TABLE IF NOT EXISTS `site_settings` (
+            `setting_key` VARCHAR(100) PRIMARY KEY,
+            `setting_value` TEXT DEFAULT NULL,
+            `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
     ];
 

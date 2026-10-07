@@ -253,12 +253,39 @@ if ($action === 'update_donation_payment_status') {
 }
 
 // Enforce Admin role for management actions
-if (in_array($action, ['save_doctor', 'delete_doctor', 'save_test', 'delete_test', 'save_user', 'delete_user', 'seed_catalog'], true)) {
+if (in_array($action, ['save_doctor', 'delete_doctor', 'save_test', 'delete_test', 'save_user', 'delete_user', 'seed_catalog', 'save_site_settings'], true)) {
     if ($userRole !== 'admin') {
         http_response_code(403);
         echo json_encode(['status' => 'error', 'message' => 'Forbidden: Only Super Administrators can alter catalog records or system accounts.']);
         exit(0);
     }
+}
+
+// Public-facing organization/contact settings.  Credentials and operational
+// infrastructure remain environment-managed and are intentionally excluded.
+if ($action === 'save_site_settings') {
+    $settings = $data['settings'] ?? [];
+    if (!is_array($settings)) {
+        http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Settings payload is invalid.']); exit(0);
+    }
+    $allowed = ['organization_name', 'tagline', 'email', 'phone', 'whatsapp', 'address', 'facebook_url', 'instagram_url', 'linkedin_url', 'youtube_url'];
+    $clean = [];
+    foreach ($allowed as $key) {
+        if (!array_key_exists($key, $settings)) continue;
+        $value = trim((string) $settings[$key]);
+        if (mb_strlen($value) > 1000) { http_response_code(422); echo json_encode(['status' => 'error', 'message' => "{$key} is too long."]); exit(0); }
+        if (in_array($key, ['email'], true) && $value !== '' && !filter_var($value, FILTER_VALIDATE_EMAIL)) { http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Please enter a valid organization email.']); exit(0); }
+        if (str_ends_with($key, '_url') && $value !== '' && !filter_var($value, FILTER_VALIDATE_URL)) { http_response_code(422); echo json_encode(['status' => 'error', 'message' => "{$key} must be a valid URL."]); exit(0); }
+        $clean[$key] = $value;
+    }
+    if ($pdo === null) { http_response_code(503); echo json_encode(['status' => 'error', 'message' => 'Settings storage is unavailable.']); exit(0); }
+    $stmt = $pdo->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (:key, :value) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = NOW()');
+    foreach ($clean as $key => $value) $stmt->execute([':key' => $key, ':value' => $value]);
+    AvinyaCache::invalidateGroup('settings');
+    AvinyaCache::invalidateGroup('homepage');
+    logActivity('SITE_SETTINGS_SAVED', 'admin', $_SESSION['admin_email'] ?? 'admin', 'Updated public organization settings', ['keys' => array_keys($clean)]);
+    echo json_encode(['status' => 'ok', 'message' => 'Site settings saved successfully.', 'settings' => $clean]);
+    exit(0);
 }
 
 // Action: Save Doctor (Create or Update)
@@ -332,15 +359,15 @@ if ($action === 'save_doctor') {
     if ($pdo !== null) {
         $stmt = $pdo->prepare("INSERT INTO `doctors`
             (`doctor_id`, `name`, `speciality_id`, `speciality_name`, `qualification`, `experience_years`, `hospital_id`, `hospital_name`, `location`, `consultation_fee`, `fee_display`, `consultation_types`, `rating`, `reviews_count`, `badge`, `avatar`, `about`, `areas_of_expertise`, `languages`, `schedule`, `is_active`)
-            VALUES (:d_id, :name, :spec_id, :spec_name, :qual, :exp, :h_id, :h_name, :loc, :fee, :fee_disp, :types, :rating, :revs, :badge, :avatar, :about, :expert, :langs, :sched, 1)
+            VALUES (:d_id, :name, :spec_id, :spec_name, :qual, :exp, :h_id, :h_name, :loc, :fee, :fee_disp, :types, :rating, :revs, :badge, :avatar, :about, :expert, :langs, :sched, :active)
             ON DUPLICATE KEY UPDATE
-            `name` = VALUES(`name`), `speciality_id` = VALUES(`speciality_id`), `speciality_name` = VALUES(`speciality_name`), `qualification` = VALUES(`qualification`), `experience_years` = VALUES(`experience_years`), `hospital_name` = VALUES(`hospital_name`), `location` = VALUES(`location`), `consultation_fee` = VALUES(`consultation_fee`), `fee_display` = VALUES(`fee_display`), `consultation_types` = VALUES(`consultation_types`), `rating` = VALUES(`rating`), `reviews_count` = VALUES(`reviews_count`), `badge` = VALUES(`badge`), `avatar` = VALUES(`avatar`), `about` = VALUES(`about`), `areas_of_expertise` = VALUES(`areas_of_expertise`), `languages` = VALUES(`languages`), `schedule` = VALUES(`schedule`), `is_active` = 1");
+            `name` = VALUES(`name`), `speciality_id` = VALUES(`speciality_id`), `speciality_name` = VALUES(`speciality_name`), `qualification` = VALUES(`qualification`), `experience_years` = VALUES(`experience_years`), `hospital_name` = VALUES(`hospital_name`), `location` = VALUES(`location`), `consultation_fee` = VALUES(`consultation_fee`), `fee_display` = VALUES(`fee_display`), `consultation_types` = VALUES(`consultation_types`), `rating` = VALUES(`rating`), `reviews_count` = VALUES(`reviews_count`), `badge` = VALUES(`badge`), `avatar` = VALUES(`avatar`), `about` = VALUES(`about`), `areas_of_expertise` = VALUES(`areas_of_expertise`), `languages` = VALUES(`languages`), `schedule` = VALUES(`schedule`), `is_active` = VALUES(`is_active`)");
         
         $stmt->execute([
             ':d_id' => $docId, ':name' => $name, ':spec_id' => $specId, ':spec_name' => $specName, ':qual' => $qual, ':exp' => $exp,
             ':h_id' => $hId, ':h_name' => $hName, ':loc' => $loc, ':fee' => $fee, ':fee_disp' => $feeDisp,
             ':types' => json_encode($types), ':rating' => $rating, ':revs' => $revs, ':badge' => $badge,
-            ':avatar' => $avatar, ':about' => $about, ':expert' => json_encode($expert), ':langs' => json_encode($langs), ':sched' => json_encode($sched)
+            ':avatar' => $avatar, ':about' => $about, ':expert' => json_encode($expert), ':langs' => json_encode($langs), ':sched' => json_encode($sched), ':active' => array_key_exists('is_active', $doc) ? (!empty($doc['is_active']) ? 1 : 0) : (array_key_exists('isActive', $doc) ? (!empty($doc['isActive']) ? 1 : 0) : 1)
         ]);
     }
 
@@ -396,14 +423,14 @@ if ($action === 'save_test') {
     if ($pdo !== null) {
         $stmt = $pdo->prepare("INSERT INTO `diagnostic_tests`
             (`test_id`, `name`, `category`, `tagline`, `description`, `price`, `original_price`, `avinya_subsidy`, `tests_included`, `preparation`, `report_turnaround`, `sample_type`, `icon`, `home_collection`, `centre_visit`, `is_priority`, `badge`, `is_active`)
-            VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :subsidy, :inc, :prep, :turnaround, :stype, :icon, :home, :centre, :prio, :badge, 1)
+            VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :subsidy, :inc, :prep, :turnaround, :stype, :icon, :home, :centre, :prio, :badge, :active)
             ON DUPLICATE KEY UPDATE
-            `name` = VALUES(`name`), `category` = VALUES(`category`), `tagline` = VALUES(`tagline`), `description` = VALUES(`description`), `price` = VALUES(`price`), `original_price` = VALUES(`original_price`), `avinya_subsidy` = VALUES(`avinya_subsidy`), `tests_included` = VALUES(`tests_included`), `preparation` = VALUES(`preparation`), `report_turnaround` = VALUES(`report_turnaround`), `sample_type` = VALUES(`sample_type`), `icon` = VALUES(`icon`), `home_collection` = VALUES(`home_collection`), `centre_visit` = VALUES(`centre_visit`), `is_priority` = VALUES(`is_priority`), `badge` = VALUES(`badge`), `is_active` = 1");
+            `name` = VALUES(`name`), `category` = VALUES(`category`), `tagline` = VALUES(`tagline`), `description` = VALUES(`description`), `price` = VALUES(`price`), `original_price` = VALUES(`original_price`), `avinya_subsidy` = VALUES(`avinya_subsidy`), `tests_included` = VALUES(`tests_included`), `preparation` = VALUES(`preparation`), `report_turnaround` = VALUES(`report_turnaround`), `sample_type` = VALUES(`sample_type`), `icon` = VALUES(`icon`), `home_collection` = VALUES(`home_collection`), `centre_visit` = VALUES(`centre_visit`), `is_priority` = VALUES(`is_priority`), `badge` = VALUES(`badge`), `is_active` = VALUES(`is_active`)");
         
         $stmt->execute([
             ':t_id' => $tId, ':name' => $name, ':cat' => $cat, ':tagline' => $tagline, ':descr' => $descr,
             ':price' => $price, ':orig_price' => $origPrice, ':subsidy' => $subsidy, ':inc' => json_encode($included),
-            ':prep' => $prep, ':turnaround' => $turnaround, ':stype' => $sampleType, ':icon' => $icon, ':home' => $home, ':centre' => $centre, ':prio' => $prio, ':badge' => $badge
+            ':prep' => $prep, ':turnaround' => $turnaround, ':stype' => $sampleType, ':icon' => $icon, ':home' => $home, ':centre' => $centre, ':prio' => $prio, ':badge' => $badge, ':active' => array_key_exists('is_active', $t) ? (!empty($t['is_active']) ? 1 : 0) : (array_key_exists('isActive', $t) ? (!empty($t['isActive']) ? 1 : 0) : 1)
         ]);
     }
 
@@ -737,8 +764,8 @@ if ($pdo !== null) {
             $diagnosticBookings = $pdo->query("SELECT * FROM `diagnostic_bookings` ORDER BY `id` DESC LIMIT 200")->fetchAll();
             $emailLogs = $pdo->query("SELECT * FROM `email_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
             $activityLogs = $pdo->query("SELECT * FROM `activity_logs` ORDER BY `id` DESC LIMIT 200")->fetchAll();
-            $doctorsCatalog = $pdo->query("SELECT * FROM `doctors` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
-            $diagnosticTestsCatalog = $pdo->query("SELECT * FROM `diagnostic_tests` WHERE `is_active` = 1 ORDER BY `id` ASC")->fetchAll();
+            $doctorsCatalog = $pdo->query("SELECT * FROM `doctors` ORDER BY `id` ASC")->fetchAll();
+            $diagnosticTestsCatalog = $pdo->query("SELECT * FROM `diagnostic_tests` ORDER BY `id` ASC")->fetchAll();
             $usersCatalog = $pdo->query("SELECT `id`, `user_id`, `name`, `email`, `phone`, `avatar`, `role`, `doctor_id`, `provider_id`, `status`, `last_login`, `created_at` FROM `users` ORDER BY `id` ASC")->fetchAll();
             $galleriesCatalog = $pdo->query("SELECT * FROM `galleries` WHERE `deleted_at` IS NULL ORDER BY `is_featured` DESC, `sort_order` ASC, `created_at` DESC")->fetchAll();
         } else {

@@ -59,7 +59,7 @@ $galleries = AvinyaCache::remember($cacheKey, ['gallery', 'homepage'], 1800, fun
             $params[':cat'] = $category;
         }
 
-        $sql .= " ORDER BY COALESCE(updated_at, created_at, event_date) DESC, created_at DESC";
+        $sql .= " ORDER BY `is_featured` DESC, `sort_order` ASC, COALESCE(updated_at, created_at, event_date) DESC, created_at DESC";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);

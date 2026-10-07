@@ -68,6 +68,7 @@ export async function getDb() {
     const raw = await readFile(DB_FILE, 'utf-8');
     dbCache = JSON.parse(raw);
     if (!dbCache.diagnosticProviders) dbCache.diagnosticProviders = await loadData('diagnostic_providers');
+    if (!dbCache.siteSettings) dbCache.siteSettings = {};
     if (!dbCache.galleries || dbCache.galleries.length === 0) dbCache.galleries = await loadData('galleries');
     if (!dbCache.users) dbCache.users = buildUsersCatalog(dbCache.doctors || await loadData('doctors'), dbCache.diagnosticProviders);
   } catch (err) {
@@ -88,6 +89,7 @@ export async function getDb() {
       users: buildUsersCatalog(docs, provs),
       passwordResets: [],
       notificationLogs: []
+      ,siteSettings: {}
     };
     await persistDb();
   }
@@ -119,6 +121,18 @@ export async function persistDb() {
       next();
     }
   }
+}
+
+export async function getSiteSettings() {
+  const db = await getDb();
+  return { ...(db.siteSettings || {}) };
+}
+
+export async function saveSiteSettings(settings) {
+  const db = await getDb();
+  db.siteSettings = { ...(db.siteSettings || {}), ...settings };
+  await persistDb();
+  return { ...db.siteSettings };
 }
 
 // -------------------------------------------------------------
@@ -1132,8 +1146,12 @@ export async function getGalleries(filters = {}) {
     );
   }
 
-  // Default ordering: latest created/updated first
+  // Administrator-selected featured/order values take precedence over recency.
   list.sort((a, b) => {
+    if (Boolean(a.is_featured) !== Boolean(b.is_featured)) return a.is_featured ? -1 : 1;
+    const orderA = Number.isFinite(Number(a.sort_order)) ? Number(a.sort_order) : 0;
+    const orderB = Number.isFinite(Number(b.sort_order)) ? Number(b.sort_order) : 0;
+    if (orderA !== orderB) return orderA - orderB;
     const dateA = new Date(a.updated_at || a.created_at || a.event_date || 0);
     const dateB = new Date(b.updated_at || b.created_at || b.event_date || 0);
     return dateB - dateA;

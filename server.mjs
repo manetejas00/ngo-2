@@ -57,6 +57,8 @@ import {
   updateGallery,
   deleteGallery,
   reorderGalleries
+  ,getSiteSettings,
+  saveSiteSettings
 } from './services/healthcare/healthcareDb.mjs';
 import {
   dispatchAppointmentCreatedEmails,
@@ -1500,6 +1502,11 @@ const server = createServer(async (req, res) => {
     }
   }
 
+  if (req.method === 'GET' && (urlPath === '/api/site-settings' || urlPath === '/api/site-settings.php')) {
+    const defaults = { organization_name: 'AvinyaCareFoundation', tagline: 'No one should face a health crisis alone.', email: 'info@avinyacarefoundation.com', phone: '+91 74474 41116', whatsapp: '+91 74474 41116', address: 'Mumbai-Virar, Maharashtra' };
+    return sendJson(200, { status: 'ok', settings: { ...defaults, ...(await getSiteSettings()) } });
+  }
+
   // ADMIN DATA & MANAGEMENT ENDPOINT: /api/admin-data.php
   if (urlPath === '/api/admin-data.php' || urlPath === '/api/admin-data') {
     try {
@@ -1521,6 +1528,16 @@ const server = createServer(async (req, res) => {
       }
 
       const action = (payload.action || 'all').toLowerCase().trim();
+
+      if (action === 'save_site_settings') {
+        if (sessionUser.role !== 'admin') return sendJson(403, { status: 'error', message: 'Administrator permissions required.' });
+        const input = payload.settings || {};
+        const allowed = ['organization_name', 'tagline', 'email', 'phone', 'whatsapp', 'address', 'facebook_url', 'instagram_url', 'linkedin_url', 'youtube_url'];
+        const settings = Object.fromEntries(allowed.filter(key => Object.hasOwn(input, key)).map(key => [key, String(input[key] || '').trim()]));
+        if (settings.email && !/^\S+@\S+\.\S+$/.test(settings.email)) return sendJson(422, { status: 'error', message: 'Please enter a valid organization email.' });
+        for (const key of allowed.filter(key => key.endsWith('_url'))) if (settings[key] && !/^https?:\/\//i.test(settings[key])) return sendJson(422, { status: 'error', message: `${key} must be a valid URL.` });
+        return sendJson(200, { status: 'ok', message: 'Site settings saved successfully.', settings: await saveSiteSettings(settings) });
+      }
 
       // Action: Save Gallery Item
       if (action === 'save_gallery') {
