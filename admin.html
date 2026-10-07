@@ -250,6 +250,10 @@
           <span class="nav-icon">📊</span>
           <span class="nav-text">Dashboard Overview</span>
         </button>
+        <button class="sidebar-nav-link" data-tab="websiteAnalytics" data-tooltip="Website Analytics" onclick="switchTab('websiteAnalytics')">
+          <span class="nav-icon">📈</span>
+          <span class="nav-text">Website Analytics</span>
+        </button>
 
         <div class="menu-group-label">HEALTHCARE PLATFORM</div>
         <button class="sidebar-nav-link" data-tab="doctor" data-tooltip="Doctor Appointments" onclick="switchTab('doctor')">
@@ -1411,7 +1415,8 @@
         'dashboard', 'doctor', 'diagnostic', 'doctorsCatalog', 'testsCatalog', 'gallery',
         'forms_contact', 'forms_newsletter', 'forms_volunteer', 'forms_support',
         'forms_donation', 'forms_coming_soon_feedback', 'forms_partnership',
-        'forms_feedback', 'forms_all', 'email', 'activity', 'usersCatalog', 'settings'
+        'forms_feedback', 'forms_all', 'email', 'activity', 'usersCatalog', 'settings',
+        'cacheManagement', 'websiteAnalytics'
       ];
       return validTabs.includes(hash) ? hash : 'dashboard';
     }
@@ -2222,6 +2227,7 @@
       // Update Breadcrumb & Header Title
       const titleMap = {
         dashboard: 'Dashboard Overview',
+        websiteAnalytics: 'Website Analytics',
         doctor: 'Doctor Appointments',
         diagnostic: 'Diagnostic Bookings',
         doctorsCatalog: 'Doctors Catalog',
@@ -2248,6 +2254,7 @@
 
       // Hide/Show containers
       const dashPanel = document.getElementById('dashboardOverviewPanel');
+      const ga4Section = document.getElementById('ga4Section');
       const tableCard = document.getElementById('tableCard');
       const settingsPanel = document.getElementById('settingsPanel');
       const cachePanel = document.getElementById('cacheManagementPanel');
@@ -2258,10 +2265,11 @@
       const reseedBtn = document.getElementById('reseedCatalogBtn');
 
       dashPanel.style.display = tab === 'dashboard' ? 'grid' : 'none';
+      ga4Section.style.display = tab === 'websiteAnalytics' ? 'block' : 'none';
       settingsPanel.style.display = tab === 'settings' ? 'block' : 'none';
       if (tab === 'settings') loadSiteSettings();
       if (cachePanel) cachePanel.style.display = tab === 'cacheManagement' ? 'block' : 'none';
-      tableCard.style.display = (tab !== 'dashboard' && tab !== 'settings' && tab !== 'cacheManagement') ? 'flex' : 'none';
+      tableCard.style.display = (tab !== 'dashboard' && tab !== 'websiteAnalytics' && tab !== 'settings' && tab !== 'cacheManagement') ? 'flex' : 'none';
 
       addDocBtn.style.display = tab === 'doctorsCatalog' ? 'inline-flex' : 'none';
       addTestBtn.style.display = tab === 'testsCatalog' ? 'inline-flex' : 'none';
@@ -2273,6 +2281,8 @@
 
       if (tab === 'dashboard') {
         renderDashboardCharts();
+      } else if (tab === 'websiteAnalytics') {
+        loadGoogleAnalytics();
       } else if (tab === 'cacheManagement') {
         fetchCacheDiagnostics();
       } else if (tab !== 'settings') {
@@ -2287,6 +2297,7 @@
       if (!el) return;
       const catMap = {
         dashboard: 'Overview',
+        websiteAnalytics: 'Website Analytics',
         doctor: 'Healthcare > Doctor Appointments',
         diagnostic: 'Healthcare > Diagnostic Bookings',
         doctorsCatalog: 'Healthcare > Doctors Catalog',
