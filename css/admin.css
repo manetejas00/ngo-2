@@ -816,6 +816,8 @@ body.sidebar-collapsed .admin-user-card {
 .ga4-card span, .ga4-card small { display: block; color: var(--admin-text-subtle); font-size: 12px; }
 .ga4-card strong { display: block; margin: 7px 0 5px; color: var(--admin-text); font-size: 24px; line-height: 1.1; }
 .ga4-notice { margin-top: 14px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--admin-warning-bg); color: var(--admin-warning); }
+.ga4-notice-info { background: rgba(16, 185, 129, 0.12); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.25); }
+
 @media (max-width: 900px) { .ga4-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 540px) { .ga4-section-header { align-items: flex-start; flex-direction: column; } .ga4-grid { grid-template-columns: 1fr; } }
 
