@@ -5,8 +5,9 @@
 (async function loadAnalytics() {
   try {
     const response = await fetch('/api/analytics-config.php', { cache: 'force-cache' });
+    if (!response.ok) return;
     const config = await response.json();
-    const measurementId = String(config.measurementId || '');
+    const measurementId = String(config.measurementId || '').trim();
     if (!/^G-[A-Z0-9]+$/i.test(measurementId)) return;
 
     window.dataLayer = window.dataLayer || [];

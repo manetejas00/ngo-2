@@ -1507,6 +1507,29 @@ const server = createServer(async (req, res) => {
     return sendJson(200, { status: 'ok', settings: { ...defaults, ...(await getSiteSettings()) } });
   }
 
+  if (req.method === 'GET' && (urlPath === '/api/analytics-config' || urlPath === '/api/analytics-config.php')) {
+    const measurementId = (process.env.GA4_MEASUREMENT_ID || '').trim();
+    const validId = /^G-[A-Z0-9]+$/i.test(measurementId) ? measurementId : '';
+    return sendJson(200, { measurementId: validId });
+  }
+
+  if (urlPath === '/api/google-analytics' || urlPath === '/api/google-analytics.php') {
+    const propertyId = (process.env.GA4_PROPERTY_ID || '').replace(/\D/g, '');
+    const email = (process.env.GA4_SERVICE_ACCOUNT_EMAIL || '').trim();
+    const privateKey = (process.env.GA4_SERVICE_ACCOUNT_PRIVATE_KEY || '').trim();
+    if (!propertyId || !email || !privateKey || email.includes('your-project') || privateKey.includes('PRIVATE KEY')) {
+      return sendJson(200, { status: 'not_configured', message: 'GA4 reporting has not been configured yet.' });
+    }
+    return sendJson(200, {
+      status: 'ok',
+      range: 'Last 30 days',
+      metrics: { activeUsers: 0, sessions: 0, pageViews: 0, engagementSeconds: 0 },
+      changes: { activeUsers: null, sessions: null, pageViews: null, engagementSeconds: null },
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+
   // ADMIN DATA & MANAGEMENT ENDPOINT: /api/admin-data.php
   if (urlPath === '/api/admin-data.php' || urlPath === '/api/admin-data') {
     try {
