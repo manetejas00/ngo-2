@@ -58,8 +58,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   ]);
 
   // Re-initialize GSAP Navbar and Radial FAB Menu if they were just injected
-  if (navbarInjected && typeof AvinyaGsapNavbar !== 'undefined') {
-    window.AvinyaNavbarEngine = new AvinyaGsapNavbar();
+  if (navbarInjected) {
+    const initNavbarEngine = () => {
+      if (typeof AvinyaGsapNavbar !== 'undefined') {
+        window.AvinyaNavbarEngine = new AvinyaGsapNavbar();
+      }
+    };
+    if (typeof AvinyaGsapNavbar !== 'undefined') {
+      initNavbarEngine();
+    } else {
+      const script = document.createElement('script');
+      script.src = '/js/components/navbar-gsap.js?v=3.5';
+      script.onload = initNavbarEngine;
+      document.body.appendChild(script);
+    }
   }
   if (footerInjected && typeof window.initRadialMenu === 'function') {
     window.initRadialMenu();
