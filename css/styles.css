@@ -756,7 +756,7 @@ body.mobile-nav-open {
   #card-1, #card-2, #card-3, #card-4, #card-5, #card-6, #card-7 {
     left: 4% !important;
     right: 4% !important;
-    bottom: 2rem !important;
+    bottom: 5.5rem !important;
     top: auto !important;
     width: 92% !important;
     max-width: none !important;
@@ -782,6 +782,13 @@ body.mobile-nav-open {
   .hero-cta-group {
     justify-content: center !important;
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-narrative-card,
+  #card-1, #card-2, #card-3, #card-4, #card-5, #card-6, #card-7 {
+    bottom: 6.5rem !important;
   }
 }
 
