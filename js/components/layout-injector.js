@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       initNavbarEngine();
     } else {
       const script = document.createElement('script');
-      script.src = '/js/components/navbar-gsap.js?v=3.5';
+      script.src = '/js/components/navbar-gsap.js?v=4.0';
       script.onload = initNavbarEngine;
       document.body.appendChild(script);
     }
