@@ -1,7 +1,6 @@
 /**
  * AvinyaCareFoundation - Health & Cancer News Service
- * Handles API calls, multi-tier fallback (/api/news -> /api/news.json -> local cache -> embedded payload),
- * 1-hour client/server caching, deduplication, and related story querying.
+ * Handles API calls to /api/news, browser caching, deduplication, and related story querying.
  */
 
 class NewsService {
@@ -13,7 +12,7 @@ class NewsService {
   }
 
   async fetchNews() {
-    // 1. Try Primary Node.js API endpoint (/api/news)
+    // 1. Try Primary API endpoint (/api/news)
     try {
       const res = await fetch(this.primaryEndpoint);
       if (res.ok) {
@@ -30,7 +29,7 @@ class NewsService {
         }
       }
     } catch (err) {
-      console.warn('Primary news endpoint /api/news unavailable, trying fallback endpoint...');
+      console.warn('Primary news endpoint /api/news unavailable, checking browser storage cache...');
     }
 
     // 2. Try Local Browser Storage Cache
@@ -44,12 +43,10 @@ class NewsService {
       };
     }
 
-    // 4. Return Embedded Fallback Dataset (10 Groundbreaking Oncology & Healthcare Stories)
     this.articles = [];
-
     this.lastUpdated = Date.now();
     return {
-      articles: this.articles,
+      articles: [],
       lastUpdated: this.lastUpdated,
       isFallback: true
     };

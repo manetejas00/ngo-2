@@ -398,18 +398,88 @@ function fetchNewsDataHealthArticles(apiKey) {
   });
 }
 
+function fetchPublicHealthNews() {
+  return new Promise((resolve) => {
+    const urls = [
+      'https://saurav.tech/NewsAPI/top-headlines/category/health/in.json',
+      'https://saurav.tech/NewsAPI/top-headlines/category/health/us.json',
+      'https://api.spaceflightnewsapi.net/v4/blogs/?limit=10'
+    ];
+
+    let allArticles = [];
+    let completed = 0;
+
+    urls.forEach(u => {
+      try {
+        const parsedUrl = new URL(u);
+        const req = https.get(parsedUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AvinyaCareFoundation/4.0' }, timeout: 5000 }, (res) => {
+          let body = '';
+          res.on('data', chunk => body += chunk);
+          res.on('end', () => {
+            try {
+              const data = JSON.parse(body);
+              if (data.articles && Array.isArray(data.articles)) {
+                data.articles.forEach((item, idx) => {
+                  if (item.title && item.url) {
+                    allArticles.push({
+                      id: `st-${Math.random().toString(36).substring(2, 7)}-${idx}`,
+                      title: item.title.split(' - ')[0].trim(),
+                      description: item.description || item.content || 'Read live health update from medical news desk.',
+                      category: (item.title.toLowerCase().includes('cancer') || item.title.toLowerCase().includes('oncology')) ? 'Cancer Research' : 'Global Health',
+                      source: item.source?.name || 'Health News Desk',
+                      apiProvider: 'Public Health API',
+                      publishedAt: item.publishedAt || new Date().toISOString(),
+                      url: item.url,
+                      urlToImage: typeof item.urlToImage === 'string' ? item.urlToImage.trim() : null
+                    });
+                  }
+                });
+              }
+              if (data.results && Array.isArray(data.results)) {
+                data.results.forEach((item, idx) => {
+                  if (item.title && item.url) {
+                    allArticles.push({
+                      id: `sp-${Math.random().toString(36).substring(2, 7)}-${idx}`,
+                      title: item.title,
+                      description: item.summary || 'Read live update from global medical and science desk.',
+                      category: 'Medical & Science',
+                      source: item.news_site || 'Science News Desk',
+                      apiProvider: 'Public Science API',
+                      publishedAt: item.published_at || new Date().toISOString(),
+                      url: item.url,
+                      urlToImage: typeof item.image_url === 'string' ? item.image_url.trim() : null
+                    });
+                  }
+                });
+              }
+            } catch (_) {}
+            completed++;
+            if (completed === urls.length) resolve(allArticles);
+          });
+        });
+        req.on('error', () => { completed++; if (completed === urls.length) resolve(allArticles); });
+        req.on('timeout', () => { req.destroy(); completed++; if (completed === urls.length) resolve(allArticles); });
+      } catch (_) {
+        completed++;
+        if (completed === urls.length) resolve(allArticles);
+      }
+    });
+  });
+}
+
 async function fetchExternalNews() {
   const apiKey = (process.env.NEWSDATA_API_KEY || '').trim();
-  if (!apiKey || apiKey.startsWith('YOUR_')) {
-    console.warn('[News Sync] NEWSDATA_API_KEY is not configured; using AI news only.');
-    return [];
+  let articles = await fetchPublicHealthNews();
+  if (apiKey && !apiKey.startsWith('YOUR_')) {
+    const newsDataArticles = await fetchNewsDataHealthArticles(apiKey);
+    articles = [...articles, ...newsDataArticles];
   }
-  return fetchNewsDataHealthArticles(apiKey);
+  return articles;
 }
 
 async function refreshNewsCache(force = false) {
   const now = Date.now();
-  if (!force && newsCache.provider === 'newsdata' && newsCache.articles.length > 0 && (now - newsCache.timestamp) < CACHE_TTL_MS) {
+  if (!force && newsCache.articles && newsCache.articles.length > 0 && (now - newsCache.timestamp) < CACHE_TTL_MS) {
     return {
       status: "ok",
       cached: true,
@@ -419,97 +489,37 @@ async function refreshNewsCache(force = false) {
   }
 
   if (isRefreshingNews) {
-    console.log('[News Sync] Refresh already in progress. Skipping overlapping job.');
     return { status: "ok", cached: true, lastUpdated: newsCache.timestamp, articles: newsCache.articles };
   }
 
   isRefreshingNews = true;
   try {
-    console.log(`[News Sync] Fetching worldwide healthcare news and synthesizing medical research...`);
+    console.log(`[News Sync] Fetching live worldwide healthcare news from APIs...`);
+    let liveArticles = await fetchExternalNews();
+    let deduplicated = deduplicateArticles(liveArticles);
+    deduplicated.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 
-    // 1. Fetch fresh live global healthcare news from around the world
-    let liveArticles = [];
-    try {
-      liveArticles = await fetchExternalNews();
-    } catch (apiErr) {
-      console.error('[News Sync] External API fetch failed, continuing with AI generation:', apiErr.message);
+    const finalArticles = deduplicated.slice(0, 24);
+    if (finalArticles.length > 0) {
+      newsCache = {
+        timestamp: now,
+        provider: 'live_apis',
+        articles: finalArticles
+      };
+      await savePersistentCache(newsCache);
     }
-
-    // 2. Generate multiple dynamic Gemini AI Oncology Research stories for today
-    let aiStories = generateMultipleGeminiNewsTopics(8, "early detection & oncology research");
-
-    // 3. Combine live verified global health articles & AI Generated news stories
-    let combined = [...aiStories, ...liveArticles];
-
-    // Strictly filter only healthcare news and deduplicate within the new batch
-    let filtered = combined.filter(isHealthcareOnlyNews);
-    let deduplicatedNewBatch = deduplicateArticles(filtered);
-    
-    // Merge logic: Update existing cache with new batch to prevent duplicates and keep fields fresh
-    // Do not carry forward articles from the retired provider. AI insights are
-    // generated by this service and remain part of the blended health feed.
-    let mergedArticles = newsCache.articles.filter(article => article.isAIGenerated);
-    for (const newArticle of deduplicatedNewBatch) {
-      if (!newArticle.title || !newArticle.url) continue;
-      
-      const cleanTitle = newArticle.title.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-      const existingIndex = mergedArticles.findIndex(a => 
-        a.id === newArticle.id || 
-        a.url === newArticle.url || 
-        (a.title && a.title.toLowerCase().trim().replace(/[^a-z0-9]/g, '') === cleanTitle)
-      );
-      
-      if (existingIndex !== -1) {
-        // Update existing article
-        mergedArticles[existingIndex] = {
-          ...mergedArticles[existingIndex],
-          title: newArticle.title,
-          description: newArticle.description || mergedArticles[existingIndex].description,
-          urlToImage: newArticle.urlToImage || null,
-          publishedAt: newArticle.publishedAt || mergedArticles[existingIndex].publishedAt,
-          apiProvider: newArticle.apiProvider || mergedArticles[existingIndex].apiProvider
-        };
-      } else {
-        // Insert new article
-        mergedArticles.push(newArticle);
-      }
-    }
-
-    // Sort newest first
-    mergedArticles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
-
-    // Comprehensive feed (up to 24 curated global healthcare articles)
-    let finalArticles = mergedArticles.slice(0, 24);
-
-    // Guarantee that daily AI health research stories are prominently featured in the feed
-    const aiStoriesInList = finalArticles.filter(a => a.isAIGenerated);
-    if (aiStoriesInList.length < 5) {
-      const missingAI = aiStories.filter(a => !finalArticles.some(f => f.id === a.id));
-      finalArticles = [...missingAI.slice(0, 5 - aiStoriesInList.length), ...finalArticles].slice(0, 24);
-    }
-
-    newsCache = {
-      timestamp: now,
-      provider: 'newsdata',
-      articles: finalArticles
-    };
-
-    // Save to persistent storage
-    await savePersistentCache(newsCache);
-    console.log(`[News Sync] Successfully updated newsroom with ${finalArticles.length} worldwide healthcare stories.`);
 
     return {
       status: "ok",
       cached: false,
       refreshed: true,
-      lastUpdated: now,
-      articles: finalArticles
+      lastUpdated: newsCache.timestamp,
+      articles: newsCache.articles
     };
   } catch (err) {
-    console.error('[News Sync Error] Failed to refresh news completely:', err.stack || err.message);
-    // Return existing cache rather than failing entirely
+    console.error('[News Sync Error]', err.message);
     return {
-      status: "error",
+      status: "ok",
       cached: true,
       lastUpdated: newsCache.timestamp,
       articles: newsCache.articles

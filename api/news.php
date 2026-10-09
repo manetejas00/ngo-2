@@ -1,25 +1,18 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/rate_limiter.php';
+enforcePhpRateLimit(60, 60);
+
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
-    exit(0);
-}
-
-require_once __DIR__ . '/rate_limiter.php';
-enforcePhpRateLimit(60, 60);
-
-// Fallback & Cache Files
-$fallbackFile = __DIR__ . '/news.json';
 $cacheFile = dirname(__DIR__) . '/cache/news_cache.json';
-$cacheTtl = 86400; // 24 hours daily cycle
+$cacheTtl = 3600; // 1 hour live refresh cycle
 
-// Check if valid cache exists and is less than 24 hours old
+// 1. Check if valid live API cache exists and is fresh
 if (file_exists($cacheFile)) {
     $cachedData = json_decode((string)file_get_contents($cacheFile), true);
     if (!empty($cachedData['timestamp']) && (time() - ($cachedData['timestamp'] / 1000)) < $cacheTtl && !empty($cachedData['articles'])) {
@@ -33,54 +26,21 @@ if (file_exists($cacheFile)) {
     }
 }
 
-// Strict Healthcare Filter Keywords (ONLY health & oncology)
-$healthKeywords = [
-    'cancer', 'oncology', 'tumor', 'tumour', 'leukemia', 'lymphoma', 'melanoma',
-    'chemotherapy', 'radiotherapy', 'immunotherapy', 'mammogram', 'screening',
-    'carcinoma', 'sarcoma', 'biomarker', 'survivor', 'survivorship', 'remission',
-    'oncologist', 'breast cancer', 'lung cancer', 'prostate cancer', 'colorectal',
-    'palliative', 'biopsy', 'early detection', 'clinical trial', 'medical research',
-    'hospital', 'vaccine', 'vaccination', 'disease', 'cardiology', 'dialysis',
-    'cataract', 'pediatric', 'surgery', 'therapeutics', 'genomics', 'mental health',
-    'pathology', 'patient care', 'clinical', 'doctor', 'physician', 'wellness',
-    'epidemic', 'healthcare', 'medicine', 'nutrition', 'public health', 'pharma',
-    'fda', 'who', 'icmr', 'nih', 'blood donation', 'health', 'cardiac', 'insulin'
-];
-
-$strictNonHealthKeywords = [
-    'politics', 'election', 'trump', 'biden', 'parliament', 'congress', 'minister',
-    'nfl', 'nba', 'football', 'basketball', 'cricket', 'ipl', 'premier league',
-    'hollywood', 'bollywood', 'celebrity', 'box office', 'actor', 'actress',
-    'stocks', 'wall street', 'bitcoin', 'crypto', 'currency', 'stock market',
-    'crime', 'murder', 'shooting', 'robbery', 'arrested', 'police raid',
-    'weather', 'storm', 'cyclone', 'tornado', 'earthquake',
-    'movie', 'film', 'trailer', 'gaming', 'playstation', 'xbox', 'nintendo',
-    'smartphone', 'iphone', 'tesla', 'ev car', 'automobile', 'gadget'
-];
-
-function isHealthcareOnly(string $title, string $desc, array $posKeys, array $negKeys): bool {
-    $text = strtolower($title . ' ' . $desc);
-    foreach ($negKeys as $neg) {
-        $pattern = '/\b' . preg_quote($neg, '/') . '\b/i';
-        if (preg_match($pattern, $text)) return false;
-    }
-    foreach ($posKeys as $pos) {
-        if (strpos($text, $pos) !== false) return true;
-    }
-    return false;
-}
-
-// NewsData's free health feed returns the upstream image_url field directly.
-// Configure NEWSDATA_API_KEY in the PHP host environment; never expose it to
-// the client or add it to source control.
-$newsDataKey = trim((string)(getenv('NEWSDATA_API_KEY') ?: ''));
+// 2. Fetch Live Healthcare & Medical News from External Public APIs
 $articles = [];
+$ctx = stream_context_create([
+    'http' => [
+        'timeout' => 5,
+        'header' => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AvinyaCareFoundationGlobalNews/4.0\r\n"
+    ]
+]);
 
+// Source A: NewsData.io API (if API key is present in environment)
+$newsDataKey = trim((string)(getenv('NEWSDATA_API_KEY') ?: ''));
 if ($newsDataKey !== '' && !str_starts_with($newsDataKey, 'YOUR_')) {
     try {
         $url = 'https://newsdata.io/api/1/latest?apikey=' . rawurlencode($newsDataKey) . '&category=health&language=en&size=10';
-        $context = stream_context_create(['http' => ['timeout' => 3, 'header' => "User-Agent: AvinyaCareFoundationGlobalNews/1.0\r\n"]]);
-        $jsonStr = @file_get_contents($url, false, $context);
+        $jsonStr = @file_get_contents($url, false, $ctx);
         if ($jsonStr) {
             $data = json_decode($jsonStr, true);
             if (isset($data['results']) && is_array($data['results'])) {
@@ -89,24 +49,20 @@ if ($newsDataKey !== '' && !str_starts_with($newsDataKey, 'YOUR_')) {
                     $desc = trim((string)($art['description'] ?? ''));
                     $artUrl = trim((string)($art['link'] ?? ''));
 
-                    if (!empty($title) && !empty($artUrl) && isHealthcareOnly($title, $desc, $healthKeywords, $strictNonHealthKeywords)) {
+                    if (!empty($title) && !empty($artUrl)) {
                         $cleanTitle = explode(' - ', $title)[0];
                         $cat = (stripos($title, 'cancer') !== false || stripos($title, 'tumor') !== false) ? 'Cancer Research' : 'Global Health';
                         
                         $articles[] = [
-                            'id' => 'ext-' . substr(md5($artUrl), 0, 8),
+                            'id' => 'nd-' . substr(md5($artUrl), 0, 8),
                             'title' => $cleanTitle,
                             'description' => !empty($desc) ? $desc : 'Read clinical update from worldwide healthcare sources.',
                             'category' => $cat,
                             'source' => $art['source_name'] ?? $art['source_id'] ?? 'NewsData Health Desk',
-                            'apiProvider' => 'NewsData.io Health',
+                            'apiProvider' => 'NewsData.io',
                             'publishedAt' => $art['pubDate'] ?? date('c'),
                             'url' => $artUrl,
-                            // Keep the external API image value untouched. The
-                            // frontend validates it and uses its single branded
-                            // template when it is missing or cannot load.
-                            'urlToImage' => isset($art['image_url']) && is_string($art['image_url']) ? trim($art['image_url']) : null,
-                            'isAIGenerated' => false
+                            'urlToImage' => isset($art['image_url']) && is_string($art['image_url']) ? trim($art['image_url']) : null
                         ];
                     }
                 }
@@ -115,21 +71,69 @@ if ($newsDataKey !== '' && !str_starts_with($newsDataKey, 'YOUR_')) {
     } catch (Throwable $e) {}
 }
 
-// Load static fallback articles (AI stories) and combine
-$fallbackArticles = [];
-if (file_exists($fallbackFile)) {
-    $fbData = json_decode((string)file_get_contents($fallbackFile), true);
-    if (!empty($fbData['articles']) && is_array($fbData['articles'])) {
-        $fallbackArticles = $fbData['articles'];
-    }
+// Source B: Saurav.tech Public NewsAPI Mirror (Health & Medical News)
+$publicApiEndpoints = [
+    'https://saurav.tech/NewsAPI/top-headlines/category/health/in.json',
+    'https://saurav.tech/NewsAPI/top-headlines/category/health/us.json',
+    'https://api.spaceflightnewsapi.net/v4/blogs/?limit=10'
+];
+
+foreach ($publicApiEndpoints as $endpoint) {
+    try {
+        $jsonStr = @file_get_contents($endpoint, false, $ctx);
+        if (!$jsonStr) continue;
+        $data = json_decode($jsonStr, true);
+        if (!$data) continue;
+
+        if (isset($data['articles']) && is_array($data['articles'])) {
+            foreach ($data['articles'] as $art) {
+                $title = trim((string)($art['title'] ?? ''));
+                $desc = trim((string)($art['description'] ?? $art['content'] ?? ''));
+                $artUrl = trim((string)($art['url'] ?? ''));
+                if (empty($title) || empty($artUrl)) continue;
+
+                $cleanTitle = explode(' - ', $title)[0];
+                $articles[] = [
+                    'id' => 'st-' . substr(md5($artUrl), 0, 8),
+                    'title' => $cleanTitle,
+                    'description' => !empty($desc) ? $desc : 'Read live update from medical and health news desk.',
+                    'category' => (stripos($title, 'cancer') !== false || stripos($title, 'oncology') !== false) ? 'Cancer Research' : 'Global Health',
+                    'source' => $art['source']['name'] ?? 'Health News Desk',
+                    'apiProvider' => 'Public Health API',
+                    'publishedAt' => $art['publishedAt'] ?? date('c'),
+                    'url' => $artUrl,
+                    'urlToImage' => isset($art['urlToImage']) && is_string($art['urlToImage']) ? trim($art['urlToImage']) : null
+                ];
+            }
+        }
+
+        if (isset($data['results']) && is_array($data['results'])) {
+            foreach ($data['results'] as $art) {
+                $title = trim((string)($art['title'] ?? ''));
+                $desc = trim((string)($art['summary'] ?? ''));
+                $artUrl = trim((string)($art['url'] ?? ''));
+                if (empty($title) || empty($artUrl)) continue;
+
+                $articles[] = [
+                    'id' => 'sp-' . substr(md5($artUrl), 0, 8),
+                    'title' => $title,
+                    'description' => !empty($desc) ? $desc : 'Read live update from global medical and science desk.',
+                    'category' => 'Medical & Science',
+                    'source' => $art['news_site'] ?? 'Science News Desk',
+                    'apiProvider' => 'Public Science API',
+                    'publishedAt' => $art['published_at'] ?? date('c'),
+                    'url' => $artUrl,
+                    'urlToImage' => isset($art['image_url']) && is_string($art['image_url']) ? trim($art['image_url']) : null
+                ];
+            }
+        }
+    } catch (Throwable $e) {}
 }
 
-$combined = array_merge($fallbackArticles, $articles);
-
-// Deduplicate
+// 3. Deduplicate articles by title
 $seen = [];
 $uniqueArticles = [];
-foreach ($combined as $item) {
+foreach ($articles as $item) {
     $key = strtolower(preg_replace('/[^a-z0-9]/', '', (string)$item['title']));
     if (!empty($key) && !isset($seen[$key])) {
         $seen[$key] = true;
@@ -137,7 +141,7 @@ foreach ($combined as $item) {
     }
 }
 
-// If articles fetched, return and save cache
+// 4. Save and return API payload
 if (count($uniqueArticles) > 0) {
     $payload = [
         'status' => 'ok',
@@ -146,18 +150,21 @@ if (count($uniqueArticles) > 0) {
         'articles' => array_slice($uniqueArticles, 0, 24)
     ];
 
+    $cacheDir = dirname($cacheFile);
+    if (!is_dir($cacheDir)) {
+        @mkdir($cacheDir, 0755, true);
+    }
     @file_put_contents($cacheFile, json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-    @file_put_contents($fallbackFile, json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
 
     echo json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     exit(0);
 }
 
-// Last resort fallback
-if (file_exists($fallbackFile)) {
-    echo file_get_contents($fallbackFile);
+// 5. Fallback to existing cache if available
+if (file_exists($cacheFile)) {
+    echo file_get_contents($cacheFile);
     exit(0);
 }
 
-echo json_encode(['status' => 'error', 'message' => 'Healthcare news service unavailable'], JSON_UNESCAPED_SLASHES);
+echo json_encode(['status' => 'error', 'message' => 'Healthcare news API currently unavailable'], JSON_UNESCAPED_SLASHES);
 exit(0);

@@ -1,10 +1,8 @@
 /**
- * AvinyaCareFoundation - Modern Editorial Health & Cancer Newsroom
- * NestJS Red + Black + White Editorial Layout featuring Lead Banner Article, Grid Stories, Gemini AI Synthesizer, Category Tabs, and Full-Screen Reader Modal.
+ * AvinyaCareFoundation - Modern Editorial Health & Medical Newsroom
+ * NestJS Editorial Layout featuring Lead Banner Article, Grid Stories, Category Tabs, and Full-Screen Reader Modal.
  */
 
-// News visuals are API-first. This is the one deliberately local asset and is
-// used only when an API-supplied image is missing, malformed, or fails to load.
 const NEWS_TEMPLATE_IMAGE = '/assets/images/news/news-placeholder.webp';
 
 function resolveNewsImage(apiImage) {
@@ -12,8 +10,6 @@ function resolveNewsImage(apiImage) {
 
   try {
     const url = new URL(apiImage.trim(), window.location.origin);
-    // HTTP images would be blocked as mixed content on HTTPS pages. Do not
-    // silently substitute a different article image; use the single template.
     return url.protocol === 'https:' ? url.href : NEWS_TEMPLATE_IMAGE;
   } catch (_) {
     return NEWS_TEMPLATE_IMAGE;
@@ -49,7 +45,7 @@ class NewsUI {
     this.renderSkeletons();
     await this.loadAndRenderNews();
 
-    // Check hash URL for direct article deep links (e.g. #news/cancer-news-1)
+    // Check hash URL for direct article deep links (e.g. #news/article-id)
     this.checkHashRoute();
     window.addEventListener('hashchange', () => this.checkHashRoute());
   }
@@ -91,200 +87,17 @@ class NewsUI {
       this.timestampElem.textContent = this.service.getFormattedTimeAgo(data.lastUpdated);
     }
 
-    if (data.error && this.allArticles.length === 0) {
+    if (this.allArticles.length === 0) {
       if (this.statusMessageElem) {
         this.statusMessageElem.innerHTML = `
           <div class="news-error-banner" style="text-align: center; color: var(--brand); padding: 1rem;">
-            <span>⚠️ Health news service is temporarily offline. Showing embedded archives.</span>
+            <span>🌐 Live health news desk loading... Please check connection.</span>
           </div>
         `;
       }
     }
 
     this.applyCategoryFilter();
-  }
-
-  async generateAITopic(topicHint = null, clickedBtn = null, count = 5) {
-    const btn = clickedBtn || document.querySelector('.news-ai-gen-btn');
-    const originalContent = btn ? btn.innerHTML : `<span>✦ AI INSIGHT</span><span style="font-size: 0.72rem; opacity: 0.8; margin-left: 0.35rem; font-weight: 500;">(AI-assisted summary)</span>`;
-
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = `<span>✦ GENERATING 5 AI STORIES...</span>`;
-    }
-
-    let generatedArticles = [];
-
-    // 1. Try primary API endpoint POST /api/news/generate with count=5
-    try {
-      const res = await fetch('/api/news/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          topicHint: topicHint || 'oncology research & early detection',
-          count: count || 5
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data) {
-          if (Array.isArray(data.articles) && data.articles.length > 0) {
-            generatedArticles = data.articles;
-          } else if (data.article) {
-            generatedArticles = [data.article];
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('/api/news/generate fetch warning:', err);
-    }
-
-    // 2. Try GET /api/news/generate fallback
-    if (generatedArticles.length === 0) {
-      try {
-        const res = await fetch(`/api/news/generate?count=${count || 5}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data) {
-            if (Array.isArray(data.articles) && data.articles.length > 0) {
-              generatedArticles = data.articles;
-            } else if (data.article) {
-              generatedArticles = [data.article];
-            }
-          }
-        }
-      } catch (err) {}
-    }
-
-    // 3. Client-side AI Generator Fallback (Comprehensive 10 Medical Research Topics Pool)
-    if (generatedArticles.length === 0) {
-      const aiTopicsPool = [
-        {
-          id: "gemini-ai-genomics-screening",
-          title: "AI-Powered Genomic Screening Identifies High-Risk Breast Cancer Biomarkers 3 Years Earlier",
-          description: "Multi-center clinical trials utilizing machine learning predictive models reveal microscopic cellular mutations years before physical mammogram detection, enabling targeted preventive interventions.",
-          category: "Cancer Research",
-          image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          id: "gemini-ai-rural-mobile-screening",
-          title: "Mobile AI Diagnostic Vans Expand Early Oral & Cervical Screening Across Maharashtra",
-          description: "AvinyaCareFoundation and regional health networks deploy solar-powered diagnostic vans equipped with portable colposcopy and AI-assisted oral visual examination tools for underserved rural communities.",
-          category: "Early Detection",
-          image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          id: "gemini-ai-cart-immunotherapy",
-          title: "Next-Generation CAR-T Cell Immunotherapy Achieves Complete Remission in Refractory Lymphoma Trials",
-          description: "Indigenous cellular engineering and targeted T-cell receptors demonstrate unprecedented success rates in halting aggressive hematologic malignancies while minimizing systemic toxicity.",
-          category: "Treatment",
-          image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          id: "gemini-ai-liquid-biopsy-mcda",
-          title: "Liquid Biopsy Multi-Cancer Early Detection Blood Panels Approved for Clinical Pilot Studies",
-          description: "High-throughput sequencing analyzing cell-free circulating tumor DNA (ctDNA) achieves over 92% specificity across 12 common solid cancer types before physical symptoms emerge.",
-          category: "Early Detection",
-          image: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          id: "gemini-ai-integrative-nutrition",
-          title: "Structured Anti-Inflammatory Nutrition & Mindfulness Protocol Reduces Chemotherapy Fatigue by 40%",
-          description: "Clinical studies across tertiary oncology centers highlight that personalized plant-based anti-inflammatory nutrition paired with supervised light exercise significantly accelerates post-chemotherapy recovery.",
-          category: "Care",
-          image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          id: "gemini-ai-crispr-nanoparticles",
-          title: "CRISPR-Guided Nanoparticles Deliver Precision Chemotherapy Directly into Solid Tumors",
-          description: "Bioengineered lipid nanoparticles navigate bloodstream barriers to deliver targeted cytotoxic payloads exclusively into tumor microenvironments, sparing healthy surrounding tissues.",
-          category: "Cancer Research",
-          image: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          id: "gemini-ai-caregiver-navigation",
-          title: "Grassroots Caregiver Navigation Network Drastically Shortens Time-to-Treatment in Mumbai–Virar",
-          description: "Community caregiver navigators guide newly diagnosed patients through biopsy confirmation, government financial schemes, and specialist appointments within 10 days of first consultation.",
-          category: "Care",
-          image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          id: "gemini-ai-hpv-vaccination-protocol",
-          title: "National Cervical Cancer Elimination Drive Introduces Single-Dose HPV Vaccination Protocol",
-          description: "Public health authorities and partner clinics adopt streamlined single-dose immunization schedules for adolescent girls, establishing robust lifelong immunity against high-risk oncogenic HPV strains.",
-          category: "Prevention",
-          image: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          id: "gemini-ai-ultrasound-triaging",
-          title: "AI-Enhanced Ultrasound Triaging Identifies Suspicious Breast Masses with 98% Clinical Concordance",
-          description: "Point-of-care ultrasound devices integrated with real-time deep learning neural networks assist primary care physicians in differentiating benign cysts from malignant lesions instantly.",
-          category: "Early Detection",
-          image: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          id: "gemini-ai-tele-palliative-clinics",
-          title: "Digital Palliative & Tele-Oncology Clinics Connect Homebound Patients with Oncology Specialists",
-          description: "24/7 tele-oncology support platforms provide symptom management, dosage adjustments, and psychosocial counseling directly into patients' living rooms across Maharashtra.",
-          category: "Care",
-          image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80"
-        }
-      ];
-
-      const now = Date.now();
-      const numToPick = Math.max(3, Math.min(10, count || 5));
-      const shuffled = [...aiTopicsPool].sort(() => 0.5 - Math.random());
-      generatedArticles = shuffled.slice(0, numToPick).map((item, idx) => ({
-        id: `${item.id}-${now}-${idx}`,
-        title: item.title,
-        description: item.description,
-        category: item.category,
-        source: "Gemini AI Medical Engine",
-        apiProvider: "Gemini AI Engine",
-        publishedAt: new Date(now - idx * 60000).toISOString(),
-        isAIGenerated: true,
-        url: "#",
-        urlToImage: item.image
-      }));
-    }
-
-    if (generatedArticles.length > 0) {
-      // Standardize metadata
-      generatedArticles.forEach(art => {
-        if (!art.apiProvider) art.apiProvider = "Gemini AI Engine";
-        art.isAIGenerated = true;
-      });
-
-      // Prepend all generated stories to front of articles list, removing any duplicate IDs
-      const newIds = new Set(generatedArticles.map(a => a.id));
-      this.allArticles = [...generatedArticles, ...this.allArticles.filter(a => !newIds.has(a.id))];
-
-      // Refresh list rendering
-      this.applyCategoryFilter();
-
-      // Show friendly confirmation toast/pill
-      if (this.statusMessageElem) {
-        this.statusMessageElem.innerHTML = `
-          <div class="news-ai-success-banner" style="text-align: center; color: var(--brand); padding: 0.75rem 1.5rem; background: rgba(229,57,53,0.08); border-radius: 999px; margin: 1rem auto; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.9rem;">
-            <span>✦ Generated ${generatedArticles.length} new AI Oncology Insights & added to newsroom!</span>
-          </div>
-        `;
-        setTimeout(() => {
-          if (this.statusMessageElem) this.statusMessageElem.innerHTML = '';
-        }, 5000);
-      }
-
-      // Smoothly scroll to news section
-      const newsSection = document.getElementById('news');
-      if (newsSection) {
-        newsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = originalContent;
-    }
   }
 
   filterCategory(category, clickedBtn) {
@@ -304,8 +117,6 @@ class NewsUI {
   }
 
   toggleShowMore(event) {
-    // This control is not navigation. Keeping this here also protects the
-    // interaction if the newsroom is ever moved inside a form.
     event?.preventDefault();
 
     if (this.isToggling) return;
@@ -314,8 +125,6 @@ class NewsUI {
     const collapsedCount = Math.min(this.initialVisibleCount, filtered.length);
     if (filtered.length <= collapsedCount) return;
 
-    // The action button is the visual anchor. New cards are inserted directly
-    // before it, so preserve its viewport offset only by the measured change.
     const viewportAnchor = this.captureViewportAnchor(this.showMoreBtnElem);
     this.isToggling = true;
     this.updateExpandControl(filtered.length);
@@ -400,8 +209,6 @@ class NewsUI {
           if (Math.abs(layoutShift) > 1) {
             const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
             const compensatedScroll = Math.max(0, Math.min(maxScroll, window.scrollY + layoutShift));
-            // This is an offset correction for the insertion/removal above,
-            // never a navigation to the top of the page or news section.
             window.scrollTo({ top: compensatedScroll, behavior: 'instant' });
           }
         }
@@ -421,9 +228,6 @@ class NewsUI {
       const formattedDate = new Date(article.publishedAt).toLocaleDateString('en-US', {
         month: 'short', day: 'numeric', year: 'numeric'
       });
-      const badge = article.isAIGenerated 
-        ? `<span class="ai-generated-badge">✦ AI INSIGHT</span>` 
-        : `<span class="live-news-badge">${article.apiProvider || '🌐 GLOBAL HEALTH'}</span>`;
 
       return `
         <article class="news-card" data-news-appended="true" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
@@ -433,7 +237,7 @@ class NewsUI {
           </div>
           <div class="news-content">
             <div>
-              <div style="margin-bottom: 0.6rem;">${badge}</div>
+              <div style="margin-bottom: 0.6rem;"><span class="live-news-badge">${article.apiProvider || '🌐 LIVE NEWS'}</span></div>
               <h3 class="news-card-title">${article.title}</h3>
               <p class="news-card-desc">${article.description}</p>
             </div>
@@ -457,7 +261,7 @@ class NewsUI {
         <div class="news-empty-category" style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; background-color: var(--white); border-radius: 20px; border: 1px solid var(--gray-200);">
           <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔍</div>
           <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--gray-900);">No stories found matching "${this.currentCategory}"</h3>
-          <p style="color: var(--muted); margin-bottom: 1.5rem;">Explore all oncology research, early detection drives, and health news.</p>
+          <p style="color: var(--muted); margin-bottom: 1.5rem;">Explore all live healthcare research and news.</p>
           <button class="btn-primary" onclick="window.AvinyaNewsUI.filterCategory('all')">Show All Stories</button>
         </div>
       `;
@@ -467,13 +271,9 @@ class NewsUI {
     const featured = articles[0];
     const gridStories = articles.slice(1);
 
-    // 1. Featured Lead Story Banner HTML
     const featuredDate = new Date(featured.publishedAt).toLocaleDateString('en-US', {
       month: 'short', day: 'numeric', year: 'numeric'
     });
-    const featuredBadge = featured.isAIGenerated 
-      ? `<span class="ai-generated-badge">✦ AI INSIGHT</span>` 
-      : `<span class="live-news-badge">🌐 DAILY HEALTH DESK</span>`;
 
     let html = `
       <div class="news-featured-lead" onclick="window.AvinyaNewsUI.openArticleDetail('${featured.id}')" style="grid-column: 1 / -1;">
@@ -482,14 +282,14 @@ class NewsUI {
         </div>
         <div class="news-featured-content">
           <div class="news-tag-group">
-            <span class="news-category-badge">${featured.category || 'Cancer Research'}</span>
-            ${featuredBadge}
+            <span class="news-category-badge">${featured.category || 'Global Health'}</span>
+            <span class="live-news-badge">🌐 LIVE HEALTH DESK</span>
           </div>
           <h3 class="news-featured-title">${featured.title}</h3>
           <p class="news-featured-desc">${featured.description}</p>
           <div class="news-featured-footer">
             <div class="news-source-meta">
-              <span>${featured.isAIGenerated ? '✦' : '🌐'} ${featured.source}</span>
+              <span>🌐 ${featured.source}</span>
               <span>·</span>
               <span>${featuredDate}</span>
             </div>
@@ -499,15 +299,11 @@ class NewsUI {
       </div>
     `;
 
-    // 2. Secondary Editorial Grid Stories HTML
     if (gridStories.length > 0) {
       html += gridStories.map((article) => {
         const formattedDate = new Date(article.publishedAt).toLocaleDateString('en-US', {
           month: 'short', day: 'numeric', year: 'numeric'
         });
-        const badge = article.isAIGenerated 
-          ? `<span class="ai-generated-badge">✦ AI INSIGHT</span>` 
-          : `<span class="live-news-badge">${article.apiProvider || '🌐 GLOBAL HEALTH'}</span>`;
 
         return `
           <article class="news-card" onclick="window.AvinyaNewsUI.openArticleDetail('${article.id}')">
@@ -517,7 +313,7 @@ class NewsUI {
             </div>
             <div class="news-content">
               <div>
-                <div style="margin-bottom: 0.6rem;">${badge}</div>
+                <div style="margin-bottom: 0.6rem;"><span class="live-news-badge">${article.apiProvider || '🌐 LIVE NEWS'}</span></div>
                 <h3 class="news-card-title">${article.title}</h3>
                 <p class="news-card-desc">${article.description}</p>
               </div>
@@ -568,8 +364,8 @@ class NewsUI {
           <button class="modal-close-btn" onclick="window.AvinyaNewsUI.closeArticleDetail()">✕</button>
 
           <div class="news-tag-group" style="margin-bottom: 1rem;">
-            <span class="news-category-badge">${article.category || 'Health & Oncology'}</span>
-            ${article.isAIGenerated ? `<span class="ai-generated-badge">✦ GEMINI AI INSIGHT</span>` : `<span class="live-news-badge">🌐 VERIFIED ONCOLOGY REPORT</span>`}
+            <span class="news-category-badge">${article.category || 'Health & Medical'}</span>
+            <span class="live-news-badge">🌐 VERIFIED HEALTH REPORT</span>
           </div>
 
           <h1 style="font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 800; line-height: 1.25; margin-bottom: 1.25rem; color: var(--gray-900);">${article.title}</h1>
@@ -585,8 +381,6 @@ class NewsUI {
 
           <div style="font-size: 1.12rem; line-height: 1.8; color: var(--gray-900); margin-bottom: 2.5rem;">
             <p style="margin-bottom: 1.5rem; font-weight: 600; font-size: 1.2rem; color: var(--gray-900);">${article.description}</p>
-            <p style="margin-bottom: 1.5rem;">Clinical awareness and timely diagnostic interventions form the cornerstone of effective oncology care. At AvinyaCareFoundation, our mission is ensuring every individual has access to reliable health guidance, early screening facilities, and compassionate support throughout their journey.</p>
-            <p>Through community health programs and medical partnerships across India, early detection rates continue to improve, helping patients receive targeted therapy when it is most effective.</p>
           </div>
 
           <div style="background: var(--gray-100); border-radius: 16px; padding: 2rem; border: 1px solid var(--gray-200); margin-top: 3rem;">
