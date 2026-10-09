@@ -1512,6 +1512,17 @@ const server = createServer(async (req, res) => {
     }
   }
 
+  if (req.method === 'GET' && (urlPath === '/api/news' || urlPath === '/api/news.php')) {
+    try {
+      const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      const forceRefresh = urlObj.searchParams.get('refresh') === 'true';
+      const result = await refreshNewsCache(forceRefresh);
+      return sendJson(200, result);
+    } catch (err) {
+      return sendJson(500, { status: 'error', message: err.message });
+    }
+  }
+
   if (req.method === 'GET' && (urlPath === '/api/site-settings' || urlPath === '/api/site-settings.php')) {
     const defaults = { organization_name: 'AvinyaCareFoundation', tagline: 'No one should face a health crisis alone.', email: 'info@avinyacarefoundation.com', phone: '+91 74474 41116', whatsapp: '+91 74474 41116', address: 'Mumbai-Virar, Maharashtra' };
     return sendJson(200, { status: 'ok', settings: { ...defaults, ...(await getSiteSettings()) } });

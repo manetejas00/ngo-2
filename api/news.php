@@ -8,6 +8,7 @@ header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Cache-Control: public, max-age=3600, stale-while-revalidate=86400');
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
     http_response_code(204);
@@ -15,19 +16,26 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
 }
 
 $cacheFile = dirname(__DIR__) . '/cache/news_cache.json';
-$cacheTtl = 3600; // 1 hour live refresh cycle
+$cacheTtl = 43200; // 12 hours TTL for cached healthcare news
+$forceRefresh = isset($_GET['refresh']) && $_GET['refresh'] === 'true';
 
-// 1. Check if valid live API cache exists and is less than 1 hour old
-if (file_exists($cacheFile)) {
-    $cachedData = json_decode((string)file_get_contents($cacheFile), true);
-    if (!empty($cachedData['timestamp']) && (time() - ($cachedData['timestamp'] / 1000)) < $cacheTtl && !empty($cachedData['articles'])) {
-        echo json_encode([
-            'status' => 'ok',
-            'cached' => true,
-            'lastUpdated' => $cachedData['timestamp'],
-            'articles' => $cachedData['articles']
-        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        exit(0);
+// 1. Instant Cache Serving: If valid cache exists and not forced, serve immediately (0.005s)
+if (!$forceRefresh && file_exists($cacheFile)) {
+    $rawCache = @file_get_contents($cacheFile);
+    if ($rawCache) {
+        $cachedData = json_decode($rawCache, true);
+        if (!empty($cachedData['articles']) && is_array($cachedData['articles'])) {
+            $cacheAge = time() - (($cachedData['timestamp'] ?? time()*1000) / 1000);
+            if ($cacheAge < $cacheTtl) {
+                echo json_encode([
+                    'status' => 'ok',
+                    'cached' => true,
+                    'lastUpdated' => $cachedData['timestamp'] ?? (time() * 1000),
+                    'articles' => $cachedData['articles']
+                ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                exit(0);
+            }
+        }
     }
 }
 
@@ -70,11 +78,11 @@ function isHealthcareOnly(string $title, string $desc, array $posKeys, array $ne
     return false;
 }
 
-// 2. Fetch Live Healthcare & Medical News from External Public APIs
+// 2. Fast Remote Fetch (Max 2.5s Timeout per feed to prevent server hanging)
 $articles = [];
 $ctx = stream_context_create([
     'http' => [
-        'timeout' => 5,
+        'timeout' => 2.5,
         'header' => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AvinyaCareFoundationGlobalHealth/4.0\r\n"
     ]
 ]);
@@ -109,7 +117,7 @@ try {
                         'apiProvider' => 'WHO Health Desk',
                         'publishedAt' => $item['pubDate'] ?? date('c'),
                         'url' => $link,
-                        'urlToImage' => $img
+                        'urlToImage' => (is_string($img) && filter_var($img, FILTER_VALIDATE_URL)) ? trim($img) : null
                     ];
                 }
             }
@@ -144,7 +152,7 @@ if ($newsDataKey !== '' && !str_starts_with($newsDataKey, 'YOUR_')) {
                             'apiProvider' => 'NewsData.io Health',
                             'publishedAt' => $art['pubDate'] ?? date('c'),
                             'url' => $artUrl,
-                            'urlToImage' => isset($art['image_url']) && is_string($art['image_url']) ? trim($art['image_url']) : null
+                            'urlToImage' => (isset($art['image_url']) && is_string($art['image_url']) && filter_var($art['image_url'], FILTER_VALIDATE_URL)) ? trim($art['image_url']) : null
                         ];
                     }
                 }
@@ -183,7 +191,7 @@ foreach ($publicApiEndpoints as $endpoint) {
                     'apiProvider' => 'Public Health API',
                     'publishedAt' => $art['publishedAt'] ?? date('c'),
                     'url' => $artUrl,
-                    'urlToImage' => isset($art['urlToImage']) && is_string($art['urlToImage']) ? trim($art['urlToImage']) : null
+                    'urlToImage' => (isset($art['urlToImage']) && is_string($art['urlToImage']) && filter_var($art['urlToImage'], FILTER_VALIDATE_URL)) ? trim($art['urlToImage']) : null
                 ];
             }
         }
@@ -224,7 +232,7 @@ if (count($uniqueArticles) > 0) {
     exit(0);
 }
 
-// 5. Fallback to existing cache if available
+// 5. Fallback to existing cache if available (never fail if cache exists)
 if (file_exists($cacheFile)) {
     echo file_get_contents($cacheFile);
     exit(0);
@@ -232,3 +240,4 @@ if (file_exists($cacheFile)) {
 
 echo json_encode(['status' => 'error', 'message' => 'Healthcare news API currently unavailable'], JSON_UNESCAPED_SLASHES);
 exit(0);
+

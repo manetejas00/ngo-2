@@ -359,18 +359,18 @@ class NewsUI {
     const related = this.service.getRelatedArticles(article, 3);
 
     modal.innerHTML = `
-      <div class="modal-backdrop active" style="z-index: 2500;">
-        <div class="modal-container" style="width: min(850px, 95%); padding: 3.5rem 3rem;">
-          <button class="modal-close-btn" onclick="window.AvinyaNewsUI.closeArticleDetail()">✕</button>
+      <div class="modal-backdrop active" style="z-index: 99999;">
+        <div class="modal-container news-modal-container">
+          <button class="modal-close-btn" onclick="window.AvinyaNewsUI.closeArticleDetail()" aria-label="Close article">✕</button>
 
-          <div class="news-tag-group" style="margin-bottom: 1rem;">
+          <div class="news-tag-group" style="margin-bottom: 0.85rem;">
             <span class="news-category-badge">${article.category || 'Health & Medical'}</span>
             <span class="live-news-badge">🌐 VERIFIED HEALTH REPORT</span>
           </div>
 
-          <h1 style="font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 800; line-height: 1.25; margin-bottom: 1.25rem; color: var(--gray-900);">${article.title}</h1>
+          <h1 class="news-modal-title">${article.title}</h1>
 
-          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.92rem; color: var(--muted); padding-bottom: 1.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--gray-200);">
+          <div class="news-modal-meta">
             <div><strong>Source:</strong> ${article.source} · ${formattedDate}</div>
             ${article.url && article.url !== '#' ? `<a href="${article.url}" target="_blank" rel="noopener noreferrer" style="color: var(--brand); font-weight: 700;">View Original Article ↗</a>` : ''}
           </div>
@@ -379,36 +379,38 @@ class NewsUI {
             ${renderNewsImage(article.urlToImage, article.title, 'news-detail-image')}
           </div>
 
-          <div style="font-size: 1.12rem; line-height: 1.8; color: var(--gray-900); margin-bottom: 2.5rem;">
-            <p style="margin-bottom: 1.5rem; font-weight: 600; font-size: 1.2rem; color: var(--gray-900);">${article.description}</p>
+          <div class="news-modal-body">
+            <p>${article.description}</p>
           </div>
 
-          <div style="background: var(--gray-100); border-radius: 16px; padding: 2rem; border: 1px solid var(--gray-200); margin-top: 3rem;">
-            <h4 style="font-weight: 800; margin-bottom: 1rem; font-size: 1.1rem; color: var(--gray-900);">Related Health Stories</h4>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
+          <div class="news-related-box">
+            <h4 class="news-related-heading">Related Health Stories</h4>
+            <div class="news-related-grid">
               ${related.map(rel => `
-                <div style="cursor: pointer;" onclick="window.AvinyaNewsUI.openArticleDetail('${rel.id}')">
-                  <div style="font-size: 0.75rem; font-weight: 800; color: var(--brand); margin-bottom: 4px;">${rel.category}</div>
-                  <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${rel.title}</div>
+                <div class="news-related-card" onclick="window.AvinyaNewsUI.openArticleDetail('${rel.id}')">
+                  <div class="news-related-category">${rel.category}</div>
+                  <div class="news-related-title">${rel.title}</div>
                 </div>
               `).join('')}
             </div>
           </div>
 
-          <div style="margin-top: 2.5rem; text-align: center;">
-            <button class="btn-primary" onclick="window.AvinyaNewsUI.closeArticleDetail()" style="padding: 0.85rem 2.5rem;">Close Article</button>
+          <div class="news-modal-close-footer">
+            <button class="btn-primary" onclick="window.AvinyaNewsUI.closeArticleDetail()">Close Article</button>
           </div>
         </div>
       </div>
     `;
 
     document.body.style.overflow = 'hidden';
+    document.body.classList.add('news-modal-open');
   }
 
   closeArticleDetail() {
     const modal = document.getElementById('news-detail-modal');
     if (modal) modal.innerHTML = '';
     document.body.style.overflow = '';
+    document.body.classList.remove('news-modal-open');
     window.history.pushState(null, '', window.location.pathname);
   }
 
