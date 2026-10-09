@@ -213,6 +213,13 @@ foreach ($articles as $item) {
     }
 }
 
+// Ensure articles are ALWAYS ordered by latest publication date first
+usort($uniqueArticles, function ($a, $b) {
+    $tA = isset($a['publishedAt']) ? strtotime((string)$a['publishedAt']) : 0;
+    $tB = isset($b['publishedAt']) ? strtotime((string)$b['publishedAt']) : 0;
+    return ($tB ?: 0) <=> ($tA ?: 0);
+});
+
 // 4. Save and return API payload
 if (count($uniqueArticles) > 0) {
     $payload = [

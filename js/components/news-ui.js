@@ -83,6 +83,13 @@ class NewsUI {
     const data = await this.service.fetchNews();
     this.allArticles = data.articles || [];
 
+    // Ensure articles are ALWAYS ordered with the newest published stories first
+    this.allArticles.sort((a, b) => {
+      const dateA = new Date(a.publishedAt || 0).getTime();
+      const dateB = new Date(b.publishedAt || 0).getTime();
+      return dateB - dateA;
+    });
+
     if (this.timestampElem && data.lastUpdated) {
       this.timestampElem.textContent = this.service.getFormattedTimeAgo(data.lastUpdated);
     }
@@ -95,9 +102,43 @@ class NewsUI {
           </div>
         `;
       }
+    } else {
+      this.renderDynamicCategoryTabs();
     }
 
     this.applyCategoryFilter();
+  }
+
+  renderDynamicCategoryTabs() {
+    const tabContainer = document.querySelector('.news-category-tabs');
+    if (!tabContainer || !this.allArticles || this.allArticles.length === 0) return;
+
+    // Collect all unique categories and count total articles per category
+    const counts = {};
+    this.allArticles.forEach(art => {
+      const cat = art.category || 'Global Health';
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+
+    const categories = Object.keys(counts);
+
+    let html = `
+      <button type="button" class="news-tab-btn ${this.currentCategory === 'all' ? 'active' : ''}" data-category="all" onclick="window.AvinyaNewsUI.filterCategory('all', this)">
+        All (${this.allArticles.length})
+      </button>
+    `;
+
+    categories.forEach(cat => {
+      const isSel = this.currentCategory.toLowerCase() === cat.toLowerCase();
+      const escapedCat = cat.replace(/'/g, "\\'");
+      html += `
+        <button type="button" class="news-tab-btn ${isSel ? 'active' : ''}" data-category="${cat}" onclick="window.AvinyaNewsUI.filterCategory('${escapedCat}', this)">
+          ${cat} (${counts[cat]})
+        </button>
+      `;
+    });
+
+    tabContainer.innerHTML = html;
   }
 
   filterCategory(category, clickedBtn) {
