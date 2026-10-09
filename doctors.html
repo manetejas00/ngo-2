@@ -731,34 +731,6 @@
   <script src="js/services/pdf-service.js?v=4.0"></script>
   <script src="js/modals.js?v=4.0"></script>
   <script src="js/healthcare/healthcare-app.js?v=4.0"></script>
-  <script>
-    // Robust mobile drawer controller for doctors.html
-    (function() {
-      const mobileBtn = document.querySelector('.mobile-toggle');
-      const mobileOverlay = document.getElementById('mobile-nav-overlay');
-      if (mobileBtn && mobileOverlay) {
-        function toggleDrawer(open) {
-          const shouldOpen = open !== undefined ? open : !mobileOverlay.classList.contains('active');
-          mobileOverlay.classList.toggle('active', shouldOpen);
-          mobileOverlay.style.display = shouldOpen ? 'flex' : 'none';
-          mobileBtn.setAttribute('aria-expanded', shouldOpen);
-          document.body.style.overflow = shouldOpen ? 'hidden' : '';
-        }
-
-        mobileBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          toggleDrawer();
-        });
-
-        // Close on escape key
-        document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && mobileOverlay.classList.contains('active')) {
-            toggleDrawer(false);
-          }
-        });
-      }
-    })();
-  </script>
   <!-- REUSABLE_FOOTER -->
   <script src="js/components/layout-injector.js?v=4.0"></script>
 </body>

@@ -18,12 +18,12 @@ class AvinyaGsapNavbar {
   }
 
   init() {
+    if (!this.mobileToggleBtn || !this.mobileOverlay) return;
+
     this.mobileOverlay.setAttribute('aria-hidden', 'true');
     this.mobileToggleBtn.setAttribute('aria-controls', this.mobileOverlay.id);
     this.focusableElements.forEach(element => element.setAttribute('tabindex', '-1'));
 
-    // The controller remains functional when the animation library is unavailable.
-    // GSAP only enhances the shared drawer; it must not control its visibility state.
     if (typeof gsap !== 'undefined') {
       gsap.set(this.mobileOverlay, { 
         display: 'none', 
@@ -36,7 +36,7 @@ class AvinyaGsapNavbar {
       this.tl.to(this.mobileOverlay, {
         display: 'flex',
         clipPath: 'circle(150% at calc(100% - 3.5rem) 2.5rem)',
-        duration: 0.6,
+        duration: 0.5,
         ease: 'power3.inOut'
       }, 0);
 
@@ -46,29 +46,41 @@ class AvinyaGsapNavbar {
           autoAlpha: 0,
           y: 40,
           scale: 0.95,
-          duration: 0.5,
+          duration: 0.4,
           ease: 'power2.out'
-        }, 0.2);
+        }, 0.15);
       }
 
       if (this.focusableElements.length) {
         this.tl.from(this.focusableElements, {
           opacity: 0,
           y: 20,
-          duration: 0.4,
+          duration: 0.3,
           ease: 'power2.out',
-          stagger: 0.05
-        }, 0.3);
+          stagger: 0.04
+        }, 0.2);
       }
     }
 
-    // Event Listeners
-    this.mobileToggleBtn.addEventListener('click', () => this.toggle());
+    // Attach click handler cleanly to mobile toggle button
+    this.handleToggleClick = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      this.toggle();
+    };
+
+    this.mobileToggleBtn.removeEventListener('click', this.handleToggleClick);
+    this.mobileToggleBtn.addEventListener('click', this.handleToggleClick);
 
     // Close button inside overlay if present
     const closeBtn = this.mobileOverlay.querySelector('.modal-close-btn');
     if (closeBtn) {
-      closeBtn.addEventListener('click', () => this.close());
+      closeBtn.addEventListener('click', (e) => {
+        if (e) e.preventDefault();
+        this.close();
+      });
     }
 
     // Click outside or link click auto-close
@@ -94,6 +106,12 @@ class AvinyaGsapNavbar {
   }
 
   toggle() {
+    const now = Date.now();
+    if (this._lastToggle && (now - this._lastToggle < 250)) {
+      return;
+    }
+    this._lastToggle = now;
+
     if (this.isOpen) {
       this.close();
     } else {
@@ -141,7 +159,23 @@ class AvinyaGsapNavbar {
   }
 }
 
-// Auto-Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-  window.AvinyaNavbarEngine = new AvinyaGsapNavbar();
-});
+function initNavbarEngine() {
+  const toggleBtn = document.querySelector('.mobile-toggle');
+  const overlay = document.getElementById('mobile-nav-overlay');
+  if (!toggleBtn || !overlay) return;
+
+  if (!window.AvinyaNavbarEngine) {
+    window.AvinyaNavbarEngine = new AvinyaGsapNavbar();
+  } else {
+    window.AvinyaNavbarEngine.navbar = document.querySelector('.navbar');
+    window.AvinyaNavbarEngine.mobileToggleBtn = toggleBtn;
+    window.AvinyaNavbarEngine.mobileOverlay = overlay;
+    window.AvinyaNavbarEngine.init();
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNavbarEngine);
+} else {
+  initNavbarEngine();
+}
