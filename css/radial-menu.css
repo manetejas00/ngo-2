@@ -1,6 +1,6 @@
 /* ==========================================================================
-   AvinyaCareFoundation — Premium GSAP Radial FAB Menu (High-Contrast Edition)
-   Deep Black & Gold Accent, Crisp 100% Visible White/Gold Line Icons, Compact Arc
+   AvinyaCareFoundation — Premium GSAP Radial FAB Menu (Brand Theme Edition)
+   Deep Black & Brand Coral Accent (#F47528), Crisp Visible White/Brand Line Icons
    ========================================================================== */
 
 /* Container fixed at bottom-right corner */
@@ -36,7 +36,7 @@
 /* Focus visible accessibility outline */
 .radial-fab-btn:focus-visible,
 .radial-action-item:focus-visible {
-  outline: 2px solid #FFD700;
+  outline: 2px solid #F47528;
   outline-offset: 3px;
 }
 
@@ -48,17 +48,17 @@
   width: 56px;
   height: 56px;
   background: #0B0E14;
-  border: 2.5px solid #E5A93C;
+  border: 2.5px solid #F47528;
   color: #FFFFFF;
-  box-shadow: 0 0 0 4px rgba(229, 169, 60, 0.18), 0 8px 25px rgba(0, 0, 0, 0.65), 0 0 20px rgba(229, 169, 60, 0.4);
+  box-shadow: 0 0 0 4px rgba(244, 117, 40, 0.2), 0 8px 25px rgba(0, 0, 0, 0.65), 0 0 20px rgba(244, 117, 40, 0.4);
   z-index: 20;
   transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1), background 250ms ease, border-color 250ms ease, box-shadow 250ms ease;
 }
 
 .radial-fab-main-btn:hover {
   background: #121722;
-  border-color: #FFD700;
-  box-shadow: 0 0 0 6px rgba(255, 215, 0, 0.25), 0 12px 30px rgba(0, 0, 0, 0.75), 0 0 28px rgba(255, 215, 0, 0.55);
+  border-color: #F47528;
+  box-shadow: 0 0 0 6px rgba(244, 117, 40, 0.3), 0 12px 30px rgba(0, 0, 0, 0.75), 0 0 28px rgba(244, 117, 40, 0.6);
   transform: scale(1.06);
 }
 
@@ -78,9 +78,9 @@
   fill: none;
 }
 
-/* Bright Gold + High Contrast when open */
+/* Bright Brand Accent + High Contrast when open */
 .radial-fab-container.is-open .radial-fab-icon {
-  stroke: #FFD700 !important;
+  stroke: #F47528 !important;
 }
 
 /* Action Items Container */
@@ -106,9 +106,9 @@
   width: 42px;
   height: 42px;
   background: #141414;
-  border: 1.5px solid rgba(212, 175, 55, 0.5);
+  border: 1.5px solid rgba(244, 117, 40, 0.45);
   color: #FFFFFF;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(212, 175, 55, 0.25);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(244, 117, 40, 0.25);
   opacity: 0;
   transform: translate(0, 0) scale(0.5);
   transform-origin: center center;
@@ -128,17 +128,17 @@
   transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), stroke 200ms ease;
 }
 
-/* High-Contrast Gold Highlight on Hover / Click */
+/* High-Contrast Brand Highlight on Hover / Click */
 .radial-action-item:hover {
   background: #1F1F1F;
-  border-color: #FFD700;
-  color: #FFD700;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 215, 0, 0.5);
+  border-color: #F47528;
+  color: #F47528;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 20px rgba(244, 117, 40, 0.5);
 }
 
 .radial-action-item:hover svg {
   transform: scale(1.16);
-  stroke: #FFD700 !important;
+  stroke: #F47528 !important;
 }
 
 /* Tooltip Labels on Hover/Focus */
@@ -148,7 +148,7 @@
   top: 50%;
   transform: translateY(-50%) translateX(6px);
   background: rgba(10, 10, 10, 0.95);
-  border: 1px solid rgba(212, 175, 55, 0.5);
+  border: 1px solid rgba(244, 117, 40, 0.45);
   color: #FFFFFF;
   font-size: 0.78rem;
   font-weight: 600;
@@ -192,13 +192,13 @@
   right: 2rem;
   z-index: 9999;
   background: rgba(15, 15, 15, 0.96);
-  border: 1.5px solid #FFD700;
+  border: 1.5px solid #F47528;
   color: #FFFFFF;
   font-size: 0.88rem;
   font-weight: 600;
   padding: 10px 18px;
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(244, 117, 40, 0.4);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -218,7 +218,7 @@
 .radial-toast svg {
   width: 18px;
   height: 18px;
-  stroke: #FFD700;
+  stroke: #F47528;
   fill: none;
   stroke-width: 2;
 }
