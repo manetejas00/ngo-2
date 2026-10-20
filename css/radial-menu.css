@@ -267,3 +267,8 @@
     transition: none !important;
   }
 }
+
+/* Strictly hide pending/empty radial items */
+.radial-action-item[hidden], .radial-action-item[style*="display: none"] {
+  display: none !important;
+}

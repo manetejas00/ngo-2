@@ -1,5 +1,80 @@
 [
   {
+    "id": "gal-114",
+    "gallery_id": "gal-114",
+    "title": "Avinya Community Health & Diagnostic Camp",
+    "slug": "avinya-community-health-diagnostic-camp-video",
+    "category": "Health Camp",
+    "short_description": "Frontline medical outreach providing free blood pressure checkups, vital monitoring, pediatric care, and diagnostic blood tests.",
+    "description": "Our dedicated doctors, nurses, and volunteers conducted a comprehensive community health camp in Virar East. Over 450 residents received primary care consultations, maternal & pediatric vital screenings, on-site blood sample diagnostic analysis, and free prescribed medications.",
+    "image": "/assets/gallery/avinya-community-health-camp-video-poster.jpg",
+    "video": "/assets/videos/avinya-community-health-camp-2026.mp4",
+    "media_type": "video",
+    "alt_text": "Avinya Community Health & Diagnostic Camp Video",
+    "event_date": "2026-10-18",
+    "location": "Virar East, Maharashtra",
+    "photographer": "AvinyaCareFoundation Media",
+    "created_by": "Super Admin",
+    "updated_by": "Super Admin",
+    "has_details": 1,
+    "image_only": 0,
+    "is_featured": 1,
+    "is_published": 1,
+    "sort_order": 1,
+    "created_at": "2026-10-18T10:00:00.000Z",
+    "updated_at": "2026-10-20T14:50:00.000Z"
+  },
+  {
+    "id": "gal-115",
+    "gallery_id": "gal-115",
+    "title": "Child Welfare & Classroom Learning Initiative",
+    "slug": "child-welfare-classroom-learning-initiative-video",
+    "category": "Education",
+    "short_description": "Classroom infrastructure support, learning materials, and interactive development sessions for rural school children.",
+    "description": "AvinyaCareFoundation supported community schools with refurbished classroom desks, learning stationery, nutrition packs, and interactive hygiene workshops. Watch our young students share their excitement and bright smiles as they engage with our volunteers.",
+    "image": "/assets/gallery/avinya-child-education-classroom-poster.jpg",
+    "video": "/assets/videos/avinya-child-education-classroom-2026.mp4",
+    "media_type": "video",
+    "alt_text": "Child Welfare & Classroom Learning Initiative Video",
+    "event_date": "2026-10-19",
+    "location": "Palghar, Maharashtra",
+    "photographer": "AvinyaCareFoundation Media",
+    "created_by": "Super Admin",
+    "updated_by": "Super Admin",
+    "has_details": 1,
+    "image_only": 0,
+    "is_featured": 1,
+    "is_published": 1,
+    "sort_order": 2,
+    "created_at": "2026-10-19T10:00:00.000Z",
+    "updated_at": "2026-10-20T14:50:00.000Z"
+  },
+  {
+    "id": "gal-116",
+    "gallery_id": "gal-116",
+    "title": "Voluntary Blood Donation & Laboratory Screening Camp",
+    "slug": "voluntary-blood-donation-laboratory-screening-camp-video",
+    "category": "Blood Donation",
+    "short_description": "Certified clinical blood collection, plasma screening, and emergency transfusion supply replenishment.",
+    "description": "Collaborating with certified hospital blood banks and laboratory technicians, this voluntary donation drive collected life-saving blood units for critical trauma and cancer surgery patients across the Mumbai-Virar belt. Each sample underwent rigorous on-site screening and cold-chain storage.",
+    "image": "/assets/gallery/avinya-blood-donation-lab-poster.jpg",
+    "video": "/assets/videos/avinya-blood-donation-laboratory-drive-2026.mp4",
+    "media_type": "video",
+    "alt_text": "Voluntary Blood Donation & Laboratory Screening Camp Video",
+    "event_date": "2026-10-20",
+    "location": "Mumbai-Virar, Maharashtra",
+    "photographer": "AvinyaCareFoundation Media",
+    "created_by": "Super Admin",
+    "updated_by": "Super Admin",
+    "has_details": 1,
+    "image_only": 0,
+    "is_featured": 1,
+    "is_published": 1,
+    "sort_order": 3,
+    "created_at": "2026-10-20T10:00:00.000Z",
+    "updated_at": "2026-10-20T14:50:00.000Z"
+  },
+  {
     "gallery_id": "gal-101",
     "title": "Avinya Community Health Camp 2026",
     "slug": "avinya-community-health-camp-2026",
@@ -17,7 +92,7 @@
     "image_only": 0,
     "is_featured": 1,
     "is_published": 1,
-    "sort_order": 1
+    "sort_order": 4
   },
   {
     "gallery_id": "gal-102",
@@ -37,7 +112,7 @@
     "image_only": 0,
     "is_featured": 1,
     "is_published": 1,
-    "sort_order": 2
+    "sort_order": 5
   },
   {
     "gallery_id": "gal-103",
@@ -57,7 +132,7 @@
     "image_only": 0,
     "is_featured": 1,
     "is_published": 1,
-    "sort_order": 3
+    "sort_order": 6
   },
   {
     "gallery_id": "gal-104",
@@ -77,7 +152,7 @@
     "image_only": 0,
     "is_featured": 0,
     "is_published": 1,
-    "sort_order": 4
+    "sort_order": 7
   },
   {
     "gallery_id": "gal-105",
@@ -97,7 +172,7 @@
     "image_only": 0,
     "is_featured": 0,
     "is_published": 1,
-    "sort_order": 5
+    "sort_order": 8
   },
   {
     "gallery_id": "gal-106",
@@ -117,7 +192,7 @@
     "image_only": 0,
     "is_featured": 0,
     "is_published": 1,
-    "sort_order": 6
+    "sort_order": 9
   },
   {
     "gallery_id": "gal-107",
@@ -137,7 +212,7 @@
     "image_only": 0,
     "is_featured": 0,
     "is_published": 1,
-    "sort_order": 7
+    "sort_order": 10
   },
   {
     "gallery_id": "gal-108",
@@ -157,7 +232,7 @@
     "image_only": 0,
     "is_featured": 0,
     "is_published": 1,
-    "sort_order": 8
+    "sort_order": 11
   },
   {
     "gallery_id": "gal-109",
@@ -177,7 +252,7 @@
     "image_only": 0,
     "is_featured": 0,
     "is_published": 1,
-    "sort_order": 9
+    "sort_order": 12
   },
   {
     "gallery_id": "gal-110",
@@ -197,7 +272,7 @@
     "image_only": 0,
     "is_featured": 0,
     "is_published": 1,
-    "sort_order": 10
+    "sort_order": 13
   },
   {
     "gallery_id": "gal-111",
@@ -217,7 +292,7 @@
     "image_only": 0,
     "is_featured": 1,
     "is_published": 1,
-    "sort_order": 11
+    "sort_order": 14
   },
   {
     "gallery_id": "gal-112",
@@ -237,7 +312,7 @@
     "image_only": 0,
     "is_featured": 1,
     "is_published": 1,
-    "sort_order": 12
+    "sort_order": 15
   },
   {
     "gallery_id": "gal-113",
@@ -257,6 +332,6 @@
     "image_only": 0,
     "is_featured": 1,
     "is_published": 1,
-    "sort_order": 13
+    "sort_order": 16
   }
 ]

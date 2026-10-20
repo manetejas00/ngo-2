@@ -125,17 +125,23 @@ class RadialMenuEngine {
    * Calculates sleek, compact upper-left quarter-circle radial positions (180deg to 270deg) for action buttons.
    * Ensures all items float strictly in upper-left quadrant (y <= 0) with a tight, perfectly spaced arc.
    */
+  getActiveItems() {
+    return Array.from(this.container.querySelectorAll('.radial-action-item')).filter(item => {
+      return !item.hasAttribute('hidden') && item.style.display !== 'none';
+    });
+  }
+
   calculatePositions() {
-    const totalItems = this.actionItems.length;
+    const activeItems = this.getActiveItems();
+    const totalItems = activeItems.length;
     if (totalItems === 0) return;
 
-    // Compact radius (130px desktop / 90px mobile) & upper-left arc range (180deg to 270deg)
     const radius = window.innerWidth < 768 ? 90 : 130;
-    const startAngle = 180; // Facing straight left
-    const endAngle = 270;   // Facing straight up
+    const startAngle = 180;
+    const endAngle = 270;
     const angleStep = (endAngle - startAngle) / Math.max(1, totalItems - 1);
 
-    this.positions = this.actionItems.map((_, index) => {
+    this.positions = activeItems.map((_, index) => {
       const angleDeg = startAngle + index * angleStep;
       const angleRad = (angleDeg * Math.PI) / 180;
       const x = Math.round(radius * Math.cos(angleRad));
@@ -160,11 +166,11 @@ class RadialMenuEngine {
    */
   open() {
     if (this.isOpen) return;
+    this.calculatePositions();
     this.isOpen = true;
     this.container.classList.add('is-open');
     if (this.toggleBtn) this.toggleBtn.setAttribute('aria-expanded', 'true');
 
-    // Rotate main button icon (+) to (x)
     if (typeof gsap !== 'undefined' && this.toggleIcon) {
       gsap.to(this.toggleIcon, {
         rotation: 135,
@@ -185,7 +191,6 @@ class RadialMenuEngine {
     this.isOpen = false;
     if (this.toggleBtn) this.toggleBtn.setAttribute('aria-expanded', 'false');
 
-    // Rotate icon back to 0deg
     if (typeof gsap !== 'undefined' && this.toggleIcon) {
       gsap.to(this.toggleIcon, {
         rotation: 0,
@@ -195,8 +200,9 @@ class RadialMenuEngine {
       });
     }
 
+    const activeItems = this.getActiveItems();
     if (typeof gsap !== 'undefined' && !this.reducedMotion) {
-      gsap.to(this.actionItems, {
+      gsap.to(activeItems, {
         x: 0,
         y: 0,
         opacity: 0,
@@ -212,7 +218,7 @@ class RadialMenuEngine {
         }
       });
     } else {
-      this.actionItems.forEach(item => {
+      activeItems.forEach(item => {
         item.style.transform = 'translate(0px, 0px) scale(0.5)';
         item.style.opacity = '0';
       });
@@ -224,8 +230,9 @@ class RadialMenuEngine {
    * Updates radial positions for open state.
    */
   updateRadialPositions(animate = true) {
+    const activeItems = this.getActiveItems();
     if (typeof gsap !== 'undefined' && !this.reducedMotion && animate) {
-      gsap.to(this.actionItems, {
+      gsap.to(activeItems, {
         x: (i) => this.positions[i]?.x || 0,
         y: (i) => this.positions[i]?.y || 0,
         opacity: 1,
@@ -236,7 +243,7 @@ class RadialMenuEngine {
         overwrite: 'auto'
       });
     } else {
-      this.actionItems.forEach((item, i) => {
+      activeItems.forEach((item, i) => {
         const pos = this.positions[i] || { x: 0, y: 0 };
         item.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(1)`;
         item.style.opacity = '1';

@@ -499,14 +499,18 @@ button {
 
 .mobile-toggle {
   display: none;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   color: inherit;
   align-items: center;
   justify-content: center;
   z-index: 1600; /* Ensure it stays above the overlay */
+  cursor: pointer;
+  border: none;
 }
 
 .mobile-toggle .hamburger-svg line {
@@ -532,14 +536,17 @@ body.mobile-nav-open .mobile-toggle .line-bottom {
   left: 0;
   width: 100%;
   height: 100dvh;
-  background: rgba(28, 28, 28, 0.98); /* Lighter dark background for better animation visibility */
+  background: rgba(20, 20, 20, 0.98);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   z-index: 1500;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: max(4.5rem, env(safe-area-inset-top)) 1.25rem max(2.5rem, env(safe-area-inset-bottom));
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -610,6 +617,162 @@ body.mobile-nav-open {
 
 .mobile-nav-link:hover {
   color: var(--brand) !important;
+}
+
+
+/* ==========================================================================
+   OFFICIAL SOCIAL MEDIA LINKS (NAVBAR DESKTOP DOCK & MOBILE DRAWER)
+   ========================================================================== */
+.nav-social-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: 0.25rem;
+  flex-shrink: 0;
+}
+
+.nav-social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.navbar.scrolled-light .nav-social-btn {
+  color: #334155;
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.nav-social-btn:hover {
+  color: #FFFFFF;
+  background: var(--brand);
+  border-color: var(--brand);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(244, 117, 40, 0.4);
+}
+
+.navbar.scrolled-light .nav-social-btn:hover {
+  color: #FFFFFF;
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.nav-social-btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.nav-social-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: transform var(--transition-fast);
+}
+
+.nav-social-btn:hover svg {
+  transform: scale(1.1);
+}
+
+/* Mobile Navigation Drawer Social Links */
+.mobile-nav-socials {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin: 1.25rem 0 1.5rem 0;
+  max-width: 420px;
+  width: 100%;
+  padding-inline: 0.5rem;
+  box-sizing: border-box;
+}
+
+.mobile-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.5rem 1.15rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  cursor: pointer;
+  flex: 0 1 auto;
+  box-sizing: border-box;
+}
+
+.mobile-social-link svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  transition: transform var(--transition-fast);
+}
+
+.mobile-social-link:hover {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #FFFFFF !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(244, 117, 40, 0.4);
+}
+
+.mobile-social-link:hover svg {
+  transform: scale(1.12);
+}
+
+.mobile-social-link:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.mobile-nav-cta-wrapper {
+  margin-top: 0.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.mobile-nav-cta-btn {
+  min-height: 48px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+}
+
+/* Strictly hide pending/empty social items */
+.nav-social-btn[hidden],
+.mobile-social-link[hidden],
+.radial-action-item[hidden],
+.nav-social-btn[style*="display: none"],
+.mobile-social-link[style*="display: none"] {
+  display: none !important;
+}
+
+/* Desktop vs Mobile Navbar Visibility */
+@media (max-width: 1150px) {
+  .nav-social-group {
+    display: none !important;
+  }
 }
 
 /* ==========================================================================
@@ -3153,8 +3316,10 @@ body.mobile-nav-open {
   }
 
   .mobile-toggle {
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .mobile-nav-overlay {
@@ -3446,9 +3611,11 @@ body.mobile-nav-open {
 
   .navbar .mobile-toggle {
     display: flex;
-    flex: 0 0 36px;
-    width: 36px;
-    height: 36px;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .stories-grid,

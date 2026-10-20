@@ -1527,7 +1527,18 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === 'GET' && (urlPath === '/api/site-settings' || urlPath === '/api/site-settings.php')) {
-    const defaults = { organization_name: 'AvinyaCareFoundation', tagline: 'No one should face a health crisis alone.', email: 'info@avinyacarefoundation.com', phone: '+91 74474 41116', whatsapp: '+91 74474 41116', address: 'Mumbai-Virar, Maharashtra' };
+    const defaults = {
+      organization_name: 'AvinyaCareFoundation',
+      tagline: 'No one should face a health crisis alone.',
+      email: 'info@avinyacarefoundation.com',
+      phone: '+91 74474 41116',
+      whatsapp: '+91 74474 41116',
+      address: 'Mumbai-Virar, Maharashtra',
+      instagram_url: 'https://www.instagram.com/avinyacare_foundation/',
+      youtube_url: 'https://www.youtube.com/@Avinyacarefoundation',
+      facebook_url: '',
+      linkedin_url: ''
+    };
     return sendJson(200, { status: 'ok', settings: { ...defaults, ...(await getSiteSettings()) } });
   }
 

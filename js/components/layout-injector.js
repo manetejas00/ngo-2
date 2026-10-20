@@ -84,34 +84,76 @@ document.addEventListener('DOMContentLoaded', async () => {
     const payload = await response.json();
     const settings = payload?.settings;
     if (!response.ok || !settings) return;
+    function isValidSocialUrl(val) {
+      if (!val || typeof val !== 'string') return false;
+      const t = val.trim();
+      if (!t || t === '#' || t.toLowerCase() === 'pending') return false;
+      // Do not accept bare generic root domain without account/handle
+      if (/^https?:\/\/(www\.)?(facebook\.com|linkedin\.com|instagram\.com|youtube\.com)\/?$/i.test(t)) return false;
+      try {
+        const u = new URL(t);
+        return u.protocol === 'http:' || u.protocol === 'https:';
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function getVerifiedWhatsAppDigits(val) {
+      if (!val || typeof val !== 'string') return null;
+      const digits = val.replace(/\D/g, '');
+      if (digits.length === 10) return '91' + digits; // Add default India country code
+      if (digits.length >= 11 && digits.length <= 15) return digits;
+      return null;
+    }
+
+    window.AvinyaSiteSettings = settings;
+
     document.querySelectorAll('[data-site-setting]').forEach((node) => {
       const key = node.dataset.siteSetting;
       const value = settings[key];
-      if (!value) return;
+
       if (key === 'phone') {
+        if (!value) return;
         node.textContent = value;
         if (node.tagName === 'A') node.href = `tel:${value.replace(/[^+\d]/g, '')}`;
       } else if (key === 'email') {
+        if (!value) return;
         node.textContent = value;
         if (node.tagName === 'A') node.href = `mailto:${value}`;
       } else if (key === 'whatsapp') {
-        if (node.tagName === 'A') {
-          const rawDigits = value.replace(/\D/g, '');
-          node.href = value.startsWith('http') ? value : `https://wa.me/${rawDigits}`;
-          if (node.textContent.includes('wa.me/') || node.textContent.includes('WhatsApp:')) {
-            node.textContent = `WhatsApp: wa.me/${rawDigits}`;
+        const digits = getVerifiedWhatsAppDigits(value);
+        if (digits) {
+          if (node.tagName === 'A') {
+            node.href = `https://wa.me/${digits}`;
+            if (node.textContent.includes('wa.me/') || node.textContent.includes('WhatsApp:')) {
+              node.textContent = `WhatsApp: wa.me/${digits}`;
+            }
+          } else {
+            node.textContent = value;
           }
+          node.style.display = '';
+          node.removeAttribute('hidden');
         } else {
-          node.textContent = value;
+          // Hide icon if whatsapp number is missing or invalid
+          node.style.display = 'none';
+          node.setAttribute('hidden', '');
         }
-      } else if (['instagram_url', 'facebook_url', 'linkedin_url', 'youtube_url'].includes(key)) {
-        if (node.tagName === 'A') {
-          node.href = value;
+      } else if (['instagram_url', 'youtube_url', 'facebook_url', 'linkedin_url'].includes(key)) {
+        if (isValidSocialUrl(value)) {
+          if (node.tagName === 'A') {
+            node.href = value.trim();
+          } else {
+            node.textContent = value.trim();
+          }
+          node.style.display = '';
+          node.removeAttribute('hidden');
         } else {
-          node.textContent = value;
+          // Hide icon if link is missing, pending, or invalid
+          node.style.display = 'none';
+          node.setAttribute('hidden', '');
         }
       } else {
-        node.textContent = value;
+        if (value) node.textContent = value;
       }
     });
   } catch (_) {

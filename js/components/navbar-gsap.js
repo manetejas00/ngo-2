@@ -13,7 +13,7 @@ class AvinyaGsapNavbar {
 
     this.isOpen = false;
     this.tl = null;
-    this.focusableElements = this.mobileOverlay.querySelectorAll('.mobile-nav-link, button');
+    this.focusableElements = this.mobileOverlay.querySelectorAll('.mobile-nav-link, button, .mobile-social-link');
     this.init();
   }
 
@@ -86,6 +86,12 @@ class AvinyaGsapNavbar {
     // Click outside or link click auto-close
     this.mobileOverlay.querySelectorAll('.mobile-nav-link').forEach(link => {
       link.addEventListener('click', () => this.close());
+    });
+
+    this.mobileOverlay.querySelectorAll('.mobile-social-link').forEach(link => {
+      link.addEventListener('click', () => {
+        setTimeout(() => this.close(), 150);
+      });
     });
 
     this.mobileOverlay.querySelectorAll('.mobile-nav-action').forEach(action => {

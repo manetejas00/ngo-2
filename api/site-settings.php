@@ -18,7 +18,11 @@ $defaults = [
     'email' => 'info@avinyacarefoundation.com',
     'phone' => '+91 74474 41116',
     'whatsapp' => '+91 74474 41116',
-    'address' => 'Mumbai-Virar, Maharashtra'
+    'address' => 'Mumbai-Virar, Maharashtra',
+    'instagram_url' => 'https://www.instagram.com/avinyacare_foundation/',
+    'youtube_url' => 'https://www.youtube.com/@Avinyacarefoundation',
+    'facebook_url' => '',
+    'linkedin_url' => ''
 ];
 
 $settings = AvinyaCache::remember('settings:public', ['settings', 'homepage'], 1800, function () use ($defaults) {
