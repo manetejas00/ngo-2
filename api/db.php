@@ -752,6 +752,18 @@ function seedCatalogFromJSON(PDO $pdo, bool $force = false): array {
             if (file_exists($testsFile)) {
                 $testData = json_decode((string) file_get_contents($testsFile), true);
                 $testList = $testData['tests'] ?? $testData ?? [];
+
+                // Remove deprecated/old placeholder tests (e.g. test-1 through test-8)
+                $validIds = [];
+                foreach ($testList as $t) {
+                    if (!empty($t['id'])) $validIds[] = $t['id'];
+                }
+                if (!empty($validIds)) {
+                    $placeholders = implode(',', array_fill(0, count($validIds), '?'));
+                    $delStmt = $pdo->prepare("DELETE FROM `diagnostic_tests` WHERE `test_id` NOT IN ($placeholders) OR `test_id` IN ('test-1', 'test-2', 'test-3', 'test-4', 'test-5', 'test-6', 'test-7', 'test-8')");
+                    $delStmt->execute($validIds);
+                }
+
                 $stmt = $pdo->prepare("INSERT INTO `diagnostic_tests`
                     (`test_id`, `name`, `category`, `tagline`, `description`, `price`, `original_price`, `b2b_price`, `avinya_subsidy`, `tests_included`, `preparation`, `report_turnaround`, `sample_type`, `icon`, `home_collection`, `centre_visit`, `is_priority`, `badge`, `is_active`)
                     VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :b2b_price, :subsidy, :inc, :prep, :turnaround, :stype, :icon, :home, :centre, :prio, :badge, 1)

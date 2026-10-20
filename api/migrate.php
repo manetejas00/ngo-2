@@ -40,6 +40,9 @@ try {
     // 2b. Explicitly re-seed crowdfunding campaigns from data/seed_crowdfunding.json
     $seededCampaignsCount = seedCrowdfundingFromJSON($pdo, true);
 
+    // Explicitly purge old placeholder tests (test-1 through test-8)
+    $pdo->exec("DELETE FROM `diagnostic_tests` WHERE `test_id` IN ('test-1', 'test-2', 'test-3', 'test-4', 'test-5', 'test-6', 'test-7', 'test-8')");
+
     // 2c. Explicitly re-seed diagnostic tests catalog from api/healthcare/tests.json
     $seededCatalog = seedCatalogFromJSON($pdo, true);
     $seededTestsCount = $seededCatalog['tests_seeded'] ?? 0;
