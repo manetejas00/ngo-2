@@ -408,6 +408,7 @@ if ($action === 'save_test') {
     $descr = $t['description'] ?? '';
     $price = validMoney($t['price'] ?? 0, 'Test price');
     $origPrice = validMoney($t['original_price'] ?? $t['originalPrice'] ?? 0, 'Original price');
+    $b2bPrice = validMoney($t['b2b_price'] ?? $t['b2bPrice'] ?? 0, 'B2B price');
     if ($price <= 0 || ($origPrice > 0 && $origPrice < $price)) { http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Test price must be positive and cannot exceed the original price.']); exit(0); }
     $subsidy = $t['avinya_subsidy'] ?? $t['avinyaSubsidy'] ?? '';
     $included = is_array($t['testsIncluded'] ?? null) ? $t['testsIncluded'] : (is_string($t['tests_included'] ?? null) ? json_decode($t['tests_included'], true) : []);
@@ -422,14 +423,14 @@ if ($action === 'save_test') {
 
     if ($pdo !== null) {
         $stmt = $pdo->prepare("INSERT INTO `diagnostic_tests`
-            (`test_id`, `name`, `category`, `tagline`, `description`, `price`, `original_price`, `avinya_subsidy`, `tests_included`, `preparation`, `report_turnaround`, `sample_type`, `icon`, `home_collection`, `centre_visit`, `is_priority`, `badge`, `is_active`)
-            VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :subsidy, :inc, :prep, :turnaround, :stype, :icon, :home, :centre, :prio, :badge, :active)
+            (`test_id`, `name`, `category`, `tagline`, `description`, `price`, `original_price`, `b2b_price`, `avinya_subsidy`, `tests_included`, `preparation`, `report_turnaround`, `sample_type`, `icon`, `home_collection`, `centre_visit`, `is_priority`, `badge`, `is_active`)
+            VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :b2b_price, :subsidy, :inc, :prep, :turnaround, :stype, :icon, :home, :centre, :prio, :badge, :active)
             ON DUPLICATE KEY UPDATE
-            `name` = VALUES(`name`), `category` = VALUES(`category`), `tagline` = VALUES(`tagline`), `description` = VALUES(`description`), `price` = VALUES(`price`), `original_price` = VALUES(`original_price`), `avinya_subsidy` = VALUES(`avinya_subsidy`), `tests_included` = VALUES(`tests_included`), `preparation` = VALUES(`preparation`), `report_turnaround` = VALUES(`report_turnaround`), `sample_type` = VALUES(`sample_type`), `icon` = VALUES(`icon`), `home_collection` = VALUES(`home_collection`), `centre_visit` = VALUES(`centre_visit`), `is_priority` = VALUES(`is_priority`), `badge` = VALUES(`badge`), `is_active` = VALUES(`is_active`)");
+            `name` = VALUES(`name`), `category` = VALUES(`category`), `tagline` = VALUES(`tagline`), `description` = VALUES(`description`), `price` = VALUES(`price`), `original_price` = VALUES(`original_price`), `b2b_price` = VALUES(`b2b_price`), `avinya_subsidy` = VALUES(`avinya_subsidy`), `tests_included` = VALUES(`tests_included`), `preparation` = VALUES(`preparation`), `report_turnaround` = VALUES(`report_turnaround`), `sample_type` = VALUES(`sample_type`), `icon` = VALUES(`icon`), `home_collection` = VALUES(`home_collection`), `centre_visit` = VALUES(`centre_visit`), `is_priority` = VALUES(`is_priority`), `badge` = VALUES(`badge`), `is_active` = VALUES(`is_active`)");
 
         $stmt->execute([
             ':t_id' => $tId, ':name' => $name, ':cat' => $cat, ':tagline' => $tagline, ':descr' => $descr,
-            ':price' => $price, ':orig_price' => $origPrice, ':subsidy' => $subsidy, ':inc' => json_encode($included),
+            ':price' => $price, ':orig_price' => $origPrice, ':b2b_price' => $b2bPrice, ':subsidy' => $subsidy, ':inc' => json_encode($included),
             ':prep' => $prep, ':turnaround' => $turnaround, ':stype' => $sampleType, ':icon' => $icon, ':home' => $home, ':centre' => $centre, ':prio' => $prio, ':badge' => $badge, ':active' => array_key_exists('is_active', $t) ? (!empty($t['is_active']) ? 1 : 0) : (array_key_exists('isActive', $t) ? (!empty($t['isActive']) ? 1 : 0) : 1)
         ]);
     }

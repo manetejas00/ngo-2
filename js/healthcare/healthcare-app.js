@@ -1108,12 +1108,16 @@ class HealthcarePlatform {
       return;
     }
 
-    const hasMore = list.length > 6;
+    const hasMore = list.length > 9;
     if (viewMoreContainer) {
       viewMoreContainer.style.display = (hasMore && !this.showAllTests) ? 'block' : 'none';
+      const label = document.getElementById('hc-test-view-more-label');
+      if (label) {
+        label.textContent = `View All ${category === 'all' ? 'Diagnostic Tests' : category} (${list.length}) ↓`;
+      }
     }
 
-    const displayTests = this.showAllTests ? list : list.slice(0, 6);
+    const displayTests = this.showAllTests ? list : list.slice(0, 9);
 
     grid.innerHTML = displayTests.map(test => `
       <div class="hc-test-card ${test.isPriority ? 'priority-card' : ''}">

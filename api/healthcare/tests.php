@@ -37,6 +37,8 @@ try {
                 'description' => $r['description'],
                 'price' => (float) $r['price'],
                 'originalPrice' => (float) $r['original_price'],
+                'b2bPrice' => isset($r['b2b_price']) ? (float) $r['b2b_price'] : 0.0,
+                'margin' => isset($r['b2b_price']) && (float) $r['b2b_price'] > 0 ? (float) ($r['price'] - $r['b2b_price']) : 0.0,
                 'avinyaSubsidy' => $r['avinya_subsidy'],
                 'testsIncluded' => json_decode($r['tests_included'] ?? '[]', true) ?: [],
                 'preparation' => $r['preparation'],

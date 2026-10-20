@@ -133,9 +133,11 @@
         </p>
         <div class="hc-hero-widget-box" style="max-width: 600px; margin: 0 auto;">
           <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; justify-content: center;">
-            <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Cancer Screening'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🎗️ Cancer Screening</span>
             <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Full Body Checkup'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🩺 Full Body</span>
+            <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Cancer Screening'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🎗️ Cancer Screening</span>
             <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Heart Tests'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🫀 Heart</span>
+            <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Diabetes Tests'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🩸 Diabetes</span>
+            <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Thyroid & Hormones'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🦋 Thyroid</span>
             <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Women\'s Health'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🌸 Women's Health</span>
           </div>
         </div>
@@ -255,11 +257,14 @@
 
         <div class="hc-spec-pills-row" style="justify-content: center; margin-top: 1.25rem;">
           <button class="hc-spec-chip hc-test-filter-btn active" data-category="all" onclick="window.HealthcareApp.filterTests('all')">All Tests</button>
-          <button class="hc-spec-chip hc-test-filter-btn" data-category="Cancer Screening" onclick="window.HealthcareApp.filterTests('Cancer Screening')">🎗️ Cancer Screening</button>
           <button class="hc-spec-chip hc-test-filter-btn" data-category="Full Body Checkup" onclick="window.HealthcareApp.filterTests('Full Body Checkup')">🩺 Full Body</button>
+          <button class="hc-spec-chip hc-test-filter-btn" data-category="Cancer Screening" onclick="window.HealthcareApp.filterTests('Cancer Screening')">🎗️ Cancer Screening</button>
           <button class="hc-spec-chip hc-test-filter-btn" data-category="Heart Tests" onclick="window.HealthcareApp.filterTests('Heart Tests')">🫀 Heart</button>
-          <button class="hc-spec-chip hc-test-filter-btn" data-category="Women's Health" onclick="window.HealthcareApp.filterTests('Women\'s Health')">🌸 Women's Health</button>
           <button class="hc-spec-chip hc-test-filter-btn" data-category="Diabetes Tests" onclick="window.HealthcareApp.filterTests('Diabetes Tests')">🩸 Diabetes</button>
+          <button class="hc-spec-chip hc-test-filter-btn" data-category="Thyroid & Hormones" onclick="window.HealthcareApp.filterTests('Thyroid & Hormones')">🦋 Thyroid &amp; Hormones</button>
+          <button class="hc-spec-chip hc-test-filter-btn" data-category="Women's Health" onclick="window.HealthcareApp.filterTests('Women\'s Health')">🌸 Women's Health</button>
+          <button class="hc-spec-chip hc-test-filter-btn" data-category="Kidney & Liver" onclick="window.HealthcareApp.filterTests('Kidney & Liver')">🧪 Kidney &amp; Liver</button>
+          <button class="hc-spec-chip hc-test-filter-btn" data-category="Blood & Fevers" onclick="window.HealthcareApp.filterTests('Blood & Fevers')">🔬 Blood &amp; Fevers</button>
           <button class="hc-spec-chip hc-test-filter-btn" data-category="Senior Citizen Health" onclick="window.HealthcareApp.filterTests('Senior Citizen Health')">🕊️ Senior Citizen</button>
         </div>
       </div>
@@ -269,7 +274,7 @@
       </div>
       <div id="hc-test-view-more-container" style="text-align: center; margin-top: 2.5rem; display: none;">
         <button class="hc-btn-primary" onclick="window.HealthcareApp.showMoreTests()">
-          <span>View More Tests</span>
+          <span id="hc-test-view-more-label">View All Diagnostic Tests ↓</span>
         </button>
       </div>
     </section>

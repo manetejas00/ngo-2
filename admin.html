@@ -1106,18 +1106,28 @@
           </div>
 
           <div class="form-group">
-            <label>Price (₹) *</label>
-            <input type="number" id="testPrice" class="form-control" placeholder="499" required>
+            <label>Customer Price (₹) *</label>
+            <input type="number" id="testPrice" class="form-control" placeholder="499" required oninput="calculateAdminMargin()">
           </div>
 
           <div class="form-group">
-            <label>Original Price (₹)</label>
-            <input type="number" id="testOrigPrice" class="form-control" placeholder="2500">
+            <label>Market Retail (CX) Price (₹)</label>
+            <input type="number" id="testOrigPrice" class="form-control" placeholder="2500" oninput="calculateAdminMargin()">
+          </div>
+
+          <div class="form-group">
+            <label>B2B Wholesale Cost (₹)</label>
+            <input type="number" id="testB2bPrice" class="form-control" placeholder="250" oninput="calculateAdminMargin()">
+          </div>
+
+          <div class="form-group">
+            <label>Calculated NGO Margin</label>
+            <input type="text" id="testMarginDisplay" class="form-control" readonly style="background: var(--bg-card); font-weight: 700; color: var(--success);" value="₹0">
           </div>
 
           <div class="form-group">
             <label>Avinya Subsidy Text</label>
-            <input type="text" id="testSubsidy" class="form-control" placeholder="80% Subsidized by NGO">
+            <input type="text" id="testSubsidy" class="form-control" placeholder="40% Off (Avinya Subsidy)">
           </div>
 
           <div class="form-group">
@@ -3129,7 +3139,7 @@
         tableHeader.innerHTML = `<th>Photo</th><th>Doctor Name</th><th>Speciality</th><th>Hospital / Location</th><th>Fee</th><th>Actions</th>`;
         renderDoctorsCatalog(items);
       } else if (currentTab === 'testsCatalog') {
-        tableHeader.innerHTML = `<th>Icon</th><th>Test Package Name</th><th>Category</th><th>Subsidized Price</th><th>Turnaround</th><th>Actions</th>`;
+        tableHeader.innerHTML = `<th>Icon</th><th>Test Package Name</th><th>Category</th><th>Customer Price</th><th>Market (CX)</th><th>B2B Cost</th><th>Margin</th><th>Actions</th>`;
         renderDiagnosticTestsCatalog(items);
       } else if (currentTab === 'usersCatalog') {
         tableHeader.innerHTML = `<th>Avatar</th><th>Name & Email</th><th>Role</th><th>Status</th><th>Phone</th><th>Actions</th>`;
@@ -3344,7 +3354,10 @@
         const id = t.test_id || t.id || '';
         const name = escapeHtml(t.name || 'Test Package');
         const cat = escapeHtml(t.category || 'Screening');
-        const price = t.price ?? 0;
+        const price = Number(t.price ?? 0);
+        const origPrice = Number(t.original_price ?? t.originalPrice ?? 0);
+        const b2b = Number(t.b2b_price ?? t.b2bPrice ?? 0);
+        const margin = Math.max(0, price - b2b);
         const icon = t.icon || '🧪';
 
         return `
@@ -3356,8 +3369,10 @@
               <div style="font-size:11px;color:var(--text-subtle);">ID: ${id}</div>
             </td>
             <td><span class="badge badge-info">${cat}</span></td>
-            <td style="font-weight:700;color:var(--success);">₹${price}</td>
-            <td style="font-size:12px;">${escapeHtml(t.report_turnaround || t.reportTurnaround || '24 Hours')}</td>
+            <td style="font-weight:700;color:var(--primary);">₹${price}</td>
+            <td style="color:var(--text-muted);text-decoration:line-through;">₹${origPrice}</td>
+            <td style="color:var(--text-subtle);font-weight:600;">₹${b2b}</td>
+            <td><span class="badge badge-success" style="font-weight:700;">+₹${margin.toFixed(0)}</span></td>
             <td>
               <div style="display:flex;gap:6px;">
                 <button class="btn btn-outline btn-sm" onclick="openTestModal('${id}')">✏️ Edit</button>
@@ -3741,6 +3756,8 @@
           document.getElementById('testBadge').value = t.badge || '';
           document.getElementById('testPrice').value = t.price || 0;
           document.getElementById('testOrigPrice').value = t.original_price || t.originalPrice || 0;
+          document.getElementById('testB2bPrice').value = t.b2b_price || t.b2bPrice || 0;
+          calculateAdminMargin();
           document.getElementById('testSubsidy').value = t.avinya_subsidy || t.avinyaSubsidy || '';
           document.getElementById('testTagline').value = t.tagline || '';
           document.getElementById('testTurnaround').value = t.report_turnaround || t.reportTurnaround || '';
@@ -3755,9 +3772,24 @@
         document.getElementById('testId').value = '';
         document.getElementById('testIdDisplay').value = '';
         document.getElementById('testIdDisplay').readOnly = false;
+        document.getElementById('testPrice').value = '';
+        document.getElementById('testOrigPrice').value = '';
+        document.getElementById('testB2bPrice').value = '';
+        calculateAdminMargin();
         document.getElementById('testIsActive').checked = true;
       }
       modal.style.display = 'flex';
+    }
+
+    function calculateAdminMargin() {
+      const p = parseFloat(document.getElementById('testPrice')?.value) || 0;
+      const b = parseFloat(document.getElementById('testB2bPrice')?.value) || 0;
+      const m = p - b;
+      const marginInput = document.getElementById('testMarginDisplay');
+      if (marginInput) {
+        marginInput.value = `₹${m.toFixed(0)} (${b > 0 ? ((m / b) * 100).toFixed(0) + '% markup' : 'N/A'})`;
+        marginInput.style.color = m >= 0 ? 'var(--success)' : 'var(--danger)';
+      }
     }
 
     function closeTestModal() { document.getElementById('testEditModal').style.display = 'none'; }
@@ -3772,6 +3804,7 @@
         badge: document.getElementById('testBadge').value.trim(),
         price: parseFloat(document.getElementById('testPrice').value) || 0,
         originalPrice: parseFloat(document.getElementById('testOrigPrice').value) || 0,
+        b2bPrice: parseFloat(document.getElementById('testB2bPrice').value) || 0,
         avinyaSubsidy: document.getElementById('testSubsidy').value.trim(),
         tagline: document.getElementById('testTagline').value.trim(),
         reportTurnaround: document.getElementById('testTurnaround').value.trim(),

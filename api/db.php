@@ -353,6 +353,7 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
             `description` TEXT DEFAULT NULL,
             `price` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
             `original_price` DECIMAL(10,2) DEFAULT 0.00,
+            `b2b_price` DECIMAL(10,2) DEFAULT 0.00,
             `avinya_subsidy` VARCHAR(255) DEFAULT NULL,
             `tests_included` TEXT DEFAULT NULL,
             `preparation` TEXT DEFAULT NULL,
@@ -517,6 +518,9 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
         }
 
         $colsTests = $pdo->query("SHOW COLUMNS FROM `diagnostic_tests`")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('b2b_price', $colsTests, true)) {
+            $pdo->exec("ALTER TABLE `diagnostic_tests` ADD COLUMN `b2b_price` DECIMAL(10,2) DEFAULT 0.00 AFTER `original_price`");
+        }
         if (!in_array('sample_type', $colsTests, true)) {
             $pdo->exec("ALTER TABLE `diagnostic_tests` ADD COLUMN `sample_type` VARCHAR(100) DEFAULT 'Blood / Serum Sample' AFTER `report_turnaround`");
         }
@@ -744,10 +748,10 @@ function seedCatalogFromJSON(PDO $pdo, bool $force = false): array {
                 $testData = json_decode((string) file_get_contents($testsFile), true);
                 $testList = $testData['tests'] ?? $testData ?? [];
                 $stmt = $pdo->prepare("INSERT INTO `diagnostic_tests`
-                    (`test_id`, `name`, `category`, `tagline`, `description`, `price`, `original_price`, `avinya_subsidy`, `tests_included`, `preparation`, `report_turnaround`, `sample_type`, `icon`, `home_collection`, `centre_visit`, `is_priority`, `badge`, `is_active`)
-                    VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :subsidy, :inc, :prep, :turnaround, :stype, :icon, :home, :centre, :prio, :badge, 1)
+                    (`test_id`, `name`, `category`, `tagline`, `description`, `price`, `original_price`, `b2b_price`, `avinya_subsidy`, `tests_included`, `preparation`, `report_turnaround`, `sample_type`, `icon`, `home_collection`, `centre_visit`, `is_priority`, `badge`, `is_active`)
+                    VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :b2b_price, :subsidy, :inc, :prep, :turnaround, :stype, :icon, :home, :centre, :prio, :badge, 1)
                     ON DUPLICATE KEY UPDATE
-                    `name` = VALUES(`name`), `category` = VALUES(`category`), `price` = VALUES(`price`), `description` = VALUES(`description`), `sample_type` = VALUES(`sample_type`), `icon` = VALUES(`icon`)");
+                    `name` = VALUES(`name`), `category` = VALUES(`category`), `tagline` = VALUES(`tagline`), `description` = VALUES(`description`), `price` = VALUES(`price`), `original_price` = VALUES(`original_price`), `b2b_price` = VALUES(`b2b_price`), `avinya_subsidy` = VALUES(`avinya_subsidy`), `tests_included` = VALUES(`tests_included`), `preparation` = VALUES(`preparation`), `report_turnaround` = VALUES(`report_turnaround`), `sample_type` = VALUES(`sample_type`), `icon` = VALUES(`icon`), `home_collection` = VALUES(`home_collection`), `centre_visit` = VALUES(`centre_visit`), `is_priority` = VALUES(`is_priority`), `badge` = VALUES(`badge`), `is_active` = 1");
 
                 foreach ($testList as $t) {
                     $stmt->execute([
@@ -758,6 +762,7 @@ function seedCatalogFromJSON(PDO $pdo, bool $force = false): array {
                         ':descr' => $t['description'] ?? '',
                         ':price' => (float) ($t['price'] ?? 0),
                         ':orig_price' => (float) ($t['originalPrice'] ?? 0),
+                        ':b2b_price' => (float) ($t['b2bPrice'] ?? $t['b2b_price'] ?? 0),
                         ':subsidy' => $t['avinyaSubsidy'] ?? '',
                         ':inc' => json_encode($t['testsIncluded'] ?? []),
                         ':prep' => $t['preparation'] ?? '',

@@ -40,6 +40,10 @@ try {
     // 2b. Explicitly re-seed crowdfunding campaigns from data/seed_crowdfunding.json
     $seededCampaignsCount = seedCrowdfundingFromJSON($pdo, true);
 
+    // 2c. Explicitly re-seed diagnostic tests catalog from api/healthcare/tests.json
+    $seededCatalog = seedCatalogFromJSON($pdo, true);
+    $seededTestsCount = $seededCatalog['tests_seeded'] ?? 0;
+
     // Invalidate and purge all application caches completely so endpoints reflect fresh DB state
     AvinyaCache::clearAll();
 
@@ -51,19 +55,25 @@ try {
     $stmtCamp = $pdo->query("SELECT `campaign_id`, `title`, `category`, `location`, `goal_amount`, `is_spotlight`, `is_published` FROM `crowdfunding_campaigns` WHERE `deleted_at` IS NULL ORDER BY `is_spotlight` DESC, `sort_order` ASC");
     $campaigns = $stmtCamp->fetchAll(PDO::FETCH_ASSOC);
 
+    // 3c. Fetch diagnostic tests count and sample
+    $stmtTests = $pdo->query("SELECT COUNT(*) FROM `diagnostic_tests` WHERE `is_active` = 1");
+    $activeTestsCount = (int) $stmtTests->fetchColumn();
+
     // 4. List all existing tables to confirm schema health
     $stmt = $pdo->query("SHOW TABLES");
     $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     echo json_encode([
         'status' => 'ok',
-        'message' => 'Database migration, gallery, and crowdfunding re-seeding completed successfully.',
+        'message' => 'Database migration, gallery, crowdfunding, and diagnostic tests re-seeding completed successfully.',
         'database' => getDbEnv('DB_NAME', 'u382139760_ngo'),
         'tablesCreated' => $tables,
         'galleriesCount' => count($galleries),
         'galleriesSeeded' => $seededCount,
         'campaignsCount' => count($campaigns),
         'campaignsSeeded' => $seededCampaignsCount,
+        'testsCount' => $activeTestsCount,
+        'testsSeeded' => $seededTestsCount,
         'galleries' => $galleries,
         'campaigns' => $campaigns,
         'timestamp' => date(DATE_ATOM)
