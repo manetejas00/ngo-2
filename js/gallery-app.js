@@ -113,6 +113,10 @@
     });
     if (galleryItems && galleryItems.length > 0) {
       galleryItems.sort((a, b) => {
+        if (Boolean(a.is_featured) !== Boolean(b.is_featured)) return a.is_featured ? -1 : 1;
+        const orderA = Number.isFinite(Number(a.sort_order)) ? Number(a.sort_order) : 0;
+        const orderB = Number.isFinite(Number(b.sort_order)) ? Number(b.sort_order) : 0;
+        if (orderA !== orderB) return orderA - orderB;
         const dA = new Date(a.updated_at || a.created_at || a.event_date || 0);
         const dB = new Date(b.updated_at || b.created_at || b.event_date || 0);
         return dB - dA;
@@ -129,13 +133,17 @@
       if (g.category && g.category.trim()) categoriesSet.add(g.category.trim());
     });
 
-    const categories = ['All', ...Array.from(categoriesSet)];
+    const hasVideos = galleryItems.some(g => g.video || g.media_type === 'video');
+    const categories = ['All'];
+    if (hasVideos) categories.push('Videos');
+    categories.push(...Array.from(categoriesSet));
 
     container.innerHTML = categories.map(cat => {
       const catKey = cat.toLowerCase();
       const isActive = currentCategory === catKey;
       let icon = 'fa-layer-group';
-      if (catKey.includes('health') || catKey.includes('medical') || catKey.includes('cancer')) icon = 'fa-stethoscope';
+      if (catKey === 'videos') icon = 'fa-film';
+      else if (catKey.includes('health') || catKey.includes('medical') || catKey.includes('cancer')) icon = 'fa-stethoscope';
       else if (catKey.includes('tree') || catKey.includes('plant') || catKey.includes('environ')) icon = 'fa-seedling';
       else if (catKey.includes('food') || catKey.includes('hunger') || catKey.includes('ration') || catKey.includes('nutrit')) icon = 'fa-bowl-food';
       else if (catKey.includes('dog') || catKey.includes('animal') || catKey.includes('pet')) icon = 'fa-dog';
@@ -213,6 +221,7 @@
     // Filter dataset
     currentFilteredItems = galleryItems.filter(item => {
       if (currentCategory === 'all') return true;
+      if (currentCategory === 'videos') return Boolean(item.video || item.media_type === 'video');
       return (item.category || '').toLowerCase() === currentCategory;
     });
 
@@ -280,13 +289,18 @@
       const alt = escapeHtml(item.alt_text || title);
       const date = escapeHtml(item.event_date ? new Date(item.event_date).getFullYear() : '');
 
+      const isVideo = Boolean(item.video || item.media_type === 'video');
       return `
-        <div class="collage-card collage-item-${idx + 1} gallery-item" data-gallery-id="${id}" role="button" tabindex="0" aria-label="${alt}">
+        <div class="collage-card collage-item-${idx + 1} gallery-item ${isVideo ? 'is-video-item' : ''}" data-gallery-id="${id}" data-media-type="${isVideo ? 'video' : 'image'}" role="button" tabindex="0" aria-label="${alt}">
           <img src="${img}" alt="${alt}" class="collage-card-img" loading="lazy">
+          ${isVideo ? '<div class="card-video-indicator" title="Watch Video"><i class="fa-solid fa-play"></i></div>' : ''}
           <div class="gallery-hover-overlay">
             ${cat ? `<span class="hover-cat">${cat}</span>` : ''}
             ${title ? `<h3 class="hover-title">${title}</h3>` : ''}
-            ${date ? `<div class="hover-meta"><span>${date}</span></div>` : ''}
+            <div class="hover-meta">
+              ${date ? `<span>${date}</span>` : ''}
+              ${isVideo ? '<span class="gallery-media-badge"><i class="fa-solid fa-circle-play"></i> Video</span>' : ''}
+            </div>
           </div>
         </div>
       `;
@@ -323,14 +337,19 @@
       const date = escapeHtml(item.event_date ? new Date(item.event_date).getFullYear() : '');
       const spanClass = spanClasses[idx % spanClasses.length];
 
+      const isVideo = Boolean(item.video || item.media_type === 'video');
       return `
-        <div class="bento-card ${spanClass} gallery-item" data-gallery-id="${id}" role="button" tabindex="0" aria-label="${alt}">
+        <div class="bento-card ${spanClass} gallery-item ${isVideo ? 'is-video-item' : ''}" data-gallery-id="${id}" data-media-type="${isVideo ? 'video' : 'image'}" role="button" tabindex="0" aria-label="${alt}">
           <div class="bento-card-media">
             <img src="${img}" alt="${alt}" class="bento-card-img" loading="lazy">
+            ${isVideo ? '<div class="card-video-indicator" title="Watch Video"><i class="fa-solid fa-play"></i></div>' : ''}
             <div class="gallery-hover-overlay">
               ${cat ? `<span class="hover-cat">${cat}</span>` : ''}
               ${title ? `<h3 class="hover-title">${title}</h3>` : ''}
-              ${date ? `<div class="hover-meta"><span><i class="fa-regular fa-calendar"></i> ${date}</span></div>` : ''}
+              <div class="hover-meta">
+                ${date ? `<span><i class="fa-regular fa-calendar"></i> ${date}</span>` : ''}
+                ${isVideo ? '<span class="gallery-media-badge"><i class="fa-solid fa-circle-play"></i> Video</span>' : ''}
+              </div>
             </div>
           </div>
         </div>
@@ -379,7 +398,11 @@
       container.setAttribute('data-gallery-id', id);
       container.onclick = () => openLightboxById(id);
     }
+    const isVideo = Boolean(item.video || item.media_type === 'video');
     if (btnEl) {
+      btnEl.innerHTML = isVideo
+        ? '<i class="fa-solid fa-circle-play"></i> Watch Full Video & Story'
+        : (num === 1 ? '<i class="fa-solid fa-expand"></i> View Full Details' : '<i class="fa-solid fa-expand"></i> Explore Story');
       btnEl.onclick = (e) => {
         e.stopPropagation();
         openLightboxById(id);
@@ -413,13 +436,18 @@
       const date = escapeHtml(item.event_date ? new Date(item.event_date).getFullYear() : '');
       const spanClass = spanClasses[idx % spanClasses.length];
 
+      const isVideo = Boolean(item.video || item.media_type === 'video');
       return `
-        <div class="masonry-card ${spanClass} gallery-item" data-gallery-id="${id}" role="button" tabindex="0" aria-label="${alt}">
+        <div class="masonry-card ${spanClass} gallery-item ${isVideo ? 'is-video-item' : ''}" data-gallery-id="${id}" data-media-type="${isVideo ? 'video' : 'image'}" role="button" tabindex="0" aria-label="${alt}">
           <img src="${img}" alt="${alt}" class="masonry-card-img" loading="lazy">
+          ${isVideo ? '<div class="card-video-indicator" title="Watch Video"><i class="fa-solid fa-play"></i></div>' : ''}
           <div class="gallery-hover-overlay">
             ${cat ? `<span class="hover-cat">${cat}</span>` : ''}
             ${title ? `<h3 class="hover-title">${title}</h3>` : ''}
-            ${date ? `<div class="hover-meta"><span>${date}</span></div>` : ''}
+            <div class="hover-meta">
+              ${date ? `<span>${date}</span>` : ''}
+              ${isVideo ? '<span class="gallery-media-badge"><i class="fa-solid fa-circle-play"></i> Video</span>' : ''}
+            </div>
           </div>
         </div>
       `;
@@ -503,6 +531,16 @@
       const targetCard = e.target.closest('.gallery-item, .full-bleed-container, .collage-card');
       if (targetCard) {
         cursor.classList.add('active');
+        const isVideo = targetCard.classList.contains('is-video-item') || targetCard.getAttribute('data-media-type') === 'video';
+        const cursorText = cursor.querySelector('.cursor-text');
+        const cursorIcon = cursor.querySelector('.cursor-icon');
+        if (isVideo) {
+          if (cursorText) cursorText.textContent = 'PLAY';
+          if (cursorIcon) cursorIcon.className = 'fa-solid fa-play cursor-icon';
+        } else {
+          if (cursorText) cursorText.textContent = 'VIEW';
+          if (cursorIcon) cursorIcon.className = 'fa-solid fa-arrow-up-right-from-square cursor-icon';
+        }
       } else {
         cursor.classList.remove('active');
       }
@@ -831,9 +869,36 @@
 
     if (counterEl) counterEl.innerText = `${currentNum} / ${totalNum}`;
 
-    if (imgEl) {
-      imgEl.src = item.image;
-      imgEl.alt = item.alt_text || title;
+    const vidEl = document.getElementById('lightboxVideo');
+    const isVideo = Boolean(item.video || item.media_type === 'video');
+
+    if (isVideo) {
+      if (imgEl) {
+        imgEl.classList.add('hidden');
+        imgEl.src = '';
+      }
+      if (vidEl) {
+        vidEl.classList.remove('hidden');
+        vidEl.src = item.video;
+        vidEl.poster = item.image || '';
+        vidEl.load();
+        vidEl.play().catch(() => {});
+        if (typeof gsap !== 'undefined') {
+          gsap.fromTo(vidEl, { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'power2.out' });
+        }
+      }
+    } else {
+      if (vidEl) {
+        vidEl.pause();
+        vidEl.removeAttribute('src');
+        vidEl.load();
+        vidEl.classList.add('hidden');
+      }
+      if (imgEl) {
+        imgEl.classList.remove('hidden');
+        imgEl.src = item.image;
+        imgEl.alt = item.alt_text || title;
+      }
     }
 
     if (titleEl) titleEl.innerText = title;
@@ -866,6 +931,10 @@
   }
 
   function navigateLightbox(direction) {
+    const vidEl = document.getElementById('lightboxVideo');
+    if (vidEl) {
+      vidEl.pause();
+    }
     const dataset = currentFilteredItems.length > 0 ? currentFilteredItems : galleryItems;
     if (dataset.length === 0) return;
     let newIndex = currentLightboxIndex + direction;
@@ -875,6 +944,13 @@
   }
 
   function closeLightbox() {
+    const vidEl = document.getElementById('lightboxVideo');
+    if (vidEl) {
+      vidEl.pause();
+      vidEl.removeAttribute('src');
+      vidEl.load();
+      vidEl.classList.add('hidden');
+    }
     const overlay = document.getElementById('galleryLightbox');
     if (overlay) {
       overlay.classList.remove('active');
