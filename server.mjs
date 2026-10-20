@@ -1533,7 +1533,7 @@ const server = createServer(async (req, res) => {
       email: 'info@avinyacarefoundation.com',
       phone: '+91 74474 41116',
       whatsapp: '+91 74474 41116',
-      address: 'Mumbai-Virar, Maharashtra',
+      address: '210, Global Plaza, Global City, Virar West - 401305',
       instagram_url: 'https://www.instagram.com/avinyacare_foundation/',
       youtube_url: 'https://www.youtube.com/@Avinyacarefoundation',
       facebook_url: '',

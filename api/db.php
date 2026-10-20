@@ -582,6 +582,11 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
     seedGalleryFromJSON($pdo, $force);
     seedCrowdfundingFromJSON($pdo, $force);
 
+    // Seed or update public address in site_settings
+    try {
+        $pdo->exec("INSERT INTO `site_settings` (`setting_key`, `setting_value`) VALUES ('address', '210, Global Plaza, Global City, Virar West - 401305') ON DUPLICATE KEY UPDATE `setting_value` = VALUES(`setting_value`)");
+    } catch (Throwable $e) {}
+
     $migrated = true;
     return true;
 }
