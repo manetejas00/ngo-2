@@ -6,6 +6,7 @@
 
 import { createServer } from 'node:http';
 import { randomBytes } from 'node:crypto';
+import { createReadStream } from 'node:fs';
 import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
 import { join, extname, dirname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -110,6 +111,8 @@ const MIME_TYPES = {
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
   '.woff2': 'font/woff2',
   '.webmanifest': 'application/manifest+json; charset=utf-8'
 };
@@ -2537,6 +2540,39 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
 
     const ext = extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+    if (ext === '.mp4' || ext === '.webm') {
+      const range = req.headers.range;
+      const totalSize = fileStat.size;
+
+      if (range) {
+        const parts = range.replace(/bytes=/, '').split('-');
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : totalSize - 1;
+        const chunkSize = (end - start) + 1;
+        const stream = createReadStream(filePath, { start, end });
+
+        res.writeHead(206, {
+          'Content-Range': `bytes ${start}-${end}/${totalSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunkSize,
+          'Content-Type': contentType,
+          'Cache-Control': 'public, max-age=86400'
+        });
+        stream.pipe(res);
+        return;
+      }
+
+      res.writeHead(200, {
+        'Content-Length': totalSize,
+        'Content-Type': contentType,
+        'Accept-Ranges': 'bytes',
+        'Cache-Control': 'public, max-age=86400'
+      });
+      createReadStream(filePath).pipe(res);
+      return;
+    }
+
     let content = await readFile(filePath);
 
     if (ext === '.html') {
