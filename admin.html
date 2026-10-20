@@ -281,6 +281,11 @@
           <span class="nav-text">Gallery Management</span>
           <span class="nav-badge" id="sideGalleryCount">0</span>
         </button>
+        <button class="sidebar-nav-link" data-tab="crowdfunding" data-tooltip="Crowdfunding Campaigns" onclick="switchTab('crowdfunding')">
+          <span class="nav-icon">🎗️</span>
+          <span class="nav-text">Crowdfunding</span>
+          <span class="nav-badge" id="sideCrowdfundingCount">0</span>
+        </button>
 
         <div class="menu-group-label">FORM SUBMISSIONS</div>
         <button class="sidebar-nav-link" data-tab="forms_contact" data-tooltip="Contact Us Inquiries" onclick="switchTab('forms_contact')">
@@ -624,6 +629,7 @@
               <button class="btn btn-teal" id="addTestBtn" style="display:none;" onclick="openTestModal()">➕ Add Test Package</button>
               <button class="btn btn-teal" id="addUserBtn" style="display:none;" onclick="openUserModal()">➕ Add User</button>
               <button class="btn btn-teal" id="addGalleryBtn" style="display:none;" onclick="openGalleryModal()">🖼️ Add Gallery Item</button>
+              <button class="btn btn-teal" id="addCampaignBtn" style="display:none;" onclick="openCampaignModal()">🎗️ Add Campaign</button>
               <button class="btn btn-outline" id="reseedCatalogBtn" style="display:none;" onclick="reseedCatalog()">🔄 Re-Seed Catalog</button>
               <button class="btn btn-primary" id="testEmailBtn" style="display:none; background: #2563EB; border-color: #2563EB;" onclick="openEmailAuditModal()">⚡ Test Form Emails</button>
 
@@ -1346,6 +1352,139 @@
     </div>
   </div>
 
+  <!-- Crowdfunding Campaign Edit / Add Modal -->
+  <div id="campaignEditModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="campaignModalTitle">Add New Crowdfunding Campaign</h3>
+        <button class="modal-close-btn" onclick="closeCampaignModal()">✕</button>
+      </div>
+
+      <form id="campaignForm" onsubmit="saveCampaignForm(event)">
+        <div class="modal-body" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          <input type="hidden" id="campId">
+          <input type="hidden" id="campPhotoBase64">
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Campaign Feature Image File / Drag & Drop Upload *</label>
+            <div class="uploader-dropzone" onclick="document.getElementById('campFileInput').click()">
+              <span class="uploader-icon">🎗️</span>
+              <div class="uploader-title">Click to upload campaign banner or drag image here</div>
+              <div class="uploader-subtitle">Supports JPEG, PNG, WebP (Max 8MB)</div>
+            </div>
+            <input type="file" id="campFileInput" accept="image/*" style="display: none;" onchange="handleCampaignImageSelect(event)">
+
+            <div style="margin-top: 8px;">
+              <input type="text" id="campImage" class="form-control" placeholder="Or enter direct Image URL (e.g. assets/eye_hospital_construction.jpg)" onchange="previewCampaignImage()">
+            </div>
+
+            <div id="campImagePreviewContainer" class="uploader-preview-bar" style="display: none;">
+              <img id="campImagePreview" class="uploader-preview-img" src="" alt="Preview">
+              <span id="campImagePreviewInfo" style="font-size: 12px; color: var(--primary); font-weight: 600;"></span>
+            </div>
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Campaign Title *</label>
+            <input type="text" id="campTitle" class="form-control" placeholder="Construction of 50-Bed Eye Care Hospital" required>
+          </div>
+
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="campCategory" class="select-control" style="width:100%;" onchange="updateCampCategoryDefaults()">
+              <option value="infrastructure">Hospital Infrastructure</option>
+              <option value="equipment">Medical Equipment & Wards</option>
+              <option value="camps">Community Health Camps</option>
+              <option value="spotlight">Urgent Spotlight Infrastructure</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Category Badge Label</label>
+            <input type="text" id="campCategoryLabel" class="form-control" placeholder="e.g. Infrastructure or 🚑 NGO Infrastructure">
+          </div>
+
+          <div class="form-group">
+            <label>Tag / Badge Label</label>
+            <input type="text" id="campTagLabel" class="form-control" placeholder="80G Tax Saver">
+          </div>
+
+          <div class="form-group">
+            <label>Location (Vasai-Virar Region) *</label>
+            <input type="text" id="campLocation" class="form-control" placeholder="Virar East, Vasai-Virar" required>
+          </div>
+
+          <div class="form-group">
+            <label>Hospital / Facility Name</label>
+            <input type="text" id="campHospitalName" class="form-control" placeholder="Avinya Charitable Center">
+          </div>
+
+          <div class="form-group">
+            <label>Goal Target Amount (₹) *</label>
+            <input type="number" id="campGoalAmount" class="form-control" placeholder="2500000" min="1" step="1000" required>
+          </div>
+
+          <div class="form-group">
+            <label>Raised Amount (₹)</label>
+            <input type="number" id="campRaisedAmount" class="form-control" placeholder="0" min="0" step="100" value="0">
+          </div>
+
+          <div class="form-group">
+            <label>Donor Count</label>
+            <input type="number" id="campDonorCount" class="form-control" placeholder="0" min="0" value="0">
+          </div>
+
+          <div class="form-group">
+            <label>Target Timeline / Status</label>
+            <input type="text" id="campTargetTimeline" class="form-control" placeholder="Target: Next 30 Days">
+          </div>
+
+          <div class="form-group">
+            <label>Donation Modal Category Tag</label>
+            <input type="text" id="campDonationCategory" class="form-control" placeholder="e.g. Mobile Medical Ambulance">
+          </div>
+
+          <div class="form-group">
+            <label>Sort Order Position</label>
+            <input type="number" id="campSortOrder" class="form-control" value="0">
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Campaign Description / Mission Summary *</label>
+            <textarea id="campDescription" class="form-control" rows="3" placeholder="Explain the urgent requirement and direct community impact..." required></textarea>
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>WhatsApp Share Text</label>
+            <input type="text" id="campWhatsappText" class="form-control" placeholder="Help AvinyaCareFoundation deploy healthcare infrastructure in Vasai-Virar...">
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1; background: var(--bg-surface); padding: 12px; border-radius: var(--radius-md);">
+            <div style="display: flex; gap: 18px; flex-wrap: wrap;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                <input type="checkbox" id="campIsSpotlight"> 🌟 Make Urgent Spotlight (Top Featured Card)
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                <input type="checkbox" id="campIsTaxExempt" checked> 🛡️ 80G Tax Exempt Eligible
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                <input type="checkbox" id="campIsPublished" checked> 🟢 Published
+              </label>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+              💡 <em>Setting Spotlight promotes this campaign to the top hero spotlight card on /crowdfunding.html</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeCampaignModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">💾 Save Campaign</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Record Detail Viewer Modal -->
   <div id="detailModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 600px;">
@@ -1491,7 +1630,7 @@
     function getInitialTab() {
       const hash = window.location.hash.replace('#', '').trim();
       const validTabs = [
-        'dashboard', 'doctor', 'diagnostic', 'doctorsCatalog', 'testsCatalog', 'gallery',
+        'dashboard', 'doctor', 'diagnostic', 'doctorsCatalog', 'testsCatalog', 'gallery', 'crowdfunding',
         'forms_contact', 'forms_newsletter', 'forms_volunteer', 'forms_support',
         'forms_donation', 'forms_coming_soon_feedback', 'forms_partnership',
         'forms_feedback', 'forms_all', 'email', 'activity', 'usersCatalog', 'settings',
@@ -1676,6 +1815,7 @@
         closeUserModal();
         closeProfileModal();
         closeGalleryModal();
+        closeCampaignModal();
         closeForgotPasswordModal();
         const userMenu = document.getElementById('userDropdownMenu');
         if (userMenu) userMenu.classList.remove('show');
@@ -2177,6 +2317,8 @@
       document.getElementById('sideTestsCatalogCount').innerText = (rawData.diagnosticTestsCatalog || []).length;
       document.getElementById('sideUsersCatalogCount').innerText = (rawData.usersCatalog || []).length;
       document.getElementById('sideGalleryCount').innerText = (rawData.galleriesCatalog || []).length;
+      const sideCfEl = document.getElementById('sideCrowdfundingCount');
+      if (sideCfEl) sideCfEl.innerText = (rawData.crowdfundingCatalog || []).length;
     }
 
     function formatAnalyticsTrend(value) {
@@ -2621,6 +2763,7 @@
         doctorsCatalog: 'Doctors Catalog',
         testsCatalog: 'Diagnostic Tests Catalog',
         gallery: 'Gallery Management',
+        crowdfunding: 'Crowdfunding Campaigns',
         forms_contact: 'Contact Us Inquiries',
         forms_newsletter: 'Newsletter Subscribers',
         forms_volunteer: 'Volunteer Applications',
@@ -2651,6 +2794,7 @@
       const addTestBtn = document.getElementById('addTestBtn');
       const addUserBtn = document.getElementById('addUserBtn');
       const addGalBtn = document.getElementById('addGalleryBtn');
+      const addCampBtn = document.getElementById('addCampaignBtn');
       const reseedBtn = document.getElementById('reseedCatalogBtn');
 
       dashPanel.style.display = tab === 'dashboard' ? 'grid' : 'none';
@@ -2665,7 +2809,8 @@
       addTestBtn.style.display = tab === 'testsCatalog' ? 'inline-flex' : 'none';
       addUserBtn.style.display = tab === 'usersCatalog' ? 'inline-flex' : 'none';
       addGalBtn.style.display = tab === 'gallery' ? 'inline-flex' : 'none';
-      reseedBtn.style.display = ['doctorsCatalog', 'testsCatalog', 'usersCatalog'].includes(tab) ? 'inline-flex' : 'none';
+      if (addCampBtn) addCampBtn.style.display = tab === 'crowdfunding' ? 'inline-flex' : 'none';
+      reseedBtn.style.display = ['doctorsCatalog', 'testsCatalog', 'usersCatalog', 'crowdfunding'].includes(tab) ? 'inline-flex' : 'none';
       const testEmailBtn = document.getElementById('testEmailBtn');
       if (testEmailBtn) testEmailBtn.style.display = tab === 'email' ? 'inline-flex' : 'none';
 
@@ -2693,6 +2838,7 @@
         doctorsCatalog: 'Healthcare > Doctors Catalog',
         testsCatalog: 'Healthcare > Diagnostic Tests Catalog',
         gallery: 'Healthcare > Gallery Management',
+        crowdfunding: 'Healthcare > Crowdfunding Campaigns',
         forms_contact: 'Forms > Contact Us',
         forms_newsletter: 'Forms > Newsletter',
         forms_volunteer: 'Forms > Volunteer',
@@ -2860,6 +3006,7 @@
       else if (currentTab === 'testsCatalog') items = rawData.diagnosticTestsCatalog || [];
       else if (currentTab === 'usersCatalog') items = rawData.usersCatalog || [];
       else if (currentTab === 'gallery') items = rawData.galleriesCatalog || [];
+      else if (currentTab === 'crowdfunding') items = rawData.crowdfundingCatalog || [];
 
       // Filter by text search
       if (query) {
@@ -2931,6 +3078,7 @@
       let items = [];
       if (currentTab.startsWith('forms')) items = rawData.formSubmissions || [];
       else if (currentTab === 'gallery') items = rawData.galleriesCatalog || [];
+      else if (currentTab === 'crowdfunding') items = rawData.crowdfundingCatalog || [];
       else if (currentTab === 'testsCatalog') items = rawData.diagnosticTestsCatalog || [];
       else if (currentTab === 'doctor') items = rawData.doctorBookings || [];
       else if (currentTab === 'diagnostic') items = rawData.diagnosticBookings || [];
@@ -2942,6 +3090,8 @@
 
       if (currentTab === 'gallery') {
         ['General', 'Medical Camps', 'Tree Plantation', 'Food Donation', 'Animal Welfare', 'Education', 'Women Health', 'Blood Donation', 'Disaster Relief', 'Donation Drives', 'Volunteers', 'Events'].forEach(c => categoriesSet.add(c));
+      } else if (currentTab === 'crowdfunding') {
+        ['spotlight', 'infrastructure', 'equipment', 'camps'].forEach(c => categoriesSet.add(c));
       }
 
       const options = ['<option value="all">All Categories</option>'];
@@ -2987,6 +3137,9 @@
       } else if (currentTab === 'gallery') {
         tableHeader.innerHTML = `<th>Image</th><th>Title & Category</th><th>Date / Location</th><th>Mode</th><th>Sort Order</th><th>Status</th><th>Featured</th><th>Actions</th>`;
         renderGalleriesCatalog(items);
+      } else if (currentTab === 'crowdfunding') {
+        tableHeader.innerHTML = `<th>Thumbnail</th><th>Campaign Title & Category</th><th>Location & Hospital</th><th>Goal & Raised</th><th>Timeline</th><th>Spotlight</th><th>Status</th><th>Sort</th><th>Actions</th>`;
+        renderCrowdfundingCatalog(items);
       }
     }
 
@@ -3303,6 +3456,89 @@
               <div style="display:flex;gap:6px;">
                 <button class="btn btn-outline btn-sm" onclick="openGalleryModal('${id}')">✏️ Edit</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteGalleryItem('${id}')">🗑️ Delete</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderCrowdfundingCatalog(items) {
+      const tbody = document.getElementById('tableBody');
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="empty-state"><div class="empty-state-icon">🎗️</div><div class="empty-state-title">No Crowdfunding Campaigns Found</div><div class="empty-state-text">Click "+ Add Campaign" to create your first fundraising campaign.</div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = items.map(c => {
+        const id = c.campaign_id || c.id || '';
+        const title = escapeHtml(c.title || '(Untitled Campaign)');
+        const cat = escapeHtml(c.category || 'infrastructure');
+        const catLabel = escapeHtml(c.category_label || cat);
+        const loc = escapeHtml(c.location || 'Virar East, Vasai-Virar');
+        const hosp = escapeHtml(c.hospital_name || '');
+        const img = escapeHtml(c.image || '/assets/logo-emblem.png');
+        const goal = parseFloat(c.goal_amount) || 0;
+        const raised = parseFloat(c.raised_amount) || 0;
+        const donors = parseInt(c.donor_count, 10) || 0;
+        const pct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+        const timeline = escapeHtml(c.target_timeline || 'Active');
+        const isPublished = c.is_published !== false && c.is_published !== 0 && c.is_published !== '0';
+        const isSpotlight = Boolean(c.is_spotlight && c.is_spotlight !== '0');
+        const sortOrder = c.sort_order ?? 0;
+
+        const pubBadge = isPublished
+          ? `<span class="badge badge-success" style="cursor:pointer;" onclick="toggleCampaignPublish('${id}', false)">🟢 Published</span>`
+          : `<span class="badge badge-warning" style="cursor:pointer;" onclick="toggleCampaignPublish('${id}', true)">🟡 Draft</span>`;
+
+        const spotBadge = isSpotlight
+          ? `<span class="badge badge-accent" style="cursor:pointer;" onclick="toggleCampaignSpotlight('${id}', false)">🌟 Spotlight</span>`
+          : `<span class="badge badge-info" style="cursor:pointer;opacity:0.75;" onclick="toggleCampaignSpotlight('${id}', true)">Standard</span>`;
+
+        const formattedGoal = '₹' + goal.toLocaleString('en-IN');
+        const formattedRaised = '₹' + raised.toLocaleString('en-IN');
+
+        return `
+          <tr>
+            <td style="width:70px;">
+              <img src="${img}" alt="${title}" style="width:55px;height:40px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border-color);" onerror="this.src='/assets/logo-emblem.png'">
+            </td>
+            <td>
+              <div style="font-weight:700;color:var(--text-main);font-size:13px;">${title}</div>
+              <div style="font-size:11px;color:var(--primary);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span class="badge badge-teal" style="font-size:10px;padding:1px 6px;">📁 ${catLabel}</span>
+                <span style="color:var(--text-muted);font-size:10px;">ID: ${escapeHtml(id)}</span>
+              </div>
+            </td>
+            <td style="font-size:12px;color:var(--text-muted);">
+              <div style="font-weight:600;color:var(--text-main);">📍 ${loc}</div>
+              ${hosp ? `<div style="font-size:11px;color:var(--text-subtle);">${hosp}</div>` : ''}
+            </td>
+            <td style="min-width:140px;">
+              <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;margin-bottom:3px;">
+                <span style="color:#FFA466;">${formattedRaised}</span>
+                <span style="color:var(--text-subtle);">${formattedGoal}</span>
+              </div>
+              <div style="background:var(--border-color);height:6px;border-radius:3px;overflow:hidden;width:100%;">
+                <div style="background:linear-gradient(90deg, #10B981, #059669);height:100%;width:${pct}%;"></div>
+              </div>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:2px;display:flex;justify-content:space-between;">
+                <span>${pct}% funded</span>
+                <span>👥 ${donors} donors</span>
+              </div>
+            </td>
+            <td style="font-size:12px;color:var(--text-muted);white-space:nowrap;">
+              <span class="badge badge-info" style="font-size:10px;">⏱️ ${timeline}</span>
+            </td>
+            <td>${spotBadge}</td>
+            <td>${pubBadge}</td>
+            <td style="width:70px;">
+              <input type="number" value="${sortOrder}" class="search-input" style="width:55px;padding:4px 6px;text-align:center;font-size:12px;height:28px;" onchange="updateCampaignSortOrder('${id}', this.value)">
+            </td>
+            <td>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-outline btn-sm" onclick="openCampaignModal('${id}')">✏️ Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteCampaignItem('${id}')">🗑️ Delete</button>
               </div>
             </td>
           </tr>
@@ -3865,6 +4101,257 @@
       }
     }
 
+    // --- CROWDFUNDING CAMPAIGN CRUD ACTIONS ---
+    function openCampaignModal(campId = null) {
+      document.getElementById('campaignForm').reset();
+      document.getElementById('campId').value = '';
+      document.getElementById('campPhotoBase64').value = '';
+      document.getElementById('campFileInput').value = '';
+      document.getElementById('campImagePreviewContainer').style.display = 'none';
+
+      const title = document.getElementById('campaignModalTitle');
+      if (campId) {
+        title.innerText = 'Edit Campaign (' + campId + ')';
+        const camp = (rawData.crowdfundingCatalog || []).find(c => (c.campaign_id || c.id) === campId);
+        if (camp) {
+          document.getElementById('campId').value = camp.campaign_id || camp.id || '';
+          document.getElementById('campTitle').value = camp.title || '';
+          document.getElementById('campCategory').value = camp.category || 'infrastructure';
+          document.getElementById('campCategoryLabel').value = camp.category_label || '';
+          document.getElementById('campTagLabel').value = camp.tag_label || '';
+          document.getElementById('campLocation').value = camp.location || 'Virar East, Vasai-Virar';
+          document.getElementById('campHospitalName').value = camp.hospital_name || '';
+          document.getElementById('campGoalAmount').value = camp.goal_amount || 500000;
+          document.getElementById('campRaisedAmount').value = camp.raised_amount || 0;
+          document.getElementById('campDonorCount').value = camp.donor_count || 0;
+          document.getElementById('campTargetTimeline').value = camp.target_timeline || '';
+          document.getElementById('campDonationCategory').value = camp.donation_category || '';
+          document.getElementById('campDescription').value = camp.description || '';
+          document.getElementById('campWhatsappText').value = camp.whatsapp_text || '';
+          document.getElementById('campImage').value = camp.image || '';
+          document.getElementById('campIsSpotlight').checked = Boolean(camp.is_spotlight && camp.is_spotlight !== '0');
+          document.getElementById('campIsTaxExempt').checked = camp.is_tax_exempt !== false && camp.is_tax_exempt !== 0 && camp.is_tax_exempt !== '0';
+          document.getElementById('campIsPublished').checked = camp.is_published !== false && camp.is_published !== 0 && camp.is_published !== '0';
+          document.getElementById('campSortOrder').value = camp.sort_order ?? 0;
+          previewCampaignImage();
+        }
+      } else {
+        title.innerText = 'Add New Crowdfunding Campaign';
+        document.getElementById('campLocation').value = 'Virar East, Vasai-Virar';
+        document.getElementById('campCategory').value = 'infrastructure';
+        document.getElementById('campCategoryLabel').value = 'Infrastructure';
+        document.getElementById('campTagLabel').value = '80G Tax Saver';
+        document.getElementById('campGoalAmount').value = 1000000;
+        document.getElementById('campRaisedAmount').value = 0;
+        document.getElementById('campDonorCount').value = 0;
+        document.getElementById('campTargetTimeline').value = 'Active';
+        document.getElementById('campIsTaxExempt').checked = true;
+        document.getElementById('campIsPublished').checked = true;
+      }
+      document.getElementById('campaignEditModal').classList.add('active');
+      document.getElementById('campaignEditModal').style.display = 'flex';
+    }
+
+    function closeCampaignModal() {
+      const modal = document.getElementById('campaignEditModal');
+      if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+      }
+    }
+
+    function updateCampCategoryDefaults() {
+      const cat = document.getElementById('campCategory').value;
+      const catLabel = document.getElementById('campCategoryLabel');
+      const tagLabel = document.getElementById('campTagLabel');
+      const isSpotlight = document.getElementById('campIsSpotlight');
+
+      if (cat === 'spotlight') {
+        if (!catLabel.value || catLabel.value === 'Infrastructure' || catLabel.value === 'Medical Equipment' || catLabel.value === 'Community Health Camps') {
+          catLabel.value = '🚑 NGO Infrastructure • High Impact Project';
+        }
+        tagLabel.value = 'AvinyaCareFoundation Official Project';
+        isSpotlight.checked = true;
+      } else if (cat === 'infrastructure') {
+        catLabel.value = 'Infrastructure';
+        tagLabel.value = '80G Tax Saver';
+      } else if (cat === 'equipment') {
+        catLabel.value = 'Medical Equipment';
+        tagLabel.value = '80G Tax Saver';
+      } else if (cat === 'camps') {
+        catLabel.value = 'Community Health Camps';
+        tagLabel.value = '80G Tax Saver';
+      }
+    }
+
+    function previewCampaignImage() {
+      const urlInput = document.getElementById('campImage');
+      const base64Input = document.getElementById('campPhotoBase64');
+      const container = document.getElementById('campImagePreviewContainer');
+      const preview = document.getElementById('campImagePreview');
+      const info = document.getElementById('campImagePreviewInfo');
+
+      const src = (base64Input.value || urlInput.value || '').trim();
+      if (src) {
+        container.style.display = 'flex';
+        preview.src = src;
+        info.innerText = base64Input.value ? '✓ Uploaded image ready' : '✓ Image URL linked';
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    function handleCampaignImageSelect(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        showToast('Please select a valid image file.', 'error');
+        return;
+      }
+      if (file.size > 8 * 1024 * 1024) {
+        showToast('Image file size exceeds 8MB limit.', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64 = e.target.result;
+        document.getElementById('campPhotoBase64').value = base64;
+        document.getElementById('campImage').value = `[Uploaded File: ${file.name}]`;
+        previewCampaignImage();
+        showToast(`Image selected (${(file.size / 1024).toFixed(1)} KB)`, 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveCampaignForm(event) {
+      event.preventDefault();
+      const campId = document.getElementById('campId').value.trim();
+      const base64 = document.getElementById('campPhotoBase64').value;
+      const imageUrl = document.getElementById('campImage').value.trim();
+
+      if (!base64 && !imageUrl) {
+        showToast('Please select an image file or enter an image URL.', 'warning');
+        return;
+      }
+
+      const title = document.getElementById('campTitle').value.trim();
+      const location = document.getElementById('campLocation').value.trim();
+
+      const payload = {
+        action: 'save_crowdfunding_campaign',
+        campaign: {
+          campaign_id: campId,
+          title: title,
+          category: document.getElementById('campCategory').value.trim(),
+          category_label: document.getElementById('campCategoryLabel').value.trim(),
+          tag_label: document.getElementById('campTagLabel').value.trim(),
+          location: location,
+          hospital_name: document.getElementById('campHospitalName').value.trim(),
+          goal_amount: parseFloat(document.getElementById('campGoalAmount').value) || 0,
+          raised_amount: parseFloat(document.getElementById('campRaisedAmount').value) || 0,
+          donor_count: parseInt(document.getElementById('campDonorCount').value, 10) || 0,
+          target_timeline: document.getElementById('campTargetTimeline').value.trim(),
+          donation_category: document.getElementById('campDonationCategory').value.trim() || title,
+          description: document.getElementById('campDescription').value.trim(),
+          whatsapp_text: document.getElementById('campWhatsappText').value.trim(),
+          image: base64 || imageUrl,
+          is_spotlight: document.getElementById('campIsSpotlight').checked ? 1 : 0,
+          is_tax_exempt: document.getElementById('campIsTaxExempt').checked ? 1 : 0,
+          is_published: document.getElementById('campIsPublished').checked ? 1 : 0,
+          sort_order: parseInt(document.getElementById('campSortOrder').value, 10) || 0
+        }
+      };
+
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+          showToast('Campaign saved successfully!', 'success');
+          closeCampaignModal();
+          await fetchAdminData(true);
+        } else {
+          showToast('Failed to save campaign: ' + (data.message || 'Error'), 'error');
+        }
+      } catch (e) {
+        showToast('Error saving campaign.', 'error');
+      }
+    }
+
+    async function deleteCampaignItem(campId) {
+      if (!confirm(`Are you sure you want to delete campaign '${campId}'?`)) return;
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'delete_crowdfunding_campaign', id: campId })
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+          showToast(`Campaign '${campId}' deleted.`, 'success');
+          await fetchAdminData(true);
+        } else {
+          showToast('Failed to delete campaign: ' + (data.message || 'Error'), 'error');
+        }
+      } catch (e) {
+        showToast('Error deleting campaign.', 'error');
+      }
+    }
+
+    async function toggleCampaignPublish(campId, isPublished) {
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'toggle_crowdfunding_publish', id: campId, is_published: isPublished })
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+          showToast(`Campaign status updated.`, 'info');
+          await fetchAdminData(true);
+        }
+      } catch (e) {
+        console.error('Error toggling campaign publish status:', e);
+      }
+    }
+
+    async function toggleCampaignSpotlight(campId, isSpotlight) {
+      try {
+        const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'toggle_crowdfunding_spotlight', id: campId, is_spotlight: isSpotlight })
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+          showToast(`Spotlight campaign updated.`, 'info');
+          await fetchAdminData(true);
+        }
+      } catch (e) {
+        console.error('Error toggling campaign spotlight status:', e);
+      }
+    }
+
+    async function updateCampaignSortOrder(campId, newOrder) {
+      try {
+        await fetch(getApiBaseUrl() + '/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({
+            action: 'reorder_crowdfunding_campaigns',
+            orders: [{ id: campId, sort_order: parseInt(newOrder, 10) || 0 }]
+          })
+        });
+        await fetchAdminData(true);
+      } catch (e) {
+        console.error('Error updating campaign sort order:', e);
+      }
+    }
+
     async function updateBookingStatus(type, id, status) {
       try {
         const res = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
@@ -3961,6 +4448,7 @@
       else if (currentTab === 'testsCatalog') data = rawData.diagnosticTestsCatalog || [];
       else if (currentTab === 'usersCatalog') data = rawData.usersCatalog || [];
       else if (currentTab === 'gallery') data = rawData.galleriesCatalog || [];
+      else if (currentTab === 'crowdfunding') data = rawData.crowdfundingCatalog || [];
 
       if (!data || data.length === 0) {
         showToast('No data available in current view to export as PDF.', 'warning');
@@ -3990,6 +4478,7 @@
       else if (currentTab === 'testsCatalog') data = rawData.diagnosticTestsCatalog;
       else if (currentTab === 'usersCatalog') data = rawData.usersCatalog;
       else if (currentTab === 'gallery') data = rawData.galleriesCatalog;
+      else if (currentTab === 'crowdfunding') data = rawData.crowdfundingCatalog;
 
       if (!data || data.length === 0) {
         showToast('No data available to export.', 'warning');

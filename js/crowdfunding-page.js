@@ -96,6 +96,160 @@
     });
   }
 
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  async function loadDynamicCampaigns() {
+    try {
+      const res = await fetch('/api/crowdfunding.php');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data || data.status !== 'ok') return;
+
+      // Render Spotlight Campaign if available
+      if (data.spotlight) {
+        const spot = data.spotlight;
+        const spotlightContainer = document.querySelector('#urgent-spotlight .cf-spotlight-card');
+        if (spotlightContainer) {
+          const goal = parseFloat(spot.goal_amount) || 2500000;
+          const raised = parseFloat(spot.raised_amount) || 0;
+          const pct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+          const donCat = spot.donation_category || spot.title || 'Mobile Medical Ambulance';
+
+          spotlightContainer.innerHTML = `
+            <div class="cf-spotlight-media">
+              <img src="${escapeHtml(spot.image || 'assets/mobile_ambulance_clinic.jpg')}" alt="${escapeHtml(spot.alt_text || spot.title)}" loading="lazy" decoding="async">
+              <div class="cf-spotlight-tag-urgent">
+                <span>⏱️</span> ${escapeHtml(spot.target_timeline || 'Target: Next 30 Days')}
+              </div>
+              <div class="cf-spotlight-tag-verified">
+                <span>✓</span> ${escapeHtml(spot.tag_label || 'AvinyaCareFoundation Official Project')}
+              </div>
+            </div>
+
+            <div class="cf-spotlight-content">
+              <div>
+                <h3 class="cf-spotlight-title">${escapeHtml(spot.title)}</h3>
+                <div class="cf-spotlight-hospital">
+                  <span>📍 Region:</span>
+                  <span class="hosp-name">${escapeHtml(spot.location || 'Vasai-Virar Region')}</span>
+                  ${spot.hospital_name ? `<span>• ${escapeHtml(spot.hospital_name)}</span>` : '<span>• Healthcare Access Initiative</span>'}
+                </div>
+                <p class="cf-spotlight-desc">
+                  ${escapeHtml(spot.description || '')}
+                </p>
+              </div>
+
+              <div>
+                <div class="cf-progress-container" data-campaign-category="${escapeHtml(donCat)}" data-goal="${goal}">
+                  <div class="cf-progress-header">
+                    <div>
+                      <span class="cf-progress-raised">${money(raised)}</span>
+                      <span class="cf-progress-goal">pledged toward ${money(goal)} goal</span>
+                    </div>
+                    <span class="cf-progress-percent" style="color: #FFA466; font-weight: 800; font-size: 1.1rem;">${pct}%</span>
+                  </div>
+                  <div class="cf-progress-bar-bg">
+                    <div class="cf-progress-bar-fill" style="width: ${pct}%;"></div>
+                  </div>
+                  <div class="cf-progress-stats">
+                    <span>🏢 <span class="cf-progress-donor-count">${spot.donor_count || 0}</span> Corporate &amp; Community Donors</span>
+                    <span>🛡️ ${spot.is_tax_exempt ? '80G Tax Exempt Eligible' : 'Direct Impact Project'}</span>
+                  </div>
+                </div>
+
+                <div class="cf-spotlight-actions">
+                  <button class="cf-btn-primary" style="flex: 1; justify-content: center;" onclick="window.AvinyaModals.openDonateModal(5000, '${escapeHtml(donCat)}')">
+                    <span>Fund the Ambulance</span>
+                    <span>→</span>
+                  </button>
+                  <button class="cf-btn-secondary" style="padding: 0.95rem 1.25rem;" onclick="shareOnWhatsApp('${escapeHtml(spot.whatsapp_text || ('Help AvinyaCareFoundation with: ' + spot.title + ' ' + window.location.href))}')">
+                    <span>📱 Share on WhatsApp</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      // Render Grid Campaigns
+      if (Array.isArray(data.campaigns) && data.campaigns.length > 0) {
+        const gridContainer = document.getElementById('cf-grid-container');
+        if (gridContainer) {
+          gridContainer.innerHTML = data.campaigns.map(c => {
+            const goal = parseFloat(c.goal_amount) || 1000000;
+            const raised = parseFloat(c.raised_amount) || 0;
+            const pct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+            const donCat = c.donation_category || c.title;
+
+            return `
+              <div class="cf-card" data-category="${escapeHtml(c.category || 'infrastructure')}">
+                <div class="cf-card-media">
+                  <img src="${escapeHtml(c.image || 'assets/logo-emblem.png')}" alt="${escapeHtml(c.alt_text || c.title)}" loading="lazy" decoding="async">
+                  <div class="cf-card-category">${escapeHtml(c.category_label || c.category || 'Healthcare')}</div>
+                  ${c.is_tax_exempt ? `<div class="cf-card-tax">${escapeHtml(c.tag_label || '80G Tax Saver')}</div>` : ''}
+                </div>
+                <div class="cf-card-body">
+                  <h3 class="cf-card-title">${escapeHtml(c.title)}</h3>
+                  <div class="cf-card-meta">
+                    <span>📍</span>
+                    <span class="hospital">${escapeHtml(c.location || 'Vasai-Virar')}${c.hospital_name ? ` • ${escapeHtml(c.hospital_name)}` : ''}</span>
+                  </div>
+                  <p class="cf-card-desc">
+                    ${escapeHtml(c.description || '')}
+                  </p>
+                  <div class="cf-card-footer">
+                    <div class="cf-progress-container" style="margin-bottom: 0.75rem;" data-campaign-category="${escapeHtml(donCat)}" data-goal="${goal}">
+                      <div class="cf-progress-header">
+                        <span class="cf-progress-raised" style="font-weight: 700; color: #FFA466;">${money(raised)}</span>
+                        <span class="cf-progress-goal">pledged toward ${money(goal)} (<span class="cf-progress-percent">${pct}%</span>)</span>
+                      </div>
+                      <div class="cf-progress-bar-bg">
+                        <div class="cf-progress-bar-fill" style="width: ${pct}%;"></div>
+                      </div>
+                      <div class="cf-progress-stats" style="margin-top: 0.35rem;">
+                        <span>👥 <span class="cf-progress-donor-count">${c.donor_count || 0}</span> Donors</span>
+                        <span>⏱️ ${escapeHtml(c.target_timeline || 'Active')}</span>
+                      </div>
+                    </div>
+                    <div class="cf-card-actions">
+                      <button class="cf-btn-donate" onclick="window.AvinyaModals.openDonateModal(5000, '${escapeHtml(donCat)}')">
+                        <span>Donate ₹5,000</span>
+                        <span>→</span>
+                      </button>
+                      <button class="cf-btn-share" title="Share on WhatsApp" onclick="shareOnWhatsApp('${escapeHtml(c.whatsapp_text || ('Support ' + c.title + ': ' + window.location.href))}')">
+                        <span>💬</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          // Update "All Projects (N)" count button if present
+          const allBtn = document.querySelector('.cf-filter-btn[data-filter="all"]');
+          if (allBtn) {
+            allBtn.textContent = `All Projects (${data.campaigns.length})`;
+          }
+        }
+      }
+
+      initializeProgress();
+      initializeReveals();
+    } catch (e) {
+      console.warn('Dynamic Crowdfunding Campaigns Fetch Warning:', e);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.cf-filter-btn').forEach(button => button.addEventListener('click', () => {
       const filter = button.dataset.filter;
@@ -112,6 +266,7 @@
     }));
     initializeProgress();
     initializeReveals();
+    loadDynamicCampaigns();
   });
 
   window.addEventListener('avinya:donation_stats_updated', event => {

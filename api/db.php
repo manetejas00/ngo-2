@@ -461,6 +461,42 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
             `setting_key` VARCHAR(100) PRIMARY KEY,
             `setting_value` TEXT DEFAULT NULL,
             `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+
+        // 13. Crowdfunding Campaigns Table
+        "CREATE TABLE IF NOT EXISTS `crowdfunding_campaigns` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `campaign_id` VARCHAR(100) UNIQUE NOT NULL,
+            `title` VARCHAR(255) NOT NULL,
+            `slug` VARCHAR(255) DEFAULT NULL,
+            `category` VARCHAR(100) NOT NULL DEFAULT 'infrastructure',
+            `category_label` VARCHAR(100) DEFAULT NULL,
+            `tag_label` VARCHAR(100) DEFAULT NULL,
+            `location` VARCHAR(255) NOT NULL DEFAULT 'Virar, Vasai-Virar',
+            `hospital_name` VARCHAR(255) DEFAULT NULL,
+            `goal_amount` DECIMAL(12, 2) NOT NULL DEFAULT 500000.00,
+            `raised_amount` DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
+            `donor_count` INT NOT NULL DEFAULT 0,
+            `target_timeline` VARCHAR(100) DEFAULT 'Target: Next 30 Days',
+            `description` TEXT DEFAULT NULL,
+            `image` TEXT DEFAULT NULL,
+            `alt_text` VARCHAR(255) DEFAULT NULL,
+            `whatsapp_text` TEXT DEFAULT NULL,
+            `donation_category` VARCHAR(100) DEFAULT NULL,
+            `is_spotlight` TINYINT(1) DEFAULT 0,
+            `is_tax_exempt` TINYINT(1) DEFAULT 1,
+            `is_published` TINYINT(1) DEFAULT 1,
+            `sort_order` INT DEFAULT 0,
+            `created_by` VARCHAR(255) DEFAULT 'Super Admin',
+            `updated_by` VARCHAR(255) DEFAULT 'Super Admin',
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            `deleted_at` DATETIME DEFAULT NULL,
+            INDEX `idx_cf_id` (`campaign_id`),
+            INDEX `idx_cf_cat` (`category`),
+            INDEX `idx_cf_spotlight` (`is_spotlight`),
+            INDEX `idx_cf_pub` (`is_published`),
+            INDEX `idx_cf_sort` (`sort_order`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
     ];
 
@@ -540,9 +576,67 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
     seedCatalogFromJSON($pdo, $force);
     seedDefaultUsers($pdo);
     seedGalleryFromJSON($pdo, $force);
+    seedCrowdfundingFromJSON($pdo, $force);
 
     $migrated = true;
     return true;
+}
+
+function seedCrowdfundingFromJSON(PDO $pdo, bool $force = false): int {
+    try {
+        if ($force) {
+            $pdo->exec("TRUNCATE TABLE `crowdfunding_campaigns`");
+        }
+
+        $seedFile = dirname(__DIR__) . '/data/seed_crowdfunding.json';
+        if (!file_exists($seedFile)) return 0;
+
+        $seedItems = json_decode((string) file_get_contents($seedFile), true);
+        if (!is_array($seedItems) || count($seedItems) === 0) return 0;
+
+        $stmt = $pdo->prepare("INSERT INTO `crowdfunding_campaigns`
+            (`campaign_id`, `title`, `slug`, `category`, `category_label`, `tag_label`, `location`, `hospital_name`, `goal_amount`, `raised_amount`, `donor_count`, `target_timeline`, `description`, `image`, `alt_text`, `whatsapp_text`, `donation_category`, `is_spotlight`, `is_tax_exempt`, `is_published`, `sort_order`, `created_at`, `updated_at`)
+            VALUES (:cid, :title, :slug, :cat, :cat_lbl, :tag_lbl, :loc, :hosp, :goal, :raised, :donors, :timeline, :desc, :img, :alt, :whatsapp, :don_cat, :is_spot, :is_tax, :is_pub, :sort_ord, NOW(), NOW())
+            ON DUPLICATE KEY UPDATE
+            `title` = VALUES(`title`), `slug` = VALUES(`slug`), `category` = VALUES(`category`), `category_label` = VALUES(`category_label`),
+            `tag_label` = VALUES(`tag_label`), `location` = VALUES(`location`), `hospital_name` = VALUES(`hospital_name`),
+            `goal_amount` = VALUES(`goal_amount`), `target_timeline` = VALUES(`target_timeline`), `description` = VALUES(`description`),
+            `image` = VALUES(`image`), `alt_text` = VALUES(`alt_text`), `whatsapp_text` = VALUES(`whatsapp_text`),
+            `donation_category` = VALUES(`donation_category`), `is_spotlight` = VALUES(`is_spotlight`), `is_tax_exempt` = VALUES(`is_tax_exempt`),
+            `is_published` = VALUES(`is_published`), `sort_order` = VALUES(`sort_order`), `updated_at` = NOW()");
+
+        $count = 0;
+        foreach ($seedItems as $item) {
+            $stmt->execute([
+                ':cid' => $item['campaign_id'] ?? ('camp-' . uniqid()),
+                ':title' => $item['title'] ?? 'Campaign Title',
+                ':slug' => $item['slug'] ?? null,
+                ':cat' => $item['category'] ?? 'infrastructure',
+                ':cat_lbl' => $item['category_label'] ?? null,
+                ':tag_lbl' => $item['tag_label'] ?? null,
+                ':loc' => $item['location'] ?? 'Virar, Vasai-Virar',
+                ':hosp' => $item['hospital_name'] ?? null,
+                ':goal' => (float)($item['goal_amount'] ?? 500000),
+                ':raised' => (float)($item['raised_amount'] ?? 0),
+                ':donors' => (int)($item['donor_count'] ?? 0),
+                ':timeline' => $item['target_timeline'] ?? 'Target: Next 30 Days',
+                ':desc' => $item['description'] ?? null,
+                ':img' => $item['image'] ?? '',
+                ':alt' => $item['alt_text'] ?? null,
+                ':whatsapp' => $item['whatsapp_text'] ?? null,
+                ':don_cat' => $item['donation_category'] ?? null,
+                ':is_spot' => !empty($item['is_spotlight']) ? 1 : 0,
+                ':is_tax' => isset($item['is_tax_exempt']) ? ($item['is_tax_exempt'] ? 1 : 0) : 1,
+                ':is_pub' => isset($item['is_published']) ? ($item['is_published'] ? 1 : 0) : 1,
+                ':sort_ord' => (int)($item['sort_order'] ?? 0)
+            ]);
+            $count++;
+        }
+        return $count;
+    } catch (Throwable $e) {
+        error_log('seedCrowdfundingFromJSON Exception: ' . $e->getMessage());
+        return 0;
+    }
 }
 
 function seedGalleryFromJSON(PDO $pdo, bool $force = false): int {

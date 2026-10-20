@@ -37,6 +37,9 @@ try {
     // 2. Explicitly re-seed galleries table from data/seed_galleries.json
     $seededCount = seedGalleryFromJSON($pdo, true);
 
+    // 2b. Explicitly re-seed crowdfunding campaigns from data/seed_crowdfunding.json
+    $seededCampaignsCount = seedCrowdfundingFromJSON($pdo, true);
+
     // Invalidate and purge all application caches completely so endpoints reflect fresh DB state
     AvinyaCache::clearAll();
 
@@ -44,18 +47,25 @@ try {
     $stmtGal = $pdo->query("SELECT `gallery_id`, `title`, `category`, `image`, `is_published`, `created_at` FROM `galleries` ORDER BY `sort_order` ASC, `created_at` DESC");
     $galleries = $stmtGal->fetchAll(PDO::FETCH_ASSOC);
 
+    // 3b. Fetch updated list of campaigns
+    $stmtCamp = $pdo->query("SELECT `campaign_id`, `title`, `category`, `location`, `goal_amount`, `is_spotlight`, `is_published` FROM `crowdfunding_campaigns` WHERE `deleted_at` IS NULL ORDER BY `is_spotlight` DESC, `sort_order` ASC");
+    $campaigns = $stmtCamp->fetchAll(PDO::FETCH_ASSOC);
+
     // 4. List all existing tables to confirm schema health
     $stmt = $pdo->query("SHOW TABLES");
     $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     echo json_encode([
         'status' => 'ok',
-        'message' => 'Database migration and gallery re-seeding completed successfully.',
+        'message' => 'Database migration, gallery, and crowdfunding re-seeding completed successfully.',
         'database' => getDbEnv('DB_NAME', 'u382139760_ngo'),
         'tablesCreated' => $tables,
         'galleriesCount' => count($galleries),
         'galleriesSeeded' => $seededCount,
+        'campaignsCount' => count($campaigns),
+        'campaignsSeeded' => $seededCampaignsCount,
         'galleries' => $galleries,
+        'campaigns' => $campaigns,
         'timestamp' => date(DATE_ATOM)
     ], JSON_PRETTY_PRINT);
 } catch (Throwable $e) {

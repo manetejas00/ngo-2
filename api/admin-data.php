@@ -694,17 +694,198 @@ if ($action === 'reorder_galleries') {
     exit(0);
 }
 
+// Action: Save Crowdfunding Campaign Record
+if ($action === 'save_crowdfunding_campaign') {
+    if (!in_array($userRole, ['admin', 'manager'], true)) {
+        http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Forbidden.']); exit(0);
+    }
+    $camp = $data['campaign'] ?? $data;
+    $cId = trim((string) ($camp['campaign_id'] ?? $camp['id'] ?? ''));
+    if ($cId === '') $cId = 'camp-' . time() . '-' . rand(100, 999);
+
+    $title = trim((string) ($camp['title'] ?? ''));
+    if ($title === '') {
+        http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Campaign title is required.']); exit(0);
+    }
+    $slug = trim((string) ($camp['slug'] ?? ''));
+    if ($slug === '') {
+        $slug = strtolower(trim((string) preg_replace('/[^a-z0-9]+/i', '-', $title), '-'));
+    }
+    if ($slug === '') $slug = 'campaign-' . time();
+
+    $category = trim((string) ($camp['category'] ?? 'infrastructure'));
+    $categoryLabel = trim((string) ($camp['category_label'] ?? ''));
+    if ($categoryLabel === '') {
+        $catMap = [
+            'spotlight' => '🚑 NGO Infrastructure • High Impact Project',
+            'infrastructure' => 'Infrastructure',
+            'equipment' => 'Medical Equipment',
+            'camps' => 'Community Health Camps'
+        ];
+        $categoryLabel = $catMap[$category] ?? ucfirst($category);
+    }
+
+    $tagLabel = trim((string) ($camp['tag_label'] ?? '80G Tax Saver'));
+    $location = trim((string) ($camp['location'] ?? 'Virar East, Vasai-Virar'));
+    $hospitalName = trim((string) ($camp['hospital_name'] ?? 'Avinya Healthcare Center'));
+    $goalAmount = validMoney($camp['goal_amount'] ?? 500000, 'Goal amount');
+    $raisedAmount = validMoney($camp['raised_amount'] ?? 0, 'Raised amount');
+    $donorCount = max(0, (int) ($camp['donor_count'] ?? 0));
+    $targetTimeline = trim((string) ($camp['target_timeline'] ?? 'Active'));
+    $description = trim((string) ($camp['description'] ?? ''));
+    $img = trim((string) ($camp['image'] ?? $camp['photoBase64'] ?? ''));
+    $altText = trim((string) ($camp['alt_text'] ?? $title));
+    $donationCategory = trim((string) ($camp['donation_category'] ?? $title));
+    $whatsappText = trim((string) ($camp['whatsapp_text'] ?? ''));
+    if ($whatsappText === '') {
+        $whatsappText = "Support {$title} with AvinyaCareFoundation: https://avinyacarefoundation.org/crowdfunding";
+    }
+    $isSpotlight = !empty($camp['is_spotlight']) ? 1 : 0;
+    $isTaxExempt = isset($camp['is_tax_exempt']) ? ($camp['is_tax_exempt'] ? 1 : 0) : 1;
+    $isPublished = isset($camp['is_published']) ? ($camp['is_published'] ? 1 : 0) : 1;
+    $sortOrder = (int) ($camp['sort_order'] ?? 0);
+
+    // Save base64 image to assets/crowdfunding/ if provided
+    if (str_starts_with($img, 'data:image/')) {
+        if (preg_match('/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/', $img, $m)) {
+            $ext = strtolower($m[1]) === 'jpeg' ? 'jpg' : strtolower($m[1]);
+            $rawImg = base64_decode($m[2]);
+            $targetDir = dirname(__DIR__) . '/assets/crowdfunding';
+            if (!is_dir($targetDir)) mkdir($targetDir, 0755, true);
+            $imgFilename = 'camp_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
+            file_put_contents($targetDir . '/' . $imgFilename, $rawImg);
+            $img = 'assets/crowdfunding/' . $imgFilename;
+        }
+    }
+
+    if ($pdo !== null) {
+        if ($isSpotlight === 1) {
+            $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `is_spotlight` = 0 WHERE `campaign_id` != :cid")->execute([':cid' => $cId]);
+        }
+
+        $stmt = $pdo->prepare("INSERT INTO `crowdfunding_campaigns`
+            (`campaign_id`, `title`, `slug`, `category`, `category_label`, `tag_label`, `location`, `hospital_name`, `goal_amount`, `raised_amount`, `donor_count`, `target_timeline`, `description`, `image`, `alt_text`, `whatsapp_text`, `donation_category`, `is_spotlight`, `is_tax_exempt`, `is_published`, `sort_order`, `updated_at`)
+            VALUES (:cid, :title, :slug, :cat, :cat_lbl, :tag_lbl, :loc, :hosp, :goal, :raised, :donors, :timeline, :desc, :img, :alt, :whatsapp, :don_cat, :is_spot, :is_tax, :is_pub, :sort_ord, NOW())
+            ON DUPLICATE KEY UPDATE
+            `title` = VALUES(`title`), `slug` = VALUES(`slug`), `category` = VALUES(`category`), `category_label` = VALUES(`category_label`),
+            `tag_label` = VALUES(`tag_label`), `location` = VALUES(`location`), `hospital_name` = VALUES(`hospital_name`),
+            `goal_amount` = VALUES(`goal_amount`), `raised_amount` = VALUES(`raised_amount`), `donor_count` = VALUES(`donor_count`),
+            `target_timeline` = VALUES(`target_timeline`), `description` = VALUES(`description`), `image` = VALUES(`image`),
+            `alt_text` = VALUES(`alt_text`), `whatsapp_text` = VALUES(`whatsapp_text`), `donation_category` = VALUES(`donation_category`),
+            `is_spotlight` = VALUES(`is_spotlight`), `is_tax_exempt` = VALUES(`is_tax_exempt`), `is_published` = VALUES(`is_published`),
+            `sort_order` = VALUES(`sort_order`), `updated_at` = NOW(), `deleted_at` = NULL");
+
+        $stmt->execute([
+            ':cid' => $cId, ':title' => $title, ':slug' => $slug, ':cat' => $category,
+            ':cat_lbl' => $categoryLabel, ':tag_lbl' => $tagLabel, ':loc' => $location,
+            ':hosp' => $hospitalName, ':goal' => $goalAmount, ':raised' => $raisedAmount,
+            ':donors' => $donorCount, ':timeline' => $targetTimeline, ':desc' => $description,
+            ':img' => $img, ':alt' => $altText, ':whatsapp' => $whatsappText,
+            ':don_cat' => $donationCategory, ':is_spot' => $isSpotlight, ':is_tax' => $isTaxExempt,
+            ':is_pub' => $isPublished, ':sort_ord' => $sortOrder
+        ]);
+    }
+
+    AvinyaCache::invalidateGroup('crowdfunding');
+    AvinyaCache::invalidateGroup('homepage');
+    logActivity('CROWDFUNDING_SAVED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Saved crowdfunding campaign '{$title}' ({$cId})", ['campaignId' => $cId, 'title' => $title]);
+    echo json_encode(['status' => 'ok', 'message' => "Campaign saved successfully.", 'campaignId' => $cId, 'imageUrl' => $img]);
+    exit(0);
+}
+
+// Action: Delete Crowdfunding Campaign Record
+if ($action === 'delete_crowdfunding_campaign') {
+    if (!in_array($userRole, ['admin', 'manager'], true)) {
+        http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Forbidden.']); exit(0);
+    }
+    $cId = trim((string) ($data['id'] ?? $data['campaignId'] ?? ''));
+    if ($cId === '') {
+        http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'Campaign ID is required.']); exit(0);
+    }
+    if ($pdo !== null) {
+        $stmt = $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `deleted_at` = NOW() WHERE `campaign_id` = :id");
+        $stmt->execute([':id' => $cId]);
+    }
+    AvinyaCache::invalidateGroup('crowdfunding');
+    AvinyaCache::invalidateGroup('homepage');
+    logActivity('CROWDFUNDING_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Deleted crowdfunding campaign {$cId}", ['campaignId' => $cId]);
+    echo json_encode(['status' => 'ok', 'message' => "Campaign {$cId} deleted successfully."]);
+    exit(0);
+}
+
+// Action: Toggle Publish State
+if ($action === 'toggle_crowdfunding_publish') {
+    if (!in_array($userRole, ['admin', 'manager'], true)) {
+        http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Forbidden.']); exit(0);
+    }
+    $cId = trim((string) ($data['id'] ?? $data['campaignId'] ?? ''));
+    $isPub = !empty($data['is_published']) ? 1 : 0;
+    if ($pdo !== null) {
+        $stmt = $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `is_published` = :pub WHERE `campaign_id` = :id");
+        $stmt->execute([':pub' => $isPub, ':id' => $cId]);
+    }
+    AvinyaCache::invalidateGroup('crowdfunding');
+    AvinyaCache::invalidateGroup('homepage');
+    logActivity('CROWDFUNDING_PUBLISH_TOGGLED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Set campaign {$cId} published status to {$isPub}", ['campaignId' => $cId, 'is_published' => $isPub]);
+    echo json_encode(['status' => 'ok', 'message' => "Campaign publish status updated."]);
+    exit(0);
+}
+
+// Action: Toggle Spotlight State
+if ($action === 'toggle_crowdfunding_spotlight') {
+    if (!in_array($userRole, ['admin', 'manager'], true)) {
+        http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Forbidden.']); exit(0);
+    }
+    $cId = trim((string) ($data['id'] ?? $data['campaignId'] ?? ''));
+    $isSpot = !empty($data['is_spotlight']) ? 1 : 0;
+    if ($pdo !== null) {
+        if ($isSpot === 1) {
+            $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `is_spotlight` = 0 WHERE `campaign_id` != :id")->execute([':id' => $cId]);
+        }
+        $stmt = $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `is_spotlight` = :spot WHERE `campaign_id` = :id");
+        $stmt->execute([':spot' => $isSpot, ':id' => $cId]);
+    }
+    AvinyaCache::invalidateGroup('crowdfunding');
+    AvinyaCache::invalidateGroup('homepage');
+    logActivity('CROWDFUNDING_SPOTLIGHT_TOGGLED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Set campaign {$cId} spotlight status to {$isSpot}", ['campaignId' => $cId, 'is_spotlight' => $isSpot]);
+    echo json_encode(['status' => 'ok', 'message' => "Campaign spotlight status updated."]);
+    exit(0);
+}
+
+// Action: Reorder Crowdfunding Campaigns
+if ($action === 'reorder_crowdfunding_campaigns') {
+    if (!in_array($userRole, ['admin', 'manager'], true)) {
+        http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Forbidden.']); exit(0);
+    }
+    $orders = $data['orders'] ?? [];
+    if (is_array($orders) && $pdo !== null) {
+        $stmt = $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `sort_order` = :ord WHERE `campaign_id` = :id");
+        foreach ($orders as $item) {
+            if (!empty($item['id'])) {
+                $stmt->execute([':ord' => (int)($item['sort_order'] ?? 0), ':id' => $item['id']]);
+            }
+        }
+    }
+    AvinyaCache::invalidateGroup('crowdfunding');
+    AvinyaCache::invalidateGroup('homepage');
+    echo json_encode(['status' => 'ok', 'message' => "Campaign display orders updated."]);
+    exit(0);
+}
+
 // Action: Seed Catalog from Pre-Recorded JSON Data
 if ($action === 'seed_catalog') {
     if ($pdo !== null) {
         $res = seedCatalogFromJSON($pdo, true);
         seedDefaultUsers($pdo, true);
+        $cfSeeded = seedCrowdfundingFromJSON($pdo, true);
+        $res['crowdfunding_seeded'] = $cfSeeded;
         AvinyaCache::invalidateGroup('doctors');
         AvinyaCache::invalidateGroup('tests');
         AvinyaCache::invalidateGroup('gallery');
+        AvinyaCache::invalidateGroup('crowdfunding');
         AvinyaCache::invalidateGroup('homepage');
-        logActivity('CATALOG_SEEDED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Seeded doctors, tests & users catalog tables", $res);
-        echo json_encode(['status' => 'ok', 'message' => "Catalog seeded successfully: {$res['doctors_seeded']} doctors, {$res['tests_seeded']} diagnostic tests.", 'details' => $res]);
+        logActivity('CATALOG_SEEDED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Seeded doctors, tests, crowdfunding & users catalog tables", $res);
+        echo json_encode(['status' => 'ok', 'message' => "Catalog seeded successfully: {$res['doctors_seeded']} doctors, {$res['tests_seeded']} diagnostic tests, {$cfSeeded} crowdfunding campaigns.", 'details' => $res]);
     } else {
         echo json_encode(['status' => 'error', 'message' => "Database connection unavailable."]);
     }
@@ -720,12 +901,15 @@ $activityLogs = [];
 $doctorsCatalog = [];
 $diagnosticTestsCatalog = [];
 $usersCatalog = [];
+$galleriesCatalog = [];
+$crowdfundingCatalog = [];
 
 if ($pdo !== null) {
     try {
         seedDiagnosticProviders($pdo, false);
         seedCatalogFromJSON($pdo, false);
         seedDefaultUsers($pdo, false);
+        seedCrowdfundingFromJSON($pdo, false);
 
         if ($userRole === 'doctor') {
             // Doctors can only view their own doctor bookings
@@ -770,6 +954,7 @@ if ($pdo !== null) {
             $diagnosticTestsCatalog = $pdo->query("SELECT * FROM `diagnostic_tests` ORDER BY `id` ASC")->fetchAll();
             $usersCatalog = $pdo->query("SELECT `id`, `user_id`, `name`, `email`, `phone`, `avatar`, `role`, `doctor_id`, `provider_id`, `status`, `last_login`, `created_at` FROM `users` ORDER BY `id` ASC")->fetchAll();
             $galleriesCatalog = $pdo->query("SELECT * FROM `galleries` WHERE `deleted_at` IS NULL ORDER BY `is_featured` DESC, `sort_order` ASC, `created_at` DESC")->fetchAll();
+            $crowdfundingCatalog = $pdo->query("SELECT * FROM `crowdfunding_campaigns` WHERE `deleted_at` IS NULL ORDER BY `is_spotlight` DESC, `sort_order` ASC, `created_at` DESC")->fetchAll();
         } else {
             http_response_code(403);
             echo json_encode(['status' => 'error', 'message' => 'Role is not authorized for the Admin Panel.']);
@@ -820,6 +1005,7 @@ echo json_encode([
         'totalDiagnosticTests' => count($diagnosticTestsCatalog),
         'totalUsers' => count($usersCatalog),
         'totalGalleries' => count($galleriesCatalog ?? []),
+        'totalCrowdfundingCampaigns' => count($crowdfundingCatalog ?? []),
         'totalDonationsAmount' => $totalDonationsAmount,
         'totalDonationsCount' => $totalDonationsCount,
         'formCounts' => $formCountsByType,
@@ -836,6 +1022,7 @@ echo json_encode([
         'doctorsCatalog' => array_values($doctorsCatalog),
         'diagnosticTestsCatalog' => array_values($diagnosticTestsCatalog),
         'usersCatalog' => array_values($usersCatalog),
-        'galleriesCatalog' => array_values($galleriesCatalog ?? [])
+        'galleriesCatalog' => array_values($galleriesCatalog ?? []),
+        'crowdfundingCatalog' => array_values($crowdfundingCatalog ?? [])
     ]
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
