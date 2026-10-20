@@ -769,9 +769,9 @@
 }
 
 .cf-btn-share {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--cf-border);
-  color: #FFFFFF;
+  background: rgba(37, 211, 102, 0.1);
+  border: 1px solid rgba(37, 211, 102, 0.3);
+  color: #25D366;
   padding: 0.7rem 0.9rem;
   border-radius: var(--cf-radius-sm);
   cursor: pointer;
@@ -782,6 +782,14 @@
   min-width: 42px;
   min-height: 42px;
   box-sizing: border-box;
+}
+
+.cf-btn-share svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  display: block;
+  flex-shrink: 0;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -795,6 +803,7 @@
   background: #25D366;
   border-color: #25D366;
   color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
 }
 }
 
