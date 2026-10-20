@@ -105,7 +105,7 @@ if ($action === 'test_email_dispatch') {
     $adminResult = sendPHPSMTP($adminTo, "[Admin Alert] " . $testSubject, $testHtml);
 
     $success = ($userResult === true || $userResult === 1);
-    
+
     logActivity('ADMIN_EMAIL_TEST', 'admin', $_SESSION['admin_email'] ?? 'admin', "Dispatched SMTP diagnostic audit to {$targetEmail}", ['targetEmail' => $targetEmail, 'userSent' => $userResult, 'adminSent' => $adminResult]);
 
     echo json_encode([
@@ -311,7 +311,7 @@ if ($action === 'save_doctor') {
     $revs = (int) ($doc['reviews_count'] ?? $doc['reviewsCount'] ?? 100);
     $badge = $doc['badge'] ?? 'Medical Specialist';
     $avatar = $doc['avatar'] ?? '/assets/doctors/default-doctor.jpg';
-    
+
     // Process uploaded photoBase64 if provided
     $photoData = $doc['photoBase64'] ?? $doc['image'] ?? null;
     if ($photoData && is_string($photoData) && str_starts_with($photoData, 'data:image/')) {
@@ -334,7 +334,7 @@ if ($action === 'save_doctor') {
             } else { http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Uploaded image is invalid or exceeds 6 MB.']); exit(0); }
         }
     }
-    
+
     $about = $doc['about'] ?? '';
     $expert = is_array($doc['areasOfExpertise'] ?? null) ? $doc['areasOfExpertise'] : (is_string($doc['areas_of_expertise'] ?? null) ? json_decode($doc['areas_of_expertise'], true) : []);
     $langs = is_array($doc['languages'] ?? null) ? $doc['languages'] : (is_string($doc['languages'] ?? null) ? json_decode($doc['languages'], true) : ['English', 'Hindi']);
@@ -362,7 +362,7 @@ if ($action === 'save_doctor') {
             VALUES (:d_id, :name, :spec_id, :spec_name, :qual, :exp, :h_id, :h_name, :loc, :fee, :fee_disp, :types, :rating, :revs, :badge, :avatar, :about, :expert, :langs, :sched, :active)
             ON DUPLICATE KEY UPDATE
             `name` = VALUES(`name`), `speciality_id` = VALUES(`speciality_id`), `speciality_name` = VALUES(`speciality_name`), `qualification` = VALUES(`qualification`), `experience_years` = VALUES(`experience_years`), `hospital_name` = VALUES(`hospital_name`), `location` = VALUES(`location`), `consultation_fee` = VALUES(`consultation_fee`), `fee_display` = VALUES(`fee_display`), `consultation_types` = VALUES(`consultation_types`), `rating` = VALUES(`rating`), `reviews_count` = VALUES(`reviews_count`), `badge` = VALUES(`badge`), `avatar` = VALUES(`avatar`), `about` = VALUES(`about`), `areas_of_expertise` = VALUES(`areas_of_expertise`), `languages` = VALUES(`languages`), `schedule` = VALUES(`schedule`), `is_active` = VALUES(`is_active`)");
-        
+
         $stmt->execute([
             ':d_id' => $docId, ':name' => $name, ':spec_id' => $specId, ':spec_name' => $specName, ':qual' => $qual, ':exp' => $exp,
             ':h_id' => $hId, ':h_name' => $hName, ':loc' => $loc, ':fee' => $fee, ':fee_disp' => $feeDisp,
@@ -426,7 +426,7 @@ if ($action === 'save_test') {
             VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :subsidy, :inc, :prep, :turnaround, :stype, :icon, :home, :centre, :prio, :badge, :active)
             ON DUPLICATE KEY UPDATE
             `name` = VALUES(`name`), `category` = VALUES(`category`), `tagline` = VALUES(`tagline`), `description` = VALUES(`description`), `price` = VALUES(`price`), `original_price` = VALUES(`original_price`), `avinya_subsidy` = VALUES(`avinya_subsidy`), `tests_included` = VALUES(`tests_included`), `preparation` = VALUES(`preparation`), `report_turnaround` = VALUES(`report_turnaround`), `sample_type` = VALUES(`sample_type`), `icon` = VALUES(`icon`), `home_collection` = VALUES(`home_collection`), `centre_visit` = VALUES(`centre_visit`), `is_priority` = VALUES(`is_priority`), `badge` = VALUES(`badge`), `is_active` = VALUES(`is_active`)");
-        
+
         $stmt->execute([
             ':t_id' => $tId, ':name' => $name, ':cat' => $cat, ':tagline' => $tagline, ':descr' => $descr,
             ':price' => $price, ':orig_price' => $origPrice, ':subsidy' => $subsidy, ':inc' => json_encode($included),
@@ -567,7 +567,7 @@ if ($action === 'save_gallery') {
     $gal = $data['gallery'] ?? $data;
     $gId = trim((string) ($gal['id'] ?? $gal['gallery_id'] ?? ''));
     if ($gId === '') $gId = 'gal-' . time() . '-' . rand(100, 999);
-    
+
     $title = trim((string) ($gal['title'] ?? ''));
     $slug = trim((string) ($gal['slug'] ?? ''));
     if ($slug === '' && $title !== '') {
@@ -578,6 +578,8 @@ if ($action === 'save_gallery') {
     $shortDesc = trim((string) ($gal['short_description'] ?? ''));
     $desc = trim((string) ($gal['description'] ?? ''));
     $img = trim((string) ($gal['image'] ?? $gal['photoBase64'] ?? ''));
+    $video = trim((string) ($gal['video'] ?? ''));
+    $mediaType = $video !== '' ? 'video' : 'image';
     $altText = trim((string) ($gal['alt_text'] ?? $title));
     $category = trim((string) ($gal['category'] ?? 'General'));
     $eventDate = trim((string) ($gal['event_date'] ?? ''));
@@ -606,12 +608,12 @@ if ($action === 'save_gallery') {
     }
 
     if ($pdo !== null) {
-        $stmt = $pdo->prepare("INSERT INTO `galleries` 
-            (`gallery_id`, `title`, `slug`, `short_description`, `description`, `image`, `alt_text`, `category`, `event_date`, `location`, `photographer`, `created_by`, `updated_by`, `external_link`, `has_details`, `image_only`, `is_featured`, `is_published`, `sort_order`, `updated_at`) 
-            VALUES (:gid, :title, :slug, :short_desc, :desc, :img, :alt, :cat, :edate, :loc, :photo, :c_by, :u_by, :link, :has_det, :img_only, :is_feat, :is_pub, :sort_ord, NOW())
-            ON DUPLICATE KEY UPDATE 
+        $stmt = $pdo->prepare("INSERT INTO `galleries`
+            (`gallery_id`, `title`, `slug`, `short_description`, `description`, `image`, `video`, `media_type`, `alt_text`, `category`, `event_date`, `location`, `photographer`, `created_by`, `updated_by`, `external_link`, `has_details`, `image_only`, `is_featured`, `is_published`, `sort_order`, `updated_at`)
+            VALUES (:gid, :title, :slug, :short_desc, :desc, :img, :video, :media_type, :alt, :cat, :edate, :loc, :photo, :c_by, :u_by, :link, :has_det, :img_only, :is_feat, :is_pub, :sort_ord, NOW())
+            ON DUPLICATE KEY UPDATE
             `title` = VALUES(`title`), `slug` = VALUES(`slug`), `short_description` = VALUES(`short_description`),
-            `description` = VALUES(`description`), `image` = VALUES(`image`), `alt_text` = VALUES(`alt_text`),
+            `description` = VALUES(`description`), `image` = VALUES(`image`), `video` = VALUES(`video`), `media_type` = VALUES(`media_type`), `alt_text` = VALUES(`alt_text`),
             `category` = VALUES(`category`), `event_date` = VALUES(`event_date`), `location` = VALUES(`location`),
             `photographer` = VALUES(`photographer`), `updated_by` = VALUES(`updated_by`), `external_link` = VALUES(`external_link`),
             `has_details` = VALUES(`has_details`), `image_only` = VALUES(`image_only`), `is_featured` = VALUES(`is_featured`),
@@ -619,7 +621,7 @@ if ($action === 'save_gallery') {
             `deleted_at` = NULL");
         $stmt->execute([
             ':gid' => $gId, ':title' => $title, ':slug' => $slug, ':short_desc' => $shortDesc,
-            ':desc' => $desc, ':img' => $img, ':alt' => $altText, ':cat' => $category,
+            ':desc' => $desc, ':img' => $img, ':video' => $video, ':media_type' => $mediaType, ':alt' => $altText, ':cat' => $category,
             ':edate' => $eventDate, ':loc' => $location, ':photo' => $photographer,
             ':c_by' => $createdBy, ':u_by' => $updatedBy, ':link' => $externalLink,
             ':has_det' => $hasDetails, ':img_only' => $imageOnly, ':is_feat' => $isFeatured,
@@ -735,9 +737,9 @@ if ($pdo !== null) {
         } elseif ($userRole === 'diagnostic_provider') {
             // Diagnostic Providers can only view test bookings assigned to their provider ID
             if (!empty($userProvId)) {
-                $stmt = $pdo->prepare("SELECT b.* FROM `diagnostic_bookings` b 
-                    LEFT JOIN `diagnostic_tests` t ON b.test_id = t.test_id 
-                    WHERE b.provider_id = :prov_id OR t.provider_id = :prov_id 
+                $stmt = $pdo->prepare("SELECT b.* FROM `diagnostic_bookings` b
+                    LEFT JOIN `diagnostic_tests` t ON b.test_id = t.test_id
+                    WHERE b.provider_id = :prov_id OR t.provider_id = :prov_id
                     ORDER BY b.id DESC LIMIT 200");
                 $stmt->execute([':prov_id' => $userProvId]);
                 $diagnosticBookings = $stmt->fetchAll();

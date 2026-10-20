@@ -1,7 +1,7 @@
 <?php
 /**
  * AvinyaCareFoundation - Hostinger MySQL Database Manager & Auto-Migrator
- * 
+ *
  * Provides PDO database connection and automatic table schema migrations.
  * Every time an API request runs, it checks and creates missing tables automatically,
  * requiring zero manual database setup in phpMyAdmin on Git push.
@@ -13,7 +13,7 @@ if (!function_exists('loadEnvDatabaseVars')) {
     function loadEnvDatabaseVars(): void {
         $root = dirname(__DIR__);
         $hostHeader = $_SERVER['HTTP_HOST'] ?? '';
-        
+
         $filesToLoad = [];
         if (str_contains($hostHeader, 'test.avinyacarefoundation.org')) {
             if (is_file($root . '/.env.staging')) $filesToLoad[] = $root . '/.env.staging';
@@ -51,17 +51,17 @@ function getDbEnv(string $key, string $default = ''): string {
 
 function getBearerToken(): string {
     $headers = function_exists('getallheaders') ? (getallheaders() ?: []) : [];
-    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] 
-        ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] 
-        ?? $_SERVER['HTTP_X_AUTHORIZATION'] 
-        ?? $headers['Authorization'] 
-        ?? $headers['authorization'] 
+    $authHeader = $_SERVER['HTTP_AUTHORIZATION']
+        ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
+        ?? $_SERVER['HTTP_X_AUTHORIZATION']
+        ?? $headers['Authorization']
+        ?? $headers['authorization']
         ?? '';
 
     if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
         return trim($matches[1]);
     }
-    
+
     $rawInput = file_get_contents('php://input');
     $data = json_decode((string) $rawInput, true) ?: $_POST;
     return trim((string) ($data['token'] ?? $_GET['token'] ?? $_POST['token'] ?? ''));
@@ -430,6 +430,8 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
             `short_description` VARCHAR(500) DEFAULT NULL,
             `description` TEXT DEFAULT NULL,
             `image` TEXT NOT NULL,
+            `video` TEXT DEFAULT NULL,
+            `media_type` VARCHAR(20) NOT NULL DEFAULT 'image',
             `alt_text` VARCHAR(255) DEFAULT NULL,
             `category` VARCHAR(100) DEFAULT NULL,
             `event_date` VARCHAR(100) DEFAULT NULL,
@@ -477,7 +479,7 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
         if (!in_array('is_anonymous', $colsForms, true)) {
             $pdo->exec("ALTER TABLE `form_submissions` ADD COLUMN `is_anonymous` TINYINT(1) DEFAULT 0 AFTER `payment_status`");
         }
-        
+
         $colsTests = $pdo->query("SHOW COLUMNS FROM `diagnostic_tests`")->fetchAll(PDO::FETCH_COLUMN);
         if (!in_array('sample_type', $colsTests, true)) {
             $pdo->exec("ALTER TABLE `diagnostic_tests` ADD COLUMN `sample_type` VARCHAR(100) DEFAULT 'Blood / Serum Sample' AFTER `report_turnaround`");
@@ -515,6 +517,12 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
         }
 
         $colsGal = $pdo->query("SHOW COLUMNS FROM `galleries`")->fetchAll(PDO::FETCH_COLUMN);
+        if (!in_array('video', $colsGal, true)) {
+            $pdo->exec("ALTER TABLE `galleries` ADD COLUMN `video` TEXT DEFAULT NULL AFTER `image`");
+        }
+        if (!in_array('media_type', $colsGal, true)) {
+            $pdo->exec("ALTER TABLE `galleries` ADD COLUMN `media_type` VARCHAR(20) NOT NULL DEFAULT 'image' AFTER `video`");
+        }
         if (!in_array('created_by', $colsGal, true)) {
             $pdo->exec("ALTER TABLE `galleries` ADD COLUMN `created_by` VARCHAR(255) DEFAULT 'Admin User' AFTER `photographer`");
         }
@@ -549,59 +557,40 @@ function seedGalleryFromJSON(PDO $pdo, bool $force = false): int {
         $seedItems = json_decode((string) file_get_contents($seedFile), true);
         if (!is_array($seedItems) || count($seedItems) === 0) return 0;
 
-        $galCount = (int) $pdo->query("SELECT COUNT(*) FROM `galleries`")->fetchColumn();
-        if ($galCount !== count($seedItems) || $force) {
-            if (!$force) {
-                $validIds = array_map(fn($item) => $item['gallery_id'] ?? $item['id'] ?? '', $seedItems);
-                $validIds = array_filter($validIds);
-                if (!empty($validIds)) {
-                    $inClause = implode(',', array_map(fn($id) => $pdo->quote($id), $validIds));
-                    $pdo->exec("DELETE FROM `galleries` WHERE `gallery_id` NOT IN ({$inClause})");
-                } else {
-                    $pdo->exec("TRUNCATE TABLE `galleries`");
-                }
-            }
-
-            $stmt = $pdo->prepare("INSERT INTO `galleries` 
-                (`gallery_id`, `title`, `slug`, `short_description`, `description`, `image`, `alt_text`, `category`, `event_date`, `location`, `photographer`, `created_by`, `updated_by`, `external_link`, `has_details`, `image_only`, `is_featured`, `is_published`, `sort_order`, `created_at`, `updated_at`) 
-                VALUES (:gid, :title, :slug, :short_desc, :desc, :img, :alt, :cat, :edate, :loc, :photo, :c_by, :u_by, :link, :has_det, :img_only, :is_feat, :is_pub, :sort_ord, :c_at, :u_at)
-                ON DUPLICATE KEY UPDATE 
-                `title` = VALUES(`title`), `slug` = VALUES(`slug`), `short_description` = VALUES(`short_description`),
-                `description` = VALUES(`description`), `image` = VALUES(`image`), `alt_text` = VALUES(`alt_text`),
-                `category` = VALUES(`category`), `event_date` = VALUES(`event_date`), `location` = VALUES(`location`),
-                `photographer` = VALUES(`photographer`), `created_by` = VALUES(`created_by`), `updated_by` = VALUES(`updated_by`),
-                `external_link` = VALUES(`external_link`), `has_details` = VALUES(`has_details`), `image_only` = VALUES(`image_only`),
-                `is_featured` = VALUES(`is_featured`), `is_published` = VALUES(`is_published`), `sort_order` = VALUES(`sort_order`),
-                `updated_at` = VALUES(`updated_at`)");
-            $count = 0;
-            foreach ($seedItems as $item) {
-                $stmt->execute([
-                    ':gid' => $item['gallery_id'] ?? $item['id'] ?? ('gal-' . uniqid()),
-                    ':title' => $item['title'] ?? null,
-                    ':slug' => $item['slug'] ?? null,
-                    ':short_desc' => $item['short_description'] ?? null,
-                    ':desc' => $item['description'] ?? null,
-                    ':img' => $item['image'] ?? '',
-                    ':alt' => $item['alt_text'] ?? null,
-                    ':cat' => $item['category'] ?? null,
-                    ':edate' => $item['event_date'] ?? null,
-                    ':loc' => $item['location'] ?? null,
-                    ':photo' => $item['photographer'] ?? null,
-                    ':c_by' => $item['created_by'] ?? 'Admin User',
-                    ':u_by' => $item['updated_by'] ?? 'Admin User',
-                    ':link' => $item['external_link'] ?? null,
-                    ':has_det' => !empty($item['has_details']) ? 1 : 0,
-                    ':img_only' => !empty($item['image_only']) ? 1 : 0,
-                    ':is_feat' => !empty($item['is_featured']) ? 1 : 0,
-                    ':is_pub' => isset($item['is_published']) ? ($item['is_published'] ? 1 : 0) : 1,
-                    ':sort_ord' => (int) ($item['sort_order'] ?? 0),
-                    ':c_at' => !empty($item['created_at']) ? date('Y-m-d H:i:s', strtotime((string)$item['created_at'])) : date('Y-m-d H:i:s'),
-                    ':u_at' => !empty($item['updated_at']) ? date('Y-m-d H:i:s', strtotime((string)$item['updated_at'])) : date('Y-m-d H:i:s')
-                ]);
-                $count++;
-            }
-            return $count;
+        // Insert missing release records while preserving administrator content.
+        $stmt = $pdo->prepare("INSERT IGNORE INTO `galleries`
+            (`gallery_id`, `title`, `slug`, `short_description`, `description`, `image`, `video`, `media_type`, `alt_text`, `category`, `event_date`, `location`, `photographer`, `created_by`, `updated_by`, `external_link`, `has_details`, `image_only`, `is_featured`, `is_published`, `sort_order`, `created_at`, `updated_at`)
+            VALUES (:gid, :title, :slug, :short_desc, :desc, :img, :video, :media_type, :alt, :cat, :edate, :loc, :photo, :c_by, :u_by, :link, :has_det, :img_only, :is_feat, :is_pub, :sort_ord, :c_at, :u_at)");
+        $count = 0;
+        foreach ($seedItems as $item) {
+            $stmt->execute([
+                ':gid' => $item['gallery_id'] ?? $item['id'] ?? ('gal-' . uniqid()),
+                ':title' => $item['title'] ?? null,
+                ':slug' => $item['slug'] ?? null,
+                ':short_desc' => $item['short_description'] ?? null,
+                ':desc' => $item['description'] ?? null,
+                ':img' => $item['image'] ?? '',
+                ':video' => $item['video'] ?? null,
+                ':media_type' => !empty($item['video']) ? 'video' : 'image',
+                ':alt' => $item['alt_text'] ?? null,
+                ':cat' => $item['category'] ?? null,
+                ':edate' => $item['event_date'] ?? null,
+                ':loc' => $item['location'] ?? null,
+                ':photo' => $item['photographer'] ?? null,
+                ':c_by' => $item['created_by'] ?? 'Admin User',
+                ':u_by' => $item['updated_by'] ?? 'Admin User',
+                ':link' => $item['external_link'] ?? null,
+                ':has_det' => !empty($item['has_details']) ? 1 : 0,
+                ':img_only' => !empty($item['image_only']) ? 1 : 0,
+                ':is_feat' => !empty($item['is_featured']) ? 1 : 0,
+                ':is_pub' => isset($item['is_published']) ? ($item['is_published'] ? 1 : 0) : 1,
+                ':sort_ord' => (int) ($item['sort_order'] ?? 0),
+                ':c_at' => !empty($item['created_at']) ? date('Y-m-d H:i:s', strtotime((string)$item['created_at'])) : date('Y-m-d H:i:s'),
+                ':u_at' => !empty($item['updated_at']) ? date('Y-m-d H:i:s', strtotime((string)$item['updated_at'])) : date('Y-m-d H:i:s')
+            ]);
+            $count += $stmt->rowCount();
         }
+        return $count;
     } catch (Throwable $e) {
         error_log('seedGalleryFromJSON Exception: ' . $e->getMessage());
         throw $e;
@@ -624,7 +613,7 @@ function seedCatalogFromJSON(PDO $pdo, bool $force = false): array {
                     VALUES (:d_id, :name, :spec_id, :spec_name, :qual, :exp, :h_id, :h_name, :loc, :fee, :fee_disp, :types, :rating, :revs, :badge, :avatar, :about, :expert, :langs, :sched, 1)
                     ON DUPLICATE KEY UPDATE
                     `name` = VALUES(`name`), `speciality_name` = VALUES(`speciality_name`), `qualification` = VALUES(`qualification`), `consultation_fee` = VALUES(`consultation_fee`), `avatar` = VALUES(`avatar`), `about` = VALUES(`about`), `schedule` = VALUES(`schedule`)");
-                
+
                 foreach ($docList as $d) {
                     $stmt->execute([
                         ':d_id' => $d['id'] ?? ('doc-' . uniqid()),
@@ -665,7 +654,7 @@ function seedCatalogFromJSON(PDO $pdo, bool $force = false): array {
                     VALUES (:t_id, :name, :cat, :tagline, :descr, :price, :orig_price, :subsidy, :inc, :prep, :turnaround, :stype, :icon, :home, :centre, :prio, :badge, 1)
                     ON DUPLICATE KEY UPDATE
                     `name` = VALUES(`name`), `category` = VALUES(`category`), `price` = VALUES(`price`), `description` = VALUES(`description`), `sample_type` = VALUES(`sample_type`), `icon` = VALUES(`icon`)");
-                
+
                 foreach ($testList as $t) {
                     $stmt->execute([
                         ':t_id' => $t['id'] ?? ('test-' . uniqid()),
@@ -776,7 +765,7 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
                 // Delete existing matching record by email or user_id
                 $del = $pdo->prepare("DELETE FROM `users` WHERE LOWER(`email`) = :e OR `user_id` = :u");
                 $del->execute([':e' => strtolower($email), ':u' => $uid]);
-                
+
                 $stmt = $pdo->prepare("INSERT INTO `users`
                     (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`, `must_change_password`, `created_at`, `updated_at`)
                     VALUES (:u_id, :name, :email, :pass_hash, :role, :doc_id, :prov_id, 'active', 0, NOW(), NOW())");

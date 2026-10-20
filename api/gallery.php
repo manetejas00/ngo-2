@@ -22,12 +22,12 @@ require_once __DIR__ . '/cache-manager.php';
 $pdo = getDatabaseConnection();
 $category = strtolower(trim((string) ($_GET['category'] ?? '')));
 
-$cacheKey = 'gallery:pub:' . md5($category);
+$cacheKey = 'gallery:pub:video-v1:' . md5($category);
 
 $galleries = AvinyaCache::remember($cacheKey, ['gallery', 'homepage'], 1800, function() use ($pdo, $category) {
     if ($pdo === null) return null;
     try {
-        $sql = "SELECT 
+        $sql = "SELECT
                     gallery_id AS id,
                     gallery_id,
                     title,
@@ -35,6 +35,8 @@ $galleries = AvinyaCache::remember($cacheKey, ['gallery', 'homepage'], 1800, fun
                     short_description,
                     description,
                     image,
+                    video,
+                    media_type,
                     alt_text,
                     category,
                     event_date,
@@ -52,7 +54,7 @@ $galleries = AvinyaCache::remember($cacheKey, ['gallery', 'homepage'], 1800, fun
                     updated_at
                 FROM `galleries`
                 WHERE `is_published` = 1 AND `deleted_at` IS NULL";
-        
+
         $params = [];
         if ($category !== '' && $category !== 'all') {
             $sql .= " AND LOWER(`category`) = :cat";
