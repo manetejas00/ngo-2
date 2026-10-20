@@ -10,7 +10,14 @@ header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
-header('Cache-Control: public, max-age=300');
+
+if (isset($_GET['_t'])) {
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+} else {
+    header('Cache-Control: public, max-age=60');
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -23,9 +30,9 @@ require_once __DIR__ . '/cache-manager.php';
 $pdo = getDatabaseConnection();
 $category = strtolower(trim((string) ($_GET['category'] ?? '')));
 
-$cacheKey = 'crowdfunding:pub:v1:' . md5($category);
+$cacheKey = 'crowdfunding:pub:v2:' . md5($category);
 
-$result = AvinyaCache::remember($cacheKey, ['crowdfunding', 'homepage'], 1800, function() use ($pdo, $category) {
+$result = AvinyaCache::remember($cacheKey, ['crowdfunding', 'homepage'], 300, function() use ($pdo, $category) {
     if ($pdo === null) return null;
     try {
         $sql = "SELECT
@@ -91,6 +98,12 @@ $result = AvinyaCache::remember($cacheKey, ['crowdfunding', 'homepage'], 1800, f
             }
         }
 
+        // Automatic Fallback: If no campaign is marked as spotlight, choose the first published one
+        if ($spotlight === null && !empty($formatted)) {
+            $spotlight = $formatted[0];
+            $campaigns = array_slice($formatted, 1);
+        }
+
         return [
             'spotlight' => $spotlight,
             'campaigns' => $campaigns,
@@ -136,6 +149,11 @@ foreach ($items as $item) {
     } else {
         $campaigns[] = $item;
     }
+}
+
+if ($spotlight === null && !empty($items)) {
+    $spotlight = $items[0];
+    $campaigns = array_slice($items, 1);
 }
 
 echo json_encode([

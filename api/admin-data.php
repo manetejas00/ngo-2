@@ -788,6 +788,7 @@ if ($action === 'save_crowdfunding_campaign') {
 
     AvinyaCache::invalidateGroup('crowdfunding');
     AvinyaCache::invalidateGroup('homepage');
+    AvinyaCache::clearAll();
     logActivity('CROWDFUNDING_SAVED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Saved crowdfunding campaign '{$title}' ({$cId})", ['campaignId' => $cId, 'title' => $title]);
     echo json_encode(['status' => 'ok', 'message' => "Campaign saved successfully.", 'campaignId' => $cId, 'imageUrl' => $img]);
     exit(0);
@@ -803,11 +804,12 @@ if ($action === 'delete_crowdfunding_campaign') {
         http_response_code(400); echo json_encode(['status' => 'error', 'message' => 'Campaign ID is required.']); exit(0);
     }
     if ($pdo !== null) {
-        $stmt = $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `deleted_at` = NOW() WHERE `campaign_id` = :id");
-        $stmt->execute([':id' => $cId]);
+        $stmt = $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `deleted_at` = NOW() WHERE `campaign_id` = :id OR `id` = :id2");
+        $stmt->execute([':id' => $cId, ':id2' => $cId]);
     }
     AvinyaCache::invalidateGroup('crowdfunding');
     AvinyaCache::invalidateGroup('homepage');
+    AvinyaCache::clearAll();
     logActivity('CROWDFUNDING_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Deleted crowdfunding campaign {$cId}", ['campaignId' => $cId]);
     echo json_encode(['status' => 'ok', 'message' => "Campaign {$cId} deleted successfully."]);
     exit(0);
@@ -821,11 +823,12 @@ if ($action === 'toggle_crowdfunding_publish') {
     $cId = trim((string) ($data['id'] ?? $data['campaignId'] ?? ''));
     $isPub = !empty($data['is_published']) ? 1 : 0;
     if ($pdo !== null) {
-        $stmt = $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `is_published` = :pub WHERE `campaign_id` = :id");
-        $stmt->execute([':pub' => $isPub, ':id' => $cId]);
+        $stmt = $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `is_published` = :pub WHERE `campaign_id` = :id OR `id` = :id2");
+        $stmt->execute([':pub' => $isPub, ':id' => $cId, ':id2' => $cId]);
     }
     AvinyaCache::invalidateGroup('crowdfunding');
     AvinyaCache::invalidateGroup('homepage');
+    AvinyaCache::clearAll();
     logActivity('CROWDFUNDING_PUBLISH_TOGGLED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Set campaign {$cId} published status to {$isPub}", ['campaignId' => $cId, 'is_published' => $isPub]);
     echo json_encode(['status' => 'ok', 'message' => "Campaign publish status updated."]);
     exit(0);
@@ -840,13 +843,14 @@ if ($action === 'toggle_crowdfunding_spotlight') {
     $isSpot = !empty($data['is_spotlight']) ? 1 : 0;
     if ($pdo !== null) {
         if ($isSpot === 1) {
-            $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `is_spotlight` = 0 WHERE `campaign_id` != :id")->execute([':id' => $cId]);
+            $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `is_spotlight` = 0 WHERE `campaign_id` != :id AND `id` != :id2")->execute([':id' => $cId, ':id2' => $cId]);
         }
-        $stmt = $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `is_spotlight` = :spot WHERE `campaign_id` = :id");
-        $stmt->execute([':spot' => $isSpot, ':id' => $cId]);
+        $stmt = $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `is_spotlight` = :spot WHERE `campaign_id` = :id OR `id` = :id2");
+        $stmt->execute([':spot' => $isSpot, ':id' => $cId, ':id2' => $cId]);
     }
     AvinyaCache::invalidateGroup('crowdfunding');
     AvinyaCache::invalidateGroup('homepage');
+    AvinyaCache::clearAll();
     logActivity('CROWDFUNDING_SPOTLIGHT_TOGGLED', 'admin', $_SESSION['admin_email'] ?? 'admin@gmail.com', "Set campaign {$cId} spotlight status to {$isSpot}", ['campaignId' => $cId, 'is_spotlight' => $isSpot]);
     echo json_encode(['status' => 'ok', 'message' => "Campaign spotlight status updated."]);
     exit(0);
@@ -859,15 +863,16 @@ if ($action === 'reorder_crowdfunding_campaigns') {
     }
     $orders = $data['orders'] ?? [];
     if (is_array($orders) && $pdo !== null) {
-        $stmt = $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `sort_order` = :ord WHERE `campaign_id` = :id");
+        $stmt = $pdo->prepare("UPDATE `crowdfunding_campaigns` SET `sort_order` = :ord WHERE `campaign_id` = :id OR `id` = :id2");
         foreach ($orders as $item) {
             if (!empty($item['id'])) {
-                $stmt->execute([':ord' => (int)($item['sort_order'] ?? 0), ':id' => $item['id']]);
+                $stmt->execute([':ord' => (int)($item['sort_order'] ?? 0), ':id' => $item['id'], ':id2' => $item['id']]);
             }
         }
     }
     AvinyaCache::invalidateGroup('crowdfunding');
     AvinyaCache::invalidateGroup('homepage');
+    AvinyaCache::clearAll();
     echo json_encode(['status' => 'ok', 'message' => "Campaign display orders updated."]);
     exit(0);
 }
