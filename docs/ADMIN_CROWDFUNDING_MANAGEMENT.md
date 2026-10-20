@@ -65,15 +65,15 @@ CREATE TABLE IF NOT EXISTS `crowdfunding_campaigns` (
    - **Spotlight Flag**: `1` (Renders in top Urgent Spotlight Hero section)
 
 2. **Hospital Construction**:
-   - **Title**: `Construction of 50-Bed Eye Care Hospital`
+   - **Title**: `Construction of 100-Bed Multi-Speciality Hospital`
    - **Location**: `Virar East, Vasai-Virar`
-   - **Hospital**: `Virar Eye Care Facility`
+   - **Hospital**: `Avinya Multi-Speciality Hospital, Virar East`
    - **Goal**: ₹50,00,000 | **Tag**: 80G Tax Saver
 
-3. **Medical Equipment & Wards**:
-   - **Title**: `Equipping New NGO Pediatric & Neonatal Ward`
-   - **Location**: `Vasai West`
-   - **Hospital**: `Avinya Charitable Hospital, Vasai West`
+3. **Children Care & Wards**:
+   - **Title**: `Equipping New Children Care Hospital & NICU`
+   - **Location**: `Vasai West, Vasai-Virar`
+   - **Hospital**: `Avinya Children Care Hospital, Vasai West`
    - **Goal**: ₹15,00,000 | **Tag**: 80G Tax Saver
 
 4. **Specialized Dialysis Center**:
