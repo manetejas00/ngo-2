@@ -1067,6 +1067,11 @@ class HealthcarePlatform {
   // -------------------------------------------------------------
   // Diagnostic Tests Section & Booking Flow
   // -------------------------------------------------------------
+  handleTestSearchInput(q) {
+    this.testSearchQuery = (q || '').toLowerCase().trim();
+    this.renderDiagnosticTests(this.selectedTestCategory, false);
+  }
+
   renderDiagnosticTests(category = 'all', keepShowAll = false) {
     const grid = document.getElementById('hc-test-grid');
     if (!grid) return;
@@ -1078,6 +1083,17 @@ class HealthcarePlatform {
     }
 
     let list = [...this.testsCache];
+    if (this.testSearchQuery) {
+      const q = this.testSearchQuery;
+      list = list.filter(t => {
+        const nameMatch = (t.name || '').toLowerCase().includes(q);
+        const descMatch = (t.description || '').toLowerCase().includes(q);
+        const catMatch = (t.category || '').toLowerCase().includes(q);
+        const incMatch = Array.isArray(t.testsIncluded) && t.testsIncluded.some(item => (item || '').toLowerCase().includes(q));
+        return nameMatch || descMatch || catMatch || incMatch;
+      });
+    }
+
     if (category !== 'all') {
       list = list.filter(t => t.category.toLowerCase() === category.toLowerCase());
     }
@@ -1088,7 +1104,7 @@ class HealthcarePlatform {
       if (viewMoreContainer) {
         viewMoreContainer.style.display = 'none';
       }
-      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; background: var(--hc-surface); border-radius: var(--hc-radius-lg); border: 1px dashed var(--hc-border); color: var(--hc-text-muted);">No tests found in this category.</div>`;
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; background: var(--hc-surface); border-radius: var(--hc-radius-lg); border: 1px dashed var(--hc-border); color: var(--hc-text-muted);">No tests matching "${this.testSearchQuery ? this.escapeHtml(this.testSearchQuery) : category}" found. Try another search or filter.</div>`;
       return;
     }
 
