@@ -10,8 +10,9 @@
     "build": "node scripts/preflight.mjs",
     "check": "node scripts/preflight.mjs",
     "test": "node scripts/preflight.mjs",
-    "smoke:staging": "node scripts/live-smoke.mjs https://test.avinyacarefoundation.org",
-    "smoke:production": "node scripts/live-smoke.mjs https://avinyacarefoundation.org"
+    "deploy:live": "node scripts/deploy-remote.mjs",
+    "smoke:staging": "node --dns-result-order=ipv4first scripts/live-smoke.mjs https://test.avinyacarefoundation.org",
+    "smoke:production": "node --dns-result-order=ipv4first scripts/live-smoke.mjs https://avinyacarefoundation.org"
   },
   "keywords": [
     "ngo",
