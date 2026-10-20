@@ -7,10 +7,12 @@ if (!/^https:\/\//.test(base)) {
 const checks = [
   { path: '/', type: 'text', contains: 'AvinyaCareFoundation' },
   { path: '/doctors.html', type: 'text', contains: 'Doctors & Diagnostic Tests' },
+  { path: '/crowdfunding.html', type: 'text', contains: 'NGO Healthcare Infrastructure' },
   { path: '/admin.html', type: 'text', contains: 'Admin Dashboard' },
   { path: '/assets/logo.png', type: 'asset' },
   { path: '/api/healthcare/doctors.php', type: 'json', array: 'doctors' },
   { path: '/api/healthcare/tests.php', type: 'json', array: 'tests' },
+  { path: '/api/crowdfunding.php', type: 'json', array: 'campaigns' },
   { path: '/api/news.php', type: 'json', array: 'articles' },
 ];
 
