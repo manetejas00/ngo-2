@@ -53,8 +53,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Inject both components concurrently
   const [navbarInjected, footerInjected] = await Promise.all([
-    injectComponent('REUSABLE_NAVBAR', '/components/navbar.html'),
-    injectComponent('REUSABLE_FOOTER', '/components/footer.html')
+    injectComponent('REUSABLE_NAVBAR', '/components/navbar'),
+    injectComponent('REUSABLE_FOOTER', '/components/footer')
   ]);
 
   // Re-initialize GSAP Navbar and Radial FAB Menu if they were just injected

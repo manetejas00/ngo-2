@@ -3715,6 +3715,16 @@ body.mobile-nav-open {
   }
 
   .nav-actions > .btn-primary {
+    display: inline-flex;
+    height: 34px;
+    min-height: 34px;
+    max-height: 34px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.78rem;
+    gap: 0.25rem;
+  }
+
+  .nav-actions > .btn-primary .arrow {
     display: none;
   }
 
