@@ -46,6 +46,7 @@ const javaScriptFiles = [
     ...tracked.map((relative) => resolve(root, relative)),
     ...collectFiles(resolve(root, 'js'), new Set(['.js', '.mjs', '.cjs'])),
     ...collectFiles(resolve(root, 'services'), new Set(['.js', '.mjs', '.cjs'])),
+    ...collectFiles(resolve(root, 'config'), new Set(['.js', '.mjs', '.cjs'])),
     ...collectFiles(resolve(root, 'scripts'), new Set(['.js', '.mjs', '.cjs'])),
   ]),
 ];

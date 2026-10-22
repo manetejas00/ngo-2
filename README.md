@@ -85,8 +85,11 @@ Run the project checks before deploying:
 npm test
 ```
 
-This validates required project files, JavaScript syntax, and PHP syntax when
-PHP is available.
+This validates required project files, JavaScript syntax, PHP syntax when
+PHP is available, and the Node environment configuration, static access policy,
+and gallery data service behavior. The other
+integration and browser tests in `test/` have their own prerequisites and are
+not all run by this command.
 
 ## Deployment
 
@@ -101,6 +104,7 @@ environment secrets on the host.
 api/             PHP API endpoints and database helpers
 assets/          Images, video, logos, and other media
 components/      Modular HTML components (navbar, footer)
+config/          Node environment loading and static content types
 css/             Website styling
 docs/            Project documentation and setup guides
 js/              Browser-side functionality

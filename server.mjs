@@ -11,6 +11,9 @@ import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
 import { join, extname, dirname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import https from 'node:https';
+import { loadEnvironment } from './config/environment.mjs';
+import { MIME_TYPES } from './config/mime-types.mjs';
+import { isPrivateStaticPath } from './services/http/static-access.mjs';
 import { generateFormEmails } from './services/ai/emailGenerator.mjs';
 import { renderUserEmail, renderAdminEmail } from './services/email/emailTemplate.mjs';
 import { sendFormEmails } from './services/email/emailService.mjs';
@@ -80,42 +83,7 @@ const loginAttempts = new Map();
 
 // Use the verified production mail identity for the normal production start,
 // while preserving the separate test configuration for local development.
-try {
-  const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env';
-  const envPath = join(__dirname, envFile);
-  const envContent = await readFile(envPath, 'utf-8');
-  for (const line of envContent.split('\n')) {
-    const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
-      const [key, ...vals] = trimmed.split('=');
-      const val = vals.join('=').trim().replace(/^["']|["']$/g, '');
-      if (key && !process.env[key.trim()]) {
-        process.env[key.trim()] = val;
-      }
-    }
-  }
-} catch (e) {
-  // .env file optional
-}
-
-const MIME_TYPES = {
-  '.html': 'text/html; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.js': 'application/javascript; charset=utf-8',
-  '.mjs': 'application/javascript; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.txt': 'text/plain; charset=utf-8',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.webp': 'image/webp',
-  '.png': 'image/png',
-  '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon',
-  '.mp4': 'video/mp4',
-  '.webm': 'video/webm',
-  '.woff2': 'font/woff2',
-  '.webmanifest': 'application/manifest+json; charset=utf-8'
-};
+await loadEnvironment(__dirname);
 
 // In-Memory News Cache initialized from persistent storage
 let newsCache = {
@@ -785,7 +753,12 @@ const server = createServer(async (req, res) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
-  const urlPath = req.url.split('?')[0];
+  let urlPath = req.url.split('?')[0];
+
+  // Uniform API endpoint normalization: strip .php suffix so endpoints work identically across Node and Hostinger
+  if (urlPath.startsWith('/api/') && urlPath.endsWith('.php')) {
+    urlPath = urlPath.slice(0, -4);
+  }
 
   // Redirect direct requests for .html files to clean URLs
   if (urlPath.endsWith('.html')) {
@@ -1512,6 +1485,33 @@ const server = createServer(async (req, res) => {
     } catch (err) {
       console.error('Gallery fetch failure:', err);
       return sendJson(500, { status: 'error', message: 'Unable to fetch gallery records.' });
+    }
+  }
+
+  // --- PUBLIC CROWDFUNDING ENDPOINT: /api/crowdfunding or /api/crowdfunding.php ---
+  if (req.method === 'GET' && (urlPath === '/api/crowdfunding' || urlPath === '/api/crowdfunding.php')) {
+    try {
+      const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      const category = (parsedUrl.searchParams.get('category') || '').toLowerCase().trim();
+      const seedFile = join(__dirname, 'data', 'seed_crowdfunding.json');
+      const raw = JSON.parse(await readFile(seedFile, 'utf-8'));
+      let items = raw.filter(item => item.is_published !== false);
+      if (category && category !== 'all') {
+        items = items.filter(item => (item.category || '').toLowerCase() === category);
+      }
+      const spotlight = items.find(i => i.is_spotlight) || items[0] || null;
+      const campaigns = items.filter(i => i !== spotlight);
+
+      return sendJson(200, {
+        status: 'ok',
+        count: items.length,
+        spotlight,
+        campaigns,
+        data: items
+      });
+    } catch (err) {
+      console.error('Crowdfunding fetch failure:', err);
+      return sendJson(500, { status: 'error', message: 'Unable to fetch crowdfunding campaigns.' });
     }
   }
 
@@ -2381,20 +2381,16 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
 
   if (urlPath === '/sitemap.xml') {
     try {
-      const doctors = await getDoctors();
       const tests = await getDiagnosticTests();
       let urls = '';
       
-      const staticPages = ['', '/gallery', '/doctors', '/crowdfunding'];
+      const staticPages = ['', '/gallery', '/diagnostic-tests', '/crowdfunding'];
       for (const page of staticPages) {
         urls += `  <url>\n    <loc>${BASE_URL}${page}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${page === '' ? '1.0' : '0.8'}</priority>\n  </url>\n`;
       }
       
-      for (const doc of doctors) {
-        urls += `  <url>\n    <loc>${BASE_URL}/doctor/${doc.id}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
-      }
       for (const t of tests) {
-        urls += `  <url>\n    <loc>${BASE_URL}/test/${t.id}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+        urls += `  <url>\n    <loc>${BASE_URL}/test/${t.id}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
       }
 
       const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}</urlset>`;
@@ -2507,8 +2503,12 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
     return res.end(JSON.stringify({ status: 'error', message: 'Invalid request path.' }));
   }
   const normalizedPath = targetFile.replace(/\/+$/, '').toLowerCase();
-  // TEMPORARY: Doctors module uses shared Coming Soon page until launch.
-  if (normalizedPath === '/doctors' || normalizedPath === 'doctors') targetFile = '/coming-soon.html';
+  // Healthcare Services & Diagnostic Tests module
+  if (normalizedPath === '/diagnostic-tests' || normalizedPath === 'diagnostic-tests' ||
+      normalizedPath === '/diagnostics' || normalizedPath === 'diagnostics' ||
+      normalizedPath === '/doctors' || normalizedPath === 'doctors') {
+    targetFile = '/doctors.html';
+  }
   if (normalizedPath === '/crowdfunding' || normalizedPath === 'crowdfunding') targetFile = '/crowdfunding.html';
   if (normalizedPath === '/admin' || normalizedPath === 'admin') targetFile = '/admin.html';
   if (normalizedPath === '/gallery' || normalizedPath === 'gallery') targetFile = '/gallery.html';
@@ -2524,8 +2524,7 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
   }
 
   // Security Shield: Block direct static serving of PHP script source code, .env files, and storage directories
-  const lowerPath = targetFile.toLowerCase();
-  if (lowerPath.endsWith('.php') || lowerPath.includes('.env') || lowerPath.includes('/.git') || lowerPath.includes('/storage/') || lowerPath.includes('/cache/')) {
+  if (isPrivateStaticPath(targetFile)) {
     res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
     return res.end(JSON.stringify({ status: 'error', message: 'Forbidden: Direct access to backend scripts or internal files is prohibited.' }));
   }

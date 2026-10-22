@@ -30,7 +30,7 @@
 
   async function initGalleryApp() {
     showSkeleton(true);
-    await fetchGalleryData();
+    galleryItems = await window.AvinyaGalleryService.load();
     showSkeleton(false);
 
     if (!galleryItems || galleryItems.length === 0) {
@@ -64,63 +64,6 @@
       } else {
         emptyState.classList.add('hidden');
       }
-    }
-  }
-
-  // 1. Fetch Published Gallery Items from API
-  async function fetchGalleryData() {
-    let apiSuccess = false;
-    try {
-      const res = await fetch('/api/gallery');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
-      if (json.status === 'ok' && Array.isArray(json.data)) {
-        galleryItems = json.data;
-        apiSuccess = true;
-      } else if (Array.isArray(json)) {
-        galleryItems = json;
-        apiSuccess = true;
-      } else {
-        throw new Error('Invalid API response');
-      }
-    } catch (err) {
-      console.warn('[Gallery API Notice] Primary endpoint unreachable, checking fallback...', err.message);
-      try {
-        const fallbackRes = await fetch('/api/gallery.php');
-        const fallbackJson = await fallbackRes.json();
-        if (fallbackJson.status === 'ok' && Array.isArray(fallbackJson.data)) {
-          galleryItems = fallbackJson.data;
-          apiSuccess = true;
-        }
-      } catch (e) {
-        console.error('[Gallery API Error] Failed to load gallery dataset:', e);
-      }
-    }
-
-    if (!apiSuccess && !galleryItems) {
-      galleryItems = [];
-    }
-
-    // Ensure items are sorted latest first by updated_at or created_at
-    // Normalize display fields from existing records without touching slugs,
-    // asset URLs, IDs, or historical database records.
-    galleryItems.forEach(item => {
-      ['title', 'short_description', 'description', 'alt_text', 'photographer'].forEach(field => {
-        if (typeof item[field] === 'string') {
-          item[field] = item[field].replace(/\bAvinya\s*Care(?:\s*(?:Foundation|Founation|Foundatation))?\b(?![.@/_-])/gi, 'AvinyaCareFoundation');
-        }
-      });
-    });
-    if (galleryItems && galleryItems.length > 0) {
-      galleryItems.sort((a, b) => {
-        if (Boolean(a.is_featured) !== Boolean(b.is_featured)) return a.is_featured ? -1 : 1;
-        const orderA = Number.isFinite(Number(a.sort_order)) ? Number(a.sort_order) : 0;
-        const orderB = Number.isFinite(Number(b.sort_order)) ? Number(b.sort_order) : 0;
-        if (orderA !== orderB) return orderA - orderB;
-        const dA = new Date(a.updated_at || a.created_at || a.event_date || 0);
-        const dB = new Date(b.updated_at || b.created_at || b.event_date || 0);
-        return dB - dA;
-      });
     }
   }
 

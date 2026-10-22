@@ -9,11 +9,11 @@
   <meta name="keywords" content="subsidized diagnostic tests, cancer screening packages, blood tests Mumbai, doorstep blood sample collection, health checkup Vasai Virar, full body checkup, AvinyaCareFoundation diagnostics">
 
   <!-- Canonical URL -->
-  <link rel="canonical" href="https://www.avinyacarefoundation.org/doctors">
+  <link rel="canonical" href="https://www.avinyacarefoundation.org/diagnostic-tests">
 
   <!-- Open Graph / Meta -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://www.avinyacarefoundation.org/doctors">
+  <meta property="og:url" content="https://www.avinyacarefoundation.org/diagnostic-tests">
   <meta property="og:site_name" content="AvinyaCareFoundation">
   <meta property="og:title" content="Diagnostic Tests &amp; Screening Packages | AvinyaCareFoundation">
   <meta property="og:description" content="Access subsidized diagnostic tests, comprehensive cancer screening packages, and full-body health checkups with free doorstep sample collection through AvinyaCareFoundation.">
@@ -21,7 +21,7 @@
 
   <!-- Twitter / X Cards -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://www.avinyacarefoundation.org/doctors">
+  <meta name="twitter:url" content="https://www.avinyacarefoundation.org/diagnostic-tests">
   <meta name="twitter:title" content="Diagnostic Tests &amp; Screening Packages | AvinyaCareFoundation">
   <meta name="twitter:description" content="Access subsidized diagnostic tests, comprehensive cancer screening packages, and full-body health checkups with free doorstep sample collection through AvinyaCareFoundation.">
   <meta name="twitter:image" content="https://www.avinyacarefoundation.org/assets/logo.png">
@@ -32,7 +32,7 @@
     "@context": "https://schema.org",
     "@type": "MedicalClinic",
     "name": "AvinyaCareFoundation Diagnostic Services",
-    "url": "https://www.avinyacarefoundation.org/doctors",
+    "url": "https://www.avinyacarefoundation.org/diagnostic-tests",
     "image": "https://www.avinyacarefoundation.org/assets/logo.png",
     "description": "Access certified diagnostic health tests, oncology screening packages, and subsidized laboratory tests."
   }
@@ -591,6 +591,132 @@
           <span>Close Compliance Details</span>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Donate Modal -->
+  <div id="donate-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">MAKE A DIFFERENCE</div>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Sponsor Care &amp; Early Detection</h3>
+      <p style="color: var(--muted); font-size: 0.95rem;">Choose an amount to support health awareness, screening drives, and patient care across the region.</p>
+
+      <div class="donation-toggle">
+        <button id="toggle-one-time" class="toggle-option active" onclick="window.AvinyaModals.setDonationType('one-time')">One-Time</button>
+        <button id="toggle-monthly" class="toggle-option" onclick="window.AvinyaModals.setDonationType('monthly')">Monthly</button>
+      </div>
+
+      <div class="amount-grid">
+        <button type="button" class="amount-btn" onclick="window.AvinyaModals.selectAmount(500)">₹500</button>
+        <button type="button" class="amount-btn active" onclick="window.AvinyaModals.selectAmount(1000)">₹1,000</button>
+        <button type="button" class="amount-btn" onclick="window.AvinyaModals.selectAmount(2500)">₹2,500</button>
+        <button type="button" class="amount-btn" onclick="window.AvinyaModals.selectAmount(5000)">₹5,000</button>
+        <button type="button" class="amount-btn" onclick="window.AvinyaModals.selectAmount(10000)">₹10k</button>
+        <button type="button" class="amount-btn" id="custom-amount-btn" onclick="window.AvinyaModals.selectCustom()">Custom</button>
+      </div>
+
+      <div id="custom-amount-container" style="display: none; margin-bottom: 1.25rem;">
+        <div style="position: relative; display: flex; align-items: center;">
+          <span style="position: absolute; left: 1rem; font-weight: 700; color: var(--gray-900); font-size: 1.05rem;">₹</span>
+          <input type="number" id="custom-amount-input" min="100" step="50" placeholder="Enter amount (₹)" oninput="window.AvinyaModals.handleCustomAmountInput(this.value)" style="padding: 0.8rem 1rem 0.8rem 2.2rem; border-radius: 8px; border: 1.5px solid var(--brand); width: 100%; font-size: 1rem; font-weight: 600; outline: none; box-sizing: border-box; color: var(--gray-900);">
+        </div>
+      </div>
+
+      <div id="impact-calculator-statement" class="impact-calculator-box">
+        ✨ <strong>Impact:</strong> ₹1,000 provides diagnostic screening guidance and local travel assistance for 2 individuals.
+      </div>
+
+      <form onsubmit="window.AvinyaModals.submitDonation(event)">
+        <div style="margin-bottom: 1rem;">
+          <select id="donor-category" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; font-size: 0.95rem; background-color: #fff;">
+            <option value="">Select Project to Fund *</option>
+            <option value="Mobile Medical Ambulance">🚑 Mobile Medical Ambulance</option>
+            <option value="Multi-Speciality Hospital">🏗️ Virar Multi-Speciality Hospital Construction</option>
+            <option value="Children Care Hospital">👶 Vasai Children Care Hospital &amp; NICU</option>
+            <option value="Free Dialysis Center">💉 Free Dialysis Center</option>
+            <option value="Mega Health Camp">🏥 Mega Health &amp; Diagnostics Camp</option>
+            <option value="General Fund">🌟 General NGO Fund (Where needed most)</option>
+          </select>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <input type="text" id="donor-name" placeholder="Full Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
+          <input type="email" id="donor-email" placeholder="Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <input type="tel" id="donor-phone" placeholder="Phone (For 80G Receipt) *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
+          <input type="text" id="donor-pan" placeholder="PAN Card (Optional 80G Tax)" style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
+        </div>
+        <label class="anonymous-donation-option">
+          <input type="checkbox" id="donor-anonymous">
+          <span class="anonymous-donation-icon" aria-hidden="true">◉</span>
+          <span><strong>Donate anonymously</strong><small>Your name stays private on public donor updates.</small></span>
+        </label>
+
+        <div style="display: flex; align-items: center; gap: 1rem; background: #f8f8f8; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--gray-200);">
+          <img src="assets/docs/WhatsApp Image 2026-09-12 at 8.42.58 PM.jpeg" alt="80G Certificate" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; filter: grayscale(100%) contrast(1.2);">
+          <p style="margin: 0; font-size: 0.85rem; color: var(--muted); line-height: 1.4;">
+            <strong style="color: var(--gray-900);">100% Secure &amp; Tax Exempt</strong><br>
+            Donations are eligible for tax deduction under Section 80G of the Indian IT Act.
+          </p>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
+          <span>Proceed to Payment (UPI / Cards / NetBanking) →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confidential Support Modal -->
+  <div id="support-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">CONFIDENTIAL HELPLINE</div>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Request Patient Navigation Support</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Our care navigators provide free, confidential support for patients, caregivers, and families.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Support Request')">
+        <input type="text" placeholder="Patient or Caregiver Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="tel" placeholder="Phone Number (For Call / WhatsApp) *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <textarea placeholder="How can our care navigators support you? (e.g., screening guidance, hospital navigation, second opinion)" rows="3" style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.5rem;"></textarea>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Request Confidential Callback →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Volunteer Modal -->
+  <div id="volunteer-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <div class="modal-header-brand">
+        <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">JOIN OUR COMMUNITY</div>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Volunteer Application</h3>
+      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Join our care navigation team or assist in community screening drives.</p>
+      <form onsubmit="window.AvinyaModals.submitForm(event, 'Volunteer Application')">
+        <input type="text" placeholder="Full Name *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="email" placeholder="Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <input type="tel" placeholder="Phone Number *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1rem;">
+        <select required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; margin-bottom: 1.5rem;">
+          <option value="">Select Volunteer Role</option>
+          <option value="Care Companion">Care Companion / Patient Helper</option>
+          <option value="Medical Specialist">Medical Specialist / Doctor</option>
+          <option value="Community Organizer">Community Screening Organizer</option>
+          <option value="Event Helper">Event &amp; Logistics Helper</option>
+        </select>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>Submit Volunteer Profile →</span>
+        </button>
+      </form>
     </div>
   </div>
   </div>

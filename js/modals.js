@@ -50,9 +50,6 @@ class ModalManager {
 
   openModal(modalId) {
     const requestedModalId = modalId;
-    if (modalId === 'donate-modal') {
-      modalId = 'coming-soon-modal';
-    }
 
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -65,6 +62,13 @@ class ModalManager {
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
       this.activeModal = modal;
+      this.previousActiveElement = document.activeElement;
+
+      // Focus first interactive element for WCAG 2.2 AA accessibility
+      requestAnimationFrame(() => {
+        const focusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (focusable) focusable.focus();
+      });
 
       if (requestedModalId === 'donate-modal' && window.AvinyaAnalytics) {
         window.AvinyaAnalytics.event('donation_started');
@@ -95,6 +99,11 @@ class ModalManager {
 
     document.body.style.overflow = '';
     this.activeModal = null;
+
+    if (this.previousActiveElement && typeof this.previousActiveElement.focus === 'function') {
+      try { this.previousActiveElement.focus(); } catch (err) {}
+      this.previousActiveElement = null;
+    }
 
     // A donation confirmation can stay open while the visitor reads it. Refresh
     // campaign progress when they close it, rather than changing the page behind it.
@@ -353,7 +362,13 @@ class ModalManager {
 
   // --- DONATION MODAL ---
   openDonateModal(defaultAmount = 1000, category = null) {
-    this.openModal('coming-soon-modal');
+    this.selectedAmount = defaultAmount || 1000;
+    this.openModal('donate-modal');
+    if (category) {
+      const select = document.getElementById('donor-category');
+      if (select) select.value = category;
+    }
+    this.selectAmount(this.selectedAmount);
   }
 
   // --- VOLUNTEER MODAL ---

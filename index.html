@@ -34,24 +34,44 @@
   {
     "@context": "https://schema.org",
     "@type": "NGO",
-    "name": "AvinyaCareFoundation",
+    "name": "Avinya Care Foundation",
+    "alternateName": "AvinyaCareFoundation",
     "url": "https://www.avinyacarefoundation.org/",
     "logo": "https://www.avinyacarefoundation.org/assets/logo.png",
-    "description": "Humanitarian organization dedicated to health awareness, early screening drives, compassionate patient support, and caregiver navigation across Mumbai-Virar.",
+    "image": "https://www.avinyacarefoundation.org/assets/logo.png",
+    "description": "Humanitarian healthcare nonprofit organization providing subsidized doctor consultations, early cancer screening biomarker panels, dialysis assistance, and medical crowdfunding across Vasai-Virar and Mumbai.",
+    "telephone": "+91-7447441116",
+    "email": "info@avinyacarefoundation.com",
+    "taxID": "80G / 12A Registered",
     "contactPoint": {
       "@type": "ContactPoint",
-      "contactType": "customer support"
+      "telephone": "+91-7447441116",
+      "contactType": "emergency helpline",
+      "email": "info@avinyacarefoundation.com",
+      "availableLanguage": ["English", "Hindi", "Marathi"],
+      "areaServed": ["Vasai-Virar", "Mumbai", "Palghar", "Maharashtra", "India"]
     },
-    "location": {
-      "@type": "Place",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "210, Global Plaza, Global City",
-        "addressLocality": "Virar West",
-        "postalCode": "401305",
-        "addressRegion": "Maharashtra",
-        "addressCountry": "IN"
+    "areaServed": [
+      {
+        "@type": "AdministrativeArea",
+        "name": "Vasai-Virar"
+      },
+      {
+        "@type": "City",
+        "name": "Mumbai"
+      },
+      {
+        "@type": "State",
+        "name": "Maharashtra"
       }
+    ],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "210, Global Plaza, Global City",
+      "addressLocality": "Virar West",
+      "postalCode": "401305",
+      "addressRegion": "Maharashtra",
+      "addressCountry": "IN"
     }
   }
   </script>
@@ -138,13 +158,16 @@
           </div>
           <h1 class="hero-title">No one should face a health crisis alone.</h1>
           <div class="hero-cta-group">
-            <button class="btn-primary" onclick="window.AvinyaModals.openSupportModal()">
-              <span>Get Support</span>
+            <button type="button" class="btn-primary" onclick="window.AvinyaModals.openSupportModal()" aria-label="Get Medical Support">
+              <span>Get Medical Help</span>
               <span class="arrow">→</span>
             </button>
-            <a href="#hero-transition" class="btn-secondary btn-secondary-dark">
-              <span>Our Mission</span>
+            <a href="/diagnostic-tests" class="btn-secondary btn-secondary-dark" aria-label="Diagnostic Tests &amp; Screening Packages">
+              <span>Diagnostic Tests</span>
             </a>
+            <button type="button" class="btn-secondary btn-secondary-dark" onclick="window.AvinyaModals.openDonateModal(1000)" aria-label="Donate with 80G Tax Exemption">
+              <span>Donate (80G)</span>
+            </button>
           </div>
         </div>
 
@@ -886,6 +909,101 @@
     </div>
   </section>
 
+  <!-- 6B. HEALTH CONNECT & DIAGNOSTIC SERVICES SPOTLIGHT (#health-connect) -->
+  <section id="health-connect" class="section-stories" style="background: #0D1117; border-top: 1px solid rgba(255,255,255,0.08); padding: 7rem 5%;">
+    <div class="section-header-center" style="max-width: 960px; margin: 0 auto 4rem;">
+      <span class="category-tag category-tag-dark">CORE HEALTHCARE SERVICES</span>
+      <h2 class="section-title section-title-dark">Comprehensive Care, Direct Access</h2>
+      <p class="body-large-dark" style="color: var(--text-light-sub); line-height: 1.7;">
+        Connecting families in Vasai–Virar and Mumbai with subsidized specialist doctor consultations, early cancer screening biomarker panels, and zero-fee medical crowdfunding.
+      </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; max-width: 1280px; margin: 0 auto;">
+      <!-- Feature 1: Health Connect Doctor Consultations -->
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2.5rem 2rem; display: flex; flex-direction: column; justify-content: space-between; transition: transform 220ms var(--ease-out), border-color 220ms var(--ease-out), box-shadow 220ms var(--ease-out);">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <span class="category-tag" style="background: rgba(244,117,40,0.15); color: var(--brand); font-weight: 700; border: 1px solid rgba(244,117,40,0.3); padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 0.75rem;">DOCTOR TRIAGE &amp; CARE</span>
+            <span style="font-size: 1.8rem;" aria-hidden="true">🩺</span>
+          </div>
+          <h3 style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem; letter-spacing: -0.02em;">Health Connect Consultations</h3>
+          <p style="color: var(--text-light-sub); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
+            Immediate triage and subsidized specialist consultations across Oncology, Cardiology, Nephrology, and General Medicine. Our care navigators assist you with hospital appointments and second opinions.
+          </p>
+          <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem; color: #D1D5DB; font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: var(--brand);">✓</span> Specialist doctor triage &amp; navigation</li>
+            <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: var(--brand);">✓</span> Subsidized teleconsultation &amp; clinic visits</li>
+            <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: var(--brand);">✓</span> Dedicated patient advocate for hospital visits</li>
+          </ul>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <button type="button" class="btn-primary" onclick="window.AvinyaModals.openSupportModal()" style="width: 100%; justify-content: center;">
+            <span>Get Medical Help</span> <span class="arrow">→</span>
+          </button>
+          <a href="/diagnostic-tests" class="btn-secondary btn-secondary-dark" style="width: 100%; justify-content: center;">
+            <span>Explore Diagnostic Tests</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Feature 2: Comprehensive Cancer Biomarker Panel -->
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(244,117,40,0.3); border-radius: 20px; padding: 2.5rem 2rem; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.4);">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, var(--brand), #FF9800);"></div>
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <span class="category-tag" style="background: var(--brand); color: #FFFFFF; font-weight: 700; padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 0.75rem;">EARLY DETECTION PANEL</span>
+            <span style="font-size: 1.8rem;" aria-hidden="true">🔬</span>
+          </div>
+          <h3 style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem; letter-spacing: -0.02em;">Cancer Biomarker Panel</h3>
+          <p style="color: var(--text-light-sub); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
+            Advanced early detection panel evaluating CEA, CA-125, PSA, AFP, and CA 19-9 biomarkers with free doorstep phlebotomy collection across Vasai–Virar and Mumbai.
+          </p>
+          <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem; color: #D1D5DB; font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: var(--brand);">✓</span> 5-marker comprehensive screening panel</li>
+            <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: var(--brand);">✓</span> Free home sample collection in Mumbai/Virar</li>
+            <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: var(--brand);">✓</span> Verified pathology report with oncologist review</li>
+          </ul>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <a href="/diagnostic-tests" class="btn-primary" style="width: 100%; justify-content: center;">
+            <span>Book Diagnostic Test</span> <span class="arrow">→</span>
+          </a>
+          <button type="button" class="btn-secondary btn-secondary-dark" onclick="window.AvinyaModals.openGuideModal('Early Screening')" style="width: 100%; justify-content: center;">
+            <span>View Screening Guide</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Feature 3: Medical Crowdfunding (0% Platform Fee) -->
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2.5rem 2rem; display: flex; flex-direction: column; justify-content: space-between; transition: transform 220ms var(--ease-out), border-color 220ms var(--ease-out), box-shadow 220ms var(--ease-out);">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <span class="category-tag" style="background: rgba(16,185,129,0.15); color: #10B981; font-weight: 700; border: 1px solid rgba(16,185,129,0.3); padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 0.75rem;">0% PLATFORM FEE</span>
+            <span style="font-size: 1.8rem;" aria-hidden="true">🤝</span>
+          </div>
+          <h3 style="font-size: 1.5rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.75rem; letter-spacing: -0.02em;">Medical Crowdfunding</h3>
+          <p style="color: var(--text-light-sub); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
+            Transparent emergency medical fundraising where 100% of your donation directly pays for hospital ICU care, cancer chemotherapy, cardiac surgeries, and pediatric treatment.
+          </p>
+          <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem; color: #D1D5DB; font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10B981;">✓</span> 0% commission — 100% reaches the hospital</li>
+            <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10B981;">✓</span> 80G tax receipt issued immediately upon donation</li>
+            <li style="display: flex; align-items: center; gap: 0.5rem;"><span style="color: #10B981;">✓</span> Verified clinical bills &amp; doctor records</li>
+          </ul>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <a href="/crowdfunding" class="btn-primary" style="width: 100%; justify-content: center;">
+            <span>Support a Patient</span> <span class="arrow">→</span>
+          </a>
+          <button type="button" class="btn-secondary btn-secondary-dark" onclick="window.AvinyaModals.openDonateModal(1000)" style="width: 100%; justify-content: center;">
+            <span>Donate to General Medical Fund</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- 7. HUMAN STORIES (DEEP BLACK #0A0A0A) -->
   <section id="stories" class="section-stories">
     <div class="section-header-center">
@@ -1397,6 +1515,96 @@
           onclick="window.AvinyaModals.openCSRModal()">
           <span>CSR Partnership →</span>
         </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12B. CONTACT & EMERGENCY HELPLINE SECTION (#contact) -->
+  <section id="contact" class="section-stories" style="background: #0A0A0A; border-top: 1px solid rgba(255,255,255,0.08); padding: 7rem 5%;">
+    <div class="section-header-center" style="max-width: 900px; margin: 0 auto 4rem;">
+      <span class="category-tag category-tag-dark">WE ARE HERE TO HELP</span>
+      <h2 class="section-title section-title-dark">Connect with Our Care Team</h2>
+      <p class="body-large-dark" style="color: var(--text-light-sub); line-height: 1.7;">
+        Whether you require immediate patient navigation, wish to schedule a health screening camp, or seek partnership opportunities, our dedicated team in Virar West and Mumbai is ready to assist.
+      </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2.5rem; max-width: 1200px; margin: 0 auto;">
+      <!-- Contact Details & Verified Info -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- Card 1: Emergency & Patient Helpline -->
+        <div style="background: #141716; border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 1.75rem; display: flex; align-items: flex-start; gap: 1.25rem;">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(244,117,40,0.12); display: flex; align-items: center; justify-content: center; color: var(--brand); font-size: 1.3rem; flex-shrink: 0;" aria-hidden="true">📞</div>
+          <div>
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--brand); letter-spacing: 0.05em; margin-bottom: 0.25rem;">CONFIDENTIAL HELPLINE</div>
+            <a href="tel:+917447441116" style="font-size: 1.35rem; font-weight: 800; color: #FFFFFF; text-decoration: none; display: block; margin-bottom: 0.35rem;">+91 74474 41116</a>
+            <p style="font-size: 0.85rem; color: var(--text-light-sub); margin: 0;">Monday – Saturday, 9:00 AM – 7:00 PM IST</p>
+            <a href="https://wa.me/917447441116" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.4rem; color: #25D366; font-size: 0.85rem; font-weight: 700; text-decoration: none; margin-top: 0.5rem;">Chat on WhatsApp →</a>
+          </div>
+        </div>
+
+        <!-- Card 2: Email -->
+        <div style="background: #141716; border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 1.75rem; display: flex; align-items: flex-start; gap: 1.25rem;">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 1.3rem; flex-shrink: 0;" aria-hidden="true">✉️</div>
+          <div>
+            <div style="font-size: 0.8rem; font-weight: 700; color: #A3A3A3; letter-spacing: 0.05em; margin-bottom: 0.25rem;">OFFICIAL EMAIL</div>
+            <a href="mailto:info@avinyacarefoundation.com" style="font-size: 1.1rem; font-weight: 700; color: #FFFFFF; text-decoration: none; word-break: break-all;">info@avinyacarefoundation.com</a>
+            <p style="font-size: 0.85rem; color: var(--text-light-sub); margin-top: 0.35rem;">We respond within 24 business hours.</p>
+          </div>
+        </div>
+
+        <!-- Card 3: Physical Address -->
+        <div style="background: #141716; border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 1.75rem; display: flex; align-items: flex-start; gap: 1.25rem;">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 1.3rem; flex-shrink: 0;" aria-hidden="true">📍</div>
+          <div>
+            <div style="font-size: 0.8rem; font-weight: 700; color: #A3A3A3; letter-spacing: 0.05em; margin-bottom: 0.25rem;">REGISTERED OFFICE &amp; CLINIC</div>
+            <p style="font-size: 0.95rem; font-weight: 600; color: #FFFFFF; line-height: 1.5; margin: 0 0 0.5rem;">210, Global Plaza, Global City, Virar West, Maharashtra 401305</p>
+            <span style="display: inline-block; font-size: 0.75rem; color: var(--brand); font-weight: 700; background: rgba(244,117,40,0.1); padding: 0.2rem 0.6rem; border-radius: 6px;">80G • 12A • CSR-1 • NITI Aayog Darpan</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Message Form -->
+      <div style="background: #141716; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2.5rem 2rem;">
+        <h3 style="font-size: 1.4rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem;">Send a Message</h3>
+        <p style="color: var(--text-light-sub); font-size: 0.9rem; margin-bottom: 1.75rem;">Fill out this form and our support team will reach out promptly.</p>
+        
+        <form onsubmit="window.AvinyaModals && window.AvinyaModals.submitForm(event, 'Homepage Contact Form')" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div>
+            <label for="contact-name" style="display: block; font-size: 0.85rem; font-weight: 600; color: #D1D5DB; margin-bottom: 0.35rem;">Full Name *</label>
+            <input type="text" id="contact-name" name="name" required placeholder="e.g. Rajesh Sharma" autocomplete="name" style="width: 100%; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.05); color: #FFFFFF; font-size: 0.95rem; box-sizing: border-box;">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <label for="contact-phone" style="display: block; font-size: 0.85rem; font-weight: 600; color: #D1D5DB; margin-bottom: 0.35rem;">Phone Number *</label>
+              <input type="tel" id="contact-phone" name="phone" required placeholder="e.g. 98765 43210" autocomplete="tel" style="width: 100%; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.05); color: #FFFFFF; font-size: 0.95rem; box-sizing: border-box;">
+            </div>
+            <div>
+              <label for="contact-email" style="display: block; font-size: 0.85rem; font-weight: 600; color: #D1D5DB; margin-bottom: 0.35rem;">Email Address *</label>
+              <input type="email" id="contact-email" name="email" required placeholder="you@domain.com" autocomplete="email" style="width: 100%; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.05); color: #FFFFFF; font-size: 0.95rem; box-sizing: border-box;">
+            </div>
+          </div>
+          <div>
+            <label for="contact-purpose" style="display: block; font-size: 0.85rem; font-weight: 600; color: #D1D5DB; margin-bottom: 0.35rem;">How Can We Help? *</label>
+            <select id="contact-purpose" name="purpose" required style="width: 100%; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.18); background: #1C201E; color: #FFFFFF; font-size: 0.95rem; box-sizing: border-box;">
+              <option value="">Select an option</option>
+              <option value="Patient Navigation">🏥 Patient &amp; Treatment Navigation</option>
+              <option value="Diagnostic Test">🔬 Book Cancer Biomarker / Diagnostic Test</option>
+              <option value="Crowdfunding Support">🤝 Request Medical Crowdfunding Aid</option>
+              <option value="Screening Camp">🩺 Organize Community Screening / Blood Camp</option>
+              <option value="Volunteer">🙋 Volunteer With Us</option>
+              <option value="CSR Partnership">💼 Corporate CSR / Partnership</option>
+              <option value="General Inquiry">💬 General Inquiry</option>
+            </select>
+          </div>
+          <div>
+            <label for="contact-message" style="display: block; font-size: 0.85rem; font-weight: 600; color: #D1D5DB; margin-bottom: 0.35rem;">Your Message *</label>
+            <textarea id="contact-message" name="message" rows="3" required placeholder="Please describe how we can assist you..." style="width: 100%; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.05); color: #FFFFFF; font-size: 0.95rem; box-sizing: border-box; resize: vertical;"></textarea>
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 0.5rem;">
+            <span>Send Message</span> <span class="arrow">→</span>
+          </button>
+        </form>
       </div>
     </div>
   </section>

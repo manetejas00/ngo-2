@@ -20,7 +20,7 @@
         <h4 class="footer-heading">Explore</h4>
         <ul class="footer-links">
           <li><a href="/#hero" class="footer-link">About</a></li>
-          <li><a href="/doctors" class="footer-link" style="color: var(--brand); font-weight: 700;">Diagnostic Tests</a></li>
+          <li><a href="/diagnostic-tests" class="footer-link" style="color: var(--brand); font-weight: 700;">Diagnostic Tests</a></li>
           <li><a href="/crowdfunding" class="footer-link" style="color: var(--brand); font-weight: 700;">Crowdfunding</a></li>
           <li><a href="/#what-we-do" class="footer-link">What We Do</a></li>
           <li><a href="/#stories" class="footer-link">Stories</a></li>
@@ -144,68 +144,49 @@
   <!-- Coming Soon Modal -->
   <div id="coming-soon-modal" class="modal-backdrop">
     <style>
-      #coming-soon-modal .modal-gradient-title {
+      #coming-soon-modal .modal-clean-title {
         font-family: var(--font-primary, 'Manrope', sans-serif);
-        font-size: 2rem;
+        font-size: 1.85rem;
         font-weight: 800;
         margin-bottom: 0.5rem;
         text-align: center;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.025em;
         line-height: 1.2;
-        padding-bottom: 0.1em;
-        background: linear-gradient(to right, #42f587 0%, #42a7f5 20%, #9942f5 40%, #f54293 60%, #f58442 80%, #42f587 100%);
-        background-size: 200% auto;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        color: transparent;
-        animation: modalGradientFlow 5s linear infinite;
-      }
-      
-      @keyframes modalGradientFlow {
-        0% { background-position: 0% center; }
-        100% { background-position: -200% center; }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        #coming-soon-modal .modal-gradient-title {
-          animation: none;
-          background-position: left center;
-        }
+        color: #111827;
       }
 
       #coming-soon-modal .modern-input {
-        background-color: #F3F4F6;
-        border: 1px solid #E5E7EB;
-        border-radius: 9999px;
-        padding: 0.8rem 1.25rem;
+        background-color: #F9FAFB;
+        border: 1.5px solid #E5E7EB;
+        border-radius: 10px;
+        padding: 0.8rem 1.1rem;
         width: 100%;
         box-sizing: border-box;
         font-size: 0.95rem;
         font-family: inherit;
         outline: none;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        transition: border-color 160ms var(--ease-out, ease), box-shadow 160ms var(--ease-out, ease);
       }
       #coming-soon-modal .modern-input:focus {
-        border-color: #D1D5DB;
-        box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.05);
+        border-color: var(--brand, #F47528);
+        box-shadow: 0 0 0 3px rgba(244, 117, 40, 0.15);
       }
       
       #coming-soon-modal .modern-textarea {
-        border-radius: 16px;
+        border-radius: 12px;
         resize: vertical;
       }
 
       #coming-soon-modal .modern-btn {
-        background-color: #111827;
+        background-color: var(--brand, #F47528);
         color: #FFFFFF;
         border: none;
-        border-radius: 9999px;
-        padding: 1rem;
-        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.95rem;
+        font-weight: 700;
         font-size: 1rem;
         cursor: pointer;
-        transition: background-color 0.2s ease, transform 0.2s ease;
+        transition: transform 160ms var(--ease-out, ease), background-color 160ms var(--ease-out, ease);
         font-family: inherit;
         width: 100%;
         display: flex;
@@ -213,8 +194,10 @@
         justify-content: center;
       }
       #coming-soon-modal .modern-btn:hover {
-        background-color: #374151;
-        transform: scale(1.01);
+        background-color: var(--brand-hover, #D95F16);
+      }
+      #coming-soon-modal .modern-btn:active {
+        transform: scale(0.97);
       }
     </style>
 
@@ -225,7 +208,7 @@
         <img src="/assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" style="width: 56px; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.05));">
       </div>
       
-      <h3 class="modal-gradient-title">Coming Soon</h3>
+      <h3 class="modal-clean-title">Coming Soon</h3>
       <p style="color: #4B5563; font-size: 0.95rem; text-align: center; margin-bottom: 2rem; line-height: 1.6;">
         From raising health awareness to creating a supportive and compassionate community.
       </p>
