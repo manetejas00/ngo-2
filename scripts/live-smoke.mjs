@@ -15,6 +15,8 @@ const checks = [
   { path: '/api/healthcare/tests.php', type: 'json', array: 'tests' },
   { path: '/api/crowdfunding.php', type: 'json', array: 'campaigns' },
   { path: '/api/news.php', type: 'json', array: 'articles' },
+  { path: '/sitemap.xml', type: 'text', contains: 'diagnostic-tests' },
+  { path: '/robots.txt', type: 'text', contains: 'sitemap.xml' },
 ];
 
 let failed = false;
