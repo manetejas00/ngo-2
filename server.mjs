@@ -14,6 +14,10 @@ import https from 'node:https';
 import { loadEnvironment } from './config/environment.mjs';
 import { MIME_TYPES } from './config/mime-types.mjs';
 import { isPrivateStaticPath } from './services/http/static-access.mjs';
+import { parseByteRange } from './services/http/byte-range.mjs';
+import { checkRateLimit } from './services/http/rate-limit.mjs';
+import { createSubmissionStore } from './services/submissions/submission-store.mjs';
+import { isDonationPledge, calculateDonationStats, formatINR } from './services/donations/donationStats.mjs';
 import { generateFormEmails } from './services/ai/emailGenerator.mjs';
 import { renderUserEmail, renderAdminEmail } from './services/email/emailTemplate.mjs';
 import { sendFormEmails } from './services/email/emailService.mjs';
@@ -73,6 +77,9 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Load configuration before reading any environment-backed settings.
+await loadEnvironment(__dirname);
+
 const rawPort = process.env.PORT || 3000;
 const PORT = typeof rawPort === 'string' && /^\d+$/.test(rawPort) ? parseInt(rawPort, 10) : rawPort;
 const CACHE_DIR = join(__dirname, 'cache');
@@ -80,10 +87,6 @@ const CACHE_FILE = join(CACHE_DIR, 'news_cache.json');
 const CACHE_TTL_MS = process.env.NEWS_REFRESH_INTERVAL_MS ? parseInt(process.env.NEWS_REFRESH_INTERVAL_MS, 10) : 2 * 3600 * 1000; // Default 2 hours
 const AUTH_SESSION_TTL_MS = 30 * 60 * 1000;
 const loginAttempts = new Map();
-
-// Use the verified production mail identity for the normal production start,
-// while preserving the separate test configuration for local development.
-await loadEnvironment(__dirname);
 
 // In-Memory News Cache initialized from persistent storage
 let newsCache = {
@@ -500,174 +503,10 @@ async function refreshNewsCache(force = false) {
   }
 }
 
-const SUBMISSIONS_FILE = join(CACHE_DIR, 'submissions.json');
-const SUCCESSFUL_PAYMENT_STATUSES = new Set(['SUCCESS', 'CONFIRMED', 'PAID']);
-
-function getSubmissionCategory(record) {
-  return String(record?.category || record?.interest || '').trim();
-}
-
-function isSuccessfulDonation(record) {
-  return record.form_type === 'donation'
-    && Number.isFinite(Number(record.amount))
-    && Number(record.amount) > 0
-    && SUCCESSFUL_PAYMENT_STATUSES.has(String(record.payment_status || '').toUpperCase());
-}
-
-function getPaymentStatus(record) {
-  return String(record.payment_status || record.paymentStatus || 'PENDING').trim().toUpperCase();
-}
-
-function isDonationPledge(record) {
-  return record.form_type === 'donation'
-    && Number.isFinite(Number(record.amount))
-    && Number(record.amount) > 0;
-}
-
-function calculateDonationStats(records) {
-  const stats = {
-    total: 0,
-    total_donations: 0,
-    unique_donors: 0,
-    donors: 0,
-    categories: {},
-    campaign_donors: {},
-    pledged_total: 0,
-    pledged_donations: 0,
-    pledged_categories: {},
-    pledged_campaign_donors: {},
-    pending_total: 0,
-    pending_donations: 0,
-    failed_total: 0,
-    failed_donations: 0
-  };
-  const donorKeys = new Set();
-  const campaignDonorKeys = new Map();
-  const pledgedCampaignDonorKeys = new Map();
-  const seenTransactions = new Set();
-
-  for (const record of records || []) {
-    if (!isDonationPledge(record)) continue;
-    const transactionId = String(record.transaction_id || record.transactionId || '').trim();
-    if (transactionId) {
-      if (seenTransactions.has(transactionId)) continue;
-      seenTransactions.add(transactionId);
-    }
-
-    const amount = Number(record.amount);
-    const status = getPaymentStatus(record);
-    const category = getSubmissionCategory(record) || 'General Fund';
-
-    // Submitted forms are visible as pledges immediately. They remain
-    // separate from verified aid until payment is confirmed.
-    if (status === 'PENDING' || isSuccessfulDonation(record)) {
-      stats.pledged_total += amount;
-      stats.pledged_donations += 1;
-      stats.pledged_categories[category] = (stats.pledged_categories[category] || 0) + amount;
-      if (!pledgedCampaignDonorKeys.has(category)) pledgedCampaignDonorKeys.set(category, new Set());
-      if (record.email) pledgedCampaignDonorKeys.get(category).add(String(record.email).trim().toLowerCase());
-    }
-    if (isSuccessfulDonation(record)) {
-      stats.total += amount;
-      stats.total_donations += 1;
-      stats.categories[category] = (stats.categories[category] || 0) + amount;
-      if (record.email) donorKeys.add(String(record.email).trim().toLowerCase());
-      if (!campaignDonorKeys.has(category)) campaignDonorKeys.set(category, new Set());
-      if (record.email) campaignDonorKeys.get(category).add(String(record.email).trim().toLowerCase());
-    } else if (status === 'PENDING') {
-      stats.pending_total += amount;
-      stats.pending_donations += 1;
-    } else {
-      stats.failed_total += amount;
-      stats.failed_donations += 1;
-    }
-  }
-
-  stats.unique_donors = donorKeys.size;
-  stats.donors = stats.unique_donors;
-  for (const [category, donors] of campaignDonorKeys) stats.campaign_donors[category] = donors.size;
-  for (const [category, donors] of pledgedCampaignDonorKeys) stats.pledged_campaign_donors[category] = donors.size;
-  return stats;
-}
-
-function formatINR(amount) {
-  return `₹${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(Number(amount) || 0)}`;
-}
-
-async function saveSubmission(submissionRecord) {
-  try {
-    await mkdir(CACHE_DIR, { recursive: true });
-    let submissions = [];
-    try {
-      const raw = await readFile(SUBMISSIONS_FILE, 'utf-8');
-      submissions = JSON.parse(raw);
-      if (!Array.isArray(submissions)) submissions = [];
-    } catch (e) {
-      submissions = [];
-    }
-    // Keep the project selection under both names while older records are still
-    // read through `interest`. This makes the admin Category column reliable.
-    const category = getSubmissionCategory(submissionRecord);
-    submissions.unshift({
-      ...submissionRecord,
-      category,
-      interest: category || submissionRecord.interest || ''
-    });
-    if (submissions.length > 500) submissions = submissions.slice(0, 500);
-    await writeFile(SUBMISSIONS_FILE, JSON.stringify(submissions, null, 2), 'utf-8');
-  } catch (err) {
-    console.warn('[Submissions Save Warning]', err.message);
-  }
-}
-
-async function getFormSubmissions() {
-  try {
-    const raw = await readFile(SUBMISSIONS_FILE, 'utf-8');
-    const list = JSON.parse(raw);
-    if (!Array.isArray(list)) return [];
-    return list.map(item => ({
-      id: item.submissionId || item.id || item.submission_id || ('SUB-' + Date.now()),
-      submission_id: item.submissionId || item.id || item.submission_id || ('SUB-' + Date.now()),
-      form_type: (item.formType || item.form_type || 'contact').toLowerCase(),
-      name: item.name || 'Anonymous',
-      email: item.email || '',
-      phone: item.phone || '',
-      organization: item.organization || '',
-      message: item.message || '',
-      amount: item.amount || null,
-      payment_status: item.paymentStatus || item.payment_status || 'PENDING',
-      transaction_id: item.transactionId || item.transaction_id || '',
-      category: getSubmissionCategory(item),
-      interest: getSubmissionCategory(item),
-      is_anonymous: Boolean(item.isAnonymous || item.is_anonymous),
-      delivery_status: item.deliveryStatus || item.delivery_status || 'SENT',
-      created_at: item.timestampIST || item.created_at || new Date().toISOString()
-    }));
-  } catch (e) {
-    return [];
-  }
-}
-
-async function updateDonationPaymentStatus(submissionId, paymentStatus, verifiedBy) {
-  const allowedStatuses = new Set(['PENDING', 'CONFIRMED', 'PAID', 'FAILED']);
-  const normalizedId = String(submissionId || '').trim();
-  const normalizedStatus = String(paymentStatus || '').trim().toUpperCase();
-  if (!normalizedId || !allowedStatuses.has(normalizedStatus)) throw new Error('Invalid donation payment status update.');
-
-  const raw = await readFile(SUBMISSIONS_FILE, 'utf-8');
-  const submissions = JSON.parse(raw);
-  if (!Array.isArray(submissions)) throw new Error('Donation records are unavailable.');
-  const record = submissions.find(item => String(item.submissionId || item.id || item.submission_id || '').trim() === normalizedId
-    && String(item.formType || item.form_type || '').toLowerCase() === 'donation');
-  if (!record) throw new Error('Donation record was not found.');
-
-  record.paymentStatus = normalizedStatus;
-  record.payment_status = normalizedStatus;
-  record.paymentVerifiedBy = String(verifiedBy || 'admin').slice(0, 120);
-  record.paymentVerifiedAt = getFormattedISTTimestamp();
-  await writeFile(SUBMISSIONS_FILE, JSON.stringify(submissions, null, 2), 'utf-8');
-  return record;
-}
+const submissionStore = createSubmissionStore(join(CACHE_DIR, 'submissions.json'), { timestamp: getFormattedISTTimestamp });
+const saveSubmission = submissionStore.save;
+const getFormSubmissions = submissionStore.list;
+const updateDonationPaymentStatus = submissionStore.updateDonationPaymentStatus;
 
 function getFormattedISTTimestamp() {
   const now = new Date();
@@ -676,73 +515,11 @@ function getFormattedISTTimestamp() {
   return `${dateStr}, ${timeStr} IST`;
 }
 
-// Universal IP-Based Rate Limiting Store & Middleware
-const rateLimitStore = new Map();
-
-// Periodic cleanup of stale rate limit entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, record] of rateLimitStore.entries()) {
-    if (now - record.startTime > 60000) {
-      rateLimitStore.delete(key);
-    }
-  }
-}, 5 * 60 * 1000);
-
-function checkRateLimit(req, res) {
-  const rawIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-  const clientIp = rawIp.split(',')[0].trim();
-  const urlPath = (req.url || '').split('?')[0];
-
-  // Determine threshold per route type
-  let maxRequests = 180; // Default for static files (html, css, js, assets)
-  const windowMs = 60 * 1000; // 1 minute window
-
-  if (urlPath === '/api/submit-form' || urlPath === '/api/admin-auth' || urlPath === '/api/admin-auth.php' || urlPath === '/api/news/generate') {
-    maxRequests = 15; // Strict 15 req/min for auth, form submissions, and AI generation
-  } else if (urlPath.startsWith('/api/')) {
-    maxRequests = 60; // Standard 60 req/min for general API endpoints
-  }
-
-  const categoryKey = urlPath.startsWith('/api/') ? 'api' : 'static';
-  const key = `${clientIp}:${categoryKey}:${urlPath}`;
-  const now = Date.now();
-
-  let record = rateLimitStore.get(key);
-  if (!record || now - record.startTime > windowMs) {
-    record = { count: 1, startTime: now };
-    rateLimitStore.set(key, record);
-  } else {
-    record.count++;
-  }
-
-  const remaining = Math.max(0, maxRequests - record.count);
-  const resetSeconds = Math.ceil((record.startTime + windowMs - now) / 1000);
-
-  res.setHeader('X-RateLimit-Limit', maxRequests);
-  res.setHeader('X-RateLimit-Remaining', remaining);
-  res.setHeader('X-RateLimit-Reset', resetSeconds);
-
-  if (record.count > maxRequests) {
-    res.setHeader('Retry-After', resetSeconds);
-    res.writeHead(429, {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Access-Control-Allow-Origin': '*'
-    });
-    res.end(JSON.stringify({
-      status: 'error',
-      message: `Too many requests to ${urlPath}. Please slow down and try again in ${resetSeconds} seconds.`
-    }));
-    return false;
-  }
-
-  return true;
-}
-
 // Initialize persistent cache from disk
 await initPersistentCache();
 
 const server = createServer(async (req, res) => {
+  try {
   // Universal Security & CORS Headers (Data Leak & Injection Protection)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
@@ -979,8 +756,7 @@ const server = createServer(async (req, res) => {
       res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
       res.end(JSON.stringify({
         status: 'error',
-        message: 'Internal server error processing form submission',
-        errorMessage: err.message
+        message: 'Internal server error processing form submission'
       }));
       return;
     }
@@ -2556,9 +2332,12 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
       const totalSize = fileStat.size;
 
       if (range) {
-        const parts = range.replace(/bytes=/, '').split('-');
-        const start = parseInt(parts[0], 10);
-        const end = parts[1] ? parseInt(parts[1], 10) : totalSize - 1;
+        const parsedRange = parseByteRange(range, totalSize);
+        if (!parsedRange) {
+          res.writeHead(416, { 'Content-Range': `bytes */${totalSize}` });
+          return res.end();
+        }
+        const { start, end } = parsedRange;
         const chunkSize = (end - start) + 1;
         const stream = createReadStream(filePath, { start, end });
 
@@ -2612,6 +2391,15 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
     console.error('[Static 404]', filePath, err.message);
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('404 Not Found');
+  }
+  } catch (error) {
+    console.error('[Request Error]', error);
+    if (res.headersSent) {
+      res.destroy();
+      return;
+    }
+    res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ status: 'error', message: 'Internal server error.' }));
   }
 });
 

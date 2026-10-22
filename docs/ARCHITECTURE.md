@@ -4,9 +4,12 @@ AvinyaCareFoundation is a progressively enhanced static website with two compati
 
 - `index.html`, `crowdfunding.html`, `doctors.html`, and `admin.html` are the public/admin page shells.
 - `js/components/` owns page-focused presentation behavior; `js/services/` owns browser integrations such as PDFs and news.
+- `js/healthcare/healthcare-domain.js` contains scheduling and fee rules shared by healthcare views; load it before the healthcare controller in the doctors page.
 - `api/` contains PHP endpoints used on shared hosting. `api/db.php` centralizes its database connection.
 - `server.mjs` is the Node runtime used for local development and Node-compatible deployments. It delegates email and healthcare persistence to `services/`.
 - `services/email/`, `services/ai/`, and `services/healthcare/` are backend domain boundaries. New backend business rules belong there rather than in `server.mjs` route handling.
+- `services/http/` owns shared HTTP policies, including static access, byte ranges, and rate limiting.
+- `services/submissions/` owns the Node submission ledger. Mutations are serialized within one process and written through a temporary file; this is not a multi-process database.
 
 ## Request flow
 

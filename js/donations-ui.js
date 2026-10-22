@@ -42,15 +42,12 @@
 
   async function refresh({ retry = true } = {}) {
     if (refreshPromise) return refreshPromise;
-    refreshPromise = Promise.all([fetch('/api/donations/stats', { cache: 'no-store' }), fetch('/api/donations/recent', { cache: 'no-store' })])
-      .then(async ([statsResponse, recentResponse]) => {
-        if (!statsResponse.ok || !recentResponse.ok) throw new Error('Donation data is temporarily unavailable.');
-        const [statsPayload, recentPayload] = await Promise.all([statsResponse.json(), recentResponse.json()]);
-        if (statsPayload.status !== 'ok' || !statsPayload.stats || recentPayload.status !== 'ok') throw new Error('Donation data response is invalid.');
-        applyStats(statsPayload.stats);
-        applyRecent(recentPayload.donations);
-        window.dispatchEvent(new CustomEvent('avinya:donation_stats_updated', { detail: statsPayload.stats }));
-        return statsPayload.stats;
+    refreshPromise = window.AvinyaDonationService.load()
+      .then(({ stats, donations }) => {
+        applyStats(stats);
+        applyRecent(donations);
+        window.dispatchEvent(new CustomEvent('avinya:donation_stats_updated', { detail: stats }));
+        return stats;
       }).catch(error => {
         if (retry && !retryTimer) retryTimer = window.setTimeout(() => { retryTimer = null; refresh({ retry: false }).catch(() => {}); }, 5000);
         console.warn('Donation statistics refresh failed:', error.message);

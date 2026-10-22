@@ -69,39 +69,9 @@ class HealthcarePlatform {
     this.init();
   }
 
-  getInitialBookingDate() {
-    const d = new Date();
-    d.setDate(d.getDate() + 1); // Tomorrow
-    return this.formatLocalDate(d);
-  }
-
-  formatLocalDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  getDoctorBookingDates(doctor, limit = 7) {
-    const schedule = doctor?.schedule || {};
-    const tomorrow = new Date();
-    tomorrow.setHours(12, 0, 0, 0);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const minimum = this.formatLocalDate(tomorrow);
-    const explicitDates = Array.isArray(schedule.availableDates)
-      ? [...new Set(schedule.availableDates)].filter(date => /^\d{4}-\d{2}-\d{2}$/.test(date) && date >= minimum).sort()
-      : [];
-    if (explicitDates.length) return explicitDates.slice(0, limit);
-
-    const workingDays = Array.isArray(schedule.workingDays) ? schedule.workingDays.map(Number) : [1,2,3,4,5,6];
-    const dates = [];
-    for (let offset = 0; offset < 60 && dates.length < limit; offset++) {
-      const date = new Date(tomorrow);
-      date.setDate(tomorrow.getDate() + offset);
-      if (workingDays.includes(date.getDay())) dates.push(this.formatLocalDate(date));
-    }
-    return dates;
-  }
+  getInitialBookingDate() { return window.AvinyaHealthcareDomain.getInitialBookingDate(); }
+  formatLocalDate(date) { return window.AvinyaHealthcareDomain.formatLocalDate(date); }
+  getDoctorBookingDates(doctor, limit = 7) { return window.AvinyaHealthcareDomain.getDoctorBookingDates(doctor, limit); }
 
   async init() {
     this.setupNavigationHooks();
@@ -190,49 +160,13 @@ class HealthcarePlatform {
   // Data Loading
   // -------------------------------------------------------------
   async fetchJsonEndpoint(endpoint) {
-    const apiBase = '';
-    const fullUrl = endpoint.startsWith('http') ? endpoint : (apiBase + endpoint);
-    const res = await fetch(fullUrl, {
-      headers: { Accept: 'application/json' }
-    });
-
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status} from ${endpoint}`);
-    }
-
-    const raw = await res.text();
-    const text = raw.trim();
-
-    if (!text) {
-      throw new Error(`Empty response from ${endpoint}`);
-    }
-
-    if (text.startsWith('<')) {
-      throw new Error(`Expected JSON from ${endpoint}, received HTML instead`);
-    }
-
-    try {
-      return JSON.parse(text);
-    } catch (err) {
-      throw new Error(`Invalid JSON from ${endpoint}: ${err.message}`);
-    }
+    return window.AvinyaHealthcareApi.fetchJson(endpoint);
   }
 
   async fetchJsonWithFallback(primaryEndpoint, fallbackEndpoint, label) {
-    try {
-      return await this.fetchJsonEndpoint(primaryEndpoint);
-    } catch (primaryErr) {
-      console.warn(`[Healthcare Platform] ${label} primary endpoint failed:`, primaryErr.message);
-    }
-
-    if (!fallbackEndpoint) return null;
-
-    try {
-      return await this.fetchJsonEndpoint(fallbackEndpoint);
-    } catch (fallbackErr) {
-      console.warn(`[Healthcare Platform] ${label} fallback endpoint failed:`, fallbackErr.message);
-      return null;
-    }
+    return window.AvinyaHealthcareApi.fetchWithFallback(
+      primaryEndpoint, fallbackEndpoint, label, endpoint => this.fetchJsonEndpoint(endpoint)
+    );
   }
 
   async loadInitialData() {
@@ -511,28 +445,7 @@ class HealthcarePlatform {
     `;}).join('');
   }
 
-  parseFeeDisplay(doc) {
-    const raw = doc.feeDisplay || (doc.consultationFee === 0 ? '₹0 (Free / Avinya Supported)' : `₹${doc.consultationFee || 0}`);
-    const match = raw.match(/^([^(\n]+)(?:\s*\((.+)\))?$/);
-
-    let price = raw.trim();
-    let rawTag = '';
-
-    if (match) {
-      price = match[1].trim();
-      if (match[2]) rawTag = match[2].trim();
-    }
-
-    let tag = rawTag;
-    if (rawTag.includes('50% AvinyaCareFoundation Concession')) tag = '50% Concession';
-    else if (rawTag.includes('Avinya Supported')) tag = 'Avinya Supported';
-    else if (rawTag.includes('Community Clinic')) tag = 'Community Clinic';
-    else if (rawTag.includes('Partner Rate')) tag = 'Partner Rate';
-
-    const isFree = price === '₹0' || price.toLowerCase().includes('free');
-
-    return { price, tag, rawTag, isFree };
-  }
+  parseFeeDisplay(doc) { return window.AvinyaHealthcareDomain.parseFeeDisplay(doc); }
 
   showMoreDoctors() {
     this.showAllDoctors = true;

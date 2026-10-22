@@ -87,9 +87,16 @@ npm test
 
 This validates required project files, JavaScript syntax, PHP syntax when
 PHP is available, and the Node environment configuration, static access policy,
-and gallery data service behavior. The other
+gallery, donation, and healthcare data services, and donation aggregation. The other
 integration and browser tests in `test/` have their own prerequisites and are
 not all run by this command.
+
+For a read-only Node HTTP smoke test, start a local server on port 31879 and
+run `npm run test:http` in another terminal. `TEST_BASE_URL` can select another
+local port. This suite does not submit forms or verify email, payments, PHP,
+or browser interactions. Some older scripts in `test/` target live services or
+create bookings and send email; inspect them and use isolated test data before
+running them.
 
 ## Deployment
 
@@ -107,8 +114,8 @@ components/      Modular HTML components (navbar, footer)
 config/          Node environment loading and static content types
 css/             Website styling
 docs/            Project documentation and setup guides
-js/              Browser-side functionality
-services/        Node email, AI, and healthcare services
+js/              Browser-side controllers, components, and data services
+services/        Node domain logic, HTTP helpers, email, AI, and healthcare services
 scripts/         Validation, deployment, and maintenance scripts
 server.mjs       Local Node.js server
 ```

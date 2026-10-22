@@ -9,7 +9,8 @@
     "dev": "node server.mjs",
     "build": "node scripts/preflight.mjs",
     "check": "node scripts/preflight.mjs",
-    "test": "node scripts/preflight.mjs && node --test test/config.test.mjs test/gallery-service.test.mjs test/static-access.test.mjs",
+    "test": "node scripts/preflight.mjs && node --test test/config.test.mjs test/gallery-service.test.mjs test/static-access.test.mjs test/byte-range.test.mjs test/rate-limit.test.mjs test/submission-store.test.mjs test/donation-stats.test.mjs test/donation-service.test.mjs test/healthcare-api.test.mjs test/healthcare-domain.test.mjs",
+    "test:http": "node --test test/http-readonly.test.mjs",
     "deploy:live": "node scripts/deploy-remote.mjs",
     "smoke:staging": "node --dns-result-order=ipv4first scripts/live-smoke.mjs https://test.avinyacarefoundation.org",
     "smoke:production": "node --dns-result-order=ipv4first scripts/live-smoke.mjs https://avinyacarefoundation.org"

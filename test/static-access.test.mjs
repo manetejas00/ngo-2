@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { isPrivateStaticPath } from '../services/http/static-access.mjs';
 
 test('private server and deployment files cannot be served as static assets', () => {
-  for (const path of ['/server.mjs', '/config/environment.mjs', '/services/email/emailService.mjs', '/test/example.js', '/storage', '/cache/news.json', '/.env.production', '/api/db.php']) {
+  for (const path of ['/server.mjs', '/config/environment.mjs', '/services/email/emailService.mjs', '/test/example.js', '/storage', '/cache/news.json', '/.env.production', '/api/db.php', '/assets/../test/example.js']) {
     assert.equal(isPrivateStaticPath(path), true, path);
   }
 });

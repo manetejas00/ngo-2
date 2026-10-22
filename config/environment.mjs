@@ -12,9 +12,10 @@ export async function loadEnvironment(root, environment = process.env) {
       const [key, ...values] = trimmed.split('=');
       const name = key.trim();
       const value = values.join('=').trim().replace(/^["']|["']$/g, '');
-      if (key && !environment[name]) environment[name] = value;
+      if (name && environment[name] === undefined) environment[name] = value;
     }
-  } catch {
-    // Environment files are optional; deployment may supply variables directly.
+  } catch (error) {
+    // Deployment may supply variables directly, but other read failures need attention.
+    if (error.code !== 'ENOENT') throw error;
   }
 }
