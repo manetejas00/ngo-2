@@ -268,7 +268,7 @@ if ($action === 'save_site_settings') {
     if (!is_array($settings)) {
         http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Settings payload is invalid.']); exit(0);
     }
-    $allowed = ['organization_name', 'tagline', 'email', 'phone', 'whatsapp', 'address', 'facebook_url', 'instagram_url', 'linkedin_url', 'youtube_url'];
+    $allowed = ['organization_name', 'tagline', 'email', 'phone', 'whatsapp', 'address', 'facebook_url', 'instagram_url', 'linkedin_url', 'youtube_url', 'x_url', 'threads_url'];
     $clean = [];
     foreach ($allowed as $key) {
         if (!array_key_exists($key, $settings)) continue;

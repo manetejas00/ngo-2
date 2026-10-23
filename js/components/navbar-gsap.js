@@ -165,7 +165,60 @@ class AvinyaGsapNavbar {
   }
 }
 
+function initSocialDropdown() {
+  const dropdown = document.getElementById('nav-social-dropdown');
+  const toggleBtn = document.getElementById('social-dropdown-btn');
+  if (!dropdown || !toggleBtn) return;
+
+  const closeDropdown = () => {
+    dropdown.classList.remove('is-open');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+  };
+
+  const openDropdown = () => {
+    dropdown.classList.add('is-open');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+  };
+
+  const toggleDropdown = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const isOpen = dropdown.classList.contains('is-open');
+    if (isOpen) {
+      closeDropdown();
+    } else {
+      openDropdown();
+    }
+  };
+
+  toggleBtn.removeEventListener('click', toggleDropdown);
+  toggleBtn.addEventListener('click', toggleDropdown);
+
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target)) {
+      closeDropdown();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && dropdown.classList.contains('is-open')) {
+      closeDropdown();
+      toggleBtn.focus();
+    }
+  });
+
+  dropdown.querySelectorAll('.nav-dropdown-item').forEach(item => {
+    item.addEventListener('click', () => {
+      closeDropdown();
+    });
+  });
+}
+
 function initNavbarEngine() {
+  initSocialDropdown();
+
   const toggleBtn = document.querySelector('.mobile-toggle');
   const overlay = document.getElementById('mobile-nav-overlay');
   if (!toggleBtn || !overlay) return;
@@ -185,3 +238,4 @@ if (document.readyState === 'loading') {
 } else {
   initNavbarEngine();
 }
+

@@ -1312,6 +1312,8 @@ const server = createServer(async (req, res) => {
       address: '210, Global Plaza, Global City, Virar West - 401305',
       instagram_url: 'https://www.instagram.com/avinyacare_foundation/',
       youtube_url: 'https://www.youtube.com/@Avinyacarefoundation',
+      x_url: 'https://x.com/Avinyacare',
+      threads_url: 'https://www.threads.com/@avinyacare_foundation',
       facebook_url: '',
       linkedin_url: ''
     };
@@ -1430,7 +1432,7 @@ const server = createServer(async (req, res) => {
       if (action === 'save_site_settings') {
         if (sessionUser.role !== 'admin') return sendJson(403, { status: 'error', message: 'Administrator permissions required.' });
         const input = payload.settings || {};
-        const allowed = ['organization_name', 'tagline', 'email', 'phone', 'whatsapp', 'address', 'facebook_url', 'instagram_url', 'linkedin_url', 'youtube_url'];
+        const allowed = ['organization_name', 'tagline', 'email', 'phone', 'whatsapp', 'address', 'facebook_url', 'instagram_url', 'linkedin_url', 'youtube_url', 'x_url', 'threads_url'];
         const settings = Object.fromEntries(allowed.filter(key => Object.hasOwn(input, key)).map(key => [key, String(input[key] || '').trim()]));
         if (settings.email && !/^\S+@\S+\.\S+$/.test(settings.email)) return sendJson(422, { status: 'error', message: 'Please enter a valid organization email.' });
         for (const key of allowed.filter(key => key.endsWith('_url'))) if (settings[key] && !/^https?:\/\//i.test(settings[key])) return sendJson(422, { status: 'error', message: `${key} must be a valid URL.` });

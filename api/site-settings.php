@@ -21,6 +21,8 @@ $defaults = [
     'address' => '210, Global Plaza, Global City, Virar West - 401305',
     'instagram_url' => 'https://www.instagram.com/avinyacare_foundation/',
     'youtube_url' => 'https://www.youtube.com/@Avinyacarefoundation',
+    'x_url' => 'https://x.com/Avinyacare',
+    'threads_url' => 'https://www.threads.com/@avinyacare_foundation',
     'facebook_url' => '',
     'linkedin_url' => ''
 ];

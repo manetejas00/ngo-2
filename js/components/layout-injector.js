@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const t = val.trim();
       if (!t || t === '#' || t.toLowerCase() === 'pending') return false;
       // Do not accept bare generic root domain without account/handle
-      if (/^https?:\/\/(www\.)?(facebook\.com|linkedin\.com|instagram\.com|youtube\.com)\/?$/i.test(t)) return false;
+      if (/^https?:\/\/(www\.)?(facebook\.com|linkedin\.com|instagram\.com|youtube\.com|threads\.(com|net)|x\.com|twitter\.com)\/?$/i.test(t)) return false;
       try {
         const u = new URL(t);
         return u.protocol === 'http:' || u.protocol === 'https:';
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           node.style.display = 'none';
           node.setAttribute('hidden', '');
         }
-      } else if (['instagram_url', 'youtube_url', 'facebook_url', 'linkedin_url'].includes(key)) {
+      } else if (['instagram_url', 'youtube_url', 'facebook_url', 'linkedin_url', 'threads_url', 'x_url', 'twitter_url'].includes(key)) {
         if (isValidSocialUrl(value)) {
           if (node.tagName === 'A') {
             node.href = value.trim();
