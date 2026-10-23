@@ -692,13 +692,39 @@ button {
   color: #FFFFFF;
 }
 
-.dropdown-item-icon.icon-youtube {
-  color: #FF0000;
+.dropdown-item-icon.icon-youtube .yt-screen {
+  fill: #FF0000;
+  transition: fill 160ms ease;
+}
+.dropdown-item-icon.icon-youtube .yt-play {
+  fill: #FFFFFF;
+  transition: fill 160ms ease;
 }
 .nav-dropdown-item:hover .dropdown-item-icon.icon-youtube {
   background: #FF0000;
-  color: #FFFFFF;
   border-color: transparent;
+}
+.nav-dropdown-item:hover .dropdown-item-icon.icon-youtube .yt-screen {
+  fill: #FFFFFF;
+}
+.nav-dropdown-item:hover .dropdown-item-icon.icon-youtube .yt-play {
+  fill: #FF0000;
+}
+.navbar.scrolled-light .dropdown-item-icon.icon-youtube .yt-screen {
+  fill: #FF0000;
+}
+.navbar.scrolled-light .dropdown-item-icon.icon-youtube .yt-play {
+  fill: #FFFFFF;
+}
+.navbar.scrolled-light .nav-dropdown-item:hover .dropdown-item-icon.icon-youtube {
+  background: #FF0000;
+  border-color: transparent;
+}
+.navbar.scrolled-light .nav-dropdown-item:hover .dropdown-item-icon.icon-youtube .yt-screen {
+  fill: #FFFFFF;
+}
+.navbar.scrolled-light .nav-dropdown-item:hover .dropdown-item-icon.icon-youtube .yt-play {
+  fill: #FF0000;
 }
 
 .dropdown-item-icon.icon-whatsapp {
