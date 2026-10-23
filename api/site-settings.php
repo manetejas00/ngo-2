@@ -27,11 +27,18 @@ $defaults = [
     'linkedin_url' => ''
 ];
 
-$settings = AvinyaCache::remember('settings:public', ['settings', 'homepage'], 1800, function () use ($defaults) {
+$settings = AvinyaCache::remember('settings:public_v2', ['settings', 'homepage'], 1800, function () use ($defaults) {
     $pdo = getDatabaseConnection();
     if ($pdo === null) return $defaults;
     $rows = $pdo->query('SELECT setting_key, setting_value FROM site_settings')->fetchAll(PDO::FETCH_KEY_PAIR);
     return array_merge($defaults, array_filter($rows, fn($key) => array_key_exists($key, $defaults) || str_ends_with($key, '_url'), ARRAY_FILTER_USE_KEY));
 });
+
+// Ensure newly supported social media channels are never undefined or omitted
+foreach (['instagram_url', 'youtube_url', 'x_url', 'threads_url'] as $socialKey) {
+    if (empty($settings[$socialKey]) && !empty($defaults[$socialKey])) {
+        $settings[$socialKey] = $defaults[$socialKey];
+    }
+}
 
 echo json_encode(['status' => 'ok', 'settings' => $settings], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

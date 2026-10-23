@@ -752,6 +752,18 @@
                   <input type="url" id="setInstagram" class="form-control" value="https://www.instagram.com/avinyacare_foundation/">
                 </div>
                 <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">X (Twitter) Profile URL</label>
+                  <input type="url" id="setX" class="form-control" value="https://x.com/Avinyacare">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Threads Profile URL</label>
+                  <input type="url" id="setThreads" class="form-control" value="https://www.threads.com/@avinyacare_foundation">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">YouTube Channel URL</label>
+                  <input type="url" id="setYouTube" class="form-control" value="https://www.youtube.com/@Avinyacarefoundation">
+                </div>
+                <div>
                   <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Facebook Page URL</label>
                   <input type="url" id="setFacebook" class="form-control" value="https://facebook.com">
                 </div>
@@ -4545,6 +4557,9 @@
         if (settings.whatsapp !== undefined && document.getElementById('setWhatsApp')) document.getElementById('setWhatsApp').value = settings.whatsapp;
         if (settings.address !== undefined && document.getElementById('setAddress')) document.getElementById('setAddress').value = settings.address;
         if (settings.instagram_url !== undefined && document.getElementById('setInstagram')) document.getElementById('setInstagram').value = settings.instagram_url;
+        if (settings.x_url !== undefined && document.getElementById('setX')) document.getElementById('setX').value = settings.x_url;
+        if (settings.threads_url !== undefined && document.getElementById('setThreads')) document.getElementById('setThreads').value = settings.threads_url;
+        if (settings.youtube_url !== undefined && document.getElementById('setYouTube')) document.getElementById('setYouTube').value = settings.youtube_url;
         if (settings.facebook_url !== undefined && document.getElementById('setFacebook')) document.getElementById('setFacebook').value = settings.facebook_url;
         if (settings.linkedin_url !== undefined && document.getElementById('setLinkedIn')) document.getElementById('setLinkedIn').value = settings.linkedin_url;
       } catch (_) { /* The static defaults remain available if settings cannot be read. */ }
@@ -4560,6 +4575,9 @@
         whatsapp: document.getElementById('setWhatsApp') ? document.getElementById('setWhatsApp').value.trim() : '',
         address: document.getElementById('setAddress') ? document.getElementById('setAddress').value.trim() : '',
         instagram_url: document.getElementById('setInstagram') ? document.getElementById('setInstagram').value.trim() : '',
+        x_url: document.getElementById('setX') ? document.getElementById('setX').value.trim() : '',
+        threads_url: document.getElementById('setThreads') ? document.getElementById('setThreads').value.trim() : '',
+        youtube_url: document.getElementById('setYouTube') ? document.getElementById('setYouTube').value.trim() : '',
         facebook_url: document.getElementById('setFacebook') ? document.getElementById('setFacebook').value.trim() : '',
         linkedin_url: document.getElementById('setLinkedIn') ? document.getElementById('setLinkedIn').value.trim() : ''
       };

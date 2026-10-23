@@ -1317,7 +1317,12 @@ const server = createServer(async (req, res) => {
       facebook_url: '',
       linkedin_url: ''
     };
-    return sendJson(200, { status: 'ok', settings: { ...defaults, ...(await getSiteSettings()) } });
+    const userSettings = await getSiteSettings();
+    const merged = { ...defaults, ...userSettings };
+    for (const key of ['x_url', 'threads_url', 'instagram_url', 'youtube_url']) {
+      if (!merged[key]) merged[key] = defaults[key];
+    }
+    return sendJson(200, { status: 'ok', settings: merged });
   }
 
   if (req.method === 'GET' && (urlPath === '/api/analytics-config' || urlPath === '/api/analytics-config.php')) {

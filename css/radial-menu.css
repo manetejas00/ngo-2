@@ -150,14 +150,25 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 20px rgba(37, 211, 102, 0.5);
 }
 
+.radial-action-item[data-site-setting="x_url"]:hover,
+.radial-action-item[data-site-setting="threads_url"]:hover {
+  border-color: #FFFFFF;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
 .radial-action-item:hover svg {
   transform: scale(1.16);
   stroke: #F47528 !important;
 }
 
-.radial-action-item:hover svg.radial-icon-fill,
 .radial-action-item:hover[data-site-setting="whatsapp"] svg {
   fill: #25D366 !important;
+  stroke: none !important;
+}
+
+.radial-action-item:hover[data-site-setting="x_url"] svg,
+.radial-action-item:hover[data-site-setting="threads_url"] svg {
+  fill: #FFFFFF !important;
   stroke: none !important;
 }
 

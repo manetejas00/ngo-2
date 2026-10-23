@@ -582,9 +582,16 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
     seedGalleryFromJSON($pdo, $force);
     seedCrowdfundingFromJSON($pdo, $force);
 
-    // Seed or update public address in site_settings
+    // Seed or update public address and verified social channels in site_settings
     try {
-        $pdo->exec("INSERT INTO `site_settings` (`setting_key`, `setting_value`) VALUES ('address', '210, Global Plaza, Global City, Virar West - 401305') ON DUPLICATE KEY UPDATE `setting_value` = VALUES(`setting_value`)");
+        $pdo->exec("INSERT INTO `site_settings` (`setting_key`, `setting_value`) VALUES 
+            ('address', '210, Global Plaza, Global City, Virar West - 401305'),
+            ('x_url', 'https://x.com/Avinyacare'),
+            ('threads_url', 'https://www.threads.com/@avinyacare_foundation'),
+            ('youtube_url', 'https://www.youtube.com/@Avinyacarefoundation'),
+            ('instagram_url', 'https://www.instagram.com/avinyacare_foundation/'),
+            ('whatsapp', '+91 74474 41116')
+            ON DUPLICATE KEY UPDATE `setting_value` = VALUES(`setting_value`)");
     } catch (Throwable $e) {}
 
     $migrated = true;

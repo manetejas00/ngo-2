@@ -133,8 +133,15 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
           node.style.display = '';
           node.removeAttribute('hidden');
+        } else if (value === undefined || value === null) {
+          // Setting not returned by API — retain valid hardcoded link from HTML
+          const fallback = node.getAttribute('href');
+          if (fallback && fallback.includes('wa.me/')) {
+            node.style.display = '';
+            node.removeAttribute('hidden');
+          }
         } else {
-          // Hide icon if whatsapp number is missing or invalid
+          // Explicitly cleared by administrator
           node.style.display = 'none';
           node.setAttribute('hidden', '');
         }
@@ -147,10 +154,31 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
           node.style.display = '';
           node.removeAttribute('hidden');
-        } else {
-          // Hide icon if link is missing, pending, or invalid
+        } else if (value === undefined || value === null) {
+          // Backend did not provide this key yet (e.g. cached settings or new platform)
+          // NEVER hide an element if it already has a valid hardcoded fallback URL in href!
+          const fallback = node.getAttribute('href');
+          if (isValidSocialUrl(fallback)) {
+            node.style.display = '';
+            node.removeAttribute('hidden');
+          } else {
+            node.style.display = 'none';
+            node.setAttribute('hidden', '');
+          }
+        } else if (value === '' || value === '#' || value.toLowerCase() === 'pending') {
+          // Explicitly removed by administrator
           node.style.display = 'none';
           node.setAttribute('hidden', '');
+        } else {
+          // Invalid format from admin - check fallback href
+          const fallback = node.getAttribute('href');
+          if (isValidSocialUrl(fallback)) {
+            node.style.display = '';
+            node.removeAttribute('hidden');
+          } else {
+            node.style.display = 'none';
+            node.setAttribute('hidden', '');
+          }
         }
       } else {
         if (value) node.textContent = value;
