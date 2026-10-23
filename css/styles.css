@@ -3238,10 +3238,26 @@ body.mobile-nav-open {
 
 .footer-top {
   display: grid;
-  grid-template-columns: 1.35fr repeat(5, 1fr);
-  gap: 2.25rem;
-  max-width: 1280px;
+  grid-template-columns: 1.15fr 0.7fr 0.75fr minmax(315px, 1.8fr) 0.75fr 0.95fr;
+  gap: 1.85rem;
+  max-width: 1380px;
   margin: 0 auto 5rem;
+}
+
+.footer-contact-col {
+  min-width: 0;
+}
+
+.footer-contact-col .footer-links {
+  gap: 0.85rem;
+}
+
+.footer-contact-col .footer-link,
+.footer-contact-col span.footer-link {
+  white-space: nowrap;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  display: inline-block;
 }
 
 .footer-brand-col {
@@ -3793,7 +3809,7 @@ body.mobile-nav-open {
   }
 }
 
-@media (max-width: 1200px) and (min-width: 992px) {
+@media (max-width: 1260px) and (min-width: 992px) {
   .footer-top {
     grid-template-columns: repeat(3, 1fr);
     gap: 2.25rem;
@@ -4086,6 +4102,10 @@ body.mobile-nav-open {
   }
   .footer-top {
     grid-template-columns: 1fr;
+  }
+  .footer-contact-col .footer-link,
+  .footer-contact-col span.footer-link {
+    white-space: normal;
   }
   .whatsapp-float-btn {
     bottom: 1.5rem;
