@@ -148,5 +148,5 @@ Smoke checks passed for https://avinyacarefoundation.org.
 | **GitHub Action fails at "Configure Hostinger SSH"** | Missing GitHub Secrets. Add `HOSTINGER_SSH_PRIVATE_KEY`, `HOSTINGER_SSH_HOST`, `HOSTINGER_SSH_PORT`, and `HOSTINGER_SSH_USER` in repository settings. |
 | **Permission denied (publickey,password)** | Your local SSH key is not authorized. Either add your SSH public key to Hostinger hPanel or use `npm run deploy:live` which supports `.env` password authentication fallback. |
 | **Node fetch timeout on Windows** | Node on Windows may attempt IPv6 before IPv4. Run with `node --dns-result-order=ipv4first ...` or use `npm run smoke:production`. |
-| **Old styles or scripts show on website** | Asset caching. Update the `?v=X.X.X` query parameter in the corresponding HTML files (e.g. `?v=4.2.1`). |
+| **Old styles or scripts show on website** | Asset caching. Update the `?v=X.X.X` query parameter in the corresponding HTML files (e.g. `?v=4.2.2`). |
 | **Need emergency rollback** | The server keeps a backup at `domains/avinyacarefoundation.org/public_html.rollback`. Run `git checkout HEAD~1` or copy the backup files back. |

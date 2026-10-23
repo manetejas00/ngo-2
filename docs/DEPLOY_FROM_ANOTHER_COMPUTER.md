@@ -8,7 +8,7 @@ This guide deploys the repository's committed `main` branch to Hostinger product
 | --- | --- |
 | Repository | https://github.com/manetejas00/ngo-2 |
 | Production branch | `main` |
-| Application version at handoff | `4.2.1` |
+| Application version at handoff | `4.2.2` |
 | PHP gallery repair commit | `12e6bee` (or a newer commit containing it) |
 | Website | https://avinyacarefoundation.org |
 | SSH host | `82.112.239.95` |
