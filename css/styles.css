@@ -3238,8 +3238,8 @@ body.mobile-nav-open {
 
 .footer-top {
   display: grid;
-  grid-template-columns: 1.5fr repeat(4, 1fr);
-  gap: 3.5rem;
+  grid-template-columns: 1.35fr repeat(5, 1fr);
+  gap: 2.25rem;
   max-width: 1280px;
   margin: 0 auto 5rem;
 }
@@ -3329,6 +3329,61 @@ body.mobile-nav-open {
 
 .footer-link:hover {
   color: var(--brand);
+}
+
+.footer-social-link-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--text-light-muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.footer-social-link-item svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+  transition: transform 160ms ease, opacity 160ms ease, color 160ms ease;
+}
+
+.footer-social-link-item:hover {
+  transform: translateX(3px);
+  color: #FFFFFF;
+}
+
+.footer-social-link-item:hover svg {
+  opacity: 1;
+  transform: scale(1.12);
+}
+
+.footer-social-link-item.link-instagram:hover {
+  color: #FD5949;
+}
+.footer-social-link-item.link-instagram:hover svg {
+  stroke: #FD5949;
+}
+
+.footer-social-link-item.link-x:hover {
+  color: #FFFFFF;
+}
+
+.footer-social-link-item.link-threads:hover {
+  color: #FFFFFF;
+}
+
+.footer-social-link-item.link-youtube:hover {
+  color: #FF0000;
+}
+.footer-social-link-item.link-youtube:hover .yt-screen {
+  fill: #FF0000;
+}
+.footer-social-link-item.link-youtube:hover .yt-play {
+  fill: #FFFFFF;
+}
+
+.footer-social-link-item.link-whatsapp:hover {
+  color: #25D366;
 }
 
 .footer-bottom {
@@ -3733,7 +3788,15 @@ body.mobile-nav-open {
     gap: 1.5rem;
   }
   .footer-top {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 1200px) and (min-width: 992px) {
+  .footer-top {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.25rem;
   }
 }
 
