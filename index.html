@@ -21,7 +21,7 @@
   <meta property="og:description"
     content="Humanitarian campaign bringing health awareness, early detection, and compassionate community support to patients and families across the Mumbai-Virar region.">
   <meta property="og:image" content="https://www.avinyacarefoundation.org/assets/logo.png">
-  
+
   <!-- Twitter / X Cards -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://www.avinyacarefoundation.org/">
@@ -90,7 +90,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=4.2.4">
+  <link rel="stylesheet" href="css/styles.css?v=4.3.2">
   <link rel="stylesheet" href="css/preloader.css?v=4.2.4">
 <link rel="stylesheet" href="/css/accessibility.css?v=4.2.4">
 <script defer src="/js/components/accessibility.js?v=4.2.4"></script>
@@ -159,6 +159,7 @@
             <span>AvinyaCareFoundation</span>
           </div>
           <h1 class="hero-title">No one should face a health crisis alone.</h1>
+          <p class="hero-local-intro">Healthcare information, care navigation and community support in Vasai–Virar and Mumbai.</p>
           <div class="hero-cta-group">
             <button type="button" class="btn-primary" onclick="window.AvinyaModals.openSupportModal()" aria-label="Get Medical Support">
               <span>Get Medical Help</span>
@@ -168,7 +169,7 @@
               <span>Diagnostic Tests</span>
             </a>
             <button type="button" class="btn-secondary btn-secondary-dark" onclick="window.AvinyaModals.openDonateModal(1000)" aria-label="Record donation interest">
-              <span>Donate (80G)</span>
+              <span>Support us</span>
             </button>
           </div>
         </div>
@@ -610,232 +611,10 @@
   </section>
 
   <!-- 5. NESTJS-STYLE STACKED OVERLAPPING FEATURE PANELS (#deep-dives) -->
-  <section id="deep-dives" class="section-stacked-panels">
-    <div class="stacked-panels-header">
-      <span class="category-tag category-tag-dark">FEATURED CARE INITIATIVES</span>
-      <h2 class="section-title section-title-dark">Empowering patients & communities.</h2>
-      <p class="body-large-dark" style="max-width: 750px; margin: 0 auto;">
-        Explore our core operational pillars designed for early detection, subsidized care, and compassionate
-        navigation.
-      </p>
-    </div>
 
-    <div class="stacked-panels-wrapper">
-      <!-- Panel 01: Deep Charcoal — BLOOD & CRITICAL CARE -->
-      <div class="stacked-feature-panel dark-panel" data-panel="0">
-        <div class="panel-header">
-          <span class="panel-eyebrow">01 / BLOOD &amp; CRITICAL CARE</span>
-          <h3 class="panel-title">Critical care within reach.</h3>
-          <p class="panel-desc">
-            Ensuring emergency blood supplies for surgeries and trauma care, alongside subsidized logistics and ongoing
-            support for chronic dialysis patients across the region.
-          </p>
-          <button class="btn-primary" style="margin-top: 1.5rem;" onclick="window.AvinyaModals.openVolunteerModal()">
-            <span>Explore Blood &amp; Care Drives</span>
-            <span class="arrow">→</span>
-          </button>
-        </div>
-
-        <div class="panel-visual-frame">
-          <img src="assets/initiatives/initiative-blood-drive.jpg" alt="Blood and Care Drive" class="panel-visual-image"
-            loading="lazy">
-          <div class="panel-visual-overlay"></div>
-        </div>
-      </div>
-
-      <!-- Panel 02: Emerald Teal — VISION & PREVENTIVE HEALTH -->
-      <div class="stacked-feature-panel teal-panel" data-panel="1">
-        <div class="panel-header">
-          <span class="panel-eyebrow">02 / VISION &amp; PREVENTIVE HEALTH</span>
-          <h3 class="panel-title">Don't wait for symptoms.</h3>
-          <p class="panel-desc">
-            Free eye screening camps, sponsored cataract surgeries restoring sight for seniors, and preventive
-            cardiovascular checkups catching cardiac risks early.
-          </p>
-          <button class="btn-primary" style="margin-top: 1.5rem; background: #FFFFFF; color: var(--brand);"
-            onclick="window.AvinyaModals.openGuideModal('Early Screening')">
-            <span>View Screening Initiatives</span>
-            <span class="arrow">→</span>
-          </button>
-        </div>
-
-        <div class="panel-visual-frame">
-          <img src="assets/initiatives/initiative-screening-camp.jpg" alt="Early Diagnostic Screening"
-            class="panel-visual-image" loading="lazy">
-          <div class="panel-visual-overlay"></div>
-        </div>
-      </div>
-
-      <!-- Panel 03: Warm Cream — COMPASSIONATE ONCOLOGY & PATIENT CARE -->
-      <div class="stacked-feature-panel light-panel" data-panel="2">
-        <div class="panel-header">
-          <span class="panel-eyebrow" style="color: var(--brand);">03 / ONCOLOGY &amp; PATIENT CARE</span>
-          <h3 class="panel-title" style="color: #0B0D0C;">No one should face illness alone.</h3>
-          <p class="panel-desc" style="color: #404040;">
-            Promoting cancer awareness, demystifying pathology reports, and walking beside patients and families with
-            compassionate bedside companions and helpline navigation.
-          </p>
-          <button class="btn-primary" style="margin-top: 1.5rem;" onclick="window.AvinyaModals.openSupportModal()">
-            <span>Get Patient Support</span>
-            <span class="arrow">→</span>
-          </button>
-        </div>
-
-        <div class="panel-visual-frame">
-          <img src="assets/initiatives/initiative-patient-care.jpg" alt="Compassionate Care Navigator"
-            class="panel-visual-image" loading="lazy">
-          <div class="panel-visual-overlay"></div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- 6. CONTINUUM OF CARE — NESTJS 3D OVERLAPPING CARDS DECK (#journey) -->
-  <section id="journey" class="section-journey">
-    <div class="journey-sticky-viewport">
-      <div class="journey-wrapper">
-        <div class="nestjs-split-header">
-          <div class="header-left">
-            <span class="category-tag category-tag-dark">THE CONTINUUM OF CARE</span>
-            <h2 class="section-title section-title-dark">Every step of your health journey.</h2>
-          </div>
-          <div class="header-right">
-            <p class="body-large-dark">
-              Built on human compassion and clinical excellence, AvinyaCareFoundation guides individuals through every milestone
-              — keeping hope clear, accessible, and supported at every stage.
-            </p>
-          </div>
-        </div>
 
-        <!-- NestJS Stacked 3D Overlapping Card Deck Carousel -->
-        <div class="nestjs-card-deck-viewport">
-          <div id="nestjs-card-deck-track" class="nestjs-card-deck-track">
-            <!-- Card 01: Blood Donation Drives -->
-            <div class="nestjs-deck-card active" data-index="0" onclick="window.AvinyaTimeline.goToStage(0, true)">
-              <div class="card-3d-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2L3 7v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V7l-9-5z" />
-                  <path d="M12 8v8M8 12h8" />
-                </svg>
-              </div>
-              <div>
-                <div class="card-step-num">01 / SERVICE</div>
-                <h3 class="card-deck-title">Blood Donation Drives</h3>
-                <p class="card-deck-desc">
-                  Community-wide donation drives ensuring supply for surgeries, emergencies, and chronic care.
-                </p>
-              </div>
-              <button class="btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;"
-                onclick="window.AvinyaModals.openVolunteerModal()">
-                <span>View Blood Drives →</span>
-              </button>
-            </div>
-
-            <!-- Card 02: Dialysis Assistance -->
-            <div class="nestjs-deck-card" data-index="1" onclick="window.AvinyaTimeline.goToStage(1, true)">
-              <div class="card-3d-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 6v6l4 2" />
-                </svg>
-              </div>
-              <div>
-                <div class="card-step-num">02 / SERVICE</div>
-                <h3 class="card-deck-title">Dialysis Assistance</h3>
-                <p class="card-deck-desc">
-                  Subsidised care and logistics support for regular dialysis patients.
-                </p>
-              </div>
-              <button class="btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;"
-                onclick="window.AvinyaModals.openSupportModal()">
-                <span>Get Dialysis Aid →</span>
-              </button>
-            </div>
-
-            <!-- Card 03: Cataract Care -->
-            <div class="nestjs-deck-card" data-index="2" onclick="window.AvinyaTimeline.goToStage(2, true)">
-              <div class="card-3d-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
-                  <circle cx="12" cy="12" r="3.5" />
-                </svg>
-              </div>
-              <div>
-                <div class="card-step-num">03 / SERVICE</div>
-                <h3 class="card-deck-title">Cataract Care</h3>
-                <p class="card-deck-desc">
-                  Free screening camps and sponsored cataract surgeries for seniors.
-                </p>
-              </div>
-              <button class="btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;"
-                onclick="window.AvinyaModals.openGuideModal('Cataract Care')">
-                <span>Find Eye Camps →</span>
-              </button>
-            </div>
-
-            <!-- Card 04: Cancer Care -->
-            <div class="nestjs-deck-card" data-index="3" onclick="window.AvinyaTimeline.goToStage(3, true)">
-              <div class="card-3d-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="11" cy="11" r="7" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  <path d="M11 8v6M8 11h6" />
-                </svg>
-              </div>
-              <div>
-                <div class="card-step-num">04 / SERVICE</div>
-                <h3 class="card-deck-title">Cancer Care</h3>
-                <p class="card-deck-desc">
-                  Awareness, early screening camps, and patient-family navigation.
-                </p>
-              </div>
-              <button class="btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;"
-                onclick="window.AvinyaModals.openSupportModal()">
-                <span>Cancer Support →</span>
-              </button>
-            </div>
-
-            <!-- Card 05: Heart Care -->
-            <div class="nestjs-deck-card" data-index="4" onclick="window.AvinyaTimeline.goToStage(4, true)">
-              <div class="card-3d-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path
-                    d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                  <path d="M12 8v5M9.5 10.5h5" />
-                </svg>
-              </div>
-              <div>
-                <div class="card-step-num">05 / SERVICE</div>
-                <h3 class="card-deck-title">Heart Care</h3>
-                <p class="card-deck-desc">
-                  Preventive check-ups, early cardiac risk screening, and emergency awareness.
-                </p>
-              </div>
-              <button class="btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;"
-                onclick="window.AvinyaModals.openGuideModal('Heart Care')">
-                <span>Heart Checkups →</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Controls & Progress Dots -->
-        <div class="nestjs-deck-controls">
-          <button class="deck-arrow-btn prev" onclick="window.AvinyaTimeline.prevCard()"
-            aria-label="Previous Stage">←</button>
-          <div class="deck-dots">
-            <span class="deck-dot active" onclick="window.AvinyaTimeline.goToStage(0, true)"></span>
-            <span class="deck-dot" onclick="window.AvinyaTimeline.goToStage(1, true)"></span>
-            <span class="deck-dot" onclick="window.AvinyaTimeline.goToStage(2, true)"></span>
-            <span class="deck-dot" onclick="window.AvinyaTimeline.goToStage(3, true)"></span>
-            <span class="deck-dot" onclick="window.AvinyaTimeline.goToStage(4, true)"></span>
-          </div>
-          <button class="deck-arrow-btn next" onclick="window.AvinyaTimeline.nextCard()"
-            aria-label="Next Stage">→</button>
-        </div>
-      </div>
-    </div>
-  </section>
 
 
 
@@ -1258,7 +1037,7 @@
       <div style="background: #141716; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2.5rem 2rem;">
         <h3 style="font-size: 1.4rem; font-weight: 800; color: #FFFFFF; margin-bottom: 0.5rem;">Send a Message</h3>
         <p style="color: var(--text-light-sub); font-size: 0.9rem; margin-bottom: 1.75rem;">Fill out this form and our support team will reach out promptly.</p>
-        
+
         <form onsubmit="window.AvinyaModals && window.AvinyaModals.submitForm(event, 'Homepage Contact Form')" style="display: flex; flex-direction: column; gap: 1rem;">
           <div>
             <label for="contact-name" style="display: block; font-size: 0.85rem; font-weight: 600; color: #D1D5DB; margin-bottom: 0.35rem;">Full Name *</label>
@@ -1648,10 +1427,10 @@
   <script src="js/services/newsService.js?v=4.2.4"></script>
   <script src="js/components/news-ui.js?v=4.2.4"></script>
   <script src="js/components/nestjs-cards.js?v=4.2.4"></script>
-  <script src="js/components/navbar-gsap.js?v=4.2.4"></script>
+  <script src="js/components/navbar-gsap.js?v=4.3.2"></script>
   <script src="js/components/radial-menu.js?v=4.2.4"></script>
   <script src="js/app.js?v=4.2.4"></script>
-  <script src="js/components/layout-injector.js?v=4.2.4"></script>
+  <script src="js/components/layout-injector.js?v=4.3.2"></script>
 
 </body>
 

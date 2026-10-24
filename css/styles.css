@@ -4494,3 +4494,11 @@ body.news-modal-open .fab-button {
   }
 }
 
+
+/* A readable first step on small screens, before the cinematic story. */
+.hero-local-intro{max-width:600px;margin:0 auto 1.4rem;color:#e1e5df;font-size:1rem;line-height:1.65;text-wrap:balance;text-shadow:0 2px 12px #000}
+@media(max-width:768px){#hero #card-1{top:130px!important;bottom:auto!important}.hero-local-intro{font-size:.87rem;max-width:340px;margin-bottom:1.2rem}}
+
+@media(max-width:360px){.navbar .tax-badge{display:none}.navbar .nav-actions>.btn-primary{font-size:.72rem;padding-inline:.5rem}.navbar .nav-brand{gap:.3rem}.navbar .brand-name{font-size:.8rem}}
+
+.footer-top>*{min-width:0}.footer-brand-badge>div{min-width:0}.footer-brand{overflow-wrap:anywhere}

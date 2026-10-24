@@ -174,7 +174,7 @@
 
                 <div class="cf-spotlight-actions">
                   <button class="cf-btn-primary" style="flex: 1; justify-content: center;" onclick="window.AvinyaModals.openDonateModal(5000, '${escapeHtml(donCat)}')">
-                    <span>Support This Project</span>
+                    <span>Enquire about this project</span>
                     <span>→</span>
                   </button>
                   <button class="cf-btn-secondary" style="padding: 0.95rem 1.25rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px;" data-share-text="${encodeURIComponent(shareText)}" onclick="window.shareOnWhatsApp(decodeURIComponent(this.dataset.shareText))">
@@ -231,7 +231,7 @@
                     </div>
                     <div class="cf-card-actions">
                       <button class="cf-btn-donate" onclick="window.AvinyaModals.openDonateModal(5000, '${escapeHtml(donCat)}')">
-                        <span>Donate ₹5,000</span>
+                        <span>Pledge interest: ₹5,000</span>
                         <span>→</span>
                       </button>
                       <button class="cf-btn-share" title="Share on WhatsApp" aria-label="Share on WhatsApp" data-share-text="${encodeURIComponent(shareText)}" onclick="window.shareOnWhatsApp(decodeURIComponent(this.dataset.shareText))">

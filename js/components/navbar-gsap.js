@@ -24,7 +24,7 @@ class AvinyaGsapNavbar {
     this.mobileToggleBtn.setAttribute('aria-controls', this.mobileOverlay.id);
     this.focusableElements.forEach(element => element.setAttribute('tabindex', '-1'));
 
-    if (typeof gsap !== 'undefined') {
+    if (typeof gsap !== 'undefined' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       gsap.set(this.mobileOverlay, { 
         display: 'none', 
         opacity: 1,
@@ -108,6 +108,14 @@ class AvinyaGsapNavbar {
         this.close();
         this.mobileToggleBtn.focus();
       }
+      if (e.key === 'Tab' && this.isOpen) {
+        const items = [...this.focusableElements].filter(element => !element.disabled && element.getClientRects().length);
+        const first = items[0], last = items[items.length - 1];
+        if (!first) return;
+        if (!this.mobileOverlay.contains(document.activeElement)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+        else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
     });
   }
 
@@ -134,6 +142,7 @@ class AvinyaGsapNavbar {
     this.mobileOverlay.style.display = 'flex';
     document.body.classList.add('mobile-nav-open');
     this.focusableElements.forEach(element => element.setAttribute('tabindex', '0'));
+    requestAnimationFrame(() => { if (this.isOpen) this.focusableElements[0]?.focus({ preventScroll: true }); });
 
     if (this.tl) {
       this.tl.eventCallback('onReverseComplete', null);
@@ -154,6 +163,7 @@ class AvinyaGsapNavbar {
       if (this.isOpen) return;
       this.mobileOverlay.classList.remove('active');
       this.mobileOverlay.style.display = 'none';
+      this.mobileToggleBtn.focus({ preventScroll: true });
     };
 
     if (this.tl) {

@@ -2170,7 +2170,7 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
       const tests = await getDiagnosticTests();
       let urls = '';
       
-      const staticPages = ['', '/gallery', '/diagnostic-tests', '/crowdfunding'];
+      const staticPages = ['', '/about', '/assistance', '/get-involved', '/transparency', '/donation-guide', '/privacy', '/terms', '/events', '/gallery', '/diagnostic-tests', '/crowdfunding'];
       for (const page of staticPages) {
         urls += `  <url>\n    <loc>${BASE_URL}${page}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${page === '' ? '1.0' : '0.8'}</priority>\n  </url>\n`;
       }

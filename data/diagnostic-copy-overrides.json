@@ -70,5 +70,11 @@
   "test-7": {
     "name": "Senior Citizen Laboratory Assessment",
     "description": "Listed laboratory panel for clinician-directed assessment of older adults. It does not directly measure bone density or diagnose joint degeneration."
+  },
+  "test-tru-wellness-women-1": {
+    "description": "Laboratory panel for women covering the listed metabolic, blood count, calcium and thyroid measurements. Blood calcium testing does not measure bone density. Discuss the appropriate tests with your clinician."
+  },
+  "test-homa-insulin-resistance": {
+    "description": "Calculation using fasting glucose and insulin measurements to support a clinician’s assessment of insulin resistance. Interpretation depends on the clinical context."
   }
 }

@@ -19,6 +19,8 @@
   let currentCategory = 'all';
   let currentFilteredItems = [];
   let currentLightboxIndex = -1;
+  let lightboxTrigger = null;
+  let previousBodyOverflow = '';
   let displayedMasonryCount = 12;
   let gsapCtx = null;
   let quickX = null;
@@ -438,9 +440,17 @@
   // Attach Lightbox Trigger Click Listeners
   function attachLightboxCardTriggers() {
     document.querySelectorAll('.gallery-item').forEach(card => {
+      if (card.dataset.lightboxBound) return;
+      card.dataset.lightboxBound = 'true';
       card.addEventListener('click', () => {
         const id = card.getAttribute('data-gallery-id');
         openLightboxById(id);
+      });
+      card.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          card.click();
+        }
       });
     });
   }
@@ -756,9 +766,17 @@
     // Keyboard Arrow & ESC navigation
     document.addEventListener('keydown', (e) => {
       if (!overlay || !overlay.classList.contains('active')) return;
-      if (e.key === 'Escape') closeLightbox();
-      if (e.key === 'ArrowLeft') navigateLightbox(-1);
-      if (e.key === 'ArrowRight') navigateLightbox(1);
+      if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); return; }
+      if (e.key === 'Tab') {
+        const controls = [...overlay.querySelectorAll('button, a[href], video[controls], [tabindex="0"]')].filter(el => !el.disabled && el.getClientRects().length);
+        const first = controls[0], last = controls[controls.length - 1];
+        if (!first) { e.preventDefault(); return; }
+        if (!overlay.contains(document.activeElement) || (e.shiftKey && document.activeElement === first)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+      if (e.target.closest('video, input, textarea, select')) return;
+      if (e.key === 'ArrowLeft') { e.preventDefault(); navigateLightbox(-1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); navigateLightbox(1); }
     });
 
     // Mobile Touch Swipe Navigation
@@ -794,6 +812,11 @@
 
     const overlay = document.getElementById('galleryLightbox');
     if (!overlay) return;
+    const wasOpen = overlay.classList.contains('active');
+    if (!wasOpen) {
+      lightboxTrigger = document.activeElement;
+      previousBodyOverflow = document.body.style.overflow;
+    }
 
     const counterEl = document.getElementById('lightboxCounter');
     const imgEl = document.getElementById('lightboxImage');
@@ -850,8 +873,8 @@
     if (locEl) locEl.innerHTML = item.location ? `<i class="fa-solid fa-location-dot"></i> <span>${escapeHtml(item.location)}</span>` : '';
     if (photogEl) photogEl.innerHTML = item.photographer ? `<i class="fa-solid fa-camera"></i> <span>${escapeHtml(item.photographer)}</span>` : '';
     
-    const authorText = item.created_by ? `By ${item.created_by}` : (item.updated_by ? `Updated by ${item.updated_by}` : 'Admin User');
-    if (authorEl) authorEl.innerHTML = `<i class="fa-solid fa-user-pen"></i> <span>${escapeHtml(authorText)}</span>`;
+    // Administrative account names are not public photographer credits.
+    if (authorEl) { authorEl.textContent = ''; authorEl.hidden = true; }
 
     if (descEl) {
       if (item.image_only || (!item.description && !item.short_description)) {
@@ -866,6 +889,9 @@
     overlay.classList.add('active');
     overlay.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+    if (!wasOpen) requestAnimationFrame(() => {
+      if (overlay.classList.contains('active')) document.getElementById('lightboxClose')?.focus({ preventScroll: true });
+    });
 
     // Animate image entrance
     if (typeof gsap !== 'undefined' && imgEl) {
@@ -899,8 +925,10 @@
       overlay.classList.remove('active');
       overlay.setAttribute('aria-hidden', 'true');
     }
-    document.body.style.overflow = '';
+    document.body.style.overflow = previousBodyOverflow;
     currentLightboxIndex = -1;
+    if (lightboxTrigger?.isConnected) lightboxTrigger.focus({ preventScroll: true });
+    lightboxTrigger = null;
   }
 
   function escapeHtml(str) {

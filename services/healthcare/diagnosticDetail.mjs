@@ -6,6 +6,7 @@ export function escapeDiagnosticHtml(value) {
 export function diagnosticDetailArticle(test) {
   const e = escapeDiagnosticHtml;
   const parameters = Array.isArray(test.testsIncluded) ? test.testsIncluded : [];
+  const tumorMarker = /tumor|cancer/i.test(`${test.category || ''} ${test.id}`);
   return `<article class="diagnostic-detail">
     <nav aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/doctors">Diagnostics</a> / ${e(test.name)}</nav>
     <h1>${e(test.name)}</h1><p>${e(test.description)}</p>
@@ -13,8 +14,8 @@ export function diagnosticDetailArticle(test) {
     <p>Listed package price: ₹${e(test.price)}. Confirm the final price, any collection charges and availability with the team.</p>
     <h2>Before your test</h2><p>Laboratory preparation information: ${e(test.preparation)} Confirm these instructions with your laboratory or clinician; do not stop medicines without advice.</p>
     <p>Listed report turnaround: ${e(test.reportTurnaround)}. Confirm when timing starts and any exceptions.</p>
-    <p>Tests may give false positive or false negative results and need clinical interpretation. A normal result does not rule out every condition. Tumor marker tests are not reliable general population cancer screens.</p>
-    <p>Background information: <a href="https://www.cancer.gov/about-cancer/diagnosis-staging/diagnosis/tumor-markers-fact-sheet">National Cancer Institute: tumor markers</a>. Information updated 24 October 2026. Discuss appropriate testing with your clinician.</p>
+    <p>Tests may give false positive or false negative results and need clinical interpretation. A normal result does not rule out every condition. Discuss appropriate testing with your clinician.</p>
+    ${tumorMarker ? '<p>Tumor marker tests are not reliable general population cancer screens. Background information: <a href="https://www.cancer.gov/about-cancer/diagnosis-staging/diagnosis/tumor-markers-fact-sheet">National Cancer Institute: tumor markers</a>. Information updated 24 October 2026.</p>' : ''}
     <a href="/doctors?test=${encodeURIComponent(test.id)}">Request this test →</a> · <a href="/assistance">Ask for help</a> · <a href="/privacy">Privacy notice</a>
   </article>`;
 }

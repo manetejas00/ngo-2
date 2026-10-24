@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2. Fetch the component HTML
     try {
-      const response = await fetch(fetchUrl);
+      const response = await fetch(`${fetchUrl}?v=4.3.1`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const htmlString = await response.text();
 
@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (navbarInjected) {
     const initNavbarEngine = () => {
       if (typeof AvinyaGsapNavbar !== 'undefined') {
+        if (typeof initSocialDropdown === 'function') initSocialDropdown();
         window.AvinyaNavbarEngine = new AvinyaGsapNavbar();
       }
     };
@@ -68,8 +69,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       initNavbarEngine();
     } else {
       const script = document.createElement('script');
-      script.src = '/js/components/navbar-gsap.js?v=4.2.2';
-      script.onload = initNavbarEngine;
+      script.src = '/js/components/navbar-gsap.js?v=4.3.2';
+      script.onload = () => { if (!window.AvinyaNavbarEngine) initNavbarEngine(); };
       document.body.appendChild(script);
     }
   }

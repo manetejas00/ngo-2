@@ -23,6 +23,30 @@ test('crawlable diagnostic content escapes stored text and keeps test selection'
   assert.ok(content.includes('A &amp; B'));
 });
 
+test('tumor marker guidance is limited to relevant tests', () => {
+  const kidney = diagnosticDetailArticle({id:'test-kidney-creatinine',name:'Creatinine'});
+  assert.ok(!kidney.includes('National Cancer Institute'));
+  assert.ok(!kidney.includes('Tumor marker tests'));
+  assert.ok(kidney.includes('need clinical interpretation'));
+  const marker = diagnosticDetailArticle({id:'test-cancer-psa-prostate',name:'PSA'});
+  assert.ok(marker.includes('National Cancer Institute'));
+  assert.ok(marker.includes('not reliable general population cancer screens'));
+});
+
+test('PHP detail routes distinguish an unavailable catalog from a missing test', {skip: Boolean(spawnSync('php', ['-v']).error)}, () => {
+  const detailPath = new URL('../api/test-detail.php', import.meta.url).pathname;
+  const run = stub => execFileSync('php', ['-r', `
+    $_GET['test_id']='test-kidney-creatinine';
+    register_shutdown_function(function() { echo "\\nSTATUS:" . http_response_code(); });
+    $source=file_get_contents($argv[1]);
+    $source=str_replace("require_once __DIR__ . '/db.php';", $argv[2], $source);
+    eval(substr($source, 5));
+  `, detailPath, stub], {encoding:'utf8',stdio:['ignore','pipe','pipe']});
+  assert.match(run('function getDatabaseConnection() { return null; }'), /temporarily unavailable[\s\S]*STATUS:503/);
+  assert.match(run('function getDatabaseConnection() { throw new Exception("offline"); }'), /STATUS:503/);
+  assert.match(run('function getDatabaseConnection() { return new class { function prepare($sql) { return new class { function execute($params) {} function fetch() { return false; } }; } }; }'), /Test not found[\s\S]*STATUS:404/);
+});
+
 test('PHP diagnostic validation follows the same date, collection and patient boundaries', {skip: Boolean(spawnSync('php', ['-v']).error)}, () => {
   const cases = [valid, {...valid,date:'2026-02-30'}, {...valid,date:'2026-10-23'}, {...valid,patientGender:''}, {...valid,collectionMethod:'home_collection'}, {...valid,collectionMethod:'home_collection',homeAddress:'Example Road',pincode:'401305'}];
   const validationPath = new URL('../api/diagnostic-validation.php', import.meta.url).pathname;
