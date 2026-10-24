@@ -21,8 +21,8 @@ export function escapeHTML(str) {
 const BRAND = Object.freeze({
   name: 'AvinyaCareFoundation',
   trust: 'Registered Public Charitable Trust',
-  email: 'info@avinyacarefoundation.com',
-  phone: '+91 74474 41116',
+  email: 'info@avinyacarefoundation.org',
+  phone: '+91 744 744 1116',
   website: 'www.avinyacarefoundation.org'
 });
 

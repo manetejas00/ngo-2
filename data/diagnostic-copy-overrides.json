@@ -1,0 +1,74 @@
+{
+  "test-avinya-whole-body-shield": {
+    "name": "Avinya Whole Body Oncology & Metabolic Assessment"
+  },
+  "test-comprehensive-cancer-biomarker": {
+    "description": "Blood panel for clinician-directed evaluation and monitoring. Tumor markers may be raised in noncancerous conditions and may be normal when cancer is present. This panel is not a reliable general population cancer screen and does not diagnose or exclude cancer.",
+    "tagline": "Clinician-directed testing with medical interpretation",
+    "badge": "Discuss with your clinician",
+    "category": "Tumor Markers"
+  },
+  "test-cancer-psa-prostate": {
+    "description": "Measures prostate-specific antigen. PSA may rise with benign conditions as well as prostate cancer. Discuss the possible benefits and harms of screening with a clinician; PSA alone does not diagnose cancer. Further assessment may be needed.",
+    "tagline": "Clinician-directed testing with medical interpretation",
+    "badge": "Discuss with your clinician",
+    "category": "Tumor Markers"
+  },
+  "test-cancer-ca125-ovarian": {
+    "description": "Measures CA-125 for use in appropriate clinical evaluation or monitoring. Noncancerous conditions can raise CA-125, and some cancers do not raise it. It is not a reliable standalone ovarian cancer screen for people without symptoms.",
+    "tagline": "Clinician-directed testing with medical interpretation",
+    "badge": "Discuss with your clinician",
+    "category": "Tumor Markers"
+  },
+  "test-cancer-ca19-9-gi": {
+    "description": "Measures CA 19-9 to support clinician-directed evaluation or monitoring. Benign conditions can raise it and some cancers do not. It is not a reliable general population screening test or a standalone cancer diagnosis.",
+    "tagline": "Clinician-directed testing with medical interpretation",
+    "badge": "Discuss with your clinician",
+    "category": "Tumor Markers"
+  },
+  "test-cancer-ca15-3-breast": {
+    "category": "Tumor Markers"
+  },
+  "test-cancer-cea-colorectal": {
+    "category": "Tumor Markers"
+  },
+  "test-cancer-afp-liver": {
+    "category": "Tumor Markers"
+  },
+  "test-tru-pre-operative-profile": {
+    "description": "A listed preoperative laboratory panel. The surgical and anaesthetic team decides which tests are appropriate for the planned procedure and the patient’s health; this panel is not required for every surgery."
+  },
+  "test-anemia-profile-basic": {
+    "description": "Measures serum ferritin to support clinician-directed assessment of iron status. Interpret with symptoms and other laboratory findings."
+  },
+  "test-vitamin-d3-25oh": {
+    "tagline": "Blood measurement of 25-hydroxyvitamin D",
+    "description": "Measures blood 25-hydroxyvitamin D. This is not a bone density measurement. Ask your clinician how the result should be interpreted."
+  },
+  "test-senior-vitality-shield": {
+    "tagline": "Laboratory assessment for older adults",
+    "description": "A listed laboratory panel for clinician-directed assessment in older adults. It does not measure bone density or guarantee detection of joint or memory conditions."
+  },
+  "test-1": {
+    "description": "Blood panel for clinician-directed evaluation and monitoring. Tumor markers may be raised in noncancerous conditions and may be normal when cancer is present. This panel is not a reliable general population cancer screen and does not diagnose or exclude cancer.",
+    "tagline": "Clinician-directed testing with medical interpretation",
+    "badge": "Discuss with your clinician",
+    "category": "Tumor Markers"
+  },
+  "test-2": {
+    "name": "Avinya Whole Body Laboratory Assessment",
+    "description": "Laboratory panel for clinician-directed assessment. Tumor markers are not reliable general population cancer screens and do not independently diagnose or exclude cancer.",
+    "tagline": "Discuss appropriate testing with your clinician"
+  },
+  "test-3": {
+    "description": "Circulating DNA testing requires a specific clinical indication and professional interpretation. It is not a guaranteed early cancer diagnosis or a replacement for established evaluation.",
+    "tagline": "Clinician-directed molecular testing"
+  },
+  "test-4": {
+    "description": "Laboratory assessment of listed cardiovascular risk markers. These blood tests do not directly show arterial plaque, diagnose a blockage or guarantee prediction of a stroke."
+  },
+  "test-7": {
+    "name": "Senior Citizen Laboratory Assessment",
+    "description": "Listed laboratory panel for clinician-directed assessment of older adults. It does not directly measure bone density or diagnose joint degeneration."
+  }
+}

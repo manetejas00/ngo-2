@@ -590,7 +590,7 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
             ('threads_url', 'https://www.threads.com/@avinyacare_foundation'),
             ('youtube_url', 'https://www.youtube.com/@Avinyacarefoundation'),
             ('instagram_url', 'https://www.instagram.com/avinyacare_foundation/'),
-            ('whatsapp', '+91 74474 41116')
+            ('whatsapp', '+91 744 744 1116')
             ON DUPLICATE KEY UPDATE `setting_value` = VALUES(`setting_value`)");
     } catch (Throwable $e) {}
 

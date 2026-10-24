@@ -7,8 +7,8 @@ import { escapeHTML } from '../email/emailTemplate.mjs';
 
 const CONTACT = Object.freeze({
   name: 'AvinyaCareFoundation',
-  phone: '+91 74474 41116',
-  email: 'info@avinyacarefoundation.com',
+  phone: '+91 744 744 1116',
+  email: 'info@avinyacarefoundation.org',
   website: 'www.avinyacarefoundation.org'
 });
 
@@ -406,14 +406,14 @@ Remarks: ${notes}`;
  */
 export function renderTestBookingEmail(booking) {
   const isHome = booking.collectionMethod === 'home_collection';
-  const subject = `Diagnostic Test Booking Confirmation – AvinyaCareFoundation [${booking.id}]`;
+  const subject = `Diagnostic Test Booking Request – AvinyaCareFoundation [${booking.id}]`;
 
   const contentHtml = `
     <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #0F172A;">
       Dear <strong>${escapeHTML(booking.patientName)}</strong>,
     </p>
     <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #334155;">
-      Your diagnostic test booking for <strong>${escapeHTML(booking.testName)}</strong> has been scheduled successfully.
+      Your diagnostic test request for <strong>${escapeHTML(booking.testName)}</strong> has been received. The team must confirm your preferred slot and collection arrangements.
     </p>
 
     <!-- Test Summary Card -->
@@ -462,7 +462,7 @@ export function renderTestBookingEmail(booking) {
     </table>
   `;
 
-  const text = `AvinyaCareFoundation - Test Booking Confirmation
+  const text = `AvinyaCareFoundation - Test Booking Request
 Booking ID: ${booking.id}
 Test: ${booking.testName}
 Collection: ${booking.collectionMethod}

@@ -57,7 +57,7 @@ $timestampIST = date('d F Y, g:i A \I\S\T');
 $allowedFormTypes = ['donation', 'volunteer', 'support', 'contact', 'partnership', 'newsletter', 'feedback', 'guide', 'coming_soon_feedback'];
 $errors = [];
 if (!in_array($formType, $allowedFormTypes, true)) $errors['form_type'] = ['Unsupported form type.'];
-if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) $errors['email'] = ['Please provide a valid email address.'];
+if ((!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) && !($formType === 'support' && $email === '')) $errors['email'] = ['Please provide a valid email address.'];
 if (in_array($formType, ['donation', 'volunteer', 'support', 'contact', 'partnership', 'coming_soon_feedback'], true) && $name === '') $errors['name'] = ['Please enter your name.'];
 $normalizedPhone = preg_replace('/[\s()\-]/', '', $phone);
 if (in_array($formType, ['donation', 'volunteer', 'support', 'coming_soon_feedback'], true) && !preg_match('/^(?:\+91)?[6-9]\d{9}$/', $normalizedPhone)) $errors['phone'] = ['Enter a valid Indian mobile number.'];
@@ -373,7 +373,7 @@ $adminHtmlContent = '<!DOCTYPE html>
 </html>';
 
 // 1. Dispatch User Confirmation HTML Email via Authenticated SSL SMTP
-$userSentResult = sendPHPSMTP($email, $userSubject, $userHtmlContent);
+$userSentResult = $email === '' ? true : sendPHPSMTP($email, $userSubject, $userHtmlContent);
 $userEmailSent = ($userSentResult === true || $userSentResult === 1);
 $userEmailError = !$userEmailSent ? "User confirmation email delivery failed via Hostinger SSL SMTP." : null;
 

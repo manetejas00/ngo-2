@@ -7,6 +7,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { validateDiagnosticRequest } from './diagnosticValidation.mjs';
 import { hashPassword, verifyPassword, validatePasswordStrength, generateResetToken, generateTokenHash } from './healthcareAuthService.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -529,7 +530,12 @@ export async function updateAppointmentStatus(id, newStatus, actor = 'Admin', no
 
 export async function getDiagnosticTests(filters = {}) {
   const db = await getDb();
-  let list = [...db.diagnosticTests];
+  const overrides = JSON.parse(await readFile(join(__dirname, '../../data/diagnostic-copy-overrides.json'), 'utf8'));
+  const seeds = JSON.parse(await readFile(join(__dirname, '../../data/seed_diagnostic_tests.json'), 'utf8'));
+  // Preserve saved catalog entries and historical IDs, while resolving all published seed URLs.
+  const catalog = new Map(seeds.map(test => [test.id, test]));
+  for (const test of db.diagnosticTests) catalog.set(test.id, test);
+  let list = [...catalog.values()].map(test => ({ ...test, ...overrides[test.id] }));
 
   if (filters.category && filters.category !== 'all') {
     list = list.filter(t => t.category.toLowerCase() === filters.category.toLowerCase());
@@ -587,6 +593,7 @@ export async function updateUserLastLogin(userId) {
 }
 
 export async function createTestBooking(bookingData) {
+  validateDiagnosticRequest(bookingData);
   const db = await getDb();
   const {
     testId,
@@ -609,7 +616,7 @@ export async function createTestBooking(bookingData) {
     throw new Error('Missing required test booking information');
   }
 
-  const test = db.diagnosticTests.find(t => t.id === testId);
+  const test = (await getDiagnosticTests()).find(t => t.id === testId);
   if (!test) throw new Error('Selected diagnostic test package not found');
 
   const currentCount = db.testBookings.length + 88;
@@ -647,13 +654,13 @@ export async function createTestBooking(bookingData) {
     patientAge: Number(patientAge) || 0,
     patientGender: patientGender || 'Unspecified',
     notes: notes ? notes.trim() : '',
-    status: 'confirmed',
+    status: 'pending',
     history: [
       {
-        status: 'confirmed',
+        status: 'pending',
         timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST',
         updatedBy: 'Patient / Web Booking',
-        notes: 'Test booking scheduled.'
+        notes: 'Preferred slot requested; laboratory confirmation required.'
       }
     ],
     createdAt: new Date().toISOString()

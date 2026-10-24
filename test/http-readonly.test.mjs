@@ -42,3 +42,21 @@ test('public gallery and donation statistics endpoints have their expected respo
   assert.equal(stats.status, 'ok');
   assert.equal(typeof stats.stats.total, 'number');
 });
+
+test('audit information pages and every diagnostic detail remain public while internal tests stay private', async () => {
+  for (const path of ['/about','/assistance','/transparency','/donation-guide','/privacy','/terms','/events']) {
+    const response = await fetch(new URL(path, base));
+    assert.equal(response.status, 200, path);
+  }
+  const catalog = await (await fetch(new URL('/api/healthcare/tests', base))).json();
+  for (const item of catalog.tests) {
+    const response = await fetch(new URL('/test/' + item.id, base));
+    assert.equal(response.status, 200, item.id);
+    const html = await response.text();
+    assert.ok(html.includes('class="diagnostic-detail"'), item.id);
+    assert.ok(html.includes('href="/css/information.css'), item.id);
+    assert.equal((html.match(/rel="canonical"/g) || []).length, 1, item.id);
+  }
+  assert.equal((await fetch(new URL('/test/config.test.mjs', base))).status, 403);
+  assert.equal((await fetch(new URL('/test/test-not-real', base))).status, 404);
+});

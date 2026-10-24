@@ -26,24 +26,15 @@
   };
 
   window.updateCalculator = value => {
-    const amount = Math.max(0, parseInt(value, 10) || 0);
-    currentCalcAmount = amount;
-    const deduction = Math.round(amount * 0.5);
-    const saved = Math.round(deduction * 0.312);
-    document.getElementById('calc-tax-deduction').textContent = money(deduction);
-    document.getElementById('calc-tax-saved').textContent = money(saved);
-    document.getElementById('calc-btn-amount').textContent = money(amount);
-    const impact = amount >= 50000 ? '✨ Fully funds 1 comprehensive cancer chemotherapy cycle or major emergency ICU stabilization.'
-      : amount >= 25000 ? '✨ Sponsors 3 specialized oncology diagnostic scans (PET-CT/MRI) + 2 post-op support visits.'
-      : amount >= 10000 ? '✨ Fully covers 2 targeted chemotherapy sessions + 1 month of vital cardiac medications.'
-      : amount >= 5000 ? '✨ Sponsors 2 full sets of diagnostic blood work and essential pediatric ICU antibiotics.'
-      : amount >= 2500 ? '✨ Sponsors 1 complete diagnostic ultrasound + 1 week of post-op antibiotic medications.'
-      : amount >= 1000 ? '✨ Provides essential diagnostic screening guidance and nutritional supplements for 2 patients.'
-      : '✨ Provides diagnostic test assistance and local patient travel support.';
-    document.getElementById('calc-impact-text').textContent = impact;
+    const amount = Number(value);
+    const valid = Number.isSafeInteger(amount) && amount >= 100 && amount <= 10000000;
+    currentCalcAmount = valid ? amount : null;
+    const button = document.getElementById('calc-donate-button');
+    if (button) button.disabled = !valid;
+    document.getElementById('calc-btn-amount').textContent = valid ? money(amount) : 'a valid amount';
   };
 
-  window.triggerCalcDonation = () => window.AvinyaModals?.openDonateModal(currentCalcAmount || 2500);
+  window.triggerCalcDonation = () => currentCalcAmount !== null && window.AvinyaModals?.openDonateModal(currentCalcAmount);
 
   function animateProgress(container) {
     const fill = container.querySelector('.cf-progress-bar-fill');
@@ -159,7 +150,7 @@
                   ${spot.hospital_name ? `<span>• ${escapeHtml(spot.hospital_name)}</span>` : '<span>• Healthcare Access Initiative</span>'}
                 </div>
                 <p class="cf-spotlight-desc">
-                  ${escapeHtml(spot.description || '')}
+                  ${escapeHtml(spot.description || '')}<br><small>Image is illustrative. Planning amounts are unverified and are not an approved total project budget.</small>
                 </p>
               </div>
 
@@ -168,7 +159,7 @@
                   <div class="cf-progress-header">
                     <div>
                       <span class="cf-progress-raised">${money(raised)}</span>
-                      <span class="cf-progress-goal">pledged toward ${money(goal)} goal</span>
+                      <span class="cf-progress-goal">pledged toward an unverified planning estimate of ${money(goal)} goal</span>
                     </div>
                     <span class="cf-progress-percent" style="color: #FFA466; font-weight: 800; font-size: 1.1rem;">${pct}%</span>
                   </div>
@@ -177,7 +168,7 @@
                   </div>
                   <div class="cf-progress-stats">
                     <span>🏢 <span class="cf-progress-donor-count">${spot.donor_count || 0}</span> Corporate &amp; Community Donors</span>
-                    <span>🛡️ ${spot.is_tax_exempt ? '80G Tax Exempt Eligible' : 'Direct Impact Project'}</span>
+                    <span>🛡️ ${spot.is_tax_exempt ? 'Confirm receipt eligibility' : 'Project proposal'}</span>
                   </div>
                 </div>
 
@@ -213,10 +204,10 @@
                 <div class="cf-card-media">
                   <img src="${escapeHtml(c.image || 'assets/logo-emblem.png')}" alt="${escapeHtml(c.alt_text || c.title)}" loading="lazy" decoding="async">
                   <div class="cf-card-category">${escapeHtml(c.category_label || c.category || 'Healthcare')}</div>
-                  ${c.is_tax_exempt ? `<div class="cf-card-tax">${escapeHtml(c.tag_label || '80G Tax Saver')}</div>` : ''}
+                  ${c.is_tax_exempt ? `<div class="cf-card-tax">${escapeHtml(c.tag_label || 'Confirm tax eligibility')}</div>` : ''}
                 </div>
                 <div class="cf-card-body">
-                  <h3 class="cf-card-title">${escapeHtml(c.title)}</h3>
+                  <h3 class="cf-card-title">${escapeHtml(c.title)}</h3><p>Proposal; approvals, budget and opening date to be confirmed. Image is illustrative.</p>
                   <div class="cf-card-meta">
                     <span>📍</span>
                     <span class="hospital">${escapeHtml(c.location || 'Vasai-Virar')}${c.hospital_name ? ` • ${escapeHtml(c.hospital_name)}` : ''}</span>
@@ -228,7 +219,7 @@
                     <div class="cf-progress-container" style="margin-bottom: 0.75rem;" data-campaign-category="${escapeHtml(donCat)}" data-goal="${goal}">
                       <div class="cf-progress-header">
                         <span class="cf-progress-raised" style="font-weight: 700; color: #FFA466;">${money(raised)}</span>
-                        <span class="cf-progress-goal">pledged toward ${money(goal)} (<span class="cf-progress-percent">${pct}%</span>)</span>
+                        <span class="cf-progress-goal">pledged toward an unverified planning estimate of ${money(goal)} (<span class="cf-progress-percent">${pct}%</span>)</span>
                       </div>
                       <div class="cf-progress-bar-bg">
                         <div class="cf-progress-bar-fill" style="width: ${pct}%;"></div>

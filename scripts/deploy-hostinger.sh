@@ -56,6 +56,7 @@ archive="$2"
 release="$3"
 stage="${target}.deploy-${release}"
 backup="${target}.rollback"
+# Runtime records, secrets and installed dependencies are preserved during deploy and rollback.
 
 cleanup() { rm -rf "$stage" "$archive"; }
 trap cleanup EXIT
@@ -79,11 +80,11 @@ cp "$target/.env" "$stage/.env"
 rm -rf "$backup"
 mkdir -p "$backup"
 if command -v rsync >/dev/null 2>&1; then
-  rsync -a --delete --exclude='.env' --exclude='storage/' "$target/" "$backup/"
-  rsync -a --delete --exclude='.env' --exclude='storage/' "$stage/" "$target/"
+  rsync -a --delete --exclude='.env' --exclude='.env.production' --exclude='.env.staging' --exclude='storage/' --exclude='cache/' --exclude='.git/' --exclude='node_modules/' "$target/" "$backup/"
+  rsync -a --delete --exclude='.env' --exclude='.env.production' --exclude='.env.staging' --exclude='storage/' --exclude='cache/' --exclude='.git/' --exclude='node_modules/' "$stage/" "$target/"
 else
   cp -a "$target/." "$backup/"
-  find "$target" -mindepth 1 -maxdepth 1 ! -name '.env' ! -name 'storage' -exec rm -rf {} +
+  find "$target" -mindepth 1 -maxdepth 1 ! -name '.env' ! -name '.env.production' ! -name '.env.staging' ! -name 'storage' ! -name 'cache' ! -name '.git' ! -name 'node_modules' -exec rm -rf {} +
   cp -a "$stage/." "$target/"
 fi
 echo "$release" > "$target/.release"
@@ -97,9 +98,9 @@ target="$1"
 backup="${target}.rollback"
 [[ -d "$backup" ]] || { echo "Rollback backup is missing." >&2; exit 1; }
 if command -v rsync >/dev/null 2>&1; then
-  rsync -a --delete --exclude='.env' --exclude='storage/' "$backup/" "$target/"
+  rsync -a --delete --exclude='.env' --exclude='.env.production' --exclude='.env.staging' --exclude='storage/' --exclude='cache/' --exclude='.git/' --exclude='node_modules/' "$backup/" "$target/"
 else
-  find "$target" -mindepth 1 -maxdepth 1 ! -name '.env' ! -name 'storage' -exec rm -rf {} +
+  find "$target" -mindepth 1 -maxdepth 1 ! -name '.env' ! -name '.env.production' ! -name '.env.staging' ! -name 'storage' ! -name 'cache' ! -name '.git' ! -name 'node_modules' -exec rm -rf {} +
   cp -a "$backup/." "$target/"
 fi
 REMOTE_ROLLBACK

@@ -11,6 +11,7 @@ require_once __DIR__ . '/rate_limiter.php';
 enforcePhpRateLimit(15, 60);
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/activity-logger.php';
+require_once __DIR__ . '/diagnostic-validation.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
@@ -163,6 +164,7 @@ try {
     if (!is_array($data)) throw new InvalidArgumentException('Invalid JSON payload.');
     foreach (['testId','date','timeSlot','patientName','patientEmail','patientPhone'] as $field) if (trim((string) ($data[$field] ?? '')) === '') throw new InvalidArgumentException('Missing required field: ' . $field);
     if (!filter_var($data['patientEmail'], FILTER_VALIDATE_EMAIL)) throw new InvalidArgumentException('A valid email address is required.');
+    validateDiagnosticRequest($data);
     $test = null;
     try {
         $pdo = getDatabaseConnection();

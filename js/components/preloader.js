@@ -15,8 +15,8 @@
       this.targetProgress = 0;
       this.isDismissed = false;
       this.startTime = Date.now();
-      this.minDisplayDuration = 550; // Ensure brand is gracefully perceived without jarring flicker
-      this.maxFailsafeTimeout = 2200; // Guaranteed auto-dismiss under any network condition
+      this.minDisplayDuration = 0; // Ensure brand is gracefully perceived without jarring flicker
+      this.maxFailsafeTimeout = 900; // Guaranteed auto-dismiss under any network condition
 
       this.init();
     }
@@ -57,7 +57,8 @@
       this.setTargetProgress(45, 'Connecting');
 
       // Hook up DOMContentLoaded
-      this.setTargetProgress(75, 'Preparing');
+      this.setTargetProgress(100, 'Ready');
+      this.dismiss();
     }
 
     setTargetProgress(val, statusText) {

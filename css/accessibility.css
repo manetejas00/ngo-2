@@ -1,0 +1,20 @@
+.avinya-field-label { display:block; margin:.4rem 0; font-size:.88rem; font-weight:600; color:#243e38; }
+.hc-input-group .avinya-field-label { color:var(--hc-text-main); }
+:where(a,button,input,select,textarea,[tabindex]):focus-visible { outline:3px solid #f28a57 !important; outline-offset:4px; }
+.modal-close-btn,.hc-modal-close { min-width:44px; min-height:44px; }
+.modal-backdrop,.hc-modal-backdrop { z-index:20000; }
+body:has(.modal-backdrop.active,.hc-modal-backdrop.active) :is(.navbar-wrapper,.radial-menu-container,.radial-fab-container) { visibility:hidden; pointer-events:none; }
+.hc-booking-notice { line-height:1.65; }
+.diagnostic-detail a { color:#08675d; text-decoration:underline; }
+.diagnostic-detail { overflow-wrap:anywhere; }
+@media (max-width:480px) {
+  .modal-container { max-width:calc(100vw - 24px) !important; padding:1.4rem !important; }
+  .hc-modal-window { max-width:calc(100vw - 16px) !important; }
+  #hc-test-booking-form > div[style*="grid"],#hc-home-address-fields > div { grid-template-columns:1fr !important; }
+  .cf-calculator-card { grid-template-columns:1fr !important; }
+  .cf-filter-tabs { flex-wrap:wrap; }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+  .action-card,.story-card,.testimonial-card,.cf-card,.cf-faq-item { opacity:1 !important; transform:none !important; }
+}

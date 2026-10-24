@@ -15,9 +15,9 @@ require_once __DIR__ . '/cache-manager.php';
 $defaults = [
     'organization_name' => 'AvinyaCareFoundation',
     'tagline' => 'No one should face a health crisis alone.',
-    'email' => 'info@avinyacarefoundation.com',
-    'phone' => '+91 74474 41116',
-    'whatsapp' => '+91 74474 41116',
+    'email' => 'info@avinyacarefoundation.org',
+    'phone' => '+91 744 744 1116',
+    'whatsapp' => '+91 744 744 1116',
     'address' => '210, Global Plaza, Global City, Virar West - 401305',
     'instagram_url' => 'https://www.instagram.com/avinyacare_foundation/',
     'youtube_url' => 'https://www.youtube.com/@Avinyacarefoundation',

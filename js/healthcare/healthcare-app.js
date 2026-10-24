@@ -26,7 +26,7 @@ class HealthcarePlatform {
         phone: '',
         email: '',
         age: '',
-        gender: 'Male',
+        gender: '',
         reason: '',
         notes: ''
       },
@@ -48,7 +48,7 @@ class HealthcarePlatform {
         phone: '',
         email: '',
         age: '',
-        gender: 'Male',
+        gender: '',
         notes: ''
       },
       confirmedBooking: null
@@ -116,6 +116,8 @@ class HealthcarePlatform {
       this.openHealthcarePlatform(subSection);
     }
     
+    const requestedTest = new URLSearchParams(window.location.search).get('test');
+    if (requestedTest && this.testsCache.some(test => test.id === requestedTest)) this.startTestBooking(requestedTest);
     // Auto-open dynamic SSR modal if present
     if (window.INITIAL_MODAL_ID) {
       setTimeout(() => {
@@ -673,7 +675,7 @@ class HealthcarePlatform {
             </div>
             <div class="hc-input-group">
               <label class="hc-input-label">Gender *</label>
-              <select id="hc-pat-gender" class="hc-select-input">
+              <select id="hc-pat-gender" class="hc-select-input" required><option value="" disabled ${!this.bookingState.patient.gender ? 'selected' : ''}>Select gender</option>
                 <option value="Male" ${this.bookingState.patient.gender === 'Male' ? 'selected' : ''}>Male</option>
                 <option value="Female" ${this.bookingState.patient.gender === 'Female' ? 'selected' : ''}>Female</option>
                 <option value="Other" ${this.bookingState.patient.gender === 'Other' ? 'selected' : ''}>Other</option>
@@ -1081,7 +1083,8 @@ class HealthcarePlatform {
   }
 
   startTestBooking(testId) {
-    const test = this.testsCache.find(t => t.id === testId) || this.testsCache[0];
+    const test = this.testsCache.find(t => t.id === testId);
+    if (!test) return;
     this.testBookingState.test = test;
     this.testBookingState.collectionMethod = test.homeCollection ? 'home_collection' : 'centre_visit';
 
@@ -1096,6 +1099,8 @@ class HealthcarePlatform {
         <div style="font-size: 0.9rem; font-weight: 700; color: var(--hc-text-main);">Package Price: ₹${test.price} (Subsidized)</div>
       </div>
 
+      <p class="hc-booking-notice">This is a request. The team must confirm the slot, collection availability, final price and any extra charges. Follow preparation instructions from your laboratory or clinician; do not stop medicines without advice. Tests can give false positive or false negative results and require medical interpretation.</p>
+      <p>Contact and booking details are used to arrange the service and may be shared with the assigned laboratory or clinician. <a href="/privacy">Privacy notice</a>.</p>
       <form id="hc-test-booking-form" onsubmit="window.HealthcareApp.submitTestBooking(event)">
         <div style="margin-bottom: 1.25rem;">
           <label class="hc-input-label" style="display: block; margin-bottom: 0.5rem;">Collection Method *</label>
@@ -1121,11 +1126,11 @@ class HealthcarePlatform {
           <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
             <div class="hc-input-group">
               <label class="hc-input-label">Complete Home Address *</label>
-              <input type="text" id="hc-test-address" class="hc-search-input" placeholder="Flat No, Wing, Building, Area">
+              <input type="text" id="hc-test-address" class="hc-search-input" ${this.testBookingState.collectionMethod === 'home_collection' ? 'required' : ''} placeholder="Flat No, Wing, Building, Area">
             </div>
             <div class="hc-input-group">
               <label class="hc-input-label">Pincode *</label>
-              <input type="text" id="hc-test-pincode" class="hc-search-input" placeholder="400050" maxlength="6">
+              <input type="text" id="hc-test-pincode" class="hc-search-input" inputmode="numeric" pattern="[1-9][0-9]{5}" ${this.testBookingState.collectionMethod === 'home_collection' ? 'required' : ''} placeholder="400050" maxlength="6">
             </div>
           </div>
         </div>
@@ -1133,7 +1138,7 @@ class HealthcarePlatform {
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
           <div class="hc-input-group">
             <label class="hc-input-label">Preferred Date *</label>
-            <input type="date" id="hc-test-date" class="hc-search-input" required value="${this.testBookingState.selectedDate}">
+            <input type="date" id="hc-test-date" class="hc-search-input" required min="${new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })}" value="${this.testBookingState.selectedDate}">
           </div>
           <div class="hc-input-group">
             <label class="hc-input-label">Time Slot *</label>
@@ -1168,7 +1173,7 @@ class HealthcarePlatform {
           </div>
           <div class="hc-input-group">
             <label class="hc-input-label">Gender *</label>
-            <select id="hc-test-pat-gender" class="hc-select-input">
+            <select id="hc-test-pat-gender" class="hc-select-input" required><option value="" disabled selected>Select gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
               <option value="Other">Other</option>
@@ -1179,7 +1184,7 @@ class HealthcarePlatform {
         <div style="display: flex; justify-content: flex-end; gap: 1rem;">
           <button type="button" class="hc-btn-secondary" onclick="window.HealthcareApp.closeModals()" style="color: var(--hc-text-main); border-color: var(--hc-border);">Cancel</button>
           <button type="submit" class="hc-btn-primary">
-            <span>Confirm Test Booking →</span>
+            <span>Request Test Booking →</span>
           </button>
         </div>
       </form>
@@ -1191,6 +1196,8 @@ class HealthcarePlatform {
 
   toggleCollectionMethod(method) {
     this.testBookingState.collectionMethod = method;
+    document.getElementById('hc-test-address')?.toggleAttribute('required', method === 'home_collection');
+    document.getElementById('hc-test-pincode')?.toggleAttribute('required', method === 'home_collection');
     const addrField = document.getElementById('hc-home-address-fields');
     if (addrField) {
       addrField.style.display = method === 'home_collection' ? 'block' : 'none';
@@ -1231,9 +1238,9 @@ class HealthcarePlatform {
             <div style="width: 64px; height: 64px; background: var(--hc-success-bg); color: var(--hc-success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.25rem auto;">
               ✓
             </div>
-            <h3 style="font-size: 1.5rem; font-weight: 800; margin: 0 0 0.5rem 0;">Diagnostic Test Scheduled!</h3>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin: 0 0 0.5rem 0;">Test Request Received</h3>
             <p style="color: var(--hc-text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
-              Booking ID: <strong style="font-family: monospace; color: var(--hc-primary); font-size: 1.1rem;">${booking.id}</strong>
+              Request reference: <strong style="font-family: monospace; color: var(--hc-primary); font-size: 1.1rem;">${booking.id}</strong>
             </p>
             <div style="background: var(--hc-surface-alt); padding: 1.25rem; border-radius: var(--hc-radius-md); text-align: left; font-size: 0.9rem; margin-bottom: 1.5rem;">
               <div><strong>Package:</strong> ${booking.testName}</div>

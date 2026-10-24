@@ -42,10 +42,21 @@ class ModalManager {
 
     // ESC Key listener
     window.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab' && this.activeModal) {
+        const items = [...this.activeModal.querySelectorAll('button, a[href], input, select, textarea, [tabindex="0"]')].filter(el => !el.disabled && el.getClientRects().length);
+        const first = items[0], last = items[items.length - 1];
+        if (items.length && !this.activeModal.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+        else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
       if (e.key === 'Escape') {
         this.closeAll();
       }
     });
+  }
+
+  escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   }
 
   openModal(modalId) {
@@ -59,6 +70,11 @@ class ModalManager {
         container.innerHTML = this.templates[modalId];
       }
 
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      const heading = modal.querySelector('h2, h3');
+      if (heading) { heading.id ||= `${modalId}-heading`; modal.setAttribute('aria-labelledby', heading.id); }
+      modal.querySelectorAll('.modal-close-btn').forEach(button => button.setAttribute('aria-label', 'Close dialog'));
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
       this.activeModal = modal;
@@ -75,6 +91,7 @@ class ModalManager {
       }
 
       if (modalId === 'donate-modal') {
+        this.setDonationType('one-time');
         this.selectAmount(this.selectedAmount || 1000);
       }
     }
@@ -123,6 +140,7 @@ class ModalManager {
 
   // --- DONATION CONTROLS ---
   setDonationType(type) {
+    // This form records an intention; it cannot create a recurring payment mandate.
     this.isMonthly = (type === 'monthly');
     const oneTimeBtn = document.getElementById('toggle-one-time');
     const monthlyBtn = document.getElementById('toggle-monthly');
@@ -179,26 +197,17 @@ class ModalManager {
   }
 
   handleCustomAmountInput(value) {
-    let amt = parseInt(value, 10);
-    if (!isNaN(amt) && amt >= 100) {
-      this.selectedAmount = amt;
-    } else {
-      this.selectedAmount = 100;
-    }
+    this.selectedAmount = Number(value);
     this.updateImpactStatement();
   }
 
   updateImpactStatement() {
     const statement = document.getElementById('impact-calculator-statement');
     if (!statement) return;
-    const amount = this.selectedAmount || 1000;
-    const formattedAmount = new Intl.NumberFormat('en-IN').format(amount);
-    const count = Math.max(1, Math.floor(amount / 500));
-    const indLabel = count === 1 ? 'individual' : 'individuals';
-
-    const desc = `Impact: ₹${formattedAmount} provides diagnostic screening guidance and local travel assistance for ${count} ${indLabel}.`;
-
-    statement.innerHTML = `✨ <strong>${desc}</strong><br><span style="font-size: 0.8rem; color: #087F73; font-weight: 600; display: inline-block; margin-top: 4px;">✓ 100% Eligible for 80G Tax Exemption (Receipt delivered via email)</span>`;
+    const valid = Number.isSafeInteger(this.selectedAmount) && this.selectedAmount >= 100;
+    statement.textContent = valid
+      ? `Donation interest: ₹${new Intl.NumberFormat('en-IN').format(this.selectedAmount)}. No payment is taken here. Confirm payment arrangements and receipt eligibility with the foundation.`
+      : 'Enter a whole-rupee amount of at least ₹100.';
   }
 
   // --- SUBMIT FORM TO API ---
@@ -272,60 +281,17 @@ class ModalManager {
           <div style="text-align: center; padding: 1.5rem 1rem 0;">
             <div style="width: 64px; height: 64px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 50%; color: #166534; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.5rem; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.03));">✓</div>
             <span style="font-size: 0.75rem; font-weight: 700; color: #166534; background: #DCFCE7; padding: 0.35rem 0.75rem; border-radius: 9999px; letter-spacing: 0.05em; text-transform: uppercase;">
-              ${isAI ? '✨ Dynamic AI Generated' : '✓ Submission Confirmed'}
+              Request received
             </span>
-            <h2 style="font-size: 1.8rem; font-weight: 800; margin: 1rem 0 0.5rem; color: #111827; font-family: var(--font-primary, 'Manrope', sans-serif); letter-spacing: -0.02em;">${title || 'Thank You!'}</h2>
+            <h2 style="font-size: 1.8rem; font-weight: 800; margin: 1rem 0 0.5rem; color: #111827; font-family: var(--font-primary, 'Manrope', sans-serif); letter-spacing: -0.02em;">${this.escapeHtml(title || 'Thank You!')}</h2>
             <p style="color: #4B5563; font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.6;">
-              ${userEmail.greeting ? `<strong style="color:#111827;">${userEmail.greeting}</strong><br>` : ''}
-              ${resData.message || 'We have received your submission and sent a confirmation email to your address.'}
+              ${userEmail.greeting ? `<strong style="color:#111827;">${this.escapeHtml(userEmail.greeting)}</strong><br>` : ''}
+              ${formType === 'donation' ? 'Your donation interest has been recorded. Payment has not been taken by this form.' : 'Your request has been received.'}
             </p>
 
-            <!-- Live Email Dispatch Status -->
-            <div style="background: ${hasDeliveryWarning ? '#FFFBEB' : '#F9FAFB'}; border: 1px solid ${hasDeliveryWarning ? '#FDE68A' : '#E5E7EB'}; border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; text-align: left; font-size: 0.85rem;">
-              <div style="font-weight: 700; color: ${hasDeliveryWarning ? '#B45309' : '#111827'}; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
-                <span>${hasDeliveryWarning ? '⚠️ Delivery Notice' : 'Live Dispatch Status'}</span>
-                <span style="font-size: 0.7rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 9999px; background: ${isUserSent && isAdminSent ? '#E5E7EB; color: #374151;' : '#FEF3C7; color: #92400E;'}">
-                  ${delivery.status || 'SENT'}
-                </span>
-              </div>
-              <div style="color: ${hasDeliveryWarning ? '#92400E' : '#4B5563'}; line-height: 1.6;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="color: ${isUserSent ? '#10B981' : '#EF4444'}; font-size: 1.1rem;">${isUserSent ? '•' : '×'}</span>
-                  <span>User (<strong>${payload.email || 'Recipient'}</strong>): ${isUserSent ? 'Sent' : (delivery.userEmailError || 'Failed')}</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
-                  <span style="color: ${isAdminSent ? '#10B981' : '#EF4444'}; font-size: 1.1rem;">${isAdminSent ? '•' : '×'}</span>
-                  <span>System (<strong>${delivery.adminEmailRecipient || 'info@test.avinyacarefoundation.org'}</strong>): ${isAdminSent ? 'Sent' : (delivery.adminEmailError || 'Failed')}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Email Content Preview Card -->
-            <div style="background: #FFFFFF; border-radius: 16px; padding: 1.25rem; margin-bottom: 2rem; text-align: left; font-size: 0.9rem; border: 1px solid #E5E7EB; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-              <div style="font-weight: 600; color: #6B7280; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                <span>Email Preview</span>
-                <span style="background: #F3F4F6; padding: 0.15rem 0.5rem; border-radius: 9999px; color: #4B5563;">${resData.submissionId}</span>
-              </div>
-              <div style="font-weight: 700; color: #111827; margin-bottom: 0.5rem; font-size: 0.95rem;">Subject: ${userEmail.subject || 'Submission Confirmation'}</div>
-              <div style="color: #6B7280; line-height: 1.6; font-size: 0.85rem;">
-                "${userEmail.body ? userEmail.body.slice(0, 180).replace(/<[^>]*>?/gm, '') + '...' : 'A personalized email response has been generated.'}"
-              </div>
-            </div>
-
+            <p role="status" style="color:#374151">Reference: ${this.escapeHtml(resData.submissionId || '')}. ${isUserSent && payload.email ? 'A confirmation email has been sent.' : 'Your request was received. Please save this reference and contact us if you need help.'} ${formType === 'donation' && !isConfirmedDonation ? 'Payment has not been confirmed. This is an acknowledgement of your interest, not a donation receipt. No recurring payment has been set up.' : ''}</p>
             <!-- Action Buttons -->
-            ${isConfirmedDonation ? `
-              <button onclick="window.AvinyaPdf.generateDonationReceiptPDF({
-                name: '${(payload.name || '').replace(/'/g, "\\'")}',
-                email: '${(payload.email || '').replace(/'/g, "\\'")}',
-                phone: '${(payload.phone || '').replace(/'/g, "\\'")}',
-                pan: '${(payload.pan || '').replace(/'/g, "\\'")}',
-                amount: ${payload.amount || 1000},
-                transaction_id: '${payload.transaction_id || resData.submissionId}',
-                receiptNo: '${resData.submissionId}'
-              })" style="width: 100%; display: flex; align-items: center; justify-content: center; padding: 1rem; border-radius: 9999px; background: #F3F4F6; color: #111827; border: 1px solid #E5E7EB; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-bottom: 1rem; transition: all 0.2s;">
-                📄 Download Official 80G Receipt
-              </button>
-            ` : formType === 'guide' ? `
+            ${isConfirmedDonation ? `<p>Contact the foundation with your reference to request a verified payment receipt or applicable tax certificate.</p>` : formType === 'guide' ? `
               <button onclick="window.AvinyaPdf.generateAwarenessGuidePDF()" style="width: 100%; display: flex; align-items: center; justify-content: center; padding: 1rem; border-radius: 9999px; background: #F3F4F6; color: #111827; border: 1px solid #E5E7EB; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-bottom: 1rem; transition: all 0.2s;">
                 📄 Download Cancer Toolkit PDF
               </button>
@@ -350,7 +316,7 @@ class ModalManager {
           <h2 style="font-size: 1.8rem; font-weight: 800; margin: 1rem 0 0.5rem; color: #111827; font-family: var(--font-primary, 'Manrope', sans-serif); letter-spacing: -0.02em;">Oops!</h2>
           <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 16px; padding: 1.25rem; margin-bottom: 2rem; text-align: left; font-size: 0.9rem; color: #991B1B; line-height: 1.6;">
             <div style="font-weight: 700; margin-bottom: 0.5rem; color: #7F1D1D;">Error Details:</div>
-            ${err.message || 'Could not submit form. Please check your network connection or try again.'}
+            ${this.escapeHtml(err.message || 'Could not submit form. Please check your network connection or try again.')}
           </div>
           <button onclick="window.AvinyaModals.closeAll()" style="width: 100%; display: flex; align-items: center; justify-content: center; padding: 1rem; border-radius: 9999px; background: #111827; color: #FFFFFF; border: none; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s ease;">
             Close & Try Again
@@ -433,10 +399,13 @@ class ModalManager {
     let amount = this.selectedAmount || 1000;
     if (this.isCustom) {
       const customInput = document.getElementById('custom-amount-input');
-      const val = parseInt(customInput?.value, 10);
-      if (val && val >= 100) {
-        amount = val;
+      const val = Number(customInput?.value);
+      if (!Number.isSafeInteger(val) || val < 100) {
+        this.showFormErrors(form, { amount: 'Enter a whole-rupee donation amount of at least ₹100.' });
+        customInput?.focus();
+        return;
       }
+      amount = val;
     }
 
     const payload = {
@@ -516,7 +485,7 @@ class ModalManager {
     const errors = {};
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,63}$/.test(String(payload.email || '').trim());
     const phoneOk = /^(?:\+91)?[6-9]\d{9}$/.test(String(payload.phone || '').replace(/[\s()-]/g, ''));
-    if (!emailOk) errors.email = 'Please enter a valid email address.';
+    if (!emailOk && !(formType === 'support' && !String(payload.email || '').trim())) errors.email = 'Please enter a valid email address.';
     if (['donation', 'volunteer', 'support', 'contact', 'partnership', 'coming_soon_feedback'].includes(formType) && !String(payload.name || '').trim()) errors.name = 'Please enter your name.';
     if (['donation', 'volunteer', 'support', 'coming_soon_feedback'].includes(formType) && !phoneOk) errors.phone = 'Enter a valid 10-digit Indian mobile number.';
     if (formType === 'donation' && (!Number.isFinite(Number(payload.amount)) || Number(payload.amount) < 100 || Number(payload.amount) > 10000000)) errors.amount = 'Donation amount must be between ₹100 and ₹1,00,00,000.';
@@ -535,6 +504,8 @@ class ModalManager {
       if (input) {
         input.setAttribute('aria-invalid', 'true');
         const node = document.createElement('div');
+        node.id = `${input.id || 'form-' + field}-error`;
+        input.setAttribute('aria-describedby', node.id);
         node.dataset.validationError = 'true'; node.setAttribute('role', 'alert'); node.style.cssText = 'color:#B91C1C;font-size:.82rem;margin:.35rem 0 .65rem;'; node.textContent = message;
         input.insertAdjacentElement('afterend', node);
       }

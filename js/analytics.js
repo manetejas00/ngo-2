@@ -13,7 +13,12 @@
     window.dataLayer = window.dataLayer || [];
     window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
     window.gtag('js', new Date());
-    window.gtag('config', measurementId, { anonymize_ip: true });
+    window.gtag('config', measurementId, { anonymize_ip: true, send_page_view: false });
+
+    const publicPath = location.pathname;
+    if (!publicPath.startsWith('/test/') && !publicPath.startsWith('/admin')) {
+      window.gtag('event', 'page_view', { page_location: location.origin + publicPath, page_title: 'Avinya Care Foundation', page_referrer: '' });
+    }
 
     const script = document.createElement('script');
     script.async = true;

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="js/analytics.js?v=4.2.2" defer></script>
+  <script src="js/analytics.js?v=4.2.3" defer></script>
   <title>Diagnostic Tests &amp; Screening Packages | AvinyaCareFoundation</title>
   <meta name="description" content="Access subsidized diagnostic tests, comprehensive cancer screening packages, and full-body health checkups with free doorstep sample collection through AvinyaCareFoundation.">
   <meta name="keywords" content="subsidized diagnostic tests, cancer screening packages, blood tests Mumbai, doorstep blood sample collection, health checkup Vasai Virar, full body checkup, AvinyaCareFoundation diagnostics">
@@ -51,9 +51,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="css/styles.css?v=4.2.2">
-  <link rel="stylesheet" href="css/healthcare.css?v=4.2.2">
-  <link rel="stylesheet" href="css/preloader.css?v=4.2.2">
+  <link rel="stylesheet" href="css/styles.css?v=4.2.3">
+  <link rel="stylesheet" href="css/healthcare.css?v=4.2.3">
+  <link rel="stylesheet" href="css/preloader.css?v=4.2.3">
+<link rel="stylesheet" href="/css/accessibility.css?v=4.2.3">
+<script defer src="/js/components/accessibility.js?v=4.2.3"></script>
 </head>
 <body class="healthcare-page-body" style="background-color: var(--hc-bg); color: var(--hc-text-main);">
   <!-- ==========================================
@@ -84,7 +86,7 @@
       </div>
     </div>
   </div>
-  <script src="js/components/preloader.js?v=4.2.2"></script>
+  <script src="js/components/preloader.js?v=4.2.3"></script>
 
   <div id="doctors-tests-platform">
 
@@ -134,7 +136,7 @@
         <div class="hc-hero-widget-box" style="max-width: 600px; margin: 0 auto;">
           <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; justify-content: center;">
             <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Full Body Checkup'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🩺 Full Body</span>
-            <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Cancer Screening'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🎗️ Cancer Screening</span>
+            <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Tumor Markers'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🎗️ Tumor Markers</span>
             <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Heart Tests'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🫀 Heart</span>
             <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Diabetes Tests'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🩸 Diabetes</span>
             <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Thyroid & Hormones'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🦋 Thyroid</span>
@@ -239,7 +241,7 @@
   <div class="hc-hero-section-bridge"></div>
 
   <!-- 3. MAIN HEALTHCARE CONTENT PLATFORM -->
-  <main> <div id="doctors-tests-platform" style="display: block;">
+  <main> <div id="hc-catalog-content" style="display: block;">
 
     <!-- 4. DIAGNOSTIC TEST CATALOG & PACKAGES -->
     <section class="hc-section" id="hc-tests-anchor">
@@ -258,7 +260,7 @@
         <div class="hc-spec-pills-row" style="justify-content: center; margin-top: 1.25rem;">
           <button class="hc-spec-chip hc-test-filter-btn active" data-category="all" onclick="window.HealthcareApp.filterTests('all')">All Tests</button>
           <button class="hc-spec-chip hc-test-filter-btn" data-category="Full Body Checkup" onclick="window.HealthcareApp.filterTests('Full Body Checkup')">🩺 Full Body</button>
-          <button class="hc-spec-chip hc-test-filter-btn" data-category="Cancer Screening" onclick="window.HealthcareApp.filterTests('Cancer Screening')">🎗️ Cancer Screening</button>
+          <button class="hc-spec-chip hc-test-filter-btn" data-category="Tumor Markers" onclick="window.HealthcareApp.filterTests('Tumor Markers')">🎗️ Tumor Markers</button>
           <button class="hc-spec-chip hc-test-filter-btn" data-category="Heart Tests" onclick="window.HealthcareApp.filterTests('Heart Tests')">🫀 Heart</button>
           <button class="hc-spec-chip hc-test-filter-btn" data-category="Diabetes Tests" onclick="window.HealthcareApp.filterTests('Diabetes Tests')">🩸 Diabetes</button>
           <button class="hc-spec-chip hc-test-filter-btn" data-category="Thyroid & Hormones" onclick="window.HealthcareApp.filterTests('Thyroid & Hormones')">🦋 Thyroid &amp; Hormones</button>
@@ -401,198 +403,13 @@
 
   <!-- Legal & Compliance Modals -->
   <!-- 1. Privacy Policy Modal -->
-  <div id="privacy-modal" class="modal-backdrop">
-    <div class="modal-container" style="width: min(720px, 100%); max-height: 85vh;">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close Privacy Policy Modal">✕</button>
-      <div class="modal-header-brand">
-        <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
-        <span class="category-tag" style="margin-bottom: 0;">DATA PROTECTION &amp; PRIVACY</span>
-      </div>
-      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; color: #111817;">Privacy Policy</h3>
-      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
-        AvinyaCareFoundation is committed to absolute patient confidentiality, donor data security, and transparent governance in accordance with the <strong>Digital Personal Data Protection (DPDP) Act 2023</strong> and healthcare ethics standards.
-      </p>
-
-      <div style="display: flex; flex-direction: column; gap: 1.25rem; font-size: 0.92rem; color: #374151; line-height: 1.6;">
-        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
-          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
-            <span>🛡️</span> Zero Commercial Monetization
-          </h4>
-          <p style="margin: 0; color: #475569;">
-            We do not sell, rent, lease, or monetize user, patient, or donor personal data to any commercial advertisers, third-party marketing brokers, or pharmaceutical marketing entities.
-          </p>
-        </div>
-
-        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
-          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
-            <span>🩺</span> Patient &amp; Medical Data Confidentiality
-          </h4>
-          <p style="margin: 0; color: #475569;">
-            Information submitted via helpline intake forms, diagnostic requests, or medical support channels is strictly confidential. Medical summaries and screening inquiries are accessible only to authorized clinical coordinators and registered volunteer doctors for triage and navigation assistance.
-          </p>
-        </div>
-
-        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
-          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
-            <span>💳</span> Donor Security &amp; 80G Statutory Records
-          </h4>
-          <p style="margin: 0; color: #475569;">
-            Payment transactions (UPI, NetBanking, Credit/Debit cards) are processed via RBI-licensed, 256-bit SSL encrypted payment gateways. PAN and contact details collected for Form 10BE / 80G tax receipts are securely retained exclusively for Income Tax Department statutory filing and direct receipt delivery.
-          </p>
-        </div>
-
-        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
-          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
-            <span>📋</span> Data Subject Rights &amp; Grievance Contact
-          </h4>
-          <p style="margin: 0; color: #475569;">
-            Supporters and beneficiaries may request review, modification, or erasure of their records at any time. For privacy inquiries or grievances, contact our Data Protection Coordinator at <a href="mailto:info@avinyacarefoundation.com" style="color: var(--brand); font-weight: 600;">info@avinyacarefoundation.com</a> or Helpline <a href="tel:+917447441116" style="color: var(--brand); font-weight: 600;">+91 74474 41116</a>.
-          </p>
-        </div>
-      </div>
-
-      <div style="margin-top: 1.75rem; text-align: right;">
-        <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="padding: 0.75rem 1.75rem; font-size: 0.95rem;">
-          <span>Understood &amp; Close</span>
-        </button>
-      </div>
-    </div>
-  </div>
+  <div id="privacy-modal" class="modal-backdrop"><div class="modal-container" style="width:min(760px,100%);max-height:85vh;overflow-y:auto;color:#192d2a;background:#f7f9f8"><button class="modal-close-btn" aria-label="Close dialog" onclick="window.AvinyaModals.closeAll()">✕</button><h2>Privacy notice</h2><p class="lead">Website data and how to ask about it. Updated 24 October 2026.</p><section><h2>Information provided through forms</h2><p>Forms request contact details, enquiry text, donation interest or booking details. Healthcare booking may also request age, gender, collection address and appointment information. Provide only what is necessary for the request. Avoid unrelated medical records or financial credentials.</p></section><section><h2>Use and service providers</h2><p>Details are used to handle requests, arrange appointments, communicate confirmations and maintain operational records. Booking details may be shared with the assigned clinician or diagnostic provider. Email delivery and hosting providers process information needed to operate the service.</p></section><section><h2>Analytics</h2><p>If configured, website analytics measures general page use and events. Form fields should not be sent to analytics. This update excludes diagnostic detail pages and admin pages from its manual page-view events and omits query strings and fragments. Your browser and network may still share technical connection information with providers.</p></section><section><h2>Retention and privacy requests</h2><p>Ask the foundation about the retention period, service providers and legal requirements applicable to your records. To request access, correction, deletion or raise a concern, <a href="mailto:info@avinyacarefoundation.org" data-site-setting="email">contact the foundation</a>. Identity verification or statutory retention may apply. No fixed retention or deletion timeframe is asserted here.</p></section><section><h2>Sensitive communications</h2><p>Do not put medical reports, PAN, passwords or banking codes in public comments or ordinary initial enquiries. Ask for the appropriate secure route before sending sensitive documents.</p></section><p><a href="/privacy">Open this page or share its link →</a></p></div></div>
 
   <!-- 2. Terms of Service Modal -->
-  <div id="terms-modal" class="modal-backdrop">
-    <div class="modal-container" style="width: min(720px, 100%); max-height: 85vh;">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close Terms of Service Modal">✕</button>
-      <div class="modal-header-brand">
-        <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
-        <span class="category-tag" style="margin-bottom: 0;">TERMS &amp; CONDITIONS</span>
-      </div>
-      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; color: #111817;">Terms of Service</h3>
-      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
-        Welcome to AvinyaCareFoundation. By accessing our platform, helpline, or community programs, you agree to the following terms and humanitarian service guidelines.
-      </p>
-
-      <div style="display: flex; flex-direction: column; gap: 1.25rem; font-size: 0.92rem; color: #374151; line-height: 1.6;">
-        <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 1.1rem 1.25rem;">
-          <h4 style="font-size: 1rem; font-weight: 700; color: #92400E; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
-            <span>⚠️</span> Healthcare Navigation Disclaimer (Non-Emergency)
-          </h4>
-          <p style="margin: 0; color: #78350F;">
-            AvinyaCareFoundation is a registered humanitarian NGO providing awareness, screening coordination, caregiver guidance, and healthcare navigation. <strong>We are not an emergency hospital or emergency rescue unit.</strong> For critical emergencies, please immediately visit the nearest emergency room or dial national emergency helplines (112 / 108).
-          </p>
-        </div>
-
-        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
-          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
-            <span>🩺</span> Clinical Advice &amp; Medical Consultation
-          </h4>
-          <p style="margin: 0; color: #475569;">
-            All clinical consultations and diagnostic screenings are conducted by licensed independent clinicians and accredited diagnostic pathology centers. Information published on our awareness portals is for educational literacy only and does not substitute for a formal clinical diagnosis by a registered medical practitioner.
-          </p>
-        </div>
-
-        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
-          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
-            <span>🤝</span> Voluntary Contributions &amp; 80G Tax Policy
-          </h4>
-          <p style="margin: 0; color: #475569;">
-            All donations made to AvinyaCareFoundation are voluntary charitable contributions utilized directly for community health drives, patient care kits, and diagnostic subsidies. Donations are eligible for 50% tax exemption under Section 80G of the Indian Income Tax Act.
-          </p>
-        </div>
-
-        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.1rem 1.25rem;">
-          <h4 style="font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
-            <span>⚖️</span> Governing Law &amp; Jurisdiction
-          </h4>
-          <p style="margin: 0; color: #475569;">
-            These terms are governed by the laws of India. Any disputes arising out of the foundation's services shall be subject to the exclusive jurisdiction of the competent courts in the Mumbai / Vasai-Virar Judicial District, Maharashtra.
-          </p>
-        </div>
-      </div>
-
-      <div style="margin-top: 1.75rem; text-align: right;">
-        <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="padding: 0.75rem 1.75rem; font-size: 0.95rem;">
-          <span>Accept &amp; Close</span>
-        </button>
-      </div>
-    </div>
-  </div>
+  <div id="terms-modal" class="modal-backdrop"><div class="modal-container" style="width:min(760px,100%);max-height:85vh;overflow-y:auto;color:#192d2a;background:#f7f9f8"><button class="modal-close-btn" aria-label="Close dialog" onclick="window.AvinyaModals.closeAll()">✕</button><h2>Website terms and service information</h2><p class="lead">Updated 24 October 2026.</p><section><h2>Information and healthcare</h2><p>Website information supports enquiries and is not a diagnosis or individualized medical advice. A clinician should guide testing, interpret results and arrange follow-up. Screening, diagnosis and monitoring serve different purposes.</p></section><section><h2>Requests and appointments</h2><p>Submitting a form records a request; it does not guarantee approval, funding, a slot or service availability. Confirm the provider, location, preparation, price, additional charges, report turnaround and cancellation or rescheduling arrangements before attending.</p></section><section><h2>Contributions</h2><p>Read the <a href="/donation-guide">donation guide</a>. An interest acknowledgement is not proof of payment. Verify project documents, approved payment arrangements and any applicable tax approval before contributing.</p></section><section><h2>Contact</h2><p>For corrections, complaints or questions, call <a href="tel:+917447441116" data-site-setting="phone">744 744 1116</a> or email <a href="mailto:info@avinyacarefoundation.org" data-site-setting="email">info@avinyacarefoundation.org</a>.</p></section><p><a href="/terms">Open this page or share its link →</a></p></div></div>
 
   <!-- 3. Legal & Statutory Compliance Modal -->
-  <div id="compliance-modal" class="modal-backdrop">
-    <div class="modal-container" style="width: min(760px, 100%); max-height: 85vh;">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close Compliance Modal">✕</button>
-      <div class="modal-header-brand">
-        <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
-        <span class="category-tag" style="margin-bottom: 0;">STATUTORY ACCREDITATION &amp; TRANSPARENCY</span>
-      </div>
-      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; color: #111817;">Legal &amp; Regulatory Compliance</h3>
-      <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
-        AvinyaCareFoundation is fully certified, audited, and registered under Indian law with complete non-profit statutory accountability.
-      </p>
-
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-        <!-- 80G Tax Exemption -->
-        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-            <span style="font-weight: 800; color: #087F73; font-size: 1.05rem;">Section 80G (IT Act)</span>
-            <span style="background: #E6F4F1; color: #087F73; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">50% Tax Deduction</span>
-          </div>
-          <p style="font-size: 0.88rem; color: #475569; margin: 0; line-height: 1.5;">
-            Registered under Section 80G of the Indian Income Tax Act, 1961. Donors receive instant 80G receipts and annual Form 10BE certificates for claiming tax deductions.
-          </p>
-        </div>
-
-        <!-- 12A Registration -->
-        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-            <span style="font-weight: 800; color: #087F73; font-size: 1.05rem;">Section 12A (IT Act)</span>
-            <span style="background: #E6F4F1; color: #087F73; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Tax-Exempt Entity</span>
-          </div>
-          <p style="font-size: 0.88rem; color: #475569; margin: 0; line-height: 1.5;">
-            Granted non-profit charitable status under Section 12A of the Income Tax Department, ensuring all incoming donations are dedicated 100% to charitable purposes.
-          </p>
-        </div>
-
-        <!-- CSR-1 Certification -->
-        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-            <span style="font-weight: 800; color: #087F73; font-size: 1.05rem;">MCA CSR-1 Registered</span>
-            <span style="background: #E6F4F1; color: #087F73; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Corporate Grants</span>
-          </div>
-          <p style="font-size: 0.88rem; color: #475569; margin: 0; line-height: 1.5;">
-            Registered with the Ministry of Corporate Affairs (MCA) under Form CSR-1 to execute corporate social responsibility healthcare and diagnostic screening mandates under Companies Act, 2013.
-          </p>
-        </div>
-
-        <!-- NITI Aayog NGO Darpan -->
-        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 1.25rem;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-            <span style="font-weight: 800; color: #087F73; font-size: 1.05rem;">NITI Aayog NGO Darpan</span>
-            <span style="background: #E6F4F1; color: #087F73; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Govt. Verified</span>
-          </div>
-          <p style="font-size: 0.88rem; color: #475569; margin: 0; line-height: 1.5;">
-            Verified and listed on the Government of India's central NGO Darpan portal for transparent public tracking, regulatory compliance, and institutional collaboration.
-          </p>
-        </div>
-      </div>
-
-      <!-- Governance & Trust Info Banner -->
-      <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px; padding: 1rem 1.25rem; font-size: 0.88rem; color: #166534; line-height: 1.6; margin-bottom: 1.5rem;">
-        <strong>🏛️ Public Charitable Trust Registration &amp; Statutory Audits:</strong><br>
-        Registered under the Maharashtra Public Trusts Act (Office: 210, Global Plaza, Global City, Virar West, Maharashtra - 401305). Accounts are annually audited by certified independent Chartered Accountants (CA) and submitted to the Charity Commissioner and Income Tax Department.
-      </div>
-
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <div style="font-size: 0.85rem; color: var(--muted);">
-          Questions or verification requests? Contact <a href="mailto:info@avinyacarefoundation.com" style="color: var(--brand); font-weight: 600;">info@avinyacarefoundation.com</a>
-        </div>
-        <button class="btn-primary" onclick="window.AvinyaModals.closeAll()" style="padding: 0.75rem 1.75rem; font-size: 0.95rem;">
-          <span>Close Compliance Details</span>
-        </button>
-      </div>
-    </div>
-  </div>
+  <div id="compliance-modal" class="modal-backdrop"><div class="modal-container" style="width:min(760px,100%);max-height:85vh;overflow-y:auto;color:#192d2a;background:#f7f9f8"><button class="modal-close-btn" aria-label="Close dialog" onclick="window.AvinyaModals.closeAll()">✕</button><h2>Documents and transparency</h2><p class="lead">Ask for evidence before relying on a claim or choosing a project.</p><section><h2>Foundation documents</h2><p>Request current registration records, exact legal identity, applicable tax approvals, CSR documentation and any available annual reports or audited financial statements. Publication and validity of these records are not verified by this website update.</p></section><section><h2>Impact reporting</h2><p>Verified surgery counts and patient outcome claims are not published here while supporting records and publication permissions are unavailable. Recorded contributions are not the same as funds disbursed or patients treated.</p></section><section><h2>Proposed projects</h2><p>Hospital, NICU, dialysis, ambulance and camp initiatives shown on the crowdfunding page are proposals. Locations, partners, approvals, costs, dates and operating capacity require confirmation. Images are illustrative. A planning amount is not evidence of the cost of a complete hospital or service.</p></section><section><h2>Before a restricted-purpose contribution</h2><p>Ask for scope, budget, approvals, milestones, responsible contact and reporting arrangements. Confirm what happens if a proposal changes, is delayed, cannot proceed or receives excess funds.</p></section><section><h2>Questions or concerns</h2><p>For patient, donor or privacy concerns, <a href="mailto:info@avinyacarefoundation.org" data-site-setting="email">email info@avinyacarefoundation.org</a> or call <a href="tel:+917447441116" data-site-setting="phone">744 744 1116</a>. Include an existing request reference where available and ask for the appropriate foundation contact.</p></section><p><a href="/transparency">Open this page or share its link →</a></p></div></div>
 
   <!-- Donate Modal -->
   <div id="donate-modal" class="modal-backdrop">
@@ -607,7 +424,7 @@
 
       <div class="donation-toggle">
         <button id="toggle-one-time" class="toggle-option active" onclick="window.AvinyaModals.setDonationType('one-time')">One-Time</button>
-        <button id="toggle-monthly" class="toggle-option" onclick="window.AvinyaModals.setDonationType('monthly')">Monthly</button>
+        <button id="toggle-monthly" class="toggle-option" onclick="window.AvinyaModals.setDonationType('monthly')">Monthly interest</button>
       </div>
 
       <div class="amount-grid">
@@ -622,7 +439,7 @@
       <div id="custom-amount-container" style="display: none; margin-bottom: 1.25rem;">
         <div style="position: relative; display: flex; align-items: center;">
           <span style="position: absolute; left: 1rem; font-weight: 700; color: var(--gray-900); font-size: 1.05rem;">₹</span>
-          <input type="number" id="custom-amount-input" min="100" step="50" placeholder="Enter amount (₹)" oninput="window.AvinyaModals.handleCustomAmountInput(this.value)" style="padding: 0.8rem 1rem 0.8rem 2.2rem; border-radius: 8px; border: 1.5px solid var(--brand); width: 100%; font-size: 1rem; font-weight: 600; outline: none; box-sizing: border-box; color: var(--gray-900);">
+          <input type="number" id="custom-amount-input" min="100" step="1" placeholder="Enter amount (₹)" oninput="window.AvinyaModals.handleCustomAmountInput(this.value)" style="padding: 0.8rem 1rem 0.8rem 2.2rem; border-radius: 8px; border: 1.5px solid var(--brand); width: 100%; font-size: 1rem; font-weight: 600; outline: none; box-sizing: border-box; color: var(--gray-900);">
         </div>
       </div>
 
@@ -648,7 +465,7 @@
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
           <input type="tel" id="donor-phone" placeholder="Phone (For 80G Receipt) *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
-          <input type="text" id="donor-pan" placeholder="PAN Card (Optional 80G Tax)" style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
+          <p>Need a tax certificate? Ask the foundation which details are required and how to provide them securely.</p>
         </div>
         <label class="anonymous-donation-option">
           <input type="checkbox" id="donor-anonymous">
@@ -724,15 +541,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
-  <script src="js/doctors-canvas.js?v=4.2.2"></script>
-  <script src="js/components/navbar-gsap.js?v=4.2.2"></script>
-  <script src="js/components/radial-menu.js?v=4.2.2"></script>
-  <script src="js/services/pdf-service.js?v=4.2.2"></script>
-  <script src="js/modals.js?v=4.2.2"></script>
-  <script src="js/services/healthcare-api.js?v=4.2.2"></script>
-  <script src="js/healthcare/healthcare-domain.js?v=4.2.2"></script>
-  <script src="js/healthcare/healthcare-app.js?v=4.2.2-domain1"></script>
+  <script src="js/doctors-canvas.js?v=4.2.3"></script>
+  <script src="js/components/navbar-gsap.js?v=4.2.3"></script>
+  <script src="js/components/radial-menu.js?v=4.2.3"></script>
+  <script src="js/services/pdf-service.js?v=4.2.3"></script>
+  <script src="js/modals.js?v=4.2.3"></script>
+  <script src="js/services/healthcare-api.js?v=4.2.3"></script>
+  <script src="js/healthcare/healthcare-domain.js?v=4.2.3"></script>
+  <script src="js/healthcare/healthcare-app.js?v=4.2.3-domain1"></script>
   <!-- REUSABLE_FOOTER -->
-  <script src="js/components/layout-injector.js?v=4.2.2"></script>
+  <script src="js/components/layout-injector.js?v=4.2.3"></script>
 </body>
 </html>

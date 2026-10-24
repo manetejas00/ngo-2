@@ -77,6 +77,8 @@ $result = AvinyaCache::remember($cacheKey, ['crowdfunding', 'homepage'], 300, fu
 
         // Format numeric types
         $formatted = array_map(function($r) {
+            $copy = json_decode(file_get_contents(dirname(__DIR__) . '/data/campaign-copy-overrides.json'), true) ?: [];
+            $r = array_merge($r, $copy[$r['campaign_id']] ?? []);
             $r['goal_amount'] = (float)$r['goal_amount'];
             $r['raised_amount'] = (float)$r['raised_amount'];
             $r['donor_count'] = (int)$r['donor_count'];

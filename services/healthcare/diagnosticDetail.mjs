@@ -1,0 +1,27 @@
+export function escapeDiagnosticHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+
+/** Crawlable core content; booking remains an explicit action on the catalog. */
+export function diagnosticDetailArticle(test) {
+  const e = escapeDiagnosticHtml;
+  const parameters = Array.isArray(test.testsIncluded) ? test.testsIncluded : [];
+  return `<article class="diagnostic-detail">
+    <nav aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/doctors">Diagnostics</a> / ${e(test.name)}</nav>
+    <h1>${e(test.name)}</h1><p>${e(test.description)}</p>
+    <h2>Listed package</h2><ul>${parameters.map(item => `<li>${e(item)}</li>`).join('')}</ul>
+    <p>Listed package price: ₹${e(test.price)}. Confirm the final price, any collection charges and availability with the team.</p>
+    <h2>Before your test</h2><p>Laboratory preparation information: ${e(test.preparation)} Confirm these instructions with your laboratory or clinician; do not stop medicines without advice.</p>
+    <p>Listed report turnaround: ${e(test.reportTurnaround)}. Confirm when timing starts and any exceptions.</p>
+    <p>Tests may give false positive or false negative results and need clinical interpretation. A normal result does not rule out every condition. Tumor marker tests are not reliable general population cancer screens.</p>
+    <p>Background information: <a href="https://www.cancer.gov/about-cancer/diagnosis-staging/diagnosis/tumor-markers-fact-sheet">National Cancer Institute: tumor markers</a>. Information updated 24 October 2026. Discuss appropriate testing with your clinician.</p>
+    <a href="/doctors?test=${encodeURIComponent(test.id)}">Request this test →</a> · <a href="/assistance">Ask for help</a> · <a href="/privacy">Privacy notice</a>
+  </article>`;
+}
+
+export function diagnosticDetailPage(test, baseUrl) {
+  const e = escapeDiagnosticHtml;
+  const canonical = `${baseUrl}/test/${encodeURIComponent(test.id)}`;
+  const schema = JSON.stringify({'@context':'https://schema.org','@type':'MedicalTest',name:test.name,description:test.description,url:canonical}).replace(/</g,'\\u003c');
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(test.name)} | Avinya Care Foundation</title><meta name="description" content="${e(test.description)}"><link rel="canonical" href="${e(canonical)}"><meta property="og:title" content="${e(test.name)}"><meta property="og:description" content="${e(test.description)}"><meta property="og:url" content="${e(canonical)}"><link rel="stylesheet" href="/css/information.css?v=4.2.3"><script type="application/ld+json">${schema}</script></head><body><a class="skip" href="#content">Skip to content</a><header><a href="/">Avinya Care Foundation</a> · <a href="/doctors">Doctors &amp; diagnostics</a></header><main id="content">${diagnosticDetailArticle(test)}</main><footer><a href="tel:+917447441116">744 744 1116</a> · <a href="/privacy">Privacy</a></footer></body></html>`;
+}

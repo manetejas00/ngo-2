@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="js/analytics.js?v=4.2.2" defer></script>
-  <title>Impact Gallery & Visual Journey | AvinyaCareFoundation</title>
+  <script src="js/analytics.js?v=4.2.3" defer></script>
+  <title>Our Community Work | AvinyaCareFoundation</title>
   <meta name="description"
     content="Explore the visual journey of AvinyaCareFoundation — healthcare drives, patient support, awareness campaigns, and community impact across Mumbai-Virar.">
   <meta name="keywords" content="AvinyaCareFoundation gallery, healthcare photos, medical drives pictures, community impact, patient stories">
@@ -47,10 +47,12 @@
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
-  <link rel="stylesheet" href="css/styles.css?v=4.2.2">
-  <link rel="stylesheet" href="css/preloader.css?v=4.2.2">
-  <link rel="stylesheet" href="css/radial-menu.css?v=4.2.2">
-  <link rel="stylesheet" href="css/gallery.css?v=4.2.2">
+  <link rel="stylesheet" href="css/styles.css?v=4.2.3">
+  <link rel="stylesheet" href="css/preloader.css?v=4.2.3">
+  <link rel="stylesheet" href="css/radial-menu.css?v=4.2.3">
+  <link rel="stylesheet" href="css/gallery.css?v=4.2.3">
+<link rel="stylesheet" href="/css/accessibility.css?v=4.2.3">
+<script defer src="/js/components/accessibility.js?v=4.2.3"></script>
 </head>
 
 <body class="gallery-page">
@@ -72,7 +74,7 @@
       <div class="gallery-container gallery-hero-content">
         <div class="hero-pill">
           <i class="fa-solid fa-camera-retro"></i>
-          <span>Visual Exhibition & Impact Memories</span>
+          <span>Our Community Work</span>
         </div>
 
         <div class="hero-title-wrap">
@@ -228,7 +230,7 @@
             <span class="lightbox-meta-item" id="lightboxAuthor"><i class="fa-solid fa-user-pen"></i> <span>Admin User</span></span>
           </div>
           <p class="lightbox-description" id="lightboxDescription">
-            Detailed story description.
+            Select an item to view available event information.
           </p>
         </div>
       </div>
@@ -249,7 +251,7 @@
 
       <div class="donation-toggle">
         <button id="toggle-one-time" class="toggle-option active" onclick="window.AvinyaModals.setDonationType('one-time')">One-Time</button>
-        <button id="toggle-monthly" class="toggle-option" onclick="window.AvinyaModals.setDonationType('monthly')">Monthly</button>
+        <button id="toggle-monthly" class="toggle-option" onclick="window.AvinyaModals.setDonationType('monthly')">Monthly interest</button>
       </div>
 
       <div class="amount-grid">
@@ -264,7 +266,7 @@
       <div id="custom-amount-container" style="display: none; margin-bottom: 1.25rem;">
         <div style="position: relative; display: flex; align-items: center;">
           <span style="position: absolute; left: 1rem; font-weight: 700; color: var(--gray-900); font-size: 1.05rem;">₹</span>
-          <input type="number" id="custom-amount-input" min="100" step="50" placeholder="Enter amount (₹)" oninput="window.AvinyaModals.handleCustomAmountInput(this.value)" style="padding: 0.8rem 1rem 0.8rem 2.2rem; border-radius: 8px; border: 1.5px solid var(--brand); width: 100%; font-size: 1rem; font-weight: 600; outline: none; box-sizing: border-box; color: var(--gray-900);">
+          <input type="number" id="custom-amount-input" min="100" step="1" placeholder="Enter amount (₹)" oninput="window.AvinyaModals.handleCustomAmountInput(this.value)" style="padding: 0.8rem 1rem 0.8rem 2.2rem; border-radius: 8px; border: 1.5px solid var(--brand); width: 100%; font-size: 1rem; font-weight: 600; outline: none; box-sizing: border-box; color: var(--gray-900);">
         </div>
       </div>
 
@@ -290,7 +292,7 @@
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
           <input type="tel" id="donor-phone" placeholder="Phone (For 80G Receipt) *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; box-sizing: border-box; font-size: 0.95rem; background: #FFFFFF; color: #111817;">
-          <input type="text" id="donor-pan" placeholder="PAN Card (Optional 80G Tax)" style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; box-sizing: border-box; font-size: 0.95rem; background: #FFFFFF; color: #111817; text-transform: uppercase;">
+          <p>Need a tax certificate? Ask the foundation which details are required and how to provide them securely.</p>
         </div>
         <label class="anonymous-donation-option">
           <input type="checkbox" id="donor-anonymous">
@@ -370,13 +372,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Draggable.min.js"></script>
 
-  <script src="js/modals.js?v=4.2.2"></script>
-  <script src="js/components/navbar-gsap.js?v=4.2.2"></script>
-  <script src="js/components/radial-menu.js?v=4.2.2"></script>
-  <script src="js/app.js?v=4.2.2"></script>
-  <script src="js/services/gallery-service.js?v=4.2.2"></script>
-  <script src="js/gallery-app.js?v=4.2.2"></script>
-  <script src="js/components/layout-injector.js?v=4.2.2"></script>
+  <script src="js/modals.js?v=4.2.3"></script>
+  <script src="js/components/navbar-gsap.js?v=4.2.3"></script>
+  <script src="js/components/radial-menu.js?v=4.2.3"></script>
+  <script src="js/app.js?v=4.2.3"></script>
+  <script src="js/services/gallery-service.js?v=4.2.3"></script>
+  <script src="js/gallery-app.js?v=4.2.3"></script>
+  <script src="js/components/layout-injector.js?v=4.2.3"></script>
 
 </body>
 

@@ -14,6 +14,7 @@ import https from 'node:https';
 import { loadEnvironment } from './config/environment.mjs';
 import { MIME_TYPES } from './config/mime-types.mjs';
 import { isPrivateStaticPath } from './services/http/static-access.mjs';
+import { diagnosticDetailPage } from './services/healthcare/diagnosticDetail.mjs';
 import { parseByteRange } from './services/http/byte-range.mjs';
 import { checkRateLimit } from './services/http/rate-limit.mjs';
 import { createSubmissionStore } from './services/submissions/submission-store.mjs';
@@ -642,7 +643,7 @@ const server = createServer(async (req, res) => {
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,63}$/;
 
       if (!allowedFormTypes.has(formType)) addError('form_type', 'Unsupported form type.');
-      if (!emailPattern.test(email)) addError('email', 'Enter a valid email address.');
+      if (!emailPattern.test(email) && !(formType === 'support' && !email)) addError('email', 'Enter a valid email address.');
       if (['donation', 'volunteer', 'support', 'contact', 'partnership', 'coming_soon_feedback'].includes(formType) && !name) addError('name', 'Enter your name.');
       if (['donation', 'volunteer', 'support', 'coming_soon_feedback'].includes(formType) && !indianPhone.test(normalizedPhone)) addError('phone', 'Enter a valid Indian mobile number.');
 
@@ -1306,9 +1307,9 @@ const server = createServer(async (req, res) => {
     const defaults = {
       organization_name: 'AvinyaCareFoundation',
       tagline: 'No one should face a health crisis alone.',
-      email: 'info@avinyacarefoundation.com',
-      phone: '+91 74474 41116',
-      whatsapp: '+91 74474 41116',
+      email: 'info@avinyacarefoundation.org',
+      phone: '+91 744 744 1116',
+      whatsapp: '+91 744 744 1116',
       address: '210, Global Plaza, Global City, Virar West - 401305',
       instagram_url: 'https://www.instagram.com/avinyacare_foundation/',
       youtube_url: 'https://www.youtube.com/@Avinyacarefoundation',
@@ -2056,7 +2057,7 @@ const server = createServer(async (req, res) => {
   }
 
   // 10. Diagnostic Tests Catalog: GET /api/healthcare/tests
-  if (urlPath === '/api/healthcare/tests' && req.method === 'GET') {
+  if (['/api/healthcare/tests', '/api/healthcare/tests.php', '/api/healthcare/tests.json'].includes(urlPath) && req.method === 'GET') {
     try {
       const tests = await getDiagnosticTests(queryParams);
       return sendJson(200, { status: 'ok', tests, count: tests.length });
@@ -2076,7 +2077,7 @@ const server = createServer(async (req, res) => {
   }
 
   // 12. Book Diagnostic Test: POST /api/healthcare/test-bookings
-  if (urlPath === '/api/healthcare/test-bookings' && req.method === 'POST') {
+  if (['/api/healthcare/test-bookings', '/api/diagnostic-booking.php'].includes(urlPath) && req.method === 'POST') {
     try {
       const body = await parseJsonBody(req);
       const booking = await createTestBooking(body);
@@ -2088,7 +2089,7 @@ const server = createServer(async (req, res) => {
         status: 'ok',
         booking,
         bookingId: booking.id,
-        message: `Diagnostic test booking ${booking.id} scheduled successfully.`
+        message: `Request ${booking.id} received. The team must confirm your preferred slot and collection arrangements.`
       });
     } catch (err) {
       return sendJson(400, { status: 'error', message: err.message });
@@ -2241,39 +2242,17 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
       const tests = await getDiagnosticTests();
       const test = tests.find(t => t.id === testId);
       if (test) {
-        let html = await readFile(resolve(__dirname, 'doctors.html'), 'utf-8');
-        const title = `${test.name} | Diagnostic Tests | AvinyaCareFoundation`;
-        const desc = test.description || `Book ${test.name} - ${test.tagline}`;
-        const schema = {
-          "@context": "https://schema.org",
-          "@type": "MedicalTest",
-          "name": test.name,
-          "description": test.description,
-          "url": `${BASE_URL}/test/${test.id}`
-        };
-        const seoTags = `
-          <title>${title}</title>
-          <meta name="description" content="${desc}">
-          <link rel="canonical" href="${BASE_URL}/test/${test.id}">
-          <meta property="og:title" content="${title}">
-          <meta property="og:description" content="${desc}">
-          <meta property="og:url" content="${BASE_URL}/test/${test.id}">
-          <meta property="og:type" content="website">
-          <script type="application/ld+json">${JSON.stringify(schema)}</script>
-        `;
-        html = html.replace(/<title>.*?<\/title>/s, '');
-        html = html.replace(/<meta name="description".*?>/s, '');
-        html = html.replace(/<meta property="og:.*?>/gs, '');
-        html = html.replace(/<meta name="twitter:.*?>/gs, '');
-        html = html.replace(/<script type="application\/ld\+json">.*?<\/script>/s, '');
-        html = html.replace('<!-- Canonical URL -->', seoTags);
-        html = html.replace('</body>', `<script>window.INITIAL_MODAL_ID='${test.id}'; window.INITIAL_MODAL_TYPE='test';</script></body>`);
-        
+        const html = diagnosticDetailPage(test, BASE_URL);
+
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
         return res.end(html);
       }
     } catch (e) {
       console.error('[Test SEO Error]', e);
+    }
+    if (/^test-[a-z0-9-]+$/.test(testId)) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      return res.end('Diagnostic test not found. Please return to /doctors.');
     }
   }
 

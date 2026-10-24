@@ -55,6 +55,8 @@ try {
     });
 
     if ($tests !== null && is_array($tests)) {
+        $overrides = json_decode(file_get_contents(dirname(__DIR__, 2) . '/data/diagnostic-copy-overrides.json'), true) ?: [];
+        $tests = array_map(fn($test) => array_merge($test, $overrides[$test['id']] ?? []), $tests);
         echo json_encode([
             'status' => 'ok',
             'tests' => $tests,

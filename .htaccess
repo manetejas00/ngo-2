@@ -50,6 +50,9 @@ Options -Indexes
   RewriteCond %{REQUEST_FILENAME}.html -f
   RewriteRule ^(.*)$ $1.html [L]
 
+  # Public diagnostic IDs go to a dedicated renderer; internal test files stay blocked.
+  RewriteRule ^test/(test-[a-z0-9-]+)/?$ api/test-detail.php?test_id=$1 [END]
+
   # Never serve repository, test, runtime, or credential material over HTTP.
   RewriteRule ^(?:test|tests|scripts|storage|cache|docs|\.agents|\.git)(?:/|$) - [F,L,NC]
   RewriteRule ^(?:live_admin_credentials\.txt|\.env(?:\..*)?)$ - [F,L,NC]
@@ -105,9 +108,9 @@ Options -Indexes
   Header set Referrer-Policy "strict-origin-when-cross-origin"
   Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 
-  # Immutable Long Cache for Versioned / Static Assets (1 Year)
+  # Revalidate unversioned static assets after one hour
   <FilesMatch "\.(css|js|webp|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$">
-    Header set Cache-Control "public, max-age=31536000, immutable"
+    Header set Cache-Control "public, max-age=3600, must-revalidate"
   </FilesMatch>
 
   # Strict Freshness Rule for Dynamic HTML and PHP API Endpoints
