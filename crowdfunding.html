@@ -631,7 +631,7 @@
 
       <form onsubmit="window.AvinyaModals.submitDonation(event)">
         <div style="margin-bottom: 1rem;">
-          <select id="donor-category" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; font-size: 0.95rem; background-color: #fff; box-sizing: border-box;">
+          <label for="donor-category" class="avinya-field-label">Selected project *</label><select id="donor-category" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; font-size: 0.95rem; background-color: #fff; box-sizing: border-box;">
             <option value="">Select Project to Fund *</option>
             <option value="Mobile Medical Ambulance">🚑 Mobile Medical Ambulance</option>
             <option value="Multi-Speciality Hospital">🏗️ Virar Multi-Speciality Hospital Construction</option>
@@ -646,7 +646,7 @@
           <input type="email" id="donor-email" placeholder="Email Address *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; box-sizing: border-box; font-size: 0.95rem; color: #111817; background: #FFFFFF;">
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
-          <input type="tel" id="donor-phone" placeholder="Phone (For 80G Receipt) *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; box-sizing: border-box; font-size: 0.95rem; color: #111817; background: #FFFFFF;">
+          <input type="tel" id="donor-phone" placeholder="Phone Number *" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; box-sizing: border-box; font-size: 0.95rem; color: #111817; background: #FFFFFF;">
           <p>Need a tax certificate? Ask the foundation which details are required and how to provide them securely.</p>
         </div>
         <label class="anonymous-donation-option">
@@ -659,12 +659,12 @@
           <img src="assets/docs/WhatsApp Image 2026-09-12 at 8.42.58 PM.jpeg" alt="80G Certificate" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; filter: grayscale(100%) contrast(1.2);">
           <p style="margin: 0; font-size: 0.85rem; color: var(--muted); line-height: 1.4;">
             <strong style="color: var(--gray-900);">Confirm payment and receipt details</strong><br>
-            Donations are eligible for tax deduction under Section 80G of the Indian IT Act.
+            Confirm current approval and your eligibility with the foundation and your tax adviser.
           </p>
         </div>
 
         <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1rem; border-radius: 9999px;">
-          <span>Proceed to Payment (UPI / Cards / NetBanking) →</span>
+          <span>Record donation interest →</span>
         </button>
       </form>
     </div>
