@@ -2,7 +2,7 @@
 
 Source: Avinya_Care_Website_Audit_2026-10-24.xlsx, 164 Action Tracker rows. The workbook was read, not modified. Recommendations were treated as findings to assess, not authority to invent foundation records or make external changes.
 
-Changes are local and not deployed. “Implemented locally” describes a code change, not legal, clinical or operational certification. Partial/mitigated findings remain open against the workbook’s acceptance criteria. No real booking, donation, email or payment was submitted during verification.
+The implementation was pushed and published to production on 24 October 2026. Live review found and corrected the legacy saved contact email and residual screening, fee, receipt and daily-news promises. “Implemented locally” describes a code change, not legal, clinical or operational certification. Partial/mitigated findings remain open against the workbook’s acceptance criteria. No real booking, donation, email or payment was submitted during verification.
 
 ## Validation
 
@@ -189,3 +189,7 @@ Clinical background checked: [NCI tumor markers](https://www.cancer.gov/about-ca
 | ACF-162 | Audit broken assets and links | Open | Run a bounded link/asset check and verify important documents manually. Requires evidence, operational approval or a separate implementation/verification step; not represented as completed. |
 | ACF-163 | Measure useful conversions | Open | Track verified completed help requests, bookings, applications and payments separately. Requires evidence, operational approval or a separate implementation/verification step; not represented as completed. |
 | ACF-164 | Add a content maintenance schedule | Partial | Added this evidence/owner handover. Foundation must assign actual review owners and dates. |
+
+## Production review follow-up
+
+The initial live review passed 76 of 77 read-only checks, including all 52 PHP diagnostic detail routes and the protected data/admin routes. The one failure was the legacy saved .com email, which public settings now normalize to the corrected .org address. Homepage residual promises and diagnostic certification/collection wording were also moderated. GitHub quality checks passed; its automated deployment workflow fails at Configure Hostinger SSH. The production SSH connection was used to verify the release and clear only the derived application cache; no migration/reseed was run. Actual clinical, financial, image consent and operational evidence remains open as itemized above.

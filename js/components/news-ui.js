@@ -324,7 +324,7 @@ class NewsUI {
         <div class="news-featured-content">
           <div class="news-tag-group">
             <span class="news-category-badge">${featured.category || 'Global Health'}</span>
-            <span class="live-news-badge">🌐 LIVE HEALTH DESK</span>
+            <span class="live-news-badge">🌐 EXTERNAL HEALTH ARTICLE</span>
           </div>
           <h3 class="news-featured-title">${featured.title}</h3>
           <p class="news-featured-desc">${featured.description}</p>

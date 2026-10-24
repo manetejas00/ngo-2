@@ -1320,6 +1320,8 @@ const server = createServer(async (req, res) => {
     };
     const userSettings = await getSiteSettings();
     const merged = { ...defaults, ...userSettings };
+    if (String(merged.email || '').trim().toLowerCase() === 'info@avinyacarefoundation.com') merged.email = defaults.email;
+    if (String(merged.phone || '').replace(/\D/g, '') === '917447441116') merged.phone = defaults.phone;
     for (const key of ['x_url', 'threads_url', 'instagram_url', 'youtube_url']) {
       if (!merged[key]) merged[key] = defaults[key];
     }

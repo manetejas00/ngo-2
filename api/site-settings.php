@@ -34,6 +34,14 @@ $settings = AvinyaCache::remember('settings:public_v2', ['settings', 'homepage']
     return array_merge($defaults, array_filter($rows, fn($key) => array_key_exists($key, $defaults) || str_ends_with($key, '_url'), ARRAY_FILTER_USE_KEY));
 });
 
+// Retire the known obsolete address even when an older saved setting or cache remains.
+if (strcasecmp(trim((string) ($settings['email'] ?? '')), 'info@avinyacarefoundation.com') === 0) {
+    $settings['email'] = $defaults['email'];
+}
+if (preg_replace('/\D/', '', (string) ($settings['phone'] ?? '')) === '917447441116') {
+    $settings['phone'] = $defaults['phone'];
+}
+
 // Ensure newly supported social media channels are never undefined or omitted
 foreach (['instagram_url', 'youtube_url', 'x_url', 'threads_url'] as $socialKey) {
     if (empty($settings[$socialKey]) && !empty($defaults[$socialKey])) {
