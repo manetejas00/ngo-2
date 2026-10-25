@@ -18,3 +18,8 @@
 :is(.modal-close-btn,.hc-modal-close,.team-dialog-close,.donation-guide-close,.camp-announcement-close,.camp-record-close,.lightbox-close):disabled{opacity:.5;cursor:wait!important}
 @media(prefers-reduced-motion:reduce){:is(.modal-close-btn,.hc-modal-close,.team-dialog-close,.donation-guide-close,.camp-announcement-close,.camp-record-close,.lightbox-close){transition:none!important}}
 .hc-modal-header,.lightbox-top-bar,.modal-header{padding:16px!important;gap:16px;min-height:76px}
+/* The existing donation form also opens from standalone information pages. */
+.information-page #donate-modal .modal-container{color:#171717;color-scheme:light}
+.information-page #donate-modal :is(h2,h3,label){color:#171717}
+.information-page #donate-modal p{color:#595959}
+.information-page #donate-modal :is(input,select){color:#171717;background:#fff;font-family:inherit}

@@ -1,0 +1,86 @@
+<div id="donate-modal" class="modal-backdrop">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
+      <div class="modal-header-brand">
+        <img src="/assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
+        <div class="category-tag" style="margin-bottom: 0;">MAKE A DIFFERENCE</div>
+      </div>
+      <h3 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">Sponsor Care & Early Detection</h3>
+      <p style="color: var(--muted); font-size: 0.95rem;">Choose an amount to support health awareness, screening
+        drives, and patient care across the region.</p>
+
+      <div class="donation-toggle">
+        <button id="toggle-one-time" class="toggle-option active"
+          onclick="window.AvinyaModals.setDonationType('one-time')">One-Time</button>
+        <button id="toggle-monthly" class="toggle-option"
+          onclick="window.AvinyaModals.setDonationType('monthly')">Monthly interest</button>
+      </div>
+
+      <div class="amount-grid">
+        <button type="button" class="amount-btn" onclick="window.AvinyaModals.selectAmount(500)">₹500</button>
+        <button type="button" class="amount-btn active" onclick="window.AvinyaModals.selectAmount(1000)">₹1,000</button>
+        <button type="button" class="amount-btn" onclick="window.AvinyaModals.selectAmount(2500)">₹2,500</button>
+        <button type="button" class="amount-btn" onclick="window.AvinyaModals.selectAmount(5000)">₹5,000</button>
+        <button type="button" class="amount-btn" onclick="window.AvinyaModals.selectAmount(10000)">₹10k</button>
+        <button type="button" class="amount-btn" id="custom-amount-btn"
+          onclick="window.AvinyaModals.selectCustom()">Custom</button>
+      </div>
+
+      <div id="custom-amount-container" style="display: none; margin-bottom: 1.25rem;">
+        <div style="position: relative; display: flex; align-items: center;">
+          <span
+            style="position: absolute; left: 1rem; font-weight: 700; color: var(--gray-900); font-size: 1.05rem;">₹</span>
+          <input type="number" id="custom-amount-input" min="100" step="1" placeholder="Enter amount (₹)"
+            oninput="window.AvinyaModals.handleCustomAmountInput(this.value)"
+            style="padding: 0.8rem 1rem 0.8rem 2.2rem; border-radius: 8px; border: 1.5px solid var(--brand); width: 100%; font-size: 1rem; font-weight: 600; outline: none; box-sizing: border-box; color: var(--gray-900);">
+        </div>
+      </div>
+
+      <div id="impact-calculator-statement" class="impact-calculator-box">
+        ✨ <strong>Impact:</strong> ₹1,000 provides diagnostic screening guidance and local travel assistance for 2
+        individuals.
+      </div>
+
+      <form onsubmit="window.AvinyaModals.submitDonation(event)">
+        <div style="margin-bottom: 1rem;">
+          <label for="donor-category" class="avinya-field-label">Selected project *</label><select id="donor-category" required style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%; font-size: 0.95rem; background-color: #fff;">
+            <option value="">Select Project to Fund *</option>
+            <option value="Mobile Medical Ambulance">🚑 Mobile Medical Ambulance</option>
+            <option value="Multi-Speciality Hospital">🏗️ Virar Multi-Speciality Hospital Construction</option>
+            <option value="Children Care Hospital">👶 Vasai Children Care Hospital &amp; NICU</option>
+            <option value="Free Dialysis Center">💉 Free Dialysis Center</option>
+            <option value="Mega Health Camp">🏥 Mega Health & Diagnostics Camp</option>
+            <option value="General Fund">🌟 General NGO Fund (Where needed most)</option>
+          </select>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <input type="text" id="donor-name" placeholder="Full Name *" required
+            style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
+          <input type="email" id="donor-email" placeholder="Email Address *" required
+            style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <input type="tel" id="donor-phone" placeholder="Phone Number *" required
+            style="padding: 0.8rem 1rem; border-radius: 8px; border: 1.5px solid var(--gray-200); width: 100%;">
+          <p>Need a tax certificate? Ask the foundation which details are required and how to provide them securely.</p>
+        </div>
+        <label class="anonymous-donation-option">
+          <input type="checkbox" id="donor-anonymous">
+          <span class="anonymous-donation-icon" aria-hidden="true">◉</span>
+          <span><strong>Donate anonymously</strong><small>Your name stays private on public donor updates.</small></span>
+        </label>
+
+        <div style="display: flex; align-items: center; gap: 1rem; background: #f8f8f8; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--gray-200);">
+          <img src="/assets/docs/WhatsApp Image 2026-09-12 at 8.42.58 PM.jpeg" alt="80G Certificate" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; filter: grayscale(100%) contrast(1.2);">
+          <p style="margin: 0; font-size: 0.85rem; color: var(--muted); line-height: 1.4;">
+            <strong style="color: var(--gray-900);">Confirm payment and receipt details</strong><br>
+            Confirm current approval and your eligibility with the foundation and your tax advisor.
+          </p>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">
+          <span>Record donation interest →</span>
+        </button>
+      </form>
+    </div>
+  </div>
