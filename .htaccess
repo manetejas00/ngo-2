@@ -34,6 +34,9 @@ Options -Indexes
   RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+  # Retired page opens the shared donation guide modal on home.
+  RewriteRule ^donation-guide(?:\.html)?/?$ /#donation-guide [R=302,L,NE]
+
   # Redirect .html to clean URLs (only for direct requests, except components)
   RewriteCond %{THE_REQUEST} \s/+(.+?)\.html[\s?] [NC]
   RewriteCond %{REQUEST_URI} !^/components/ [NC]

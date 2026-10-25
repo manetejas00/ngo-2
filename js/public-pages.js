@@ -1,7 +1,7 @@
 // Standalone information pages use the same navigation without loading form modals.
 window.AvinyaModals ||= {
   openSupportModal: () => location.assign('/assistance'),
-  openDonateModal: () => location.assign('/donation-guide'),
+  openDonateModal: () => window.openDonationGuide?.(),
   openVolunteerModal: () => location.assign('/get-involved#volunteer'),
   openCSRModal: () => location.assign('/get-involved#partnerships'),
   openCsrModal: () => location.assign('/get-involved#partnerships'),

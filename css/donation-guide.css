@@ -1,0 +1,17 @@
+.donation-guide-open{overflow:hidden}
+.donation-guide-dialog{inset:0;margin:auto;width:min(740px,calc(100% - 40px));max-height:calc(100dvh - 48px);box-sizing:border-box;overflow:auto;padding:36px;background:#fff;color:#171717;border:1px solid #ddd;border-radius:18px;box-shadow:0 30px 100px #0007;font:15px/1.7 var(--font-primary,'Inter',system-ui,sans-serif);text-align:left;color-scheme:light}
+.donation-guide-dialog::backdrop{background:#000b;backdrop-filter:blur(5px)}
+.donation-guide-dialog *{box-sizing:border-box}
+.donation-guide-dialog header{padding-right:34px;border-bottom:1px solid #ddd;padding-bottom:24px}
+.donation-guide-kicker{font-size:10px;letter-spacing:.15em;font-weight:650;color:#99400f}
+.donation-guide-dialog #donation-guide-title{font:600 clamp(26px,4vw,36px)/1.15 var(--font-primary,'Inter',system-ui,sans-serif);letter-spacing:-.045em;color:#171717;margin:14px 0}
+.donation-guide-dialog p{font-size:14px;line-height:1.8;color:#595959;margin:0}
+.donation-guide-dialog section{background:transparent;border:0;border-radius:0;margin:0;padding:23px 0;border-bottom:1px solid #e5e5e5;box-shadow:none}
+.donation-guide-dialog section h2{font:650 17px/1.4 var(--font-primary,'Inter',system-ui,sans-serif);letter-spacing:-.02em;margin:0 0 10px;color:#171717}
+.donation-guide-dialog a{color:#99400f;text-decoration:underline;text-underline-offset:4px;overflow-wrap:anywhere}
+.donation-guide-dialog footer{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:25px}
+.donation-guide-dialog button{font:600 13px/1.4 var(--font-primary,'Inter',system-ui,sans-serif);cursor:pointer}
+.donation-guide-dialog footer button{padding:12px 22px;background:#f47528;color:#171717;border:0;border-radius:8px;min-height:44px}
+.donation-guide-dialog .donation-guide-close{position:absolute;right:18px;top:18px;display:grid;place-items:center;width:36px;height:36px;background:#f2f2f2;border:1px solid #ddd;border-radius:50%;color:#171717;font-size:24px;padding:0}
+.donation-guide-dialog :is(a,button):focus-visible{outline:2px solid #a94710;outline-offset:4px}
+@media(max-width:600px){.donation-guide-dialog{padding:28px 22px;width:calc(100% - 24px);max-height:calc(100dvh - 24px);border-radius:14px}.donation-guide-dialog header{padding-right:20px}.donation-guide-dialog p{font-size:13px}.donation-guide-dialog footer{font-size:13px}}

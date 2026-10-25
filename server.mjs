@@ -537,6 +537,11 @@ const server = createServer(async (req, res) => {
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
   let urlPath = req.url.split('?')[0];
+  if (/^\/donation-guide(?:\.html)?\/?$/.test(urlPath)) {
+    res.writeHead(302, { Location: '/#donation-guide', 'Cache-Control': 'no-store' });
+    res.end();
+    return;
+  }
 
   // Uniform API endpoint normalization: strip .php suffix so endpoints work identically across Node and Hostinger
   if (urlPath.startsWith('/api/') && urlPath.endsWith('.php')) {
@@ -2196,7 +2201,7 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
       const tests = await getDiagnosticTests();
       let urls = '';
       
-      const staticPages = ['', '/about', '/assistance', '/get-involved', '/transparency', '/donation-guide', '/privacy', '/terms', '/events', '/gallery', '/diagnostic-tests', '/crowdfunding'];
+      const staticPages = ['', '/about', '/assistance', '/get-involved', '/transparency', '/privacy', '/terms', '/events', '/gallery', '/diagnostic-tests', '/crowdfunding'];
       for (const page of staticPages) {
         urls += `  <url>\n    <loc>${BASE_URL}${page}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${page === '' ? '1.0' : '0.8'}</priority>\n  </url>\n`;
       }

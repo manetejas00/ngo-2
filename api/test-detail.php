@@ -38,8 +38,8 @@ $tumorMarker = (bool) preg_match('/tumor|cancer/i', ($test['category'] ?? '') . 
 <title><?= $e($test['name']) ?> | Avinya Care Foundation</title>
 <meta name="description" content="<?= $e($test['description']) ?>">
 <link rel="canonical" href="https://www.avinyacarefoundation.org/test/<?= $e($id) ?>">
-<link rel="stylesheet" href="/css/styles.css?v=4.3.4"><link rel="stylesheet" href="/css/radial-menu.css?v=4.3.0"><link rel="stylesheet" href="/css/accessibility.css?v=4.3.0"><link rel="stylesheet" href="/css/information.css?v=4.3.1"><script defer src="/assets/vendor/gsap.min.js?v=3.15.0"></script><script defer src="/js/public-pages.js?v=4.3.0"></script><script defer src="/js/components/navbar-gsap.js?v=4.3.2"></script><script defer src="/js/components/radial-menu.js?v=4.3.0"></script><script defer src="/js/components/layout-injector.js?v=4.3.4"></script><link rel="stylesheet" href="/css/public-theme.css?v=4">
-</head><body class="information-page">
+<link rel="stylesheet" href="/css/styles.css?v=4.3.4"><link rel="stylesheet" href="/css/radial-menu.css?v=4.3.0"><link rel="stylesheet" href="/css/accessibility.css?v=4.3.0"><link rel="stylesheet" href="/css/information.css?v=4.3.1"><script defer src="/assets/vendor/gsap.min.js?v=3.15.0"></script><script defer src="/js/public-pages.js?v=4.3.1"></script><script defer src="/js/components/navbar-gsap.js?v=4.3.2"></script><script defer src="/js/components/radial-menu.js?v=4.3.0"></script><script defer src="/js/components/layout-injector.js?v=4.3.5"></script><link rel="stylesheet" href="/css/public-theme.css?v=4">
+<link rel="stylesheet" href="/css/donation-guide.css?v=1"><script defer src="/js/donation-guide.js?v=1"></script></head><body class="information-page">
 <a class="skip" href="#content">Skip to content</a><?php include __DIR__ . '/../components/navbar.html'; ?>
 <main id="content"><h1><?= $e($test['name']) ?></h1><p class="lead"><?= $e($test['description']) ?></p>
 <section><h2>Listed package</h2><ul><?php foreach ($test['testsIncluded'] as $item): ?><li><?= $e($item) ?></li><?php endforeach ?></ul>

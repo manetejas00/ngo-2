@@ -117,3 +117,10 @@ mark the entire checklist complete based solely on the automated smoke suite.
 - Repeated sends within one minute must be blocked. Failures must retain the registration.
 - Delete must require explicit confirmation. Test only on an approved disposable registration.
 - Unauthenticated and unauthorized requests must not edit, delete or send email.
+
+## Donation guide modal
+
+- The standalone donation guide page is retired. Both `/donation-guide` and `/donation-guide.html` should redirect to `/#donation-guide`, opening the shared modal.
+- Check guide links in the footer, Terms, Get Involved and crowdfunding. They should open in place without navigating away.
+- Verify close button, Escape, backdrop dismissal, scrolling and return of keyboard focus.
+- Information-page Support us buttons open the guide; existing donation enquiry forms on the main pages remain available.

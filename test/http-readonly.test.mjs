@@ -44,7 +44,7 @@ test('public gallery and donation statistics endpoints have their expected respo
 });
 
 test('audit information pages and every diagnostic detail remain public while internal tests stay private', async () => {
-  for (const path of ['/about','/get-involved','/assistance','/transparency','/donation-guide','/privacy','/terms','/events']) {
+  for (const path of ['/about','/get-involved','/assistance','/transparency','/privacy','/terms','/events']) {
     const response = await fetch(new URL(path, base));
     assert.equal(response.status, 200, path);
   }
