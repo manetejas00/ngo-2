@@ -328,7 +328,7 @@
           <span class="nav-text">Website Feedbacks</span>
           <span class="nav-badge" id="sideFormFeedbackCount">0</span>
         </button>
-        <button class="sidebar-nav-link" data-tab="forms_all" data-tooltip="All Form Submissions" onclick="switchTab('forms_all')">
+        <button class="sidebar-nav-link" data-tab="campRegistrations" onclick="switchTab('campRegistrations')">Camp Registrations</button><button class="sidebar-nav-link" data-tab="forms_all" data-tooltip="All Form Submissions" onclick="switchTab('forms_all')">
           <span class="nav-icon">📥</span>
           <span class="nav-text">All Form Submissions</span>
           <span class="nav-badge" id="sideFormsCount">0</span>
@@ -609,7 +609,7 @@
         </div>
 
         <!-- Data Table Container Card (Visible on Specific Record Tabs) -->
-        <div class="table-card" id="tableCard" style="display:none;">
+        <section class="table-card" id="campRegistrationsPanel" style="display:none;padding:24px"><h2>Mega Health &amp; Screening Camp Registrations</h2><p>29 November 2026 · Ameya Classic Club</p><div style="display:flex;gap:12px;margin:16px 0"><button class="btn btn-outline" onclick="loadCampRegistrations()">Refresh</button><button class="btn btn-outline" id="campExport" onclick="exportCampRegistrations()" disabled>Export CSV</button></div><p id="campAdminStatus" role="status"></p><div style="overflow:auto;max-height:65vh"><table><thead><tr><th style="padding:12px;text-align:left">Reference</th><th style="padding:12px;text-align:left">Registered at</th><th style="padding:12px;text-align:left">Full name</th><th style="padding:12px;text-align:left">Age</th><th style="padding:12px;text-align:left">Gender</th><th style="padding:12px;text-align:left">Mobile</th><th style="padding:12px;text-align:left">Email</th><th style="padding:12px;text-align:left">Locality</th><th style="padding:12px;text-align:left">Previous screening</th><th style="padding:12px;text-align:left">Tests interested in</th><th style="padding:12px;text-align:left">Health concerns</th><th style="padding:12px;text-align:left">Diagnosed condition</th><th style="padding:12px;text-align:left">Family history</th><th style="padding:12px;text-align:left">Consent</th><th style="padding:12px;text-align:left">Consent version</th><th style="padding:12px;text-align:left">Email status</th></tr></thead><tbody id="campAdminBody"></tbody></table></div></section><div class="table-card" id="tableCard" style="display:none;">
           <div class="table-toolbar">
             <div class="search-box">
               <span class="search-icon">🔍</span>
@@ -1656,7 +1656,7 @@
         'forms_contact', 'forms_newsletter', 'forms_volunteer', 'forms_support',
         'forms_donation', 'forms_coming_soon_feedback', 'forms_partnership',
         'forms_feedback', 'forms_all', 'email', 'activity', 'usersCatalog', 'settings',
-        'cacheManagement', 'websiteAnalytics'
+        'cacheManagement', 'websiteAnalytics', 'campRegistrations'
       ];
       return validTabs.includes(hash) ? hash : 'dashboard';
     }
@@ -2767,6 +2767,7 @@
 
     // --- TAB SWITCHING ---
     function switchTab(tab) {
+      document.getElementById('campRegistrationsPanel').style.display = tab === 'campRegistrations' ? 'block' : 'none';
       currentTab = tab;
       window.location.hash = tab;
 
@@ -2778,6 +2779,7 @@
 
       // Update Breadcrumb & Header Title
       const titleMap = {
+        campRegistrations: 'Camp Registrations',
         dashboard: 'Dashboard Overview',
         websiteAnalytics: 'Website Analytics',
         doctor: 'Doctor Appointments',
@@ -2842,6 +2844,9 @@
         loadGoogleAnalytics();
       } else if (tab === 'cacheManagement') {
         fetchCacheDiagnostics();
+      } else if (tab === 'campRegistrations') {
+        tableCard.style.display = 'none';
+        loadCampRegistrations();
       } else if (tab !== 'settings') {
         renderCurrentTab();
       }
@@ -3125,6 +3130,7 @@
     }
 
     function renderCurrentTab() {
+      if (currentTab === 'campRegistrations') return loadCampRegistrations();
       updateTypeFilterDropdown();
       filterTable();
     }
@@ -4731,5 +4737,5 @@
       }
     }
   </script>
-</body>
+<script src="/js/camp-admin.js"></script></body>
 </html>

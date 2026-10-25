@@ -288,4 +288,6 @@
   <url><loc>https://www.avinyacarefoundation.org/privacy</loc><lastmod>2026-10-24</lastmod></url>
   <url><loc>https://www.avinyacarefoundation.org/terms</loc><lastmod>2026-10-24</lastmod></url>
   <url><loc>https://www.avinyacarefoundation.org/get-involved</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.avinyacarefoundation.org/connect</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.avinyacarefoundation.org/health-camp</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>

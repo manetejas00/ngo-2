@@ -90,10 +90,11 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=4.3.2">
+  <link rel="stylesheet" href="css/styles.css?v=4.3.4">
   <link rel="stylesheet" href="css/preloader.css?v=4.2.4">
 <link rel="stylesheet" href="/css/accessibility.css?v=4.2.4">
 <script defer src="/js/components/accessibility.js?v=4.2.4"></script>
+<link rel="stylesheet" href="/css/camp-announcement.css?v=1">
 </head>
 
 <body>
@@ -161,6 +162,7 @@
           <h1 class="hero-title">No one should face a health crisis alone.</h1>
           <p class="hero-local-intro">Healthcare information, care navigation and community support in Vasai–Virar and Mumbai.</p>
           <div class="hero-cta-group">
+            <a href="/health-camp" class="btn-secondary btn-secondary-dark hero-camp-link"><span>Health Camp · 29 Nov</span><span aria-hidden="true">↗</span></a>
             <button type="button" class="btn-primary" onclick="window.AvinyaModals.openSupportModal()" aria-label="Get Medical Support">
               <span>Get Medical Help</span>
               <span class="arrow">→</span>
@@ -1430,8 +1432,18 @@
   <script src="js/components/navbar-gsap.js?v=4.3.2"></script>
   <script src="js/components/radial-menu.js?v=4.2.4"></script>
   <script src="js/app.js?v=4.2.4"></script>
-  <script src="js/components/layout-injector.js?v=4.3.2"></script>
+  <script src="js/components/layout-injector.js?v=4.3.3"></script>
 
+<dialog id="camp-announcement" aria-labelledby="camp-announcement-title" aria-describedby="camp-announcement-description">
+    <button type="button" class="camp-announcement-close" aria-label="Close camp announcement">×</button>
+    <span class="camp-announcement-label">AVINYA CARE FOUNDATION</span>
+    <h2 id="camp-announcement-title">Know your health.<br>Take the next step.</h2>
+    <p id="camp-announcement-description">Make your health a priority. Join our Mega Health &amp; Screening Camp.</p>
+    <div class="camp-announcement-details"><strong>29 November 2026</strong><span>Ameya Classic Club</span><span>Yashwant Nagar, West, Vasai-Virar</span></div>
+    <a href="/health-camp" class="camp-announcement-cta">View camp &amp; register <span aria-hidden="true">↗</span></a>
+    <button type="button" class="camp-announcement-dismiss">Continue browsing</button>
+  </dialog>
+  <script defer src="/js/camp-announcement.js?v=1"></script>
 </body>
 
 </html>

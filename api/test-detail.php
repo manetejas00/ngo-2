@@ -38,8 +38,8 @@ $tumorMarker = (bool) preg_match('/tumor|cancer/i', ($test['category'] ?? '') . 
 <title><?= $e($test['name']) ?> | Avinya Care Foundation</title>
 <meta name="description" content="<?= $e($test['description']) ?>">
 <link rel="canonical" href="https://www.avinyacarefoundation.org/test/<?= $e($id) ?>">
-<link rel="stylesheet" href="/css/information.css?v=4.2.3"></head><body>
-<a class="skip" href="#content">Skip to content</a><header><nav aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/doctors">Diagnostics</a></nav></header>
+<link rel="stylesheet" href="/css/styles.css?v=4.3.4"><link rel="stylesheet" href="/css/radial-menu.css?v=4.3.0"><link rel="stylesheet" href="/css/accessibility.css?v=4.3.0"><link rel="stylesheet" href="/css/information.css?v=4.3.1"><script defer src="/assets/vendor/gsap.min.js?v=3.15.0"></script><script defer src="/js/public-pages.js?v=4.3.0"></script><script defer src="/js/components/navbar-gsap.js?v=4.3.2"></script><script defer src="/js/components/radial-menu.js?v=4.3.0"></script><script defer src="/js/components/layout-injector.js?v=4.3.3"></script></head><body class="information-page">
+<a class="skip" href="#content">Skip to content</a><?php include __DIR__ . '/../components/navbar.html'; ?>
 <main id="content"><h1><?= $e($test['name']) ?></h1><p class="lead"><?= $e($test['description']) ?></p>
 <section><h2>Listed package</h2><ul><?php foreach ($test['testsIncluded'] as $item): ?><li><?= $e($item) ?></li><?php endforeach ?></ul>
 <p>Listed package price: ₹<?= $e($test['price']) ?>. Confirm final price, collection charges and availability with the team.</p></section>
@@ -48,4 +48,4 @@ $tumorMarker = (bool) preg_match('/tumor|cancer/i', ($test['category'] ?? '') . 
 <p>Tests may give false positive or false negative results and need medical interpretation. A normal result does not rule out every condition. Discuss appropriate testing with your clinician.</p>
 <?php if ($tumorMarker): ?><p>Tumor marker tests are not reliable general population cancer screens. Background information: <a href="https://www.cancer.gov/about-cancer/diagnosis-staging/diagnosis/tumor-markers-fact-sheet">National Cancer Institute: tumor markers</a>. Information updated 24 October 2026.</p><?php endif ?></section>
 <p><a href="/doctors?test=<?= $e(rawurlencode($id)) ?>">Request this test →</a> · <a href="/assistance">Ask for help</a></p></main>
-<footer><a href="/privacy">Privacy</a> · <a href="tel:+917447441116">744 744 1116</a></footer></body></html>
+<?php include __DIR__ . '/../components/footer.html'; ?></body></html>

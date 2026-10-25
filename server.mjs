@@ -5,6 +5,8 @@
  */
 
 import { createServer } from 'node:http';
+import { sendCampConfirmation } from './services/registrations/camp-email.mjs';
+import { createCampRegistrationStore, campRegistrationHandler } from './services/registrations/camp-registration.mjs';
 import { randomBytes } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
@@ -519,6 +521,9 @@ function getFormattedISTTimestamp() {
 // Initialize persistent cache from disk
 await initPersistentCache();
 
+const campStore = createCampRegistrationStore(join(__dirname, 'storage', 'registrations', 'camp.sqlite'));
+const registerForCamp = campRegistrationHandler(campStore, { sendConfirmation: sendCampConfirmation });
+
 const server = createServer(async (req, res) => {
   try {
   // Universal Security & CORS Headers (Data Leak & Injection Protection)
@@ -596,6 +601,8 @@ const server = createServer(async (req, res) => {
     }));
     return;
   }
+
+  if (urlPath === '/api/camp-registration') return await registerForCamp(req, res);
 
   // API Endpoint: /api/submit-form (Processes all form submissions with server-side AI email generation)
   if (urlPath === '/api/submit-form' && req.method === 'POST') {
@@ -959,15 +966,6 @@ const server = createServer(async (req, res) => {
 
   // IN-MEMORY SESSION STORE FOR NODE BACKEND
   const nodeSessionStore = global.nodeSessionStore || (global.nodeSessionStore = new Map());
-  if (!nodeSessionStore.has('AVG-ADM-TEST-TOKEN-2026')) {
-    nodeSessionStore.set('AVG-ADM-TEST-TOKEN-2026', {
-      userId: 'usr-admin-01',
-      name: 'Super Admin',
-      email: 'admin@gmail.com',
-      role: 'admin',
-      expiresAt: Date.now() + 8640000000
-    });
-  }
   const getSessionUser = (token) => {
     const session = nodeSessionStore.get(token);
     if (!session || !session.expiresAt || session.expiresAt <= Date.now()) {
@@ -1436,6 +1434,12 @@ const server = createServer(async (req, res) => {
       }
 
       const action = (payload.action || 'all').toLowerCase().trim();
+
+      if (action === 'camp_registrations') {
+        res.setHeader('Cache-Control', 'no-store');
+        if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', message: 'Administrator permissions required.' });
+        return sendJson(200, { status: 'ok', registrations: await campStore.list() });
+      }
 
       if (action === 'save_site_settings') {
         if (sessionUser.role !== 'admin') return sendJson(403, { status: 'error', message: 'Administrator permissions required.' });

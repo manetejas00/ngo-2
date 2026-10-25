@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2. Fetch the component HTML
     try {
-      const response = await fetch(`${fetchUrl}?v=4.3.1`);
+      const response = await fetch(`${fetchUrl}?v=4.3.3`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const htmlString = await response.text();
 

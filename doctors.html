@@ -51,8 +51,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="css/styles.css?v=4.3.2">
-  <link rel="stylesheet" href="css/healthcare.css?v=4.2.4">
+  <link rel="stylesheet" href="css/styles.css?v=4.3.4">
+  <link rel="stylesheet" href="css/healthcare.css?v=4.3.8">
   <link rel="stylesheet" href="css/preloader.css?v=4.2.4">
 <link rel="stylesheet" href="/css/accessibility.css?v=4.2.4">
 <script defer src="/js/components/accessibility.js?v=4.2.4"></script>
@@ -97,10 +97,10 @@
     <div class="hc-hero-ambient-glow"></div>
     
     <div class="hc-hero-sticky-stage">
-      <!-- 4K Microscopic Viruses & Bacteria Frame-by-Frame Canvas Background -->
+      <!-- Custom AI-illustrated diagnostic collection scenes -->
       <canvas id="doctors-canvas" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none;"></canvas>
       <div class="hc-hero-top-blend"></div>
-      <div class="hc-hero-bottom-blend"></div>
+      <div class="hc-hero-bottom-blend"></div><span class="diagnostic-asset-caption">Illustrative diagnostic care · AI-generated imagery</span>
 
       <!-- Stage 1: Healthcare Introduction -->
       <div class="hc-hero-stage-card active" id="hc-stage-1">
@@ -108,9 +108,8 @@
           <span>🧪</span> DIAGNOSTIC BOOKING ENQUIRIES
         </div>
         <h1 class="hc-hero-heading">
-          Affordable Diagnostics.<br>
-          Clinician-directed testing.<br>
-          Lifesaving Care.
+          Better insight.<br>
+          More informed care.
         </h1>
         <p class="hc-hero-subheading">
           Access subsidized diagnostic tests, clinician-directed laboratory panels, and sample collection subject to confirmation through AvinyaCareFoundation.
@@ -135,12 +134,12 @@
         </p>
         <div class="hc-hero-widget-box" style="max-width: 600px; margin: 0 auto;">
           <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; justify-content: center;">
-            <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Full Body Checkup'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🩺 Full Body</span>
-            <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Tumor Markers'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🎗️ Tumor Markers</span>
-            <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Heart Tests'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🫀 Heart</span>
-            <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Diabetes Tests'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🩸 Diabetes</span>
-            <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Thyroid & Hormones'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🦋 Thyroid</span>
-            <span class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Women\'s Health'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🌸 Women's Health</span>
+            <button type="button" class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Full Body Checkup'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🩺 Full Body</button>
+            <button type="button" class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Tumor Markers'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🎗️ Tumor Markers</button>
+            <button type="button" class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Heart Tests'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🫀 Heart</button>
+            <button type="button" class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Diabetes Tests'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🩸 Diabetes</button>
+            <button type="button" class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Thyroid & Hormones'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🦋 Thyroid</button>
+            <button type="button" class="hc-test-tag" style="background: rgba(255,255,255,0.12); color: #FFF; cursor: pointer; padding: 0.5rem 1rem; border-radius: 999px;" onclick="window.HealthcareApp.filterTests('Women\'s Health'); document.getElementById('hc-tests-anchor').scrollIntoView({behavior: 'smooth'})">🌸 Women's Health</button>
           </div>
         </div>
       </div>
@@ -541,7 +540,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
-  <script src="js/doctors-canvas.js?v=4.2.4"></script>
+  <script src="js/doctors-canvas.js?v=11"></script>
   <script src="js/components/navbar-gsap.js?v=4.3.2"></script>
   <script src="js/components/radial-menu.js?v=4.2.4"></script>
   <script src="js/services/pdf-service.js?v=4.2.4"></script>
@@ -550,6 +549,6 @@
   <script src="js/healthcare/healthcare-domain.js?v=4.2.4"></script>
   <script src="js/healthcare/healthcare-app.js?v=4.2.4-domain1"></script>
   <!-- REUSABLE_FOOTER -->
-  <script src="js/components/layout-injector.js?v=4.3.2"></script>
+  <script src="js/components/layout-injector.js?v=4.3.3"></script>
 </body>
 </html>

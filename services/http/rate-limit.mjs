@@ -20,7 +20,7 @@ export function checkRateLimit(req, res) {
   let maxRequests = 180; // Default for static files (html, css, js, assets)
   const windowMs = 60 * 1000; // 1 minute window
 
-  if (urlPath === '/api/submit-form' || urlPath === '/api/admin-auth' || urlPath === '/api/admin-auth.php' || urlPath === '/api/news/generate') {
+  if (urlPath === '/api/camp-registration' || urlPath === '/api/camp-registration.php' || urlPath === '/api/submit-form' || urlPath === '/api/admin-auth' || urlPath === '/api/admin-auth.php' || urlPath === '/api/news/generate') {
     maxRequests = 15; // Strict 15 req/min for auth, form submissions, and AI generation
   } else if (urlPath.startsWith('/api/')) {
     maxRequests = 60; // Standard 60 req/min for general API endpoints

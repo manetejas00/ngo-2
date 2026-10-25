@@ -61,6 +61,8 @@ Options -Indexes
   RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule \.(html|htm|css|js|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot|php)$ - [L]
 
+  RewriteRule ^api/camp-registration/?$ api/camp-registration.php [L,NC]
+
   # Route /api/submit-form to submit-form.php on Apache/PHP hosts
   RewriteRule ^api/submit-form/?$ api/submit-form.php [L,NC]
   RewriteRule ^api/security-health/?$ api/security-health.php [L,NC]

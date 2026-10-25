@@ -4502,3 +4502,15 @@ body.news-modal-open .fab-button {
 @media(max-width:360px){.navbar .tax-badge{display:none}.navbar .nav-actions>.btn-primary{font-size:.72rem;padding-inline:.5rem}.navbar .nav-brand{gap:.3rem}.navbar .brand-name{font-size:.8rem}}
 
 .footer-top>*{min-width:0}.footer-brand-badge>div{min-width:0}.footer-brand{overflow-wrap:anywhere}
+
+/* Keep navigation items at their readable width; switch layouts before crowding. */
+.navbar{width:min(1600px,100%)}
+.nav-links{flex:0 0 auto;gap:clamp(.25rem,.55vw,.65rem)}
+.nav-links>li{flex:0 0 auto}
+.nav-actions{flex-shrink:0}
+@media(max-width:1700px){.nav-links>.nav-link-secondary{display:none!important}}
+@media(max-width:1250px){
+  .navbar .nav-links{display:none!important}
+  .navbar .mobile-toggle{display:flex!important}
+  .navbar .btn-ghost-nav{display:none!important}
+}

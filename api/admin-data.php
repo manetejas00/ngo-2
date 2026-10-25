@@ -70,6 +70,14 @@ function validMoney($value, string $label): float {
     return round((float) $value, 2);
 }
 
+if ($action === 'camp_registrations') {
+    header('Cache-Control: no-store');
+    if (!in_array(strtolower((string)$userRole), ['admin','manager','superadmin'], true)) { http_response_code(403); echo json_encode(['status'=>'error','message'=>'Administrator permissions required.']); exit; }
+    try { require_once __DIR__.'/camp-store.php'; if (!$pdo) throw new RuntimeException('Database unavailable'); echo json_encode(['status'=>'ok','registrations'=>listCampRegistrations($pdo)]); }
+    catch (Throwable $error) { http_response_code(503); echo json_encode(['status'=>'error','message'=>'Registrations are temporarily unavailable.']); }
+    exit;
+}
+
 // Action: Live Form Mail & SMTP Diagnostic Audit
 if ($action === 'test_email_dispatch') {
     $targetEmail = strtolower(trim((string) ($data['testEmail'] ?? $_SESSION['admin_email'] ?? 'info@avinyacarefoundation.org')));

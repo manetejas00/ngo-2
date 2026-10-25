@@ -2221,3 +2221,22 @@
     width: 100%;
   }
 }
+
+/* Patient test footage stays visible beside the explanatory cards. */
+@media(min-width:1000px){.hc-hero-stage-card{left:4%;width:54%;max-width:780px;padding:2rem;background:rgba(10,15,29,.75)}.hc-hero-stage-card .hc-hero-heading{font-size:clamp(1.8rem,3vw,3rem)}}
+
+.diagnostic-asset-caption{position:absolute;right:24px;bottom:24px;z-index:1;font-size:10px;letter-spacing:.06em;color:#cad8d3;pointer-events:none}@media(min-width:1000px){.hc-hero-stage-card{width:43%;left:4%;padding:1.8rem;background:rgba(10,15,29,.68)}.hc-hero-stage-card .hc-hero-heading{font-size:clamp(1.8rem,2.7vw,2.7rem)}.hc-hero-stage-card .hc-hero-subheading{font-size:1rem}}
+
+/* Editorial copy sits in the image's dark negative space. */
+.hc-hero-stage-card{box-sizing:border-box;left:7%;width:37%;max-width:590px;text-align:left;background:transparent;border:0;border-radius:0;padding:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;color:#edf5f0;max-height:calc(100dvh - 180px);overflow:auto;scrollbar-width:thin}
+.hc-hero-stage-card .hc-stage-badge{background:transparent;border:0;border-radius:0;border-left:2px solid #99ceb6;padding:0 0 0 12px;color:#b7d9c8;font-size:10px;font-weight:600;letter-spacing:.17em;margin-bottom:24px}
+.hc-hero-stage-card .hc-hero-heading{background:none;-webkit-background-clip:initial;background-clip:initial;-webkit-text-fill-color:#f3f7f3;color:#f3f7f3;font-size:clamp(2rem,3.2vw,3.8rem)!important;font-weight:500;line-height:1.08;letter-spacing:-.045em;text-align:left;margin:0 0 24px}
+.hc-hero-stage-card .hc-hero-subheading{font-size:15px;line-height:1.8;color:#b0c2bc;text-align:left;margin:0 0 28px;max-width:440px}
+.hc-hero-stage-card .hc-hero-widget-box{background:transparent!important;border:0!important;border-top:1px solid #bad3c333!important;box-shadow:none!important;border-radius:0!important;padding:20px 0 0!important;margin:26px 0 0!important}
+.hc-hero-stage-card .hc-hero-widget-box>div{justify-content:flex-start!important}
+.hc-hero-stage-card .hc-test-tag{display:inline-flex;align-items:center;min-height:40px;padding:9px 12px!important;border-radius:6px!important;background:#d1e9db12!important;border:1px solid #b0d9c433;color:#d6e8df!important;font:inherit;font-size:12px;cursor:pointer}
+.hc-hero-stage-card .hc-test-tag:hover{background:#b4dcc52b!important}
+.hc-hero-stage-card .hc-hero-actions{justify-content:flex-start;margin-top:28px}
+.hc-hero-stage-card .hc-btn-primary{background:#c0dcc1;color:#14342b;box-shadow:none;border:0;border-radius:7px;padding:15px 22px;font-size:13px;font-weight:650}
+.hc-hero-stage-card :is(button,a):focus-visible{outline:2px solid #c0dcc1;outline-offset:5px}
+@media(max-width:999px){.hc-hero-stage-card{left:6%;width:88%;max-width:560px;padding:24px;background:#09151de8;border:1px solid #c0dcc126;border-radius:14px}.hc-hero-stage-card .hc-hero-heading{font-size:32px!important}.hc-hero-stage-card .hc-hero-subheading{font-size:13px}}
