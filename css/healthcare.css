@@ -2240,3 +2240,11 @@
 .hc-hero-stage-card .hc-btn-primary{background:#c0dcc1;color:#14342b;box-shadow:none;border:0;border-radius:7px;padding:15px 22px;font-size:13px;font-weight:650}
 .hc-hero-stage-card :is(button,a):focus-visible{outline:2px solid #c0dcc1;outline-offset:5px}
 @media(max-width:999px){.hc-hero-stage-card{left:6%;width:88%;max-width:560px;padding:24px;background:#101010ed;border:1px solid #c0dcc126;border-radius:14px}.hc-hero-stage-card .hc-hero-heading{font-size:32px!important}.hc-hero-stage-card .hc-hero-subheading{font-size:13px}}
+
+/* Booking overlays are viewport siblings; only their form body scrolls. */
+html.hc-modal-open{overflow:hidden;overscroll-behavior:none}
+body>.hc-modal-backdrop{height:100dvh;overflow:hidden;overscroll-behavior:contain;z-index:10000}
+body>.hc-modal-backdrop .hc-modal-window{max-height:calc(100dvh - 32px);min-height:0;flex-shrink:1;margin:auto}
+body>.hc-modal-backdrop .hc-modal-body{min-height:0;flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+body>.hc-modal-backdrop .hc-modal-header{position:relative;flex:0 0 auto}
+@media(max-width:768px){body>.hc-modal-backdrop .hc-modal-window{width:100%!important;max-width:620px!important;max-height:calc(100dvh - 32px)!important;margin:auto!important}}

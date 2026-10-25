@@ -528,8 +528,7 @@ class HealthcarePlatform {
       </div>
     `;
 
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    this.openModal(modal);
   }
 
   // -------------------------------------------------------------
@@ -547,8 +546,7 @@ class HealthcarePlatform {
 
     const modal = document.getElementById('hc-booking-modal');
     if (modal) {
-      modal.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      this.openModal(modal);
     }
   }
 
@@ -1190,8 +1188,7 @@ class HealthcarePlatform {
       </form>
     `;
 
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    this.openModal(modal);
   }
 
   toggleCollectionMethod(method) {
@@ -1682,8 +1679,17 @@ class HealthcarePlatform {
   // Modal Utilities & Event Listeners
   // -------------------------------------------------------------
   setupEventListeners() {
-    // Backdrop click close
+    // Keep fixed overlays outside the scroll hero's clipped/stacked page wrapper.
     document.querySelectorAll('.hc-modal-backdrop').forEach(modal => {
+      document.body.appendChild(modal);
+      const panel = modal.querySelector('.hc-modal-window');
+      if (panel) {
+        panel.setAttribute('role', 'dialog');
+        panel.setAttribute('aria-modal', 'true');
+        const title = panel.querySelector('.hc-modal-header h3');
+        if (title) { title.id ||= `${modal.id}-title`; panel.setAttribute('aria-labelledby', title.id); }
+      }
+      modal.querySelector('.hc-modal-close')?.setAttribute('aria-label', 'Close booking dialog');
       modal.addEventListener('click', (e) => {
         if (e.target === modal) this.closeModals();
       });
@@ -1691,13 +1697,39 @@ class HealthcarePlatform {
 
     // Escape key
     window.addEventListener('keydown', (e) => {
+      const modal = document.querySelector('.hc-modal-backdrop.active');
+      if (!modal || document.querySelector('dialog[open]')) return;
       if (e.key === 'Escape') this.closeModals();
+      if (e.key === 'Tab') {
+        const controls = [...modal.querySelectorAll('button,input,select,textarea,a[href],[tabindex]')].filter(el => !el.disabled && el.tabIndex >= 0 && el.getClientRects().length);
+        const first = controls[0], last = controls[controls.length-1];
+        if (!modal.contains(document.activeElement)) {e.preventDefault();first?.focus();return;}
+        if (e.shiftKey && document.activeElement === first) {e.preventDefault();last?.focus();}
+        else if (!e.shiftKey && document.activeElement === last) {e.preventDefault();first?.focus();}
+      }
     });
   }
 
+  openModal(modal) {
+    if (!document.querySelector('.hc-modal-backdrop.active')) {
+      this.modalOpener = document.activeElement;
+      this.previousBodyOverflow = document.body.style.overflow;
+    }
+    if (modal.parentElement !== document.body) document.body.appendChild(modal);
+    modal.classList.add('active');
+    document.documentElement.classList.add('hc-modal-open');
+    document.body.style.overflow = 'hidden';
+    const body = modal.querySelector('.hc-modal-body');
+    if (body) body.scrollTop = 0;
+    modal.querySelector('.hc-modal-close')?.focus({preventScroll:true});
+  }
+
   closeModals() {
+    if (!document.querySelector('.hc-modal-backdrop.active')) return;
     document.querySelectorAll('.hc-modal-backdrop').forEach(m => m.classList.remove('active'));
-    document.body.style.overflow = '';
+    document.documentElement.classList.remove('hc-modal-open');
+    document.body.style.overflow = this.previousBodyOverflow || '';
+    if (this.modalOpener?.isConnected) this.modalOpener.focus({preventScroll:true});
   }
 }
 
