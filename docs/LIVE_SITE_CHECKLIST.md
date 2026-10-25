@@ -87,3 +87,15 @@ person's medical data to test a form. Record the test reference privately if nee
 
 Record the release, checks actually run, failures and untested items here. Do not
 mark the entire checklist complete based solely on the automated smoke suite.
+
+### 26 October 2026 — release `030e664`
+
+- PASS: full local suite, 35 tests.
+- PASS: expanded production smoke suite, 35 page/component/asset/API checks.
+- PASS: live browser opened Sagar Warekar's profile and navigated through Ajay Pandey, Ravindra Singh, Ranjeet Mane, Chandresh Pandey and Tejas Mane; Close worked.
+- PASS: invalid live registration returns 422; GET on registration API returns 405.
+- PASS: unauthenticated camp admin listing returns 401.
+- PASS: public requests for `.env` and the private SQLite path return 403.
+- Prior live email test: production registration returned `emailStatus: SENT`; inbox/spam placement was not independently verified.
+- NOT TESTED in this release: signed-in admin CSV export, every booking/form submission, full device/browser matrix, screen reader, mailbox receipt, and live cutoff at the future camp date. Cutoff boundaries are covered by local tests.
+- DEPLOYMENT ISSUE: GitHub quality gate passed, but automated deployment failed in “Configure Hostinger SSH”. Release was deployed successfully through the existing local Hostinger SSH deployment connection, followed by passing live smoke checks. Repair CI SSH configuration before relying on automatic deployment.
