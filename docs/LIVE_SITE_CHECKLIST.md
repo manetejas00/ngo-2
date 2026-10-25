@@ -99,3 +99,11 @@ mark the entire checklist complete based solely on the automated smoke suite.
 - Prior live email test: production registration returned `emailStatus: SENT`; inbox/spam placement was not independently verified.
 - NOT TESTED in this release: signed-in admin CSV export, every booking/form submission, full device/browser matrix, screen reader, mailbox receipt, and live cutoff at the future camp date. Cutoff boundaries are covered by local tests.
 - DEPLOYMENT ISSUE: GitHub quality gate passed, but automated deployment failed in “Configure Hostinger SSH”. Release was deployed successfully through the existing local Hostinger SSH deployment connection, followed by passing live smoke checks. Repair CI SSH configuration before relying on automatic deployment.
+
+### Connect-page removal checks
+
+- [ ] `/connect` and `/connect.html` no longer serve the retired enquiry page.
+- [ ] No public HTML links point to `/connect`.
+- [ ] About no longer contains “Good questions build better trust”.
+- [ ] Team profiles no longer include “Connect with the foundation”.
+- [ ] Assistance email and phone links remain available; footer contact CTA calls the team.

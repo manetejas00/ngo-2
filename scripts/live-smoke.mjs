@@ -13,7 +13,6 @@ const checks = [
   { path: '/about', type: 'text', contains: 'team-profile-trigger' },
   { path: '/assistance', type: 'text', contains: 'assistance-hero' },
   { path: '/health-camp', type: 'text', contains: 'camp-opening' },
-  { path: '/connect', type: 'text', contains: 'connect-form' },
   { path: '/get-involved', type: 'text', contains: 'volunteer' },
   { path: '/gallery', type: 'text', contains: 'Gallery' },
   { path: '/events', type: 'text', contains: 'Community events' },
