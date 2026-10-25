@@ -21,6 +21,10 @@ if (!function_exists('loadEnvDatabaseVars')) {
             if (is_file($root . '/.env.production')) $filesToLoad[] = $root . '/.env.production';
         }
         if (is_file($root . '/.env')) $filesToLoad[] = $root . '/.env';
+        // Keep live mail credentials outside the deploy checkout so releases cannot replace them.
+        $mailEnvironment = str_contains($hostHeader, 'test.avinyacarefoundation.org') ? 'staging' : 'production';
+        $privateMailFile = dirname($root) . '/.avinya-mail-' . $mailEnvironment . '.env';
+        if (is_file($privateMailFile)) $filesToLoad[] = $privateMailFile;
 
         foreach ($filesToLoad as $envFile) {
             if (!is_file($envFile) || !is_readable($envFile)) continue;
