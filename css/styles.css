@@ -1187,6 +1187,7 @@ body.mobile-nav-open {
   left: 0;
   width: 100%;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -1199,11 +1200,12 @@ body.mobile-nav-open {
 }
 
 .hero-video {
+  /* Crop the footage’s embedded letterbox bands without changing scroll timing. */
   position: absolute;
-  top: 0;
+  top: -14%;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 128%;
   object-fit: cover;
   object-position: center center;
   z-index: 1;
