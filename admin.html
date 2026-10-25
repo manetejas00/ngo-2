@@ -22,7 +22,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="js/services/pdf-service.js?v=4.2.4"></script>
-<link rel="stylesheet" href="/css/camp-admin.css?v=1"></head>
+<link rel="stylesheet" href="/css/camp-admin.css?v=1"><link rel="stylesheet" href="/css/modal-controls.css?v=1"></head>
 <body>
 
   <!-- ==========================================================================
@@ -941,7 +941,7 @@
     <div class="modal-card" style="max-width: 720px;">
       <div class="modal-header">
         <h3 class="modal-title" id="doctorModalTitle">Add New Doctor Profile</h3>
-        <button class="modal-close-btn" onclick="closeDoctorModal()">✕</button>
+        <button class="modal-close-btn" onclick="closeDoctorModal()" aria-label="Close dialog">✕</button>
       </div>
 
       <form id="doctorForm" onsubmit="saveDoctorForm(event)">
@@ -1094,7 +1094,7 @@
     <div class="modal-card" style="max-width: 640px;">
       <div class="modal-header">
         <h3 class="modal-title" id="testModalTitle">Add Diagnostic Test Package</h3>
-        <button class="modal-close-btn" onclick="closeTestModal()">✕</button>
+        <button class="modal-close-btn" onclick="closeTestModal()" aria-label="Close dialog">✕</button>
       </div>
 
       <form id="testForm" onsubmit="saveTestForm(event)">
@@ -1193,7 +1193,7 @@
     <div class="modal-card" style="max-width: 540px;">
       <div class="modal-header">
         <h3 class="modal-title" id="userModalTitle">Add New System User</h3>
-        <button class="modal-close-btn" onclick="closeUserModal()">✕</button>
+        <button class="modal-close-btn" onclick="closeUserModal()" aria-label="Close dialog">✕</button>
       </div>
 
       <form id="userForm" onsubmit="saveUserForm(event)">
@@ -1258,7 +1258,7 @@
     <div class="modal-card" style="max-width: 680px;">
       <div class="modal-header">
         <h3 class="modal-title" id="galleryModalTitle">Add New Gallery Item</h3>
-        <button class="modal-close-btn" onclick="closeGalleryModal()">✕</button>
+        <button class="modal-close-btn" onclick="closeGalleryModal()" aria-label="Close dialog">✕</button>
       </div>
 
       <form id="galleryForm" onsubmit="saveGalleryForm(event)">
@@ -1383,7 +1383,7 @@
     <div class="modal-card" style="max-width: 680px;">
       <div class="modal-header">
         <h3 class="modal-title" id="campaignModalTitle">Add New Crowdfunding Campaign</h3>
-        <button class="modal-close-btn" onclick="closeCampaignModal()">✕</button>
+        <button class="modal-close-btn" onclick="closeCampaignModal()" aria-label="Close dialog">✕</button>
       </div>
 
       <form id="campaignForm" onsubmit="saveCampaignForm(event)">
@@ -1516,7 +1516,7 @@
     <div class="modal-card" style="max-width: 600px;">
       <div class="modal-header">
         <h3 class="modal-title" id="modalTitle">Record Detail</h3>
-        <button class="modal-close-btn" onclick="closeModal()">✕</button>
+        <button class="modal-close-btn" onclick="closeModal()" aria-label="Close dialog">✕</button>
       </div>
 
       <div class="modal-body" id="modalBody">
@@ -1535,7 +1535,7 @@
     <div class="modal-card" style="max-width: 580px;">
       <div class="modal-header">
         <h3 class="modal-title">✉️ Form Mail & SMTP Diagnostic Audit</h3>
-        <button class="modal-close-btn" onclick="closeEmailAuditModal()">✕</button>
+        <button class="modal-close-btn" onclick="closeEmailAuditModal()" aria-label="Close dialog">✕</button>
       </div>
 
       <form onsubmit="executeEmailAuditTest(event)">
@@ -1563,7 +1563,7 @@
     <div class="modal-card" style="max-width: 480px;">
       <div class="modal-header">
         <h3 class="modal-title">👤 My Admin Profile</h3>
-        <button class="modal-close-btn" onclick="closeProfileModal()">✕</button>
+        <button class="modal-close-btn" onclick="closeProfileModal()" aria-label="Close dialog">✕</button>
       </div>
 
       <form id="profileForm" onsubmit="saveCurrentUserProfile(event)">

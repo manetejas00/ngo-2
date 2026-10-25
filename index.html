@@ -95,7 +95,7 @@
 <link rel="stylesheet" href="/css/accessibility.css?v=4.2.4">
 <script defer src="/js/components/accessibility.js?v=4.2.4"></script>
 <link rel="stylesheet" href="/css/camp-announcement.css?v=1">
-<link rel="stylesheet" href="/css/donation-guide.css?v=1"><script defer src="/js/donation-guide.js?v=2"></script></head>
+<link rel="stylesheet" href="/css/donation-guide.css?v=1"><script defer src="/js/donation-guide.js?v=2"></script><link rel="stylesheet" href="/css/modal-controls.css?v=1"></head>
 
 <body>
 
@@ -1109,7 +1109,7 @@
   <!-- 1. Donate Modal -->
   <div id="donate-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
       <div class="modal-header-brand">
         <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
         <div class="category-tag" style="margin-bottom: 0;">MAKE A DIFFERENCE</div>
@@ -1197,7 +1197,7 @@
   <!-- 2. Story Reader Modal -->
   <div id="story-modal" class="modal-backdrop">
     <div class="modal-container" style="width: min(750px, 100%);">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
       <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
         <img id="modal-story-img" src="" alt="Story Cover"
           style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover;">
@@ -1219,7 +1219,7 @@
   <!-- 3. Volunteer Application Modal -->
   <div id="volunteer-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
       <div class="modal-header-brand">
         <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
         <div class="category-tag" style="margin-bottom: 0;">JOIN OUR COMMUNITY</div>
@@ -1252,7 +1252,7 @@
   <!-- 4. Guide & Toolkit Modal -->
   <div id="guide-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
       <div class="modal-header-brand">
         <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
         <div class="category-tag" style="margin-bottom: 0;">KNOWLEDGE RESOURCE</div>
@@ -1274,7 +1274,7 @@
   <!-- 5. Confidential Support Modal -->
   <div id="support-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
       <div class="modal-header-brand">
         <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
         <div class="category-tag" style="margin-bottom: 0;">CONFIDENTIAL HELPLINE</div>
@@ -1301,7 +1301,7 @@
   <!-- 6. General Contact Modal -->
   <div id="contact-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
       <div class="modal-header-brand">
         <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
         <div class="category-tag" style="margin-bottom: 0;">GET IN TOUCH</div>
@@ -1326,7 +1326,7 @@
   <!-- 7. CSR Partnership Modal -->
   <div id="csr-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
       <div class="modal-header-brand">
         <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
         <div class="category-tag" style="margin-bottom: 0;">CORPORATE PARTNERSHIP</div>
@@ -1360,7 +1360,7 @@
   <!-- 8. Newsletter Modal -->
   <div id="newsletter-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
       <div class="modal-header-brand">
         <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
         <div class="category-tag" style="margin-bottom: 0;">HEALTH JOURNAL</div>
@@ -1381,7 +1381,7 @@
   <!-- 9. Feedback Modal -->
   <div id="feedback-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
       <div class="modal-header-brand">
         <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
         <div class="category-tag" style="margin-bottom: 0;">YOUR FEEDBACK</div>

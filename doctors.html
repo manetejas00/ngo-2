@@ -57,7 +57,7 @@
 <link rel="stylesheet" href="/css/accessibility.css?v=4.2.4">
 <script defer src="/js/components/accessibility.js?v=4.2.4"></script>
 <link rel="stylesheet" href="/css/public-theme.css?v=4">
-<link rel="stylesheet" href="/css/donation-guide.css?v=1"><script defer src="/js/donation-guide.js?v=2"></script></head>
+<link rel="stylesheet" href="/css/donation-guide.css?v=1"><script defer src="/js/donation-guide.js?v=2"></script><link rel="stylesheet" href="/css/modal-controls.css?v=1"></head>
 <body class="healthcare-page-body" style="background-color: var(--hc-bg); color: var(--hc-text-main);">
   <!-- ==========================================
        AvinyaCareFoundation — HEALTHCARE PRELOADER
@@ -387,7 +387,7 @@
     <div class="hc-modal-window">
       <div class="hc-modal-header">
         <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800;">Schedule Diagnostic Test</h3>
-        <button class="hc-modal-close" onclick="window.HealthcareApp.closeModals()">✕</button>
+        <button class="hc-modal-close" onclick="window.HealthcareApp.closeModals()" aria-label="Close dialog">✕</button>
       </div>
       <div class="hc-modal-body" id="hc-test-modal-content">
         <!-- Dynamic Test Booking Form -->
@@ -414,7 +414,7 @@
   <!-- Donate Modal -->
   <div id="donate-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
       <div class="modal-header-brand">
         <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
         <div class="category-tag" style="margin-bottom: 0;">MAKE A DIFFERENCE</div>
@@ -491,7 +491,7 @@
   <!-- Confidential Support Modal -->
   <div id="support-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
       <div class="modal-header-brand">
         <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
         <div class="category-tag" style="margin-bottom: 0;">CONFIDENTIAL HELPLINE</div>
@@ -512,7 +512,7 @@
   <!-- Volunteer Modal -->
   <div id="volunteer-modal" class="modal-backdrop">
     <div class="modal-container">
-      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()">✕</button>
+      <button class="modal-close-btn" onclick="window.AvinyaModals.closeAll()" aria-label="Close dialog">✕</button>
       <div class="modal-header-brand">
         <img src="assets/logo-emblem.png" alt="AvinyaCareFoundation Logo" class="modal-brand-icon">
         <div class="category-tag" style="margin-bottom: 0;">JOIN OUR COMMUNITY</div>
