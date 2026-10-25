@@ -70,6 +70,8 @@ function validMoney($value, string $label): float {
     return round((float) $value, 2);
 }
 
+if (in_array($action, ['camp_update','camp_delete','camp_send_email'],true)) { require __DIR__.'/camp-admin.php'; exit; }
+
 if ($action === 'camp_registrations') {
     header('Cache-Control: no-store');
     if (!in_array(strtolower((string)$userRole), ['admin','manager','superadmin'], true)) { http_response_code(403); echo json_encode(['status'=>'error','message'=>'Administrator permissions required.']); exit; }

@@ -102,3 +102,21 @@ test('registration closes at exactly 4 PM IST on camp day', async () => {
     assert.equal(saves, 1);
   } finally { Date.now = originalNow; }
 });
+
+test('admin edits persist, enforce uniqueness, and deletion removes only the selected record', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'avinya-camp-admin-'));
+  try {
+    const store = createCampRegistrationStore(join(directory, 'camp.sqlite'));
+    const data = validateRegistration(valid).data;
+    const first = await store.register(data);
+    const second = await store.register({...data, name:'Second Person'});
+    assert.equal(await store.update(first.id,{...data,name:'Updated Person',email:'updated@example.com'}),true);
+    assert.equal((await store.list()).find(row=>row.id===first.id).email,'updated@example.com');
+    await assert.rejects(store.update(first.id,{...data,name:'Second Person'}));
+    assert.equal((await store.list()).find(row=>row.id===first.id).name,'Updated Person');
+    await store.setEmailStatus(first.id,'SENT');
+    assert.equal(await store.remove(first.id),true);
+    assert.equal(await store.remove(first.id),false);
+    assert.deepEqual((await store.list()).map(row=>row.id),[second.id]);
+  } finally { await rm(directory,{recursive:true,force:true}); }
+});

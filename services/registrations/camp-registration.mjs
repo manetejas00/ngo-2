@@ -74,6 +74,14 @@ export function createCampRegistrationStore(file) {
       const output = await sqlite(file, `SELECT json_object('id', r.id, 'createdAt', r.created_at, 'answers', json(r.answers_json), 'emailStatus', coalesce(e.status, CASE WHEN coalesce(json_extract(r.answers_json, '$.email'), '') = '' THEN 'SKIPPED' ELSE 'PENDING' END)) FROM camp_registrations r LEFT JOIN camp_email_status e ON e.registration_id = r.id ORDER BY r.created_at DESC;`);
       return output ? output.split('\n').map(line => { const row = JSON.parse(line); return { ...row.answers, id: row.id, createdAt: row.createdAt, emailStatus: row.emailStatus }; }) : [];
     },
+    async update(id, data) {
+      await initialize();
+      return await sqlite(file, `UPDATE camp_registrations SET name=${literal(data.name)},phone=${literal(data.phone)},age=${literal(data.age)},gender=${literal(data.gender)},locality=${literal(data.location)},answers_json=${literal(JSON.stringify(data))} WHERE id=${literal(id)}; SELECT changes();`) === '1';
+    },
+    async remove(id) {
+      await initialize();
+      return await sqlite(file, `BEGIN IMMEDIATE; DELETE FROM camp_email_status WHERE registration_id=${literal(id)}; DELETE FROM camp_registrations WHERE id=${literal(id)}; SELECT changes(); COMMIT;`) === '1';
+    },
     async setEmailStatus(id, status) {
       await initialize();
       await sqlite(file, `INSERT INTO camp_email_status VALUES (${literal(id)}, ${literal(status)}) ON CONFLICT(registration_id) DO UPDATE SET status=excluded.status;`);

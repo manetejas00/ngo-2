@@ -6,7 +6,7 @@
 
 import { createServer } from 'node:http';
 import { sendCampConfirmation } from './services/registrations/camp-email.mjs';
-import { createCampRegistrationStore, campRegistrationHandler } from './services/registrations/camp-registration.mjs';
+import { createCampRegistrationStore, campRegistrationHandler, validateRegistration } from './services/registrations/camp-registration.mjs';
 import { randomBytes } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
@@ -1439,6 +1439,28 @@ const server = createServer(async (req, res) => {
         res.setHeader('Cache-Control', 'no-store');
         if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', message: 'Administrator permissions required.' });
         return sendJson(200, { status: 'ok', registrations: await campStore.list() });
+      }
+
+      if (['camp_update','camp_delete','camp_send_email'].includes(action)) {
+        res.setHeader('Cache-Control', 'no-store');
+        if (!['admin','manager'].includes(sessionUser.role)) return sendJson(403,{status:'error',message:'Administrator permissions required.'});
+        const record = (await campStore.list()).find(row => row.id === payload.id);
+        if (!record) return sendJson(404,{status:'error',message:'Registration not found. Refresh the list.'});
+        if (action === 'camp_delete') { await campStore.remove(record.id); return sendJson(200,{status:'ok',message:'Registration deleted.'}); }
+        if (action === 'camp_update') {
+          const {data,errors} = validateRegistration({...record,...payload.registration,consent:record.consent});
+          if (Object.keys(errors).length) return sendJson(422,{status:'error',message:'Check the registration fields.',errors});
+          try { await campStore.update(record.id,data); if ((data.email||'') !== (record.email||'')) await campStore.setEmailStatus(record.id,data.email?'PENDING':'SKIPPED'); } catch { return sendJson(409,{status:'error',message:'These details conflict with another registration.'}); }
+          return sendJson(200,{status:'ok',message:'Registration updated.'});
+        }
+        if (!record.email) return sendJson(422,{status:'error',message:'Add an email address before sending.'});
+        const attempts = global.campMailAttempts ||= new Map();
+        if (Date.now() - (attempts.get(record.id)||0) < 60000) return sendJson(429,{status:'error',message:'Please wait one minute before sending again.'});
+        attempts.set(record.id,Date.now());
+        let emailStatus='FAILED';
+        try { emailStatus=await sendCampConfirmation(record,record); } catch {}
+        await campStore.setEmailStatus(record.id,emailStatus);
+        return sendJson(emailStatus==='SENT'?200:502,{status:emailStatus==='SENT'?'ok':'error',message:emailStatus==='SENT'?'Confirmation email sent.':'Email delivery failed. Registration is still saved.'});
       }
 
       if (action === 'save_site_settings') {

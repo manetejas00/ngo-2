@@ -107,3 +107,13 @@ mark the entire checklist complete based solely on the automated smoke suite.
 - [ ] About no longer contains “Good questions build better trust”.
 - [ ] Team profiles no longer include “Connect with the foundation”.
 - [ ] Assistance email and phone links remain available; footer contact CTA calls the team.
+
+## Camp registration management
+
+- Verify search, email status, date filters, sorting and pagination. CSV must include all filtered records.
+- View must show all answers; Edit must preserve original consent and validate required fields.
+- Changing an email must reset its delivery status; edits must not send automatically.
+- Send mail must show the recipient for confirmation and be disabled without an email. Confirm successful delivery with an approved test recipient.
+- Repeated sends within one minute must be blocked. Failures must retain the registration.
+- Delete must require explicit confirmation. Test only on an approved disposable registration.
+- Unauthenticated and unauthorized requests must not edit, delete or send email.
