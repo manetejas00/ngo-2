@@ -24,6 +24,7 @@ const checks = [
   { path: '/components/footer', type: 'text', contains: 'site-footer-grid' },
   { path: '/css/section-themes.css', type: 'text', contains: '.camp-opening' },
   { path: '/css/footer.css', type: 'text', contains: '.site-footer-grid' },
+  { path: '/css/public-theme.css', type: 'text', contains: '--hc-primary:#a94710' },
   { path: '/css/team.css', type: 'text', contains: '.team-dialog' },
   { path: '/js/team.js', type: 'text', contains: 'dialog.showModal()' },
   { path: '/assets/team/sagar-warekar.jpg', type: 'asset' },

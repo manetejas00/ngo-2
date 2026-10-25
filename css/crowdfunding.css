@@ -10,16 +10,16 @@
   --cf-surface-hover: #1A2B3D;
   --cf-border: rgba(255, 255, 255, 0.08);
   --cf-border-hover: rgba(244, 117, 40, 0.4);
-  --cf-border-teal: rgba(8, 127, 115, 0.35);
+  --cf-border-teal: rgba(244, 117, 40, 0.35);
 
   --cf-brand: #F47528;
   --cf-brand-hover: #E06318;
   --cf-brand-light: rgba(244, 117, 40, 0.12);
   --cf-brand-glow: rgba(244, 117, 40, 0.25);
 
-  --cf-teal: #087F73;
+  --cf-teal: #a94710;
   --cf-teal-light: #E6F6F4;
-  --cf-teal-glow: rgba(8, 127, 115, 0.25);
+  --cf-teal-glow: rgba(244, 117, 40, 0.25);
 
   --cf-text-main: #FFFFFF;
   --cf-text-muted: #94A3B8;
@@ -48,8 +48,8 @@
 .cf-hero {
   position: relative;
   padding: 9.25rem 1.5rem 5.25rem;
-  background: radial-gradient(circle at 50% 15%, rgba(244, 117, 40, 0.09) 0%, rgba(8, 127, 115, 0.05) 45%, transparent 75%),
-              linear-gradient(180deg, #070B10 0%, var(--cf-bg) 100%);
+  background: radial-gradient(circle at 50% 15%, rgba(244, 117, 40, 0.09) 0%, rgba(244, 117, 40, 0.05) 45%, transparent 75%),
+              linear-gradient(180deg, #0a0a0a 0%, var(--cf-bg) 100%);
   border-bottom: 1px solid var(--cf-border);
 }
 
@@ -100,7 +100,7 @@
 }
 
 .cf-hero-title span.accent-teal {
-  background: linear-gradient(135deg, #48D1B7 0%, #087F73 100%);
+  background: linear-gradient(135deg, #f7aa7b 0%, #a94710 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -231,7 +231,7 @@
   opacity: 0.7;
 }
 
-.cf-stat-card:nth-child(2)::before { background: #087F73; }
+.cf-stat-card:nth-child(2)::before { background: #a94710; }
 .cf-stat-card:nth-child(3)::before { background: #3B82F6; }
 .cf-stat-card:nth-child(4)::before { background: #10B981; }
 
@@ -468,7 +468,7 @@
   position: absolute;
   bottom: 1.25rem;
   left: 1.25rem;
-  background: rgba(8, 127, 115, 0.9);
+  background: rgba(244, 117, 40, 0.9);
   color: #FFFFFF;
   font-size: 0.75rem;
   font-weight: 700;
@@ -505,7 +505,7 @@
 }
 
 .cf-spotlight-hospital span.hosp-name {
-  color: #38BDF8;
+  color: #f7aa7b;
   font-weight: 600;
 }
 
@@ -683,7 +683,7 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(8, 127, 115, 0.9);
+  background: rgba(244, 117, 40, 0.9);
   color: #FFFFFF;
   font-size: 0.7rem;
   font-weight: 700;
@@ -718,7 +718,7 @@
 }
 
 .cf-card-meta span.hospital {
-  color: #38BDF8;
+  color: #f7aa7b;
 }
 
 .cf-card-desc {
@@ -821,13 +821,13 @@
   max-width: 1100px;
   margin: 0 auto;
   background: var(--cf-surface);
-  border: 1px solid rgba(8, 127, 115, 0.35);
+  border: 1px solid rgba(244, 117, 40, 0.35);
   border-radius: var(--cf-radius-lg);
   padding: 3rem;
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   gap: 3rem;
-  box-shadow: var(--cf-shadow), 0 0 35px rgba(8, 127, 115, 0.12);
+  box-shadow: var(--cf-shadow), 0 0 35px rgba(244, 117, 40, 0.12);
 }
 
 .cf-preset-pills {
@@ -890,7 +890,7 @@
 }
 
 .cf-calc-results {
-  background: #08111A;
+  background: #121212;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--cf-radius-md);
   padding: 2rem;
@@ -968,18 +968,18 @@
   position: absolute;
   inset: auto 0 0;
   height: 3px;
-  background: linear-gradient(90deg, #087F73, #48D1B7);
+  background: linear-gradient(90deg, #a94710, #f7aa7b);
   opacity: 0.95;
 }
 
 .cf-trust-card:nth-child(2)::after { background: linear-gradient(90deg, #F47528, #FFA466); }
-.cf-trust-card:nth-child(3)::after { background: linear-gradient(90deg, #38BDF8, #7DD3FC); }
+.cf-trust-card:nth-child(3)::after { background: linear-gradient(90deg, #f7aa7b, #ffccb0); }
 .cf-trust-card:nth-child(4)::after { background: linear-gradient(90deg, #A78BFA, #C4B5FD); }
 
 .cf-trust-icon {
   width: 48px;
   height: 48px;
-  background: rgba(8, 127, 115, 0.14);
+  background: rgba(244, 117, 40, 0.14);
   border: 1px solid rgba(72, 209, 183, 0.24);
   border-radius: 14px;
   display: flex;

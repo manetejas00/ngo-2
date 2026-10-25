@@ -1,0 +1,97 @@
+/* One public-site palette. Semantic success/error colors remain independent. */
+:root {
+  --brand:#f47528; --brand-hover:#ff8b45; --brand-light:#fff1e8;
+  --black:#0a0a0a; --white:#fff; --background:#fafafa;
+  --text:#171717; --muted:#595959; --text-light:#fff; --text-light-muted:#b3b3b3;
+  --text-light-sub:#b3b3b3; --text-dark-sub:#595959;
+  --hc-primary:#a94710; --hc-primary-hover:#87370b; --hc-primary-light:#fff1e8;
+  --hc-primary-glow:rgba(244,117,40,.18); --hc-teal:#f7aa7b;
+  --hc-dark:#0a0a0a; --hc-dark-card:#171717; --hc-dark-border:#333;
+  --hc-bg:#fafafa; --hc-surface:#fff; --hc-surface-alt:#f5f5f5;
+  --hc-border:#dedede; --hc-border-hover:#b8b8b8;
+  --hc-text-main:#171717; --hc-text-muted:#595959; --hc-text-light:#666;
+  --hc-font-heading:var(--font-primary); --hc-font-body:var(--font-primary);
+  --cf-bg:#0a0a0a; --cf-surface:#121212; --cf-surface-card:#191919; --cf-surface-hover:#242424;
+  --cf-text-muted:#b3b3b3; --cf-text-dark:#171717;
+  --cf-teal:#f7aa7b; --cf-teal-light:#fff1e8; --cf-teal-glow:rgba(244,117,40,.15);
+  --cf-border-teal:rgba(244,117,40,.3);
+  --gal-bg-dark:#0a0a0a; --gal-bg-card:rgba(23,23,23,.95); --gal-bg-card-hover:rgba(35,35,35,.98);
+  --gal-border:rgba(255,255,255,.16); --gal-border-glow:rgba(244,117,40,.5);
+  --gal-primary:#a94710; --gal-teal:#f47528; --gal-teal-light:#f7aa7b;
+  --gal-text-muted:#c4c4c4; --gal-text-dim:#aaa;
+  --gal-font-heading:var(--font-primary); --gal-font-body:var(--font-primary);
+}
+body:not(.admin-body){font-family:var(--font-primary,'Inter',system-ui,sans-serif)}
+/* Information pages share a dark introduction and crisp, white reading cards. */
+.information-page:not(.about-page):not(.camp-page):not(.assistance-page){background:var(--black);color:#fafafa;color-scheme:light}
+.information-page:not(.about-page):not(.camp-page):not(.assistance-page) main{width:min(1120px,calc(100% - 64px));padding-top:155px}
+.information-page:not(.about-page):not(.camp-page):not(.assistance-page) main h1{color:#fff;font-weight:600}
+.information-page:not(.about-page):not(.camp-page):not(.assistance-page) main>.lead{color:#bdbdbd;max-width:720px}
+.information-page:not(.about-page):not(.camp-page):not(.assistance-page) main>section{background:#fff;color:#171717;border:1px solid #dedede;padding:32px;border-radius:14px;margin:24px 0}
+.information-page:not(.about-page):not(.camp-page):not(.assistance-page) main>section :is(h2,h3,strong){color:#171717}
+.information-page:not(.about-page):not(.camp-page):not(.assistance-page) main>section :is(p,li){color:#595959}
+.information-page:not(.about-page):not(.camp-page):not(.assistance-page) main>section a{color:#99400f;text-decoration:underline;text-underline-offset:4px}
+/* Controls use dark type on orange; orange small text on white uses a darker shade. */
+:is(.hc-btn-primary,.cf-btn-primary,.cf-btn-donate,.cf-filter-btn.active){background:#f47528;color:#171717;border-color:#f47528;border-radius:8px;box-shadow:none}
+:is(.hc-btn-primary,.cf-btn-primary,.cf-btn-donate):hover{background:#ff8b45;color:#171717;box-shadow:0 6px 20px #00000014}
+.hc-hero-stage-card .hc-btn-primary{background:#f47528;color:#171717}
+.hc-hero-stage-card .hc-stage-badge{color:#f7aa7b;border-color:#f47528}
+.hc-hero-stage-card .hc-hero-subheading{color:#d0d0d0}
+.hc-hero-stage-card .hc-test-tag{color:#eee!important;background:#ffffff12!important;border-color:#ffffff40}
+.hc-hero-stage-card .hc-test-tag:hover{background:#ffffff26!important}
+.hc-hero-stage-card :is(button,a):focus-visible{outline-color:#f47528}
+.cf-hero-title span.accent-teal{background:none;color:#f7aa7b;-webkit-text-fill-color:currentColor}
+.hc-section-eyebrow{color:#99400f}
+.hc-test-card{border-color:#ddd;box-shadow:0 8px 30px #00000005}
+.hc-test-card:hover{border-color:#b15a26}
+/* Match the campaign invitation to the same site palette. */
+.hero-camp-link{color:#fff!important;border-color:#ffffff60!important}
+#camp-announcement{background:#fff;color:#171717;border-color:#ddd}
+#camp-announcement::backdrop{background:#000b}
+#camp-announcement h2{color:#171717}
+#camp-announcement p,.camp-announcement-dismiss{color:#595959}
+.camp-announcement-close{background:#f2f2f2;color:#171717}
+.camp-announcement-label{color:#99400f}
+.camp-announcement-details{border-color:#ddd}
+.camp-announcement-cta{background:#f47528;color:#171717}
+#camp-announcement :is(a,button):focus-visible{outline-color:#a94710}
+/* Consistent field contrast and visible keyboard navigation. */
+body:not([class*="admin"]) :is(input,select,textarea){font-family:inherit}
+body:not([class*="admin"]) :is(a,button,input,select,textarea,summary):focus-visible{outline:2px solid #b95013;outline-offset:4px}
+.site-footer .site-footer-column a{font-size:13px}
+.site-footer address{color:#aaa}
+.site-footer .site-footer-bottom p,.site-footer-bottom a{color:#aaa;font-size:11px}
+@media(max-width:600px){
+  .information-page:not(.about-page):not(.camp-page):not(.assistance-page) main{width:calc(100% - 40px);padding-top:120px}
+  .information-page:not(.about-page):not(.camp-page):not(.assistance-page) main>section{padding:24px}
+  :is(input,select,textarea){font-size:16px}
+}
+/* Shared navigation stays readable over every page background. */
+.navbar-wrapper .navbar{background:rgba(10,10,10,.97)!important;border-color:#ffffff29!important;color:#fff}
+.navbar-wrapper .navbar .nav-brand,.navbar-wrapper .navbar .brand-name{color:#fff!important}
+.navbar-wrapper .navbar .nav-links a{color:#ddd}
+.navbar-wrapper .navbar .btn-primary,body .btn-primary{color:#171717}
+body .btn-primary[style*="background: #FFFFFF"]{color:#99400f!important}
+.about-page main>.about-team .team-profile-trigger,.about-page main>.about-team .about-team-details h3{color:#fafafa}
+.team-dialog-eyebrow{color:#666}
+.cf-page .cf-calculator-card :is(p,label),.cf-page .cf-calc-results p{color:#c4c4c4}
+.information-page .skip:focus{background:#fff;color:#171717}
+.navbar-wrapper .navbar{background:#0a0a0a!important}
+.information-page .skip{background:#0a0a0a;color:#fff}
+.cf-page .cf-card-body>p{color:#bdbdbd;font-size:14px;line-height:1.7}
+.journey-dot.active,.news-tab-btn.active{color:#171717}
+.news-show-more-btn{color:#99400f;border-color:#b95014}
+.donate-theme,.donate-theme :is(.action-title,.action-desc,.category-tag,.pay-pill){color:#171717!important}
+.donate-theme .pay-pill{border-color:#17171755}
+/* Keep imagery prominent; ambient color is a restrained accent. */
+.gallery-page-main{background:#0a0a0a}
+.gallery-hero-bg{background:radial-gradient(ellipse at 50% 0%,#f4752812,transparent 65%)}
+.gallery-hero-title{font-weight:650;letter-spacing:-.05em;line-height:1.06}
+.gallery-hero-title .text-gradient{background:none;color:#f47528;-webkit-text-fill-color:currentColor}
+.gallery-category-pill.active{background:#f47528;color:#171717;box-shadow:none}
+.gallery-category-pill{transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease}
+.gallery-page .hero-pill{box-shadow:none;background:#f4752810}
+.cf-page :is(h1,h2,h3){font-family:var(--font-primary)}
+.cf-calculator-section{background:#101010}
+.cf-trust-card{background:#171717}
+.cf-cta-banner{background:radial-gradient(ellipse at 90% 0%,#f4752810,transparent 65%),#171717}

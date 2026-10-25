@@ -2,13 +2,13 @@
 
 :root {
   --gal-bg-dark: #070D0D;
-  --gal-bg-card: rgba(15, 25, 24, 0.85);
-  --gal-bg-card-hover: rgba(22, 38, 36, 0.95);
-  --gal-border: rgba(94, 234, 212, 0.14);
-  --gal-border-glow: rgba(94, 234, 212, 0.45);
+  --gal-bg-card: rgba(23, 23, 23, 0.85);
+  --gal-bg-card-hover: rgba(35, 35, 35, 0.95);
+  --gal-border: rgba(244, 117, 40, 0.14);
+  --gal-border-glow: rgba(244, 117, 40, 0.45);
   --gal-primary: #087F73;
-  --gal-teal: #14B8A6;
-  --gal-teal-light: #5EEAD4;
+  --gal-teal: #f47528;
+  --gal-teal-light: #f7aa7b;
   --gal-accent: #F47528;
   --gal-accent-hover: #FF883E;
   --gal-text-main: #FFFFFF;
@@ -38,7 +38,7 @@ body.gallery-page, body {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: rgba(20, 184, 166, 0.88);
+  background: rgba(244, 117, 40, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.4);
   color: #FFFFFF;
   display: flex;
@@ -51,7 +51,7 @@ body.gallery-page, body {
   transform: translate(-50%, -50%) scale(0.4);
   transition: opacity 0.3s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   backdrop-filter: blur(8px);
-  box-shadow: 0 10px 30px rgba(8, 127, 115, 0.5);
+  box-shadow: 0 10px 30px rgba(244, 117, 40, 0.5);
 }
 
 .gallery-custom-cursor.active {
@@ -91,9 +91,9 @@ body.gallery-page, body {
 .gallery-page-main {
   min-height: 100vh;
   position: relative;
-  background: radial-gradient(circle at 50% 0%, rgba(8, 127, 115, 0.22) 0%, transparent 65%),
+  background: radial-gradient(circle at 50% 0%, rgba(244, 117, 40, 0.22) 0%, transparent 65%),
               radial-gradient(circle at 85% 35%, rgba(244, 117, 40, 0.12) 0%, transparent 55%),
-              radial-gradient(circle at 15% 75%, rgba(20, 184, 166, 0.14) 0%, transparent 50%);
+              radial-gradient(circle at 15% 75%, rgba(244, 117, 40, 0.14) 0%, transparent 50%);
   padding-bottom: 100px;
 }
 
@@ -108,7 +108,7 @@ body.gallery-page, body {
 .gallery-hero-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 20%, rgba(20, 184, 166, 0.28) 0%, transparent 70%);
+  background: radial-gradient(circle at 50% 20%, rgba(244, 117, 40, 0.28) 0%, transparent 70%);
   pointer-events: none;
   filter: blur(50px);
 }
@@ -118,8 +118,8 @@ body.gallery-page, body {
   align-items: center;
   gap: 10px;
   padding: 8px 22px;
-  background: rgba(20, 184, 166, 0.12);
-  border: 1px solid rgba(94, 234, 212, 0.35);
+  background: rgba(244, 117, 40, 0.12);
+  border: 1px solid rgba(244, 117, 40, 0.35);
   border-radius: 40px;
   color: var(--gal-teal-light);
   font-size: 13px;
@@ -128,7 +128,7 @@ body.gallery-page, body {
   letter-spacing: 1.5px;
   margin-bottom: 24px;
   backdrop-filter: blur(12px);
-  box-shadow: 0 4px 20px rgba(8, 127, 115, 0.25);
+  box-shadow: 0 4px 20px rgba(244, 117, 40, 0.25);
 }
 
 .hero-title-wrap {
@@ -164,7 +164,7 @@ body.gallery-page, body {
 }
 
 .gallery-hero-title .text-gradient {
-  background: linear-gradient(135deg, #5EEAD4 0%, #14B8A6 50%, #F47528 100%);
+  background: linear-gradient(135deg, #f7aa7b 0%, #f47528 50%, #F47528 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -187,7 +187,7 @@ body.gallery-page, body {
   max-width: 960px;
   margin: 0 auto;
   padding: 8px;
-  background: rgba(15, 25, 24, 0.7);
+  background: rgba(23, 23, 23, 0.7);
   border: 1px solid var(--gal-border);
   border-radius: 40px;
   backdrop-filter: blur(16px);
@@ -219,8 +219,8 @@ body.gallery-page, body {
 .gallery-category-pill.active {
   background: linear-gradient(135deg, var(--gal-primary) 0%, var(--gal-teal) 100%);
   color: #FFFFFF;
-  border-color: rgba(94, 234, 212, 0.6);
-  box-shadow: 0 6px 24px rgba(8, 127, 115, 0.45);
+  border-color: rgba(244, 117, 40, 0.6);
+  box-shadow: 0 6px 24px rgba(244, 117, 40, 0.45);
 }
 
 /* --- SECTION HEADERS --- */
@@ -278,8 +278,8 @@ body.gallery-page, body {
   font-weight: 800;
   letter-spacing: 2px;
   color: var(--gal-teal-light);
-  background: rgba(20, 184, 166, 0.12);
-  border: 1px solid rgba(94, 234, 212, 0.3);
+  background: rgba(244, 117, 40, 0.12);
+  border: 1px solid rgba(244, 117, 40, 0.3);
   padding: 6px 18px;
   border-radius: 20px;
   display: inline-flex;
@@ -310,7 +310,7 @@ body.gallery-page, body {
 
 .collage-card:hover {
   border-color: var(--gal-border-glow);
-  box-shadow: 0 30px 60px rgba(8, 127, 115, 0.4);
+  box-shadow: 0 30px 60px rgba(244, 117, 40, 0.4);
   z-index: 10 !important;
 }
 
@@ -421,7 +421,7 @@ body.gallery-page, body {
 
 .bento-card:hover {
   border-color: var(--gal-border-glow);
-  box-shadow: 0 24px 60px rgba(8, 127, 115, 0.35);
+  box-shadow: 0 24px 60px rgba(244, 117, 40, 0.35);
   transform: translateY(-8px) scale(1.02);
 }
 
@@ -513,8 +513,8 @@ body.gallery-page, body {
   font-weight: 800;
   letter-spacing: 2px;
   color: var(--gal-teal-light);
-  background: rgba(20, 184, 166, 0.2);
-  border: 1px solid rgba(94, 234, 212, 0.35);
+  background: rgba(244, 117, 40, 0.2);
+  border: 1px solid rgba(244, 117, 40, 0.35);
   padding: 6px 16px;
   border-radius: 20px;
   text-transform: uppercase;
@@ -585,7 +585,7 @@ body.gallery-page, body {
 .masonry-card:hover {
   border-color: var(--gal-border-glow);
   transform: translateY(-8px);
-  box-shadow: 0 24px 50px rgba(8, 127, 115, 0.3);
+  box-shadow: 0 24px 50px rgba(244, 117, 40, 0.3);
 }
 
 .masonry-card-img {
@@ -624,13 +624,13 @@ body.gallery-page, body {
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 8px 28px rgba(8, 127, 115, 0.35);
+  box-shadow: 0 8px 28px rgba(244, 117, 40, 0.35);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .gallery-load-more-btn:hover {
   transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 14px 40px rgba(8, 127, 115, 0.55);
+  box-shadow: 0 14px 40px rgba(244, 117, 40, 0.55);
   background: linear-gradient(135deg, var(--gal-teal) 0%, var(--gal-accent) 100%);
 }
 
@@ -661,7 +661,7 @@ body.gallery-page, body {
 }
 
 .lightbox-container {
-  background: #0B1312;
+  background: #121212;
   border: 1px solid var(--gal-border-glow);
   border-radius: var(--gal-radius-lg);
   max-width: 1100px;
@@ -726,7 +726,7 @@ body.gallery-page, body {
   top: 50%;
   transform: translateY(-50%);
   background: rgba(11, 19, 18, 0.85);
-  border: 1px solid rgba(94, 234, 212, 0.3);
+  border: 1px solid rgba(244, 117, 40, 0.3);
   color: #FFFFFF;
   width: 52px;
   height: 52px;
@@ -789,8 +789,8 @@ body.gallery-page, body {
   text-transform: uppercase;
   margin-bottom: 8px;
   display: inline-block;
-  background: rgba(20, 184, 166, 0.15);
-  border: 1px solid rgba(94, 234, 212, 0.25);
+  background: rgba(244, 117, 40, 0.15);
+  border: 1px solid rgba(244, 117, 40, 0.25);
   padding: 4px 12px;
   border-radius: 20px;
 }
@@ -837,7 +837,7 @@ body.gallery-page, body {
 }
 
 .skeleton-card {
-  background: linear-gradient(90deg, rgba(15, 25, 24, 0.8) 25%, rgba(22, 38, 36, 0.95) 50%, rgba(15, 25, 24, 0.8) 75%);
+  background: linear-gradient(90deg, rgba(23, 23, 23, 0.8) 25%, rgba(35, 35, 35, 0.95) 50%, rgba(23, 23, 23, 0.8) 75%);
   background-size: 200% 100%;
   animation: skeletonPulse 1.8s infinite;
   border-radius: var(--gal-radius-lg);
@@ -1091,22 +1091,22 @@ body.gallery-page, body {
   background: rgba(11, 19, 18, 0.82);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1.5px solid rgba(94, 234, 212, 0.6);
-  color: #5EEAD4;
+  border: 1.5px solid rgba(244, 117, 40, 0.6);
+  color: #f7aa7b;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 15px;
   z-index: 5;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45), 0 0 12px rgba(20, 184, 166, 0.3);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45), 0 0 12px rgba(244, 117, 40, 0.3);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   pointer-events: none;
 }
 
 .gallery-item:hover .card-video-indicator {
   transform: scale(1.14);
-  background: #0D9488;
-  border-color: #5EEAD4;
+  background: #a94710;
+  border-color: #f7aa7b;
   color: #FFFFFF;
   box-shadow: 0 6px 24px rgba(13, 148, 136, 0.6);
 }
@@ -1120,9 +1120,9 @@ body.gallery-page, body {
   align-items: center;
   gap: 5px;
   padding: 3px 10px;
-  background: rgba(20, 184, 166, 0.22);
-  border: 1px solid rgba(94, 234, 212, 0.4);
-  color: #5EEAD4;
+  background: rgba(244, 117, 40, 0.22);
+  border: 1px solid rgba(244, 117, 40, 0.4);
+  color: #f7aa7b;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 700;

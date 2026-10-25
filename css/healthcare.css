@@ -91,7 +91,7 @@
 .hc-navbar {
   width: min(1320px, 95vw) !important;
   height: 64px !important;
-  background: rgba(10, 15, 29, 0.92) !important;
+  background: rgba(10, 10, 10, 0.92) !important;
   backdrop-filter: blur(24px) !important;
   -webkit-backdrop-filter: blur(24px) !important;
   border: 1px solid rgba(8, 127, 115, 0.35) !important;
@@ -255,7 +255,7 @@
 .hc-hero-scroll-wrapper {
   position: relative;
   min-height: 420vh;
-  background: radial-gradient(circle at 50% 20%, #111e33 0%, #0a0f1d 75%);
+  background: radial-gradient(circle at 50% 20%, #202020 0%, #0a0a0a 75%);
   color: #FFFFFF;
 }
 
@@ -286,7 +286,7 @@
   left: 0;
   right: 0;
   height: 140px;
-  background: linear-gradient(to bottom, rgba(10, 15, 29, 0.85) 0%, rgba(10, 15, 29, 0) 100%);
+  background: linear-gradient(to bottom, rgba(10, 10, 10, 0.85) 0%, rgba(10, 10, 10, 0) 100%);
   pointer-events: none;
   z-index: 3;
 }
@@ -297,10 +297,10 @@
   left: 0;
   right: 0;
   height: 200px;
-  background: linear-gradient(to bottom, 
-    rgba(10, 15, 29, 0) 0%, 
-    rgba(10, 15, 29, 0.6) 50%, 
-    rgba(10, 15, 29, 0.98) 100%
+  background: linear-gradient(to bottom,
+    rgba(10, 10, 10, 0) 0%,
+    rgba(10, 10, 10, 0.6) 50%,
+    rgba(10, 10, 10, 0.98) 100%
   );
   pointer-events: none;
   z-index: 3;
@@ -310,7 +310,7 @@
   position: relative;
   width: 100%;
   height: 100px;
-  background: linear-gradient(to bottom, #0a0f1d 0%, var(--hc-bg, #FAFAFC) 100%);
+  background: linear-gradient(to bottom, #0a0a0a 0%, var(--hc-bg, #FAFAFC) 100%);
   pointer-events: none;
   z-index: 4;
 }
@@ -344,7 +344,7 @@
   z-index: 2;
   text-align: center;
   padding: 2.5rem 2rem;
-  background: rgba(10, 15, 29, 0.55);
+  background: rgba(10, 10, 10, 0.55);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -406,7 +406,7 @@
 }
 
 .hc-btn-primary {
-  background: linear-gradient(135deg, var(--hc-primary) 0%, #056357 100%);
+  background: linear-gradient(135deg, var(--hc-primary) 0%, #87370b 100%);
   color: #FFFFFF;
   font-size: 1rem;
   font-weight: 700;
@@ -436,7 +436,7 @@
 .hc-btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(8, 127, 115, 0.45);
-  background: linear-gradient(135deg, #098f82 0%, var(--hc-primary) 100%);
+  background: linear-gradient(135deg, #b95013 0%, var(--hc-primary) 100%);
 }
 
 .hc-btn-secondary {
@@ -482,7 +482,7 @@
   align-items: center;
   gap: 0.75rem;
   z-index: 10;
-  background: rgba(10, 15, 29, 0.6);
+  background: rgba(10, 10, 10, 0.6);
   backdrop-filter: blur(10px);
   padding: 0.5rem 1rem;
   border-radius: 30px;
@@ -506,7 +506,7 @@
 
 /* Hero Stage Interactive Elements (Widgets inside cards) */
 .hc-hero-widget-box {
-  background: rgba(10, 15, 29, 0.65);
+  background: rgba(10, 10, 10, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--hc-radius-lg);
   padding: 1.5rem;
@@ -1326,7 +1326,7 @@
 .hc-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(10, 15, 29, 0.82);
+  background: rgba(10, 10, 10, 0.82);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   z-index: 9999;
@@ -2239,4 +2239,4 @@
 .hc-hero-stage-card .hc-hero-actions{justify-content:flex-start;margin-top:28px}
 .hc-hero-stage-card .hc-btn-primary{background:#c0dcc1;color:#14342b;box-shadow:none;border:0;border-radius:7px;padding:15px 22px;font-size:13px;font-weight:650}
 .hc-hero-stage-card :is(button,a):focus-visible{outline:2px solid #c0dcc1;outline-offset:5px}
-@media(max-width:999px){.hc-hero-stage-card{left:6%;width:88%;max-width:560px;padding:24px;background:#09151de8;border:1px solid #c0dcc126;border-radius:14px}.hc-hero-stage-card .hc-hero-heading{font-size:32px!important}.hc-hero-stage-card .hc-hero-subheading{font-size:13px}}
+@media(max-width:999px){.hc-hero-stage-card{left:6%;width:88%;max-width:560px;padding:24px;background:#101010ed;border:1px solid #c0dcc126;border-radius:14px}.hc-hero-stage-card .hc-hero-heading{font-size:32px!important}.hc-hero-stage-card .hc-hero-subheading{font-size:13px}}
