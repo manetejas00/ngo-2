@@ -35,3 +35,7 @@ The admin workspace retains its separate operational theme. Email templates are 
 - Verify gallery category filters and media dialogs, diagnostic filters and booking dialogs, campaign filters and contribution forms.
 - Confirm the health-camp countdown and registration section remain readable.
 - Hard refresh once after deployment to receive the updated style versions.
+
+## Home hero exception
+
+The home page and its response-page copy retain their original stylesheet stack. The shared public theme is intentionally excluded so the original hero appearance, scroll story, media and controls remain unchanged. Other public pages retain the consistency update.
