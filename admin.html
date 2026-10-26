@@ -66,6 +66,7 @@
         <button type="submit" id="loginBtn" class="btn btn-primary" style="width: 100%; height: 46px; font-size: 15px;">
           🔒 Sign In
         </button>
+        <button type="button" onclick="openForgotPasswordModal()" style="display:block;margin:16px auto 0;border:0;background:none;color:var(--primary);cursor:pointer;">Forgot password?</button>
       </form>
 
 
@@ -78,12 +79,12 @@
       <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">🔑 Reset Your Password</h3>
       <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">Enter your registered email address below and we'll send you a password reset link.</p>
       
-      <div id="forgotMsg" style="display: none; padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; margin-bottom: 16px;"></div>
+      <div id="forgotMsg" role="status" aria-live="polite" style="display: none; padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; margin-bottom: 16px;"></div>
 
       <form id="forgotForm" onsubmit="handleForgotPasswordSubmit(event)">
         <div class="form-group">
-          <label>Registered Email Address *</label>
-          <input type="email" id="forgotEmail" class="form-control" placeholder="e.g. doctor.doc-1@avinyacarefoundation.org" required>
+          <label for="forgotEmail">Registered Email Address *</label>
+          <input type="email" id="forgotEmail" class="form-control" autocomplete="email" placeholder="Your registered email" required>
         </div>
 
         <button type="submit" id="forgotBtn" class="btn btn-primary" style="width: 100%; height: 44px;">
@@ -2068,14 +2069,22 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'forgot_password', email })
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => null);
+        if (!data || typeof data.message !== 'string') {
+          throw new Error('The password-reset service is temporarily unavailable. Please try again shortly.');
+        }
+        if (!res.ok || data.status !== 'ok') {
+          throw new Error(data.message || 'The reset email could not be sent. Please try again.');
+        }
 
         msgDiv.innerText = data.message || 'If registered, a reset link has been dispatched.';
         msgDiv.style.background = 'var(--primary-light)';
         msgDiv.style.color = 'var(--primary)';
         msgDiv.style.display = 'block';
       } catch (err) {
-        msgDiv.innerText = 'Error requesting password reset.';
+        msgDiv.innerText = err instanceof TypeError
+          ? 'Could not connect to the password-reset service. Check your connection and try again.'
+          : err.message;
         msgDiv.style.background = 'var(--danger-bg)';
         msgDiv.style.color = 'var(--danger)';
         msgDiv.style.display = 'block';

@@ -284,8 +284,8 @@ if ($action === 'forgot_password') {
             $configuredBase = rtrim(resetMailEnv('RESET_BASE_URL'), '/');
             $host = preg_replace('/[^a-z0-9.:-]/i', '', (string) ($_SERVER['HTTP_HOST'] ?? ''));
             $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $baseUrl = $configuredBase !== '' ? $configuredBase : 'https://www.avinyacarefoundation.org';
-            $resetUrl = $baseUrl . '/admin.html#reset-password?token=' . rawurlencode($token);
+            $baseUrl = $configuredBase !== '' ? $configuredBase : 'https://avinyacarefoundation.org';
+            $resetUrl = $baseUrl . '/admin#reset-password?token=' . rawurlencode($token);
             $mail = $baseUrl !== '' ? sendPasswordResetEmail($email, (string) ($u['name'] ?? ''), $resetUrl, 45) : ['sent' => false, 'error' => 'Application base URL is not configured.'];
             $smtpStatus = !empty($mail['sent']) ? 'SENT' : 'FAILED';
             $log = $pdo->prepare("INSERT INTO `email_logs` (`reference_id`, `form_or_booking_type`, `recipient_role`, `recipient_email`, `subject`, `smtp_status`, `delivery_method`, `error_message`) VALUES (:ref, 'PASSWORD_RESET', 'user', :email, :subject, :status, 'HOSTINGER_SSL_SMTP', :error)");
