@@ -447,15 +447,15 @@ logActivity(
 );
 
 logActivity(
-    $userEmailSent ? 'EMAIL_SENT' : 'EMAIL_FAILED',
+    $userEmailSent ? 'EMAIL_SENT' : ($email === '' ? 'EMAIL_SKIPPED' : 'EMAIL_FAILED'),
     'system',
     $email,
-    $userEmailSent ? "User confirmation email delivered to {$email}" : "User email delivery failed to {$email}",
+    $email === '' ? "Visitor email skipped because no address was supplied." : ($userEmailSent ? "User confirmation email accepted for {$email}" : "User email delivery failed to {$email}"),
     [
         'submissionId' => $submissionId,
         'subject' => $userSubject,
         'role' => 'user',
-        'smtpStatus' => $userEmailSent ? 'SENT' : 'FAILED',
+        'smtpStatus' => $email === '' ? 'SKIPPED' : ($userEmailSent ? 'SENT' : 'FAILED'),
         'error' => $userEmailError
     ]
 );
