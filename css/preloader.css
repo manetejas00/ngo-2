@@ -22,6 +22,8 @@
               transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
   overflow: hidden;
+  /* Release the page even if JavaScript is unavailable or a script stalls. */
+  animation: preloaderFailsafe 0s 2s forwards;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -307,4 +309,8 @@
   .preloader-progress-wrap {
     width: 160px;
   }
+}
+
+@keyframes preloaderFailsafe {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
 }

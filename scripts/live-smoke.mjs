@@ -5,7 +5,13 @@ if (!/^https:\/\//.test(base)) {
 }
 
 const checks = [
-  { path: '/', type: 'text', contains: 'AvinyaCareFoundation' },
+  { path: '/', type: 'text', contains: '/assets/vendor/gsap-3.12.5/gsap.min.js' },
+  { path: '/assets/vendor/gsap-3.12.5/gsap.min.js', type: 'text', contains: '3.12.5' },
+  { path: '/assets/vendor/gsap-3.12.5/ScrollTrigger.min.js', type: 'text', contains: 'ScrollTrigger' },
+  { path: '/assets/vendor/gsap-3.12.5/ScrollToPlugin.min.js', type: 'text', contains: 'ScrollToPlugin' },
+  { path: '/assets/vendor/gsap-3.12.5/Draggable.min.js', type: 'text', contains: 'Draggable' },
+  { path: '/assets/vendor/html2pdf-0.10.1/html2pdf.bundle.min.js', type: 'text', contains: 'html2pdf' },
+  { path: '/css/preloader.css', type: 'text', contains: '@keyframes preloaderFailsafe' },
   { path: '/doctors.html', type: 'text', contains: 'Diagnostic Tests' },
   { path: '/diagnostic-tests', type: 'text', contains: 'Diagnostic Tests' },
   { path: '/crowdfunding.html', type: 'text', contains: 'NGO Healthcare Infrastructure' },
