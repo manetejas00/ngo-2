@@ -814,7 +814,7 @@ function getAuthSessionUser(): ?array {
         $token = trim((string) ($_GET['token'] ?? $_POST['token'] ?? ''));
     }
 
-    $isAuthenticated = !empty($_SESSION['admin_token']) && $token !== '' && hash_equals((string) $_SESSION['admin_token'], $token);
+    $isAuthenticated = str_starts_with($token, 'AVG2-SESS-') && !empty($_SESSION['admin_token']) && $token !== '' && hash_equals((string) $_SESSION['admin_token'], $token);
     if (!$isAuthenticated) return null;
 
     return [

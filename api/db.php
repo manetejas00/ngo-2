@@ -73,7 +73,7 @@ function getBearerToken(): string {
 
 function verifyAndRehydrateAdminToken(?PDO $pdo, string $token): bool {
     $token = trim($token);
-    if (empty($token)) return false;
+    if (!str_starts_with($token, 'AVG2-SESS-')) return false;
 
     if (session_status() !== PHP_SESSION_ACTIVE) {
         @session_start();
@@ -105,26 +105,6 @@ function verifyAndRehydrateAdminToken(?PDO $pdo, string $token): bool {
         } catch (Throwable $e) {}
     }
 
-    $sessionFile = dirname(__DIR__) . '/cache/sessions.json';
-    if (file_exists($sessionFile)) {
-        try {
-            $sessions = json_decode((string)file_get_contents($sessionFile), true);
-            if (is_array($sessions) && isset($sessions[$token])) {
-                $sess = $sessions[$token];
-                if (($sess['expires_at'] ?? 0) > time()) {
-                    $_SESSION['admin_token'] = $token;
-                    $_SESSION['user_id'] = $sess['user_id'] ?? 'usr-admin-01';
-                    $_SESSION['user_email'] = $sess['user_email'] ?? 'admin@avinyacarefoundation.org';
-                    $_SESSION['user_name'] = $sess['user_name'] ?? 'Super Admin';
-                    $_SESSION['user_role'] = strtolower($sess['user_role'] ?? 'admin');
-                    $_SESSION['user_doc_id'] = $sess['user_doc_id'] ?? null;
-                    $_SESSION['user_prov_id'] = $sess['user_prov_id'] ?? null;
-                    $_SESSION['auth_started_at'] = time();
-                    return true;
-                }
-            }
-        } catch (Throwable $e) {}
-    }
 
     return false;
 }
@@ -860,112 +840,7 @@ function seedDiagnosticProviders(PDO $pdo, bool $force = false): int {
     return $seeded;
 }
 
+// Account provisioning is an explicit staff operation, never a database-read side effect.
 function seedDefaultUsers(PDO $pdo, bool $force = false): int {
-    $bootstrapEmail = strtolower(getDbEnv('BOOTSTRAP_ADMIN_EMAIL', 'admin@avinyacarefoundation.org'));
-    $bootstrapPassword = getDbEnv('BOOTSTRAP_ADMIN_PASSWORD', 'Demo@Avinya2026');
-    if (!$bootstrapEmail) $bootstrapEmail = 'admin@avinyacarefoundation.org';
-    if (strlen($bootstrapPassword) < 6) $bootstrapPassword = 'Demo@Avinya2026';
-
-    $seeded = 0;
-    try {
-        if ($force) {
-            try {
-                $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
-                $pdo->exec("TRUNCATE TABLE `users`");
-                $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
-            } catch (Throwable $e) {
-                try {
-                    $pdo->exec("DELETE FROM `users`");
-                } catch (Throwable $e2) {}
-            }
-        }
-
-        $defaultPassHash = password_hash($bootstrapPassword, PASSWORD_DEFAULT);
-
-        // Update any remaining user password hashes
-        try {
-            $pdo->exec("UPDATE `users` SET `password_hash` = " . $pdo->quote($defaultPassHash) . ", `must_change_password` = 0, `status` = 'active'");
-        } catch (Throwable $e) {}
-
-        $upsertUser = function(string $uid, string $name, string $email, string $role, ?string $docId = null, ?string $provId = null) use ($pdo, $defaultPassHash): bool {
-            try {
-                // Delete existing matching record by email or user_id
-                $del = $pdo->prepare("DELETE FROM `users` WHERE LOWER(`email`) = :e OR `user_id` = :u");
-                $del->execute([':e' => strtolower($email), ':u' => $uid]);
-
-                $stmt = $pdo->prepare("INSERT INTO `users`
-                    (`user_id`, `name`, `email`, `password_hash`, `role`, `doctor_id`, `provider_id`, `status`, `must_change_password`, `created_at`, `updated_at`)
-                    VALUES (:u_id, :name, :email, :pass_hash, :role, :doc_id, :prov_id, 'active', 0, NOW(), NOW())");
-
-                $stmt->execute([
-                    ':u_id' => $uid,
-                    ':name' => $name,
-                    ':email' => strtolower($email),
-                    ':pass_hash' => $defaultPassHash,
-                    ':role' => $role,
-                    ':doc_id' => $docId,
-                    ':prov_id' => $provId
-                ]);
-                return true;
-            } catch (Throwable $e) {
-                $GLOBALS['last_user_seed_error'] = "{$email}: " . $e->getMessage();
-                error_log("Failed to upsert user {$email}: " . $e->getMessage());
-                return false;
-            }
-        };
-
-        // 1. Core System Accounts
-        if ($upsertUser('usr-admin-01', 'Super Admin', $bootstrapEmail, 'admin')) $seeded++;
-        if ($upsertUser('usr-admin-02', 'Admin User', 'admin@gmail.com', 'admin')) $seeded++;
-        if ($upsertUser('usr-2', 'Healthcare Coordinator', 'health@avinyacarefoundation.org', 'manager')) $seeded++;
-
-        // 2. Doctor Accounts
-        try {
-            $doctors = $pdo->query("SELECT `doctor_id`, `name` FROM `doctors`")->fetchAll();
-            if (is_array($doctors) && count($doctors) > 0) {
-                foreach ($doctors as $d) {
-                    $docId = $d['doctor_id'];
-                    $cleanDocId = preg_replace('/[^a-zA-Z0-9_-]/', '', $docId);
-                    $email = "doctor.{$cleanDocId}@avinyacarefoundation.org";
-                    $userId = "usr-doc-{$cleanDocId}";
-                    if ($upsertUser($userId, $d['name'], $email, 'doctor', $docId)) $seeded++;
-                }
-            }
-        } catch (Throwable $e) {}
-
-        // Fallback doctors if doctors query was empty or failed
-        if ($seeded <= 3) {
-            if ($upsertUser('usr-doc-1', 'Dr. Ananya Sharma (Oncologist)', 'doctor.doc-1@avinyacarefoundation.org', 'doctor', 'doc-1')) $seeded++;
-            if ($upsertUser('usr-doc-2', 'Dr. Rajesh Varma (Cardiologist)', 'doctor.doc-2@avinyacarefoundation.org', 'doctor', 'doc-2')) $seeded++;
-            if ($upsertUser('usr-doc-3', 'Dr. Meera Kulkarni (General Physician)', 'doctor.doc-3@avinyacarefoundation.org', 'doctor', 'doc-3')) $seeded++;
-        }
-
-        // 3. Diagnostic Provider Accounts
-        try {
-            $providers = $pdo->query("SELECT `provider_id`, `name`, `email` FROM `diagnostic_providers`")->fetchAll();
-            if (is_array($providers) && count($providers) > 0) {
-                foreach ($providers as $p) {
-                    $provId = $p['provider_id'];
-                    $cleanProvId = preg_replace('/[^a-zA-Z0-9_-]/', '', $provId);
-                    $userId = "usr-prov-{$cleanProvId}";
-                    $email = !empty($p['email']) ? strtolower(trim($p['email'])) : "provider.{$cleanProvId}@avinyacarefoundation.org";
-                    if ($upsertUser($userId, $p['name'], $email, 'diagnostic_provider', null, $provId)) $seeded++;
-                }
-            }
-        } catch (Throwable $e) {}
-
-        // Fallback providers
-        if ($upsertUser('usr-prov-1', 'Metropolis Diagnostic Partner', 'pathology@metropolis.com', 'diagnostic_provider', null, 'provider-1')) $seeded++;
-        if ($upsertUser('usr-prov-2', 'SRL Diagnostics Partner', 'info@srldiagnostics.com', 'diagnostic_provider', null, 'provider-2')) $seeded++;
-
-        // Always sync password hashes to Demo@Avinya2026
-        try {
-            $pdo->exec("UPDATE `users` SET `password_hash` = " . $pdo->quote($defaultPassHash) . ", `must_change_password` = 0, `status` = 'active'");
-        } catch (Throwable $e) {}
-
-    } catch (Throwable $e) {
-        $GLOBALS['last_user_seed_error'] = "Outer: " . $e->getMessage();
-        error_log('Error seeding default users: ' . $e->getMessage());
-    }
-    return $seeded;
+    return 0;
 }

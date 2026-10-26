@@ -10,10 +10,8 @@ function enforcePhpRateLimit($maxRequests = 60, $windowSeconds = 60) {
         return;
     }
 
-    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
-    if (strpos($ip, ',') !== false) {
-        $ip = trim(explode(',', $ip)[0]);
-    }
+    // Forwarded headers are visitor-controlled unless a trusted proxy validates them.
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 
     $tmpDir = sys_get_temp_dir() . '/avinya_ratelimit';
     if (!is_dir($tmpDir)) {

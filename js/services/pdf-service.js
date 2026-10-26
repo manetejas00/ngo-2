@@ -15,7 +15,7 @@ class AvinyaPdfService {
       name: 'AvinyaCareFoundation',
       trust: 'Registered Public Charitable Trust',
       verification: 'NITI Aayog NGO Darpan Verified',
-      address: '210, Global Plaza, Global City, Virar West, Maharashtra – 401305',
+      address: '210, Global Plaza, Global City, Virar West',
       phone: '+91 744 744 1116',
       email: 'info@avinyacarefoundation.org',
       website: 'www.avinyacarefoundation.org',
@@ -410,7 +410,7 @@ class AvinyaPdfService {
       <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 14px; font-size: 10px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 8px;">
         <div>
           <div>AvinyaCareFoundation • Reg. Public Charitable Trust • NITI Aayog NGO Darpan Verified</div>
-          <div>210, Global Plaza, Global City, Virar West, Maharashtra - 401305</div>
+          <div>210, Global Plaza, Global City, Virar West</div>
         </div>
         <div style="text-align: right; font-weight: 700; color: #087F73;">
           www.avinyacarefoundation.org

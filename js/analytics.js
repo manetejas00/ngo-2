@@ -27,7 +27,11 @@
 
     // Retains the small custom-event interface used by the site without sending form fields.
     window.AvinyaAnalytics = window.AvinyaAnalytics || {
-      event: function (name, params) { window.gtag('event', name, params || {}); }
+      event: function (name) {
+        if (['donation_started', 'donation_completed', 'contact_form_submitted', 'news_article_viewed'].includes(name)) {
+          window.gtag('event', name);
+        }
+      }
     };
   } catch (_) {
     // Analytics must never interfere with the visitor experience.

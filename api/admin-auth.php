@@ -19,6 +19,8 @@ ini_set('session.use_strict_mode', '1');
 session_set_cookie_params(['lifetime' => 1800, 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly' => true, 'samesite' => 'Strict', 'path' => '/']);
 session_start();
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/rate_limiter.php';
+enforcePhpRateLimit(20, 300);
 require_once __DIR__ . '/activity-logger.php';
 require_once __DIR__ . '/password-reset-email.php';
 
@@ -36,51 +38,11 @@ if (!empty($_SESSION['auth_started_at']) && (time() - (int) $_SESSION['auth_star
     session_destroy();
 }
 
-// Action: Get Public Login Users list (for dropdown selection in login modal)
-if ($action === 'get_login_accounts' || $action === 'public_users' || $action === 'login_accounts') {
-    $usersList = [];
-    if ($pdo !== null) {
-        seedDefaultUsers($pdo);
-        try {
-            $stmt = $pdo->query("SELECT `user_id`, `name`, `email`, `role`, `doctor_id`, `provider_id` FROM `users` WHERE `status` IS NULL OR LOWER(`status`) = 'active' ORDER BY `role` ASC, `name` ASC");
-            if ($stmt) {
-                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                if (is_array($rows) && count($rows) > 0) {
-                    $usersList = $rows;
-                }
-            }
-        } catch (Throwable $e) {}
-    }
-
-    if (empty($usersList) || count($usersList) === 0) {
-        $usersList = [
-            ['user_id' => 'usr-admin-01', 'name' => 'Super Admin', 'email' => 'admin@avinyacarefoundation.org', 'role' => 'admin', 'doctor_id' => null, 'provider_id' => null],
-            ['user_id' => 'usr-admin-02', 'name' => 'Admin User', 'email' => 'admin@gmail.com', 'role' => 'admin', 'doctor_id' => null, 'provider_id' => null],
-            ['user_id' => 'usr-2', 'name' => 'Healthcare Coordinator', 'email' => 'health@avinyacarefoundation.org', 'role' => 'manager', 'doctor_id' => null, 'provider_id' => null],
-            ['user_id' => 'usr-doc-1', 'name' => 'Dr. Ananya Sharma (Oncologist)', 'email' => 'doctor.doc-1@avinyacarefoundation.org', 'role' => 'doctor', 'doctor_id' => 'doc-1', 'provider_id' => null],
-            ['user_id' => 'usr-doc-2', 'name' => 'Dr. Rajesh Varma (Cardiologist)', 'email' => 'doctor.doc-2@avinyacarefoundation.org', 'role' => 'doctor', 'doctor_id' => 'doc-2', 'provider_id' => null],
-            ['user_id' => 'usr-doc-3', 'name' => 'Dr. Meera Kulkarni (General Physician)', 'email' => 'doctor.doc-3@avinyacarefoundation.org', 'role' => 'doctor', 'doctor_id' => 'doc-3', 'provider_id' => null],
-            ['user_id' => 'usr-prov-1', 'name' => 'Metropolis Diagnostic Partner', 'email' => 'pathology@metropolis.com', 'role' => 'diagnostic_provider', 'doctor_id' => null, 'provider_id' => 'provider-1'],
-            ['user_id' => 'usr-prov-2', 'name' => 'SRL Diagnostics Partner', 'email' => 'info@srldiagnostics.com', 'role' => 'diagnostic_provider', 'doctor_id' => null, 'provider_id' => 'provider-2']
-        ];
-    }
-
-    http_response_code(200);
-    echo json_encode([
-        'status' => 'ok',
-        'defaultPassword' => 'Demo@Avinya2026',
-        'users' => array_map(function($u) {
-            return [
-                'userId' => $u['user_id'],
-                'name' => $u['name'],
-                'email' => $u['email'],
-                'role' => strtolower($u['role']),
-                'doctorId' => $u['doctor_id'],
-                'providerId' => $u['provider_id']
-            ];
-        }, $usersList)
-    ]);
-    exit(0);
+// Staff directories are private, including legacy login account selectors.
+if (in_array($action, ['get_login_accounts', 'public_users', 'login_accounts'], true)) {
+    http_response_code(401);
+    echo json_encode(['status' => 'error', 'message' => 'Enter your staff email and password to sign in.']);
+    exit;
 }
 
 // Action: Get Temporary Dev Users list grouped by role
@@ -118,22 +80,11 @@ if ($action === 'get_temp_users' || $action === 'temp_users') {
     exit(0);
 }
 
-// Action: Reset/Truncate and Re-seed Users Table
-if ($action === 'reset_users' || $action === 'reseed_users') {
-    $seeded = 0;
-    if ($pdo !== null) {
-        $seeded = seedDefaultUsers($pdo, true);
-    }
-    http_response_code(200);
-    echo json_encode([
-        'status' => 'ok',
-        'message' => "Users table truncated and re-seeded with {$seeded} active system accounts.",
-        'count' => $seeded,
-        'defaultPassword' => 'Demo@Avinya2026',
-        'error' => $GLOBALS['last_user_seed_error'] ?? $GLOBALS['last_db_conn_error'] ?? null,
-        'timestamp' => date(DATE_ATOM)
-    ], JSON_PRETTY_PRINT);
-    exit(0);
+// Destructive development reset actions are never available over HTTP.
+if (in_array($action, ['reset_users', 'reseed_users'], true)) {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'Account reset is unavailable.']);
+    exit;
 }
 
 // Action: Login
@@ -149,48 +100,20 @@ if ($action === 'login' || $action === 'temp_login') {
 
     $user = null;
     if ($pdo !== null) {
-        // Ensure default accounts exist
-        seedDefaultUsers($pdo, false);
-
         $stmt = $pdo->prepare("SELECT * FROM `users` WHERE LOWER(`email`) = :q OR LOWER(`user_id`) = :q LIMIT 1");
         $stmt->execute([':q' => $identifier]);
         $user = $stmt->fetch();
-
-        $passHash = password_hash($password, PASSWORD_DEFAULT);
-
-        if ($user) {
-            // Update password hash and status to active
-            $upd = $pdo->prepare("UPDATE `users` SET `password_hash` = :h, `status` = 'active', `must_change_password` = 0 WHERE `id` = :id");
-            $upd->execute([':h' => $passHash, ':id' => $user['id']]);
-            $user['password_hash'] = $passHash;
-            $user['status'] = 'active';
-        } else {
-            // Auto-create user if missing
-            $role = (str_contains($identifier, 'health') || str_contains($identifier, 'manager')) ? 'manager' : (str_contains($identifier, 'doctor') ? 'doctor' : (str_contains($identifier, 'provider') || str_contains($identifier, 'pathology') ? 'diagnostic_provider' : 'admin'));
-            $name = ucwords(str_replace(['.', '_', '-'], ' ', explode('@', $identifier)[0]));
-            try {
-                $insStmt = $pdo->prepare("INSERT INTO `users` (`user_id`, `name`, `email`, `password_hash`, `role`, `status`, `must_change_password`, `created_at`, `updated_at`) VALUES (:uid, :name, :email, :phash, :role, 'active', 0, NOW(), NOW())");
-                $insStmt->execute([
-                    ':uid' => 'usr-' . uniqid(),
-                    ':name' => $name,
-                    ':email' => $identifier,
-                    ':phash' => $passHash,
-                    ':role' => $role
-                ]);
-                $stmt->execute([':q' => $identifier]);
-                $user = $stmt->fetch();
-            } catch (Throwable $e) {}
-        }
     }
 
-    if (!$user) {
+    if (!$user || strtolower((string) ($user['status'] ?? '')) !== 'active'
+        || !password_verify($password, (string) ($user['password_hash'] ?? ''))) {
         http_response_code(401);
         echo json_encode(['status' => 'error', 'message' => 'Invalid email/username or password.']);
-        exit(0);
+        exit;
     }
 
     session_regenerate_id(true);
-    $token = 'AVG-SESS-' . bin2hex(random_bytes(32));
+    $token = 'AVG2-SESS-' . bin2hex(random_bytes(32));
 
     if ($pdo !== null) {
         try {
@@ -198,23 +121,6 @@ if ($action === 'login' || $action === 'temp_login') {
             $updStmt->execute([':tok' => $token, ':uid' => $user['user_id']]);
         } catch (Throwable $e) {}
     }
-
-    $sessionFile = dirname(__DIR__) . '/cache/sessions.json';
-    try {
-        $sessions = file_exists($sessionFile) ? json_decode((string)file_get_contents($sessionFile), true) : [];
-        if (!is_array($sessions)) $sessions = [];
-        $sessions[$token] = [
-            'user_id' => $user['user_id'],
-            'user_email' => $user['email'],
-            'user_name' => $user['name'],
-            'user_role' => strtolower($user['role']),
-            'user_doc_id' => $user['doctor_id'] ?? null,
-            'user_prov_id' => $user['provider_id'] ?? null,
-            'created_at' => time(),
-            'expires_at' => time() + (7 * 86400)
-        ];
-        @file_put_contents($sessionFile, json_encode($sessions, JSON_PRETTY_PRINT), LOCK_EX);
-    } catch (Throwable $e) {}
 
     $_SESSION['admin_token'] = $token;
     $_SESSION['user_id'] = $user['user_id'];
