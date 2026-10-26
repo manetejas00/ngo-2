@@ -56,11 +56,20 @@ if (new URL(base).hostname === 'avinyacarefoundation.org') {
   for (const protocol of ['http:', 'https:']) {
     const probe = `${protocol}//www.avinyacarefoundation.org/about?domain-check=1`;
     try {
-      const response = await fetch(probe, {
+      const options = {
         redirect: 'manual', signal: AbortSignal.timeout(20_000),
         headers: { 'cache-control': 'no-cache' },
-      });
-      const location = response.headers.get('location');
+      };
+      let response = await fetch(probe, options);
+      let location = response.headers.get('location');
+      // Hostinger upgrades HTTP at the CDN before .htaccess runs. Allow that
+      // one known hop, then require the canonical redirect from HTTPS www.
+      if (protocol === 'http:' && response.status === 301 &&
+          location === probe.replace('http:', 'https:')) {
+        await response.arrayBuffer();
+        response = await fetch(location, { ...options, signal: AbortSignal.timeout(20_000) });
+        location = response.headers.get('location');
+      }
       const expected = 'https://avinyacarefoundation.org/about?domain-check=1';
       const ok = response.status === 308 && location === expected;
       await response.arrayBuffer();
