@@ -24,7 +24,7 @@ function loadBookingEmailEnv(string $root): void {
     }
 }
 
-loadBookingEmailEnv(dirname(__DIR__, 2));
+require_once dirname(__DIR__) . '/db.php';
 
 function bookingEmailEnv(string $name, string $default = ''): string {
     if (function_exists('getDbEnv')) return getDbEnv($name, $default);
@@ -74,7 +74,7 @@ final class AppointmentEmailService {
             $boundary = '=_AvinyaLogo_' . bin2hex(random_bytes(8));
             $headers = [
                 'From: ' . $fromName . ' <' . $from . '>', 'To: <' . $to . '>',
-                'Subject: =?UTF-8?B?' . base64_encode($subject) . '?=', 'MIME-Version: 1.0',
+                'Subject: =?UTF-8?B?' . base64_encode($subject) . '?=', 'Reply-To: <info@avinyacarefoundation.org>', 'MIME-Version: 1.0',
                 'Content-Type: multipart/related; boundary="' . $boundary . '"',
                 'X-Mailer: AvinyaCareFoundation-Booking/1.0'
             ];
@@ -163,7 +163,7 @@ final class AppointmentEmailService {
             . '<tr><td style="padding:34px"><p style="font-size:18px;font-weight:700;color:#087F73">Hi ' . $name . ',</p><p style="line-height:1.7">Your appointment has been successfully confirmed. Please keep the booking ID below for future reference.</p>'
             . '<div style="background:#F0FDFA;border-left:4px solid #087F73;border-radius:9px;padding:20px;margin:24px 0;line-height:1.9"><strong>Booking ID:</strong> ' . $id . '<br><strong>Doctor:</strong> ' . $doctor . '<br><strong>Service:</strong> ' . $speciality . '<br><strong>Date:</strong> ' . $date . '<br><strong>Time:</strong> ' . $time . '<br><strong>Mode:</strong> ' . $mode . '<br><strong>Location:</strong> ' . $hospital . '</div>'
             . '<p style="line-height:1.7">If you need assistance, reply to this email or contact the AvinyaCareFoundation team.</p><p style="margin-top:28px;color:#5F6865">With care,<br><strong style="color:#087F73">AvinyaCareFoundation Team</strong></p></td></tr>'
-            . '<tr><td style="background:#0A0A0A;padding:24px 32px;text-align:center;color:#A3A3A3;font-size:11px;border-top:1px solid #262626"><strong style="display:block;color:#fff;font-size:13px;margin-bottom:6px">AvinyaCareFoundation</strong>A humanitarian oncology and healthcare initiative.<br>80G &amp; 12A Tax Exempted under the Indian IT Act.</td></tr>'
+            . '<tr><td style="background:#0A0A0A;padding:24px 32px;text-align:center;color:#A3A3A3;font-size:11px;border-top:1px solid #262626"><strong style="display:block;color:#fff;font-size:13px;margin-bottom:6px">AvinyaCareFoundation</strong>A humanitarian oncology and healthcare initiative.<br>For registration and tax documents, contact the foundation.</td></tr>'
             . '</table></td></tr></table></body></html>';
     }
 }

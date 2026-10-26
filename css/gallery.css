@@ -1174,3 +1174,6 @@ body.gallery-page, body {
     transform: none !important;
   }
 }
+
+/* Keep rotated collage artwork inside its section at every screen width. */
+.intro-collage-section { overflow: clip; }

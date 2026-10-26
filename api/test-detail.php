@@ -45,7 +45,7 @@ $tumorMarker = (bool) preg_match('/tumor|cancer/i', ($test['category'] ?? '') . 
 <section><h2>Listed package</h2><ul><?php foreach ($test['testsIncluded'] as $item): ?><li><?= $e($item) ?></li><?php endforeach ?></ul>
 <p>Listed package price: ₹<?= $e($test['price']) ?>. Confirm final price, collection charges and availability with the team.</p></section>
 <section><h2>Before your test</h2><p>Laboratory preparation information: <?= $e(rtrim($test['preparation'], '. ')) ?>. Confirm with your laboratory or clinician; do not stop medicines without advice.</p>
-<p>Listed report turnaround: <?= $e($test['reportTurnaround']) ?>. Confirm when timing starts and exceptions.</p>
+<p>Listed report turnaround: <?= 'Confirm with the laboratory' ?>. Confirm when timing starts and exceptions.</p>
 <p>Tests may give false positive or false negative results and need medical interpretation. A normal result does not rule out every condition. Discuss appropriate testing with your clinician.</p>
 <?php if ($tumorMarker): ?><p>Tumor marker tests are not reliable general population cancer screens. Background information: <a href="https://www.cancer.gov/about-cancer/diagnosis-staging/diagnosis/tumor-markers-fact-sheet">National Cancer Institute: tumor markers</a>. Information updated 24 October 2026.</p><?php endif ?></section>
 <p><a href="/doctors?test=<?= $e(rawurlencode($id)) ?>">Request this test →</a> · <a href="/assistance">Ask for help</a></p></main>

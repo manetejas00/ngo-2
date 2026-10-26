@@ -1,7 +1,7 @@
 <?php
 /**
  * AvinyaCareFoundation - Hostinger SSL SMTP Email Dispatch Handler
- * Authenticates via Hostinger SMTP (smtp.hostinger.com:465 SSL) for 100% email deliverability.
+ * Sends through the configured SMTP provider; acceptance does not guarantee inbox placement.
  */
 
 header('Content-Type: application/json; charset=UTF-8');
@@ -93,7 +93,7 @@ if ($formType === 'donation') {
     $userSubject = $isConfirmedPayment ? "Thank You for Your Generous Support of ₹{$formattedAmount} — AvinyaCareFoundation" : "Donation Payment Verification Pending — AvinyaCareFoundation";
     $greeting = "Dear {$name},";
     $bodyText = $isConfirmedPayment ? "Dhanyawad for your generous contribution of <strong>₹{$formattedAmount}</strong> ({$frequency}) towards AvinyaCareFoundation. Your compassionate gift directly funds our life-saving mobile cancer screening camps, diagnostic navigation, and vital clinical nutrition for patients across underserved communities in India." : "We have recorded your donation pledge of <strong>₹{$formattedAmount}</strong>. It will not be counted or receipted until the payment provider verifies the transaction.";
-    $adminSubject = "[AvinyaCareFoundation] New Donation Received — {$name} (₹{$formattedAmount})";
+    $adminSubject = "[AvinyaCareFoundation] New Donation Interest — {$name} (₹{$formattedAmount})";
 } elseif ($formType === 'volunteer') {
     $userSubject = "Thank You for Wanting to Volunteer with AvinyaCareFoundation — AvinyaCareFoundation";
     $greeting = "Dear {$name},";
@@ -144,7 +144,7 @@ if ($formType === 'donation' && $isConfirmedPayment) {
             <tr><td style="color: #4B5563;">Transaction Ref:</td><td><code style="background: #E2E8F0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">' . htmlspecialchars($transactionId) . '</code></td></tr>
             <tr><td style="color: #4B5563;">Payment Status:</td><td><span style="color: #16A34A; font-weight: 700;">✓ SUCCESS</span></td></tr>
             ' . ($pan ? '<tr><td style="color: #4B5563;">PAN (for 80G):</td><td><code style="font-family: monospace;">' . htmlspecialchars($pan) . '</code></td></tr>' : '') . '
-            <tr><td style="color: #4B5563;">Tax Deduction:</td><td><span style="color: #087F73; font-weight: 600;">Eligible under Section 80G of Income Tax Act</span></td></tr>
+            <tr><td style="color: #4B5563;">Tax Deduction:</td><td><span style="color: #087F73; font-weight: 600;">Ask for current approval details; eligibility is not confirmed</span></td></tr>
         </table>
     </div>';
 }
@@ -161,7 +161,7 @@ $userHtmlContent = '<!DOCTYPE html>
     <tr>
       <td align="center">
         <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 620px; background-color: #FFFFFF; border-radius: 16px; overflow: hidden; border: 1px solid #E2E8F0; box-shadow: 0 4px 20px rgba(8, 127, 115, 0.08);">
-          
+
           <!-- Header Banner -->
           <tr>
             <td style="background-color: #0A0A0A; padding: 28px 32px; text-align: center; border-bottom: 3px solid #F47528;">
@@ -175,7 +175,7 @@ $userHtmlContent = '<!DOCTYPE html>
           <tr>
             <td style="padding: 36px 36px 28px 36px;">
               <p style="font-size: 18px; font-weight: 700; color: #087F73; margin: 0 0 18px 0;">' . $greeting . '</p>
-              
+
               <div style="font-size: 15px; color: #111817; line-height: 1.7; margin-bottom: 24px;">
                 <p style="margin: 0 0 16px 0;">' . $bodyText . '</p>
               </div>
@@ -237,7 +237,7 @@ $adminHtmlContent = '<!DOCTYPE html>
     <tr>
       <td align="center">
         <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 650px; background-color: #FFFFFF; border-radius: 16px; overflow: hidden; border: 1px solid #E2E8F0;">
-          
+
           <!-- Header Banner -->
           <tr>
             <td style="background-color: #0A0A0A; padding: 24px 32px; border-bottom: 3px solid #F47528;">
@@ -268,7 +268,7 @@ $adminHtmlContent = '<!DOCTYPE html>
                 </div>
               </div>
 
-              <p style="font-size: 14px; color: #5F6865; margin: 0;"><strong>Action Required:</strong> Review user submission details and process 80G tax receipt or route to the appropriate department.</p>
+              <p style="font-size: 14px; color: #5F6865; margin: 0;"><strong>Action Required:</strong> Review user submission details and verify payment and applicable receipt requirements or route to the appropriate department.</p>
             </td>
           </tr>
 
@@ -352,7 +352,7 @@ try {
     $pdo = getDatabaseConnection();
     if ($pdo !== null) {
         if ($formType === 'coming_soon_feedback') {
-            $stmt = $pdo->prepare("INSERT INTO `coming_soon_feedbacks` 
+            $stmt = $pdo->prepare("INSERT INTO `coming_soon_feedbacks`
                 (`submission_id`, `name`, `email`, `phone`, `message`, `user_email_sent`, `admin_email_sent`, `delivery_status`, `raw_payload`)
                 VALUES (:sub_id, :name, :email, :phone, :msg, :u_sent, :a_sent, :status, :payload)");
             $stmt->execute([
@@ -367,10 +367,10 @@ try {
                 ':payload' => json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
             ]);
         } else {
-            $stmt = $pdo->prepare("INSERT INTO `form_submissions` 
+            $stmt = $pdo->prepare("INSERT INTO `form_submissions`
                 (`submission_id`, `form_type`, `name`, `email`, `phone`, `amount`, `frequency`, `pan`, `transaction_id`, `organization`, `category`, `interest`, `message`, `payment_status`, `is_anonymous`, `user_email_sent`, `admin_email_sent`, `delivery_status`, `raw_payload`)
                 VALUES (:sub_id, :ftype, :name, :email, :phone, :amount, :freq, :pan, :tx_id, :org, :category, :interest, :msg, :pay_stat, :anonymous, :u_sent, :a_sent, :status, :payload)");
-            
+
             $stmt->execute([
                 ':sub_id' => $submissionId,
                 ':ftype' => $formType,
@@ -395,7 +395,7 @@ try {
         }
 
         $logStmt = $pdo->prepare("INSERT INTO `email_logs` (`reference_id`, `form_or_booking_type`, `recipient_role`, `recipient_email`, `subject`, `smtp_status`, `delivery_method`, `error_message`) VALUES (:ref, :type, :role, :to, :subj, :status, 'HOSTINGER_SSL_SMTP_465', :err)");
-        
+
         $logStmt->execute([
             ':ref' => $submissionId,
             ':type' => $formType,
@@ -478,7 +478,7 @@ echo json_encode([
         'adminEmailSent' => $adminEmailSent,
         'adminRecordEmailSent' => $adminRecordEmailSent,
         'userEmailRecipient' => $email,
-        'adminEmailRecipient' => $adminTo,
+
         'successMessage' => $successMessage,
         'errorMessage' => $errorMessage,
         'userEmailError' => $userEmailError,

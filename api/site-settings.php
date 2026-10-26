@@ -18,7 +18,7 @@ $defaults = [
     'email' => 'info@avinyacarefoundation.org',
     'phone' => '+91 744 744 1116',
     'whatsapp' => '+91 744 744 1116',
-    'address' => '210, Global Plaza, Global City, Virar West - 401305',
+    'address' => '210, Global Plaza, Global City, Virar West',
     'instagram_url' => 'https://www.instagram.com/avinyacare_foundation/',
     'youtube_url' => 'https://www.youtube.com/@Avinyacarefoundation',
     'x_url' => 'https://x.com/Avinyacare',
@@ -41,6 +41,9 @@ if (strcasecmp(trim((string) ($settings['email'] ?? '')), 'info@avinyacarefounda
 if (preg_replace('/\D/', '', (string) ($settings['phone'] ?? '')) === '917447441116') {
     $settings['phone'] = $defaults['phone'];
 }
+
+// Confirmed foundation contact details take precedence over stale saved values.
+foreach (['phone', 'whatsapp', 'email', 'address', 'tagline'] as $key) $settings[$key] = $defaults[$key];
 
 // Ensure newly supported social media channels are never undefined or omitted
 foreach (['instagram_url', 'youtube_url', 'x_url', 'threads_url'] as $socialKey) {

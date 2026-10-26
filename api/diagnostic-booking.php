@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $token = trim((string) ($_GET['token'] ?? ''));
         }
 
-        $isAuthenticated = !empty($_SESSION['admin_token']) && $token !== '' && hash_equals((string) $_SESSION['admin_token'], $token);
+        $isAuthenticated = str_starts_with($token, 'AVG2-SESS-') && !empty($_SESSION['admin_token']) && $token !== '' && hash_equals((string) $_SESSION['admin_token'], $token);
         if (!$isAuthenticated) {
             http_response_code(401);
             echo json_encode(['status' => 'error', 'message' => 'Authentication required to view diagnostic bookings.']);
@@ -105,10 +105,10 @@ function diagnosticTemplate(array $booking): string {
     return '<!doctype html><html><body style="margin:0;background:#F8FAFC;font-family:Arial,sans-serif;color:#0F172A">'
         . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:28px 14px;background:#F8FAFC"><tr><td align="center">'
         . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#fff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">'
-        . '<tr><td style="background:#0A0A0A;padding:28px 32px;text-align:center;color:#fff;border-bottom:3px solid #F47528"><div style="display:inline-block;background:#fff;border-radius:50%;padding:6px;margin-bottom:12px"><img src="cid:avinya-logo" alt="AvinyaCareFoundation" width="56" height="56" style="display:block;width:56px;height:56px;border:0;border-radius:50%"></div><div style="color:#F58220;font-size:11px;font-weight:700;letter-spacing:2px">AvinyaCareFoundation HEALTHCARE PLATFORM</div><h1 style="margin:6px 0 0;font-size:20px">Diagnostic Test Confirmed</h1></td></tr>'
-        . '<tr><td style="padding:34px"><p style="font-size:16px">Dear <strong>' . diagnosticHtml($booking['patientName']) . '</strong>,</p><p style="line-height:1.7;color:#334155">Your diagnostic test booking has been scheduled successfully.</p>'
+        . '<tr><td style="background:#0A0A0A;padding:28px 32px;text-align:center;color:#fff;border-bottom:3px solid #F47528"><div style="display:inline-block;background:#fff;border-radius:50%;padding:6px;margin-bottom:12px"><img src="cid:avinya-logo" alt="AvinyaCareFoundation" width="56" height="56" style="display:block;width:56px;height:56px;border:0;border-radius:50%"></div><div style="color:#F58220;font-size:11px;font-weight:700;letter-spacing:2px">AvinyaCareFoundation HEALTHCARE PLATFORM</div><h1 style="margin:6px 0 0;font-size:20px">Diagnostic Request Received</h1></td></tr>'
+        . '<tr><td style="padding:34px"><p style="font-size:16px">Dear <strong>' . diagnosticHtml($booking['patientName']) . '</strong>,</p><p style="line-height:1.7;color:#334155">Your request has been recorded. The team must confirm the provider, availability, final charges and appointment before you attend.</p>'
         . '<div style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;margin:24px 0"><div style="background:#087F73;color:#fff;padding:12px 18px;font-size:12px;font-weight:700;letter-spacing:1px">DIAGNOSTIC TEST BOOKING SUMMARY</div><div style="background:#F8FAFC;padding:20px;line-height:1.9"><strong>Booking ID:</strong> ' . diagnosticHtml($booking['id']) . '<br><strong>Test Package:</strong> ' . diagnosticHtml($booking['testName']) . '<br><strong>Collection Mode:</strong> ' . diagnosticHtml($collection) . '<br><strong>Date &amp; Time:</strong> ' . diagnosticHtml($booking['date'] . ' (' . $booking['timeSlot'] . ')') . '<br><strong>Location:</strong> ' . diagnosticHtml($location) . '<br><strong>Total Package Fee:</strong> ₹' . diagnosticHtml((string) $booking['price']) . '</div></div></td></tr>'
-        . '<tr><td style="background:#0A0A0A;padding:24px 32px;text-align:center;color:#A3A3A3;font-size:11px"><strong style="display:block;color:#fff;font-size:13px;margin-bottom:6px">AvinyaCareFoundation</strong>A humanitarian oncology and healthcare initiative.<br>80G &amp; 12A Tax Exempted under the Indian IT Act.</td></tr>'
+        . '<tr><td style="background:#0A0A0A;padding:24px 32px;text-align:center;color:#A3A3A3;font-size:11px"><strong style="display:block;color:#fff;font-size:13px;margin-bottom:6px">AvinyaCareFoundation</strong>A humanitarian oncology and healthcare initiative.<br>For registration and tax documents, contact the foundation.</td></tr>'
         . '</table></td></tr></table></body></html>';
 }
 
@@ -197,10 +197,11 @@ try {
     }
     if (!$test) throw new InvalidArgumentException('Selected diagnostic test package not found.');
     $booking = ['id' => 'AVC-TST-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4))), 'testId' => $data['testId'], 'testName' => $test['name'], 'price' => $test['price'], 'collectionMethod' => $data['collectionMethod'] ?? 'home_collection', 'homeAddress' => trim((string) ($data['homeAddress'] ?? '')), 'pincode' => trim((string) ($data['pincode'] ?? '')), 'city' => trim((string) ($data['city'] ?? 'Mumbai')), 'date' => $data['date'], 'timeSlot' => $data['timeSlot'], 'patientName' => trim($data['patientName']), 'patientEmail' => strtolower(trim($data['patientEmail'])), 'patientPhone' => trim($data['patientPhone']), 'patientAge' => (int) ($data['patientAge'] ?? 0), 'patientGender' => $data['patientGender'] ?? 'Unspecified', 'status' => 'pending', 'createdAt' => date(DATE_ATOM)];
-    $emailSent = sendDiagnosticEmail($booking);
+    $emailSent = false;
     
     try {
         $pdo = getDatabaseConnection();
+        if ($pdo === null) throw new RuntimeException('Booking storage unavailable.');
         if ($pdo !== null) {
             $stmt = $pdo->prepare("INSERT INTO `diagnostic_bookings`
                 (`booking_id`, `test_id`, `test_name`, `price`, `collection_method`, `patient_name`, `patient_email`, `patient_phone`, `patient_age`, `patient_gender`, `home_address`, `pincode`, `city`, `booking_date`, `time_slot`, `status`, `email_sent`)
@@ -226,17 +227,21 @@ try {
                 ':e_sent' => $emailSent ? 1 : 0
             ]);
 
+            $emailSent = sendDiagnosticEmail($booking);
+            $updateMail = $pdo->prepare('UPDATE diagnostic_bookings SET email_sent = :sent WHERE booking_id = :id');
+            $updateMail->execute([':sent' => $emailSent ? 1 : 0, ':id' => $booking['id']]);
             if ($emailSent) {
                 $logStmt = $pdo->prepare("INSERT INTO `email_logs` (`reference_id`, `form_or_booking_type`, `recipient_role`, `recipient_email`, `subject`, `smtp_status`, `delivery_method`) VALUES (:ref, 'diagnostic_booking', 'patient', :to, :subj, 'SENT', 'HOSTINGER_SSL_SMTP_465')");
                 $logStmt->execute([
                     ':ref' => $booking['id'],
                     ':to' => $booking['patientEmail'],
-                    ':subj' => 'Diagnostic Booking Confirmed — ' . $booking['id']
+                    ':subj' => 'Diagnostic Request Received — ' . $booking['id']
                 ]);
             }
         }
     } catch (Throwable $dbErr) {
-        error_log('Database Insert Warning (diagnostic_bookings): ' . $dbErr->getMessage());
+        error_log('Diagnostic booking persistence or notification failed.');
+        throw new RuntimeException('Unable to complete booking request.');
     }
 
     logActivity(

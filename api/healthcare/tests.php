@@ -56,7 +56,15 @@ try {
 
     if ($tests !== null && is_array($tests)) {
         $overrides = json_decode(file_get_contents(dirname(__DIR__, 2) . '/data/diagnostic-copy-overrides.json'), true) ?: [];
-        $tests = array_map(fn($test) => array_merge($test, $overrides[$test['id']] ?? []), $tests);
+        $tests = array_map(function ($test) use ($overrides) {
+            $test = array_merge($test, $overrides[$test['id']] ?? []);
+            unset($test['b2bPrice'], $test['margin']);
+            $test['reportTurnaround'] = 'Confirm with laboratory';
+            $test['originalPrice'] = 0;
+            $test['avinyaSubsidy'] = 'Listed price; confirm availability and final charges';
+            $test['badge'] = 'Discuss with your clinician';
+            return $test;
+        }, $tests);
         echo json_encode([
             'status' => 'ok',
             'tests' => $tests,

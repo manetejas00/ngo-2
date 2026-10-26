@@ -445,7 +445,7 @@ class AvinyaPdfService {
       ${this.getLetterheadDataHtml()}
       <div style="text-align: center; margin-bottom: 16px; border-bottom: 2px solid #087F73; padding-bottom: 10px;">
         <span style="background: #087F73; color: white; font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: 1px;">Official Tax Exemption Receipt</span>
-        <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 4px 0 2px 0;">DONATION RECEIPT UNDER SECTION 80G</h1>
+        <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 4px 0 2px 0;">CONTRIBUTION RECORD — NOT A TAX CERTIFICATE</h1>
         <div style="font-size: 11px; color: #475569; font-weight: 600;">Income Tax Act, 1961 • 50% Tax Exemption for Donors</div>
       </div>
 
@@ -483,7 +483,7 @@ class AvinyaPdfService {
       <!-- Statutory Exemption Details -->
       <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; padding: 8px 12px; margin-bottom: 14px; font-size: 11px; color: #92400E; line-height: 1.5;">
         <strong>🏛️ Statutory Tax Exemption Declaration:</strong><br>
-        Donations made to AvinyaCareFoundation are eligible for deduction under <strong>Section 80G(5)(vi)</strong> of the Income Tax Act, 1961. This receipt qualifies for Form 10BE statutory filing with the Income Tax Department of India.
+        This record does not establish tax eligibility or replace Form 10BE. Ask the foundation for current approval details and a verified receipt; consult your tax advisor.
       </div>
 
       <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; margin-top: 10px; align-items: flex-end;">

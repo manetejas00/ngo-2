@@ -1,5 +1,8 @@
 <?php
 function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
+    foreach ([$to, $replyTo] as $address) {
+        if ($address !== '' && (!filter_var($address, FILTER_VALIDATE_EMAIL) || preg_match('/[\r\n]/', $address))) return false;
+    }
     $isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
     $defaultUser = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
 
@@ -14,7 +17,8 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
     if (!$isStaging && str_contains($from, 'test.avinyacarefoundation.org')) {
         $from = 'info@avinyacarefoundation.org';
     }
-    $fromName = getDbEnv('SMTP_FROM_NAME', 'AvinyaCareFoundation');
+    if (!filter_var($from, FILTER_VALIDATE_EMAIL)) return false;
+    $fromName = str_replace(["\r", "\n"], '', getDbEnv('SMTP_FROM_NAME', 'AvinyaCareFoundation'));
     $boundary = '=_AvinyaLogo_' . bin2hex(random_bytes(8));
     $logoPath = dirname(__DIR__) . '/assets/logo.png';
     $mimeParts = [
@@ -69,11 +73,11 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
     }
 
     fputs($socket, "MAIL FROM: <{$from}>\r\n");
-    fgets($socket, 512);
+    if (substr((string) fgets($socket, 512), 0, 3) !== "250") { fclose($socket); return false; }
     fputs($socket, "RCPT TO: <{$to}>\r\n");
-    fgets($socket, 512);
+    if (!in_array(substr((string) fgets($socket, 512), 0, 3), ["250", "251"], true)) { fclose($socket); return false; }
     fputs($socket, "DATA\r\n");
-    fgets($socket, 512);
+    if (substr((string) fgets($socket, 512), 0, 3) !== "354") { fclose($socket); return false; }
 
     $encodedSubject = "=?UTF-8?B?" . base64_encode($subject) . "?=";
     $headers = [
@@ -86,7 +90,7 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
         "X-Mailer: AvinyaCareFoundation-PHP-SMTP/2.0"
     ];
 
-    fputs($socket, implode("\r\n", $headers) . "\r\n\r\n" . $mimeBody . "\r\n.\r\n");
+    fputs($socket, implode("\r\n", $headers) . "\r\n\r\n" . preg_replace('/^(\.)/m', '..', $mimeBody) . "\r\n.\r\n");
     $dataRes = fgets($socket, 512);
 
     fputs($socket, "QUIT\r\n");

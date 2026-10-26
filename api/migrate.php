@@ -6,6 +6,13 @@
 
 declare(strict_types=1);
 
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'error', 'message' => 'Maintenance is available only through the server console.']);
+    exit;
+}
+
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
 

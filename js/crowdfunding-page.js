@@ -125,7 +125,7 @@
           spotlightContainer.style.transform = 'none';
 
           const goal = parseFloat(spot.goal_amount) || 2500000;
-          const raised = parseFloat(spot.raised_amount) || 0;
+          const raised = 0;
           const pct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
           const donCat = spot.donation_category || spot.title || 'Mobile Medical Ambulance';
           const shareText = spot.whatsapp_text || ('Help AvinyaCareFoundation with: ' + spot.title + ' ' + window.location.href);
@@ -134,7 +134,7 @@
             <div class="cf-spotlight-media">
               <img src="${escapeHtml(spot.image || 'assets/mobile_ambulance_clinic.jpg')}" alt="${escapeHtml(spot.alt_text || spot.title)}" loading="lazy" decoding="async">
               <div class="cf-spotlight-tag-urgent">
-                <span>⏱️</span> ${escapeHtml(spot.target_timeline || 'Target: Next 30 Days')}
+                <span>⏱️</span> ${'Proposed initiative · dates unconfirmed'}
               </div>
               <div class="cf-spotlight-tag-verified">
                 <span>✓</span> ${escapeHtml(spot.tag_label || 'AvinyaCareFoundation Official Project')}
@@ -155,22 +155,7 @@
               </div>
 
               <div>
-                <div class="cf-progress-container" data-campaign-category="${escapeHtml(donCat)}" data-goal="${goal}">
-                  <div class="cf-progress-header">
-                    <div>
-                      <span class="cf-progress-raised">${money(raised)}</span>
-                      <span class="cf-progress-goal">pledged toward an unverified planning estimate of ${money(goal)} goal</span>
-                    </div>
-                    <span class="cf-progress-percent" style="color: #FFA466; font-weight: 800; font-size: 1.1rem;">${pct}%</span>
-                  </div>
-                  <div class="cf-progress-bar-bg">
-                    <div class="cf-progress-bar-fill" style="width: ${pct}%;"></div>
-                  </div>
-                  <div class="cf-progress-stats">
-                    <span>🏢 <span class="cf-progress-donor-count">${spot.donor_count || 0}</span> Corporate &amp; Community Donors</span>
-                    <span>🛡️ ${spot.is_tax_exempt ? 'Confirm receipt eligibility' : 'Project proposal'}</span>
-                  </div>
-                </div>
+                <p class="cf-proposal-notice">Proposed initiative. Funding figures, budget and dates require confirmation.</p>
 
                 <div class="cf-spotlight-actions">
                   <button class="cf-btn-primary" style="flex: 1; justify-content: center;" onclick="window.AvinyaModals.openDonateModal(5000, '${escapeHtml(donCat)}')">
@@ -194,7 +179,7 @@
         if (gridContainer) {
           gridContainer.innerHTML = data.campaigns.map(c => {
             const goal = parseFloat(c.goal_amount) || 1000000;
-            const raised = parseFloat(c.raised_amount) || 0;
+            const raised = 0;
             const pct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
             const donCat = c.donation_category || c.title;
             const shareText = c.whatsapp_text || ('Support ' + c.title + ': ' + window.location.href);
@@ -216,19 +201,7 @@
                     ${escapeHtml(c.description || '')}
                   </p>
                   <div class="cf-card-footer">
-                    <div class="cf-progress-container" style="margin-bottom: 0.75rem;" data-campaign-category="${escapeHtml(donCat)}" data-goal="${goal}">
-                      <div class="cf-progress-header">
-                        <span class="cf-progress-raised" style="font-weight: 700; color: #FFA466;">${money(raised)}</span>
-                        <span class="cf-progress-goal">pledged toward an unverified planning estimate of ${money(goal)} (<span class="cf-progress-percent">${pct}%</span>)</span>
-                      </div>
-                      <div class="cf-progress-bar-bg">
-                        <div class="cf-progress-bar-fill" style="width: ${pct}%;"></div>
-                      </div>
-                      <div class="cf-progress-stats" style="margin-top: 0.35rem;">
-                        <span>👥 <span class="cf-progress-donor-count">${c.donor_count || 0}</span> Donors</span>
-                        <span>⏱️ ${escapeHtml(c.target_timeline || 'Active')}</span>
-                      </div>
-                    </div>
+                    <p>Proposed initiative. Ask for a confirmed budget, timeline and supporting records.</p>
                     <div class="cf-card-actions">
                       <button class="cf-btn-donate" onclick="window.AvinyaModals.openDonateModal(5000, '${escapeHtml(donCat)}')">
                         <span>Pledge interest: ₹5,000</span>

@@ -105,7 +105,7 @@ if ($action === 'login' || $action === 'temp_login') {
         $user = $stmt->fetch();
     }
 
-    if (!$user || strtolower((string) ($user['status'] ?? '')) !== 'active'
+    if ($password === 'Demo@Avinya2026' || !$user || strtolower((string) ($user['status'] ?? '')) !== 'active'
         || !password_verify($password, (string) ($user['password_hash'] ?? ''))) {
         http_response_code(401);
         echo json_encode(['status' => 'error', 'message' => 'Invalid email/username or password.']);
@@ -279,7 +279,7 @@ if ($action === 'forgot_password') {
             $configuredBase = rtrim(resetMailEnv('RESET_BASE_URL'), '/');
             $host = preg_replace('/[^a-z0-9.:-]/i', '', (string) ($_SERVER['HTTP_HOST'] ?? ''));
             $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $baseUrl = $configuredBase !== '' ? $configuredBase : ($host !== '' ? $scheme . '://' . $host : '');
+            $baseUrl = $configuredBase !== '' ? $configuredBase : 'https://www.avinyacarefoundation.org';
             $resetUrl = $baseUrl . '/admin.html#reset-password?token=' . rawurlencode($token);
             $mail = $baseUrl !== '' ? sendPasswordResetEmail($email, (string) ($u['name'] ?? ''), $resetUrl, 45) : ['sent' => false, 'error' => 'Application base URL is not configured.'];
             $smtpStatus = !empty($mail['sent']) ? 'SENT' : 'FAILED';
