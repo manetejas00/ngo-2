@@ -1,6 +1,6 @@
 # Avinya Care Foundation — live website audit
 
-Date: 26 October 2026 (Asia/Kolkata). Website: https://www.avinyacarefoundation.org.
+Started: 26 October 2026; verification continued on 27 October 2026 (Asia/Kolkata). Website: https://www.avinyacarefoundation.org.
 
 ## Scope and evidence
 
@@ -73,7 +73,7 @@ Dummy records remain clearly labelled `QA-AUDIT-20261026…`; they are not real 
 - Targeted live checks: **18 passed**, covering private data/config/seed protection, invalid form inputs, invalid staff login, public donor privacy, internal-price omission and confirmed office address.
 - Live invalid input: general form 422; diagnostic request 400; camp registration 422; nonexistent staff login 401.
 - Public maintenance/reset actions: 403; private data/history: 401; configuration/runtime/seed files: 403.
-- A smoke run overlapped deployment and observed transient missing pages. Fixed the fallback deploy/rollback path to atomically replace each file before deleting retired files, rather than emptying the public directory. Updated the smoke expectation for the intentionally unpublished clinician directory.
+- Smoke runs observed transient missing responses around publishing/cache refresh. Origin files were present and subsequent fresh requests succeeded. Independently fixed a risky fallback deploy/rollback path to atomically replace each file before deleting retired files, rather than emptying the public directory; this was not established as the cause of the observed responses (rsync is available on Hostinger). Updated the smoke expectation for the intentionally unpublished clinician directory.
 - Release IDs, final smoke results and subsequent email retest are recorded below after deployment.
 
 ## Foundation confirmation and remaining work
@@ -88,10 +88,12 @@ Dummy records remain clearly labelled `QA-AUDIT-20261026…`; they are not real 
 8. Review large scroll-media downloads and low-bandwidth/mobile performance separately. The home desktop video is approximately 5.7 MiB; the largest gallery video is approximately 15.3 MiB. The home hero was deliberately preserved.
 9. Concurrent local and Hostinger edits allowing a demo password for the foundation account were detected, preserved in private backups and excluded from the release. Password-reset UI corrections were reviewed separately; the default-password block remains the intended live behavior.
 
+10. The separate GitHub Actions deployment workflow fails at **Configure Hostinger SSH**, before its deployment step. Its quality gate passes. Hostinger’s own GitHub-connected auto-deployment is enabled and was verified as **Completed** for the pushed release. Configure the GitHub Actions SSH secrets if that additional deployment path is wanted; it was not repaired or represented as working here.
+
 ## Final recorded results
 
 - Functional release verified: `72faa18` (earlier security/UI release `7ebbf21`). Updates were committed and pushed to `main`, then pulled onto Hostinger. A later documentation commit does not change those application behaviors.
-- Settled production smoke run: **36/36 PASS**. The withheld clinician directory is explicitly checked as unpublished, rather than requiring invented provider records.
+- Settled production smoke run: **36/36 PASS**. Hostinger’s dashboard confirmed deployment completion and **Cache cleaned successfully**; repeated checks after cache clearing passed. The withheld clinician directory is explicitly checked as unpublished, rather than requiring invented provider records.
 - Final automated regression run: **41/41 PASS**; read-only HTTP suite: **5/5 PASS**; targeted live security/validation checks: **18/18 PASS**.
 - Final contribution-email retest: **2 messages in Inbox, 0 in Junk**, with the revised subjects “Contribution Interest Received” and “Website contribution enquiry”. Camp confirmation: **1 in Inbox, 0 in Junk**. All test recipients and inspected Reply-To headers used the foundation inbox.
 - Production database inspection confirmed the marked general-form records were saved. The nonexistent staff-login test created **zero accounts**. The released login source contains **no foundation-account demo-password exception**.
