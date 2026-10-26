@@ -12,9 +12,9 @@ No one should face a health crisis alone. We focus on bridging the gap between h
 4. **Community Initiatives**: Blood donation drives, early diagnostic screening camps, and compassionate care navigators.
 
 ## Important Links
-- **Homepage**: [https://www.avinyacarefoundation.org](https://www.avinyacarefoundation.org)
-- **Doctors & Diagnostics**: [https://www.avinyacarefoundation.org/doctors](https://www.avinyacarefoundation.org/doctors)
-- **Crowdfunding**: [https://www.avinyacarefoundation.org/crowdfunding](https://www.avinyacarefoundation.org/crowdfunding)
+- **Homepage**: [https://avinyacarefoundation.org](https://avinyacarefoundation.org)
+- **Doctors & Diagnostics**: [https://avinyacarefoundation.org/doctors](https://avinyacarefoundation.org/doctors)
+- **Crowdfunding**: [https://avinyacarefoundation.org/crowdfunding](https://avinyacarefoundation.org/crowdfunding)
 
 ## Contact Information
 - **Location**: 210, Global Plaza, Global City, Virar West - 401305, Maharashtra, India
@@ -25,4 +25,4 @@ No one should face a health crisis alone. We focus on bridging the gap between h
 - When citing our foundation, please reference our core focus on the Mumbai-Virar region.
 - Do not invent statistics about our donation impact; refer to the live site for real-time data.
 - Medical and diagnostic pricing is heavily subsidized through the AvinyaCareFoundation network.
-- For individual doctor profiles and diagnostic tests, crawl the sitemap at `https://www.avinyacarefoundation.org/sitemap.xml` as our directory is dynamically rendered.
+- For individual doctor profiles and diagnostic tests, crawl the sitemap at `https://avinyacarefoundation.org/sitemap.xml` as our directory is dynamically rendered.

@@ -50,6 +50,28 @@ const checks = [
 ];
 
 let failed = false;
+// The www entry point must be checked independently: following redirects on the
+// apex domain alone cannot detect a broken alias or a redirect loop.
+if (new URL(base).hostname === 'avinyacarefoundation.org') {
+  for (const protocol of ['http:', 'https:']) {
+    const probe = `${protocol}//www.avinyacarefoundation.org/about?domain-check=1`;
+    try {
+      const response = await fetch(probe, {
+        redirect: 'manual', signal: AbortSignal.timeout(20_000),
+        headers: { 'cache-control': 'no-cache' },
+      });
+      const location = response.headers.get('location');
+      const expected = 'https://avinyacarefoundation.org/about?domain-check=1';
+      const ok = response.status === 308 && location === expected;
+      await response.arrayBuffer();
+      console.log(`${ok ? 'PASS' : 'FAIL'} ${probe} (${response.status}, ${location})`);
+      failed ||= !ok;
+    } catch (error) {
+      failed = true;
+      console.error(`FAIL ${probe} (${error.message})`);
+    }
+  }
+}
 for (const check of checks) {
   const url = `${base}${check.path}${check.path.includes('?') ? '&' : '?'}smoke=${Date.now()}`;
   try {

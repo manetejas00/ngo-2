@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 
-Sitemap: https://www.avinyacarefoundation.org/sitemap.xml
+Sitemap: https://avinyacarefoundation.org/sitemap.xml

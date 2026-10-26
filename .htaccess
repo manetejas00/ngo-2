@@ -28,6 +28,10 @@ Options -Indexes
   RewriteCond %{HTTP:Authorization} ^(.*)
   RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]
 
+  # Use one public hostname; 308 preserves methods and bodies for API requests.
+  RewriteCond %{HTTP_HOST} ^www\.avinyacarefoundation\.org(?::[0-9]+)?$ [NC]
+  RewriteRule ^ https://avinyacarefoundation.org%{REQUEST_URI} [R=308,L,NE]
+
   # Force HTTPS
   RewriteCond %{HTTPS} off
   RewriteCond %{HTTP_HOST} !^localhost [NC]
