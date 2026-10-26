@@ -3,6 +3,11 @@
 Production: https://avinyacarefoundation.org
 Prepared: 26 October 2026 (IST).
 
+Latest findings and evidence: [Website audit](WEBSITE_AUDIT_2026-10-26.md).
+Public donor activity and unverified clinician listings are intentionally withheld.
+Staff sign-in must not publish or accept shared demo credentials.
+Mark phone/tablet and authenticated staff workflows NOT TESTED until signed off.
+
 Use PASS / FAIL / NOT TESTED with a timestamp and release commit. An HTTP 200
 checks availability, not visual quality or successful completion of a workflow.
 Do not write passwords, authentication tokens, medical information or real

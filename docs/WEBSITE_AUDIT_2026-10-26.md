@@ -87,3 +87,16 @@ Dummy records remain clearly labelled `QA-AUDIT-20261026…`; they are not real 
 7. Authenticated staff CRUD, export, resend and record ownership require a secure staff-session acceptance test. No real record was edited/deleted, and no staff credential was guessed. No complete penetration-test or legal-compliance claim is made.
 8. Review large scroll-media downloads and low-bandwidth/mobile performance separately. The home desktop video is approximately 5.7 MiB; the largest gallery video is approximately 15.3 MiB. The home hero was deliberately preserved.
 9. Concurrent local and Hostinger edits allowing a demo password for the foundation account were detected, preserved in private backups and excluded from the release. Password-reset UI corrections were reviewed separately; the default-password block remains the intended live behavior.
+
+## Final recorded results
+
+- Functional release verified: `72faa18` (earlier security/UI release `7ebbf21`). Updates were committed and pushed to `main`, then pulled onto Hostinger. A later documentation commit does not change those application behaviors.
+- Settled production smoke run: **36/36 PASS**. The withheld clinician directory is explicitly checked as unpublished, rather than requiring invented provider records.
+- Final automated regression run: **41/41 PASS**; read-only HTTP suite: **5/5 PASS**; targeted live security/validation checks: **18/18 PASS**.
+- Final contribution-email retest: **2 messages in Inbox, 0 in Junk**, with the revised subjects “Contribution Interest Received” and “Website contribution enquiry”. Camp confirmation: **1 in Inbox, 0 in Junk**. All test recipients and inspected Reply-To headers used the foundation inbox.
+- Production database inspection confirmed the marked general-form records were saved. The nonexistent staff-login test created **zero accounts**. The released login source contains **no foundation-account demo-password exception**.
+- Browser recheck confirmed the staff sign-in page has no demo account selector, published shared password or prefilled password. Sign-in labels and the Forgot Password entry work. No staff password was changed by this audit.
+- HTTPS redirects with HTTP 301. The existing desktop hero video supports a one-byte HTTP 206 response. `nosniff`, same-origin framing and referrer-policy headers were observed. Explicit one-hour cache/revalidation settings were added for MP4/WebM, alongside existing static-asset caching.
+- The deploy fallback and rollback file-copy helper passed a local fixture check: new files copied, retired files removed, `.env` and stored records preserved. Temporary replacement files are outside the public directory.
+
+Do not interpret this report as certification that every device or authenticated staff workflow passed. The open sign-off and factual-confirmation items above remain required.
