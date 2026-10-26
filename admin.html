@@ -2095,8 +2095,8 @@
     async function handleResetPasswordSubmit(event) {
       event.preventDefault();
       const token = document.getElementById('resetTokenInput').value.trim();
-      const newPassword = document.getElementById('resetNewPassword').value.trim();
-      const confirmPassword = document.getElementById('resetConfirmPassword').value.trim();
+      const newPassword = document.getElementById('resetNewPassword').value;
+      const confirmPassword = document.getElementById('resetConfirmPassword').value;
       const msgDiv = document.getElementById('resetMsg');
       const btn = document.getElementById('resetSubmitBtn');
 
@@ -2117,7 +2117,8 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'reset_password', token, newPassword, confirmPassword })
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => null);
+        if (!data) throw new Error('The password-reset service is temporarily unavailable. Please try again using the same link.');
 
         if (res.ok && data.status === 'ok') {
           showToast('Password reset successfully! You can now log in.', 'success');
@@ -2132,7 +2133,9 @@
           msgDiv.style.display = 'block';
         }
       } catch (err) {
-        msgDiv.innerText = 'Error resetting password.';
+        msgDiv.innerText = err instanceof TypeError
+          ? 'Could not connect to save your password. Check your connection and try again.'
+          : err.message;
         msgDiv.style.background = 'var(--danger-bg)';
         msgDiv.style.color = 'var(--danger)';
         msgDiv.style.display = 'block';

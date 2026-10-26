@@ -28,6 +28,7 @@ require_once __DIR__ . '/rate_limiter.php';
 enforcePhpRateLimit(20, 300);
 require_once __DIR__ . '/activity-logger.php';
 require_once __DIR__ . '/password-reset-email.php';
+require_once __DIR__ . '/password-reset-store.php';
 
 $rawInput = file_get_contents('php://input');
 $data = json_decode((string) $rawInput, true) ?: $_POST;
@@ -331,22 +332,22 @@ if ($action === 'reset_password') {
         exit(0);
     }
 
-    if ($pdo !== null) {
-        $stmt = $pdo->prepare("SELECT * FROM `password_resets` WHERE `token` = :t AND `used` = 0 AND `expires_at` > NOW() LIMIT 1");
-        $stmt->execute([':t' => hash('sha256', $token)]);
-        $rst = $stmt->fetch();
-        if (!$rst) {
+    if ($pdo === null) {
+        http_response_code(503);
+        echo json_encode(['status' => 'error', 'message' => 'Password reset is temporarily unavailable. Please try again shortly.']);
+        exit;
+    }
+    try {
+        if (!completeStaffPasswordReset($pdo, $token, $newPass)) {
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Invalid or expired password reset link.']);
-            exit(0);
+            echo json_encode(['status' => 'error', 'message' => 'Invalid or expired password reset link. Please request a new link.']);
+            exit;
         }
-
-        $newHash = password_hash($newPass, PASSWORD_DEFAULT);
-        $updUser = $pdo->prepare("UPDATE `users` SET `password_hash` = :h, `session_token` = NULL, `session_expires` = NULL, `must_change_password` = 0, `password_changed_at` = NOW() WHERE `email` = :e");
-        $updUser->execute([':h' => $newHash, ':e' => $rst['email']]);
-
-        $updReset = $pdo->prepare("UPDATE `password_resets` SET `used` = 1 WHERE `id` = :id");
-        $updReset->execute([':id' => $rst['id']]);
+    } catch (Throwable $error) {
+        error_log('Password reset save failed: ' . $error->getMessage());
+        http_response_code(503);
+        echo json_encode(['status' => 'error', 'message' => 'Your password could not be saved. Please try again shortly using the same link.']);
+        exit;
     }
 
     http_response_code(200);

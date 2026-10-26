@@ -151,6 +151,16 @@ function getDatabaseConnection(): ?PDO {
     return null;
 }
 
+function ensureStaffSessionSchema(PDO $pdo): void {
+    $columns = $pdo->query('SHOW COLUMNS FROM `users`')->fetchAll(PDO::FETCH_COLUMN);
+    if (!in_array('session_token', $columns, true)) {
+        $pdo->exec('ALTER TABLE `users` ADD COLUMN `session_token` VARCHAR(255) DEFAULT NULL');
+    }
+    if (!in_array('session_expires', $columns, true)) {
+        $pdo->exec('ALTER TABLE `users` ADD COLUMN `session_expires` DATETIME DEFAULT NULL');
+    }
+}
+
 function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
     static $migrated = false;
     if ($migrated && !$force) return true;
@@ -380,6 +390,8 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
             `status` VARCHAR(50) NOT NULL DEFAULT 'active',
             `must_change_password` TINYINT(1) DEFAULT 1,
             `password_changed_at` DATETIME DEFAULT NULL,
+            `session_token` VARCHAR(255) DEFAULT NULL,
+            `session_expires` DATETIME DEFAULT NULL,
             `last_login` DATETIME DEFAULT NULL,
             `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
             `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -510,6 +522,7 @@ function autoMigrateDatabaseTables(PDO $pdo, bool $force = false): bool {
             $pdo->exec("ALTER TABLE `diagnostic_tests` ADD COLUMN `provider_id` VARCHAR(100) DEFAULT 'provider-1' AFTER `test_id`");
         }
 
+        ensureStaffSessionSchema($pdo);
         $colsUsers = $pdo->query("SHOW COLUMNS FROM `users`")->fetchAll(PDO::FETCH_COLUMN);
         if (!in_array('doctor_id', $colsUsers, true)) {
             $pdo->exec("ALTER TABLE `users` ADD COLUMN `doctor_id` VARCHAR(100) DEFAULT NULL AFTER `role`");

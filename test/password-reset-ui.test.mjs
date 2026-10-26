@@ -51,3 +51,9 @@ test('connection failures explain that the reset service could not be reached', 
   assert.match(message.innerText, /Check your connection/);
   assert.equal(message.style.color, 'var(--danger)');
 });
+
+test('password save persists a verifiable hash and atomically revokes the link and sessions', async () => {
+  const { execFileSync } = await import('node:child_process');
+  const result = execFileSync('php', [new URL('./password-reset-store.test.php', import.meta.url).pathname], {encoding:'utf8'});
+  assert.match(result, /rollback passed/);
+});
