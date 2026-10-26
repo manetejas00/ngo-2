@@ -102,3 +102,7 @@ Dummy records remain clearly labelled `QA-AUDIT-20261026…`; they are not real 
 - The deploy fallback and rollback file-copy helper passed a local fixture check: new files copied, retired files removed, `.env` and stored records preserved. Temporary replacement files are outside the public directory.
 
 Do not interpret this report as certification that every device or authenticated staff workflow passed. The open sign-off and factual-confirmation items above remain required.
+
+### Subsequent mobile-loading release verification (27 October)
+
+The additional commit `4fe5c07` bundles existing animation/PDF dependencies locally and adds a loader failsafe. It was reviewed without altering its implementation. Hostinger displayed **Completed**, branch `main`, commit `4fe5c07`, for this release. The updated regression suite passed **43/43**, and the expanded production smoke suite passed **44/44**. This supplements the earlier audit results; it does not replace the outstanding physical phone/tablet layout sign-off or authenticated staff acceptance tests.
