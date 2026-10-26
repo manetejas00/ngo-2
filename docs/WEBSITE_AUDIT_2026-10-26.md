@@ -11,6 +11,7 @@ The initial crawl checked 14 routes and 101 same-origin resources: no broken res
 ## Critical fixes deployed
 
 - Replaced the staff-login implementation that overwrote passwords and created accounts during login with verification of an existing active account's password hash.
+- Removed public demo-account selection, password autofill and published login credentials. Fixed password-reset action and token parsing.
 - Disabled public account enumeration and HTTP account-reset/reseed actions. Disabled the public maintenance runner; deployment can still run it from the server console.
 - Removed automatic account provisioning/password replacement and database migrations from ordinary database reads.
 - Rejected legacy session tokens. Blocked the shared demo password. Revoked persistent tokens on logout and password changes. Private responses use `Cache-Control: no-store`.
@@ -67,7 +68,7 @@ Dummy records remain clearly labelled `QA-AUDIT-20261026…`; they are not real 
 
 ## Verification
 
-- Automated regression suite: **40 tests passed**.
+- Automated regression suite: **41 tests passed**.
 - Read-only local HTTP suite: **5 tests passed**.
 - Targeted live checks: **18 passed**, covering private data/config/seed protection, invalid form inputs, invalid staff login, public donor privacy, internal-price omission and confirmed office address.
 - Live invalid input: general form 422; diagnostic request 400; camp registration 422; nonexistent staff login 401.
@@ -83,5 +84,5 @@ Dummy records remain clearly labelled `QA-AUDIT-20261026…`; they are not real 
 5. Confirm campaign budgets, permissions, dates, location, partners and current funding records. Confirm gallery event facts, participant consent and image publication rights. Archive notices do not replace those permissions.
 6. **Phone/tablet visual sign-off remains open.** The available browser exposed a fixed desktop viewport and no viewport/emulation control. Responsive CSS was inspected, but 375/390/768-pixel physical layouts were not certified.
 7. Authenticated staff CRUD, export, resend and record ownership require a secure staff-session acceptance test. No real record was edited/deleted, and no staff credential was guessed. No complete penetration-test or legal-compliance claim is made.
-8. Review large scroll-media downloads and low-bandwidth/mobile performance separately. The home hero was deliberately preserved.
-9. A concurrent local edit allowing a demo password for the foundation account was detected and left out of the release. Password-reset UI corrections were reviewed separately; the default-password block remains the intended live behavior.
+8. Review large scroll-media downloads and low-bandwidth/mobile performance separately. The home desktop video is approximately 5.7 MiB; the largest gallery video is approximately 15.3 MiB. The home hero was deliberately preserved.
+9. Concurrent local and Hostinger edits allowing a demo password for the foundation account were detected, preserved in private backups and excluded from the release. Password-reset UI corrections were reviewed separately; the default-password block remains the intended live behavior.

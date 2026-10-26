@@ -73,7 +73,7 @@ function getBearerToken(): string {
 
 function verifyAndRehydrateAdminToken(?PDO $pdo, string $token): bool {
     $token = trim($token);
-    if (!str_starts_with($token, 'AVG2-SESS-')) return false;
+    if (!str_starts_with($token, 'AVG3-SESS-')) return false;
 
     if (session_status() !== PHP_SESSION_ACTIVE) {
         @session_start();

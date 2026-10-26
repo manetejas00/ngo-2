@@ -41,45 +41,18 @@
       <div id="loginError" class="login-error" style="display: none; background: var(--danger-bg); border: 1px solid rgba(239, 68, 68, 0.4); color: var(--danger); padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; margin-bottom: 16px;"></div>
 
       <form id="loginForm" onsubmit="handleLogin(event)">
-        <!-- Quick Select Account Dropdown for One-Click Auto-Fill -->
-        <div class="form-group" style="margin-bottom: 18px;">
-          <label style="display: flex; align-items: center; justify-content: space-between; font-weight: 600; color: var(--primary);">
-            <span>⚡ Select Account (One-Click Auto-Fill)</span>
-            <span style="font-size: 11px; background: var(--primary); color: #fff; padding: 2px 6px; border-radius: 4px;">AUTO-FILL</span>
-          </label>
-          <select id="quickAccountSelect" class="form-control" onchange="handleQuickAccountSelect(this)" style="background: rgba(13, 148, 136, 0.08); color: var(--text-main); border: 1.5px solid var(--primary); font-weight: 600; cursor: pointer;">
-            <option value="">-- Choose Account to Auto-Fill Email & Password --</option>
-            <optgroup label="👑 Super Admin Accounts">
-              <option value="info@avinyacarefoundation.org|Demo@Avinya2026" selected>Super Admin (info@avinyacarefoundation.org)</option>
-              <option value="admin@gmail.com|Demo@Avinya2026">Admin User (admin@gmail.com)</option>
-            </optgroup>
-            <optgroup label="🏥 Staff & Coordinators">
-              <option value="health@avinyacarefoundation.org|Demo@Avinya2026">Healthcare Coordinator (health@avinyacarefoundation.org)</option>
-            </optgroup>
-            <optgroup label="🩺 Doctors & Specialists">
-              <option value="doctor.doc-1@avinyacarefoundation.org|Demo@Avinya2026">Dr. Ananya Sharma (Oncologist)</option>
-              <option value="doctor.doc-2@avinyacarefoundation.org|Demo@Avinya2026">Dr. Rajesh Varma (Cardiologist)</option>
-              <option value="doctor.doc-3@avinyacarefoundation.org|Demo@Avinya2026">Dr. Meera Kulkarni (General Physician)</option>
-            </optgroup>
-            <optgroup label="🧪 Diagnostic Providers">
-              <option value="pathology@metropolis.com|Demo@Avinya2026">Metropolis Diagnostic Partner</option>
-              <option value="info@srldiagnostics.com|Demo@Avinya2026">SRL Diagnostics Partner</option>
-            </optgroup>
-          </select>
-        </div>
-
         <div class="form-group">
-          <label>Email or Username *</label>
-          <input type="text" id="loginEmail" class="form-control" value="info@avinyacarefoundation.org" placeholder="e.g. info@avinyacarefoundation.org or admin@gmail.com" required>
+          <label for="loginEmail">Email or Username *</label>
+          <input type="text" id="loginEmail" class="form-control" autocomplete="username" placeholder="Your staff email or username" required>
         </div>
 
         <div class="form-group">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label>Password *</label>
+            <label for="loginPassword">Password *</label>
             <a href="javascript:void(0)" onclick="openForgotPasswordModal()" style="font-size: 12px; color: var(--primary);">Forgot Password?</a>
           </div>
           <div style="position: relative;">
-            <input type="password" id="loginPassword" class="form-control" value="Demo@Avinya2026" placeholder="••••••••" required style="padding-right: 40px;">
+            <input type="password" id="loginPassword" class="form-control" autocomplete="current-password" placeholder="Your private password" required style="padding-right: 40px;">
             <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-subtle); cursor: pointer; font-size: 16px; padding: 4px;" title="Show/Hide Password">👁️</button>
           </div>
         </div>
@@ -95,24 +68,7 @@
         </button>
       </form>
 
-      <!-- Demo Credentials Information Section -->
-      <div id="demoLoginSection" style="display: block; margin-top: 20px; padding: 14px; background: rgba(13, 148, 136, 0.08); border: 1px dashed var(--primary); border-radius: var(--radius-md); font-size: 13px;">
-        <div style="font-weight: 600; color: var(--primary); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
-          <span>⚡ System Login Accounts</span>
-          <span style="font-size: 11px; background: var(--primary); color: #fff; padding: 2px 6px; border-radius: 4px;">SYSTEM</span>
-        </div>
-        <div style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;">Select an account from the dropdown above to auto-fill credentials.</div>
-        <div style="display: flex; flex-direction: column; gap: 8px; font-family: monospace; font-size: 12px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);">
-            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Email: <strong id="demoEmailField">info@avinyacarefoundation.org / admin@gmail.com</strong></span>
-            <button type="button" onclick="copyDemoValue('info@avinyacarefoundation.org', 'Email')" class="btn btn-sm" style="padding: 2px 8px; font-size: 11px; background: var(--primary); color: #fff; border: 0; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Copy Email</button>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);">
-            <span>Password: <strong>Demo@Avinya2026</strong></span>
-            <button type="button" onclick="copyDemoValue('Demo@Avinya2026', 'Password')" class="btn btn-sm" style="padding: 2px 8px; font-size: 11px; background: var(--primary); color: #fff; border: 0; border-radius: 4px; cursor: pointer; flex-shrink: 0;">Copy Password</button>
-          </div>
-        </div>
-      </div>
+
     </div>
   </div>
 
@@ -1675,8 +1631,6 @@
       initSidebarCollapse();
       initModalScrollCoordinator();
       initDoctorPresets();
-      initDemoLoginVisibility();
-      loadRealLoginAccounts();
 
       const urlParams = new URLSearchParams(window.location.search);
       const resetHash = window.location.hash;
@@ -1708,7 +1662,6 @@
 
     function showLoginOverlay() {
       document.getElementById('loginOverlay').style.display = 'flex';
-      loadRealLoginAccounts();
     }
 
     function resetStateAndTables() {
@@ -2001,90 +1954,6 @@
         }
       } catch (err) {
         showToast('Network error saving profile.', 'error');
-      }
-    }
-
-    async function loadRealLoginAccounts() {
-      const selectEl = document.getElementById('quickAccountSelect');
-      if (!selectEl) return;
-      try {
-        const res = await fetch(getApiBaseUrl() + '/api/admin-auth.php?action=get_login_accounts');
-        const data = await res.json();
-        if (res.ok && data.status === 'ok' && Array.isArray(data.users) && data.users.length > 0) {
-          const defaultPass = data.defaultPassword || 'Demo@Avinya2026';
-          
-          const admins = data.users.filter(u => u.role === 'admin');
-          const managers = data.users.filter(u => u.role === 'manager');
-          const doctors = data.users.filter(u => u.role === 'doctor');
-          const providers = data.users.filter(u => u.role === 'diagnostic_provider' || u.role === 'provider');
-
-          let html = `<option value="">-- Choose Account to Auto-Fill Email & Password --</option>`;
-
-          if (admins.length > 0) {
-            html += `<optgroup label="👑 Super Admin & System Accounts">`;
-            admins.forEach(u => {
-              html += `<option value="${u.email}|${defaultPass}">${u.name} (${u.email})</option>`;
-            });
-            html += `</optgroup>`;
-          }
-
-          if (managers.length > 0) {
-            html += `<optgroup label="🏥 Staff & Coordinators">`;
-            managers.forEach(u => {
-              html += `<option value="${u.email}|${defaultPass}">${u.name} (${u.email})</option>`;
-            });
-            html += `</optgroup>`;
-          }
-
-          if (doctors.length > 0) {
-            html += `<optgroup label="🩺 Doctors & Specialists (${doctors.length})">`;
-            doctors.forEach(u => {
-              html += `<option value="${u.email}|${defaultPass}">${u.name} (${u.email})</option>`;
-            });
-            html += `</optgroup>`;
-          }
-
-          if (providers.length > 0) {
-            html += `<optgroup label="🧪 Diagnostic Providers (${providers.length})">`;
-            providers.forEach(u => {
-              html += `<option value="${u.email}|${defaultPass}">${u.name} (${u.email})</option>`;
-            });
-            html += `</optgroup>`;
-          }
-
-          selectEl.innerHTML = html;
-          if (selectEl.options.length > 1) {
-            selectEl.selectedIndex = 1;
-            handleQuickAccountSelect(selectEl, true);
-          }
-        }
-      } catch (err) {
-        console.warn('Could not load real login users dynamically, using default options:', err);
-      }
-      if (selectEl && selectEl.options.length > 1 && !document.getElementById('loginEmail').value) {
-        selectEl.selectedIndex = 1;
-        handleQuickAccountSelect(selectEl, true);
-      }
-    }
-
-    function handleQuickAccountSelect(selectEl, quiet = false) {
-      const val = selectEl ? selectEl.value : '';
-      if (!val) return;
-      const parts = val.split('|');
-      if (parts.length >= 2) {
-        const emailInput = document.getElementById('loginEmail');
-        const passInput = document.getElementById('loginPassword');
-        const errorDiv = document.getElementById('loginError');
-        const demoEmailField = document.getElementById('demoEmailField');
-        if (emailInput) emailInput.value = parts[0];
-        if (passInput) passInput.value = parts[1];
-        if (demoEmailField) demoEmailField.innerText = parts[0];
-        if (errorDiv) errorDiv.style.display = 'none';
-        if (!quiet && typeof showToast === 'function') {
-          showToast(`Account (${parts[0]}) auto-filled! Click Sign In.`, 'info');
-        }
-        const btn = document.getElementById('loginBtn');
-        if (btn) btn.focus();
       }
     }
 
@@ -2967,21 +2836,6 @@
     async function executeClearAllCacheConfirm() {
       closeClearAllCacheModal();
       await executeCacheClear('clear_all', 'Website Cache');
-    }
-
-    function copyDemoValue(val, label) {
-      navigator.clipboard.writeText(val).then(() => {
-        showToast(`${label} copied to clipboard!`, 'success');
-      }).catch(() => {
-        showToast(`Copy failed. Value: ${val}`, 'info');
-      });
-    }
-
-    function initDemoLoginVisibility() {
-      const demoBox = document.getElementById('demoLoginSection');
-      if (demoBox) {
-        demoBox.style.display = 'block';
-      }
     }
 
     // --- SEARCH & ADVANCED FILTERS ---

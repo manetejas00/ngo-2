@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $token = trim((string) ($_GET['token'] ?? ''));
         }
 
-        $isAuthenticated = str_starts_with($token, 'AVG2-SESS-') && !empty($_SESSION['admin_token']) && $token !== '' && hash_equals((string) $_SESSION['admin_token'], $token);
+        $isAuthenticated = str_starts_with($token, 'AVG3-SESS-') && !empty($_SESSION['admin_token']) && $token !== '' && hash_equals((string) $_SESSION['admin_token'], $token);
         if (!$isAuthenticated) {
             http_response_code(401);
             echo json_encode(['status' => 'error', 'message' => 'Authentication required to view diagnostic bookings.']);

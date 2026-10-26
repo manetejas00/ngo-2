@@ -9,7 +9,7 @@ test('staff login verifies an existing password without account provisioning',()
 });
 test('legacy reset routes are disabled and legacy sessions rejected',()=>{
  assert.match(auth,/Account reset is unavailable/);
- assert.match(readFileSync(new URL('../api/db.php',import.meta.url),'utf8'),/!str_starts_with\(\$token, 'AVG2-SESS-'/);
+ assert.match(readFileSync(new URL('../api/db.php',import.meta.url),'utf8'),/!str_starts_with\(\$token, 'AVG3-SESS-'/);
 });
 test('analytics never forwards caller-supplied fields',()=>{
  const src=readFileSync(new URL('../js/analytics.js',import.meta.url),'utf8');
@@ -23,4 +23,10 @@ test('confirmation dispatch is single and failed requests cannot fabricate booki
  const ui=readFileSync(new URL('../js/healthcare/healthcare-app.js',import.meta.url),'utf8');
  assert.doesNotMatch(ui,/using client fallback|Math\.random\(\) \* 900000/);
  assert.match(ui,/escapeHtml\(value\)/);
+});
+
+test('public sign-in does not publish credentials or account selectors',()=>{
+ const page=readFileSync(new URL('../admin.html',import.meta.url),'utf8');
+ assert.doesNotMatch(page,/Demo@|defaultPassword|quickAccountSelect/);
+ assert.match(page,/autocomplete="current-password"/);
 });
