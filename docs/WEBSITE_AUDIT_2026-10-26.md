@@ -73,6 +73,7 @@ Dummy records remain clearly labelled `QA-AUDIT-20261026…`; they are not real 
 - Targeted live checks: **18 passed**, covering private data/config/seed protection, invalid form inputs, invalid staff login, public donor privacy, internal-price omission and confirmed office address.
 - Live invalid input: general form 422; diagnostic request 400; camp registration 422; nonexistent staff login 401.
 - Public maintenance/reset actions: 403; private data/history: 401; configuration/runtime/seed files: 403.
+- A smoke run overlapped deployment and observed transient missing pages. Fixed the fallback deploy/rollback path to atomically replace each file before deleting retired files, rather than emptying the public directory. Updated the smoke expectation for the intentionally unpublished clinician directory.
 - Release IDs, final smoke results and subsequent email retest are recorded below after deployment.
 
 ## Foundation confirmation and remaining work

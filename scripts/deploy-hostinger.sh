@@ -51,6 +51,26 @@ scp "${scp_options[@]}" "$archive" "$ssh_target:$remote_archive"
 
 ssh "${ssh_options[@]}" "$ssh_target" bash -s -- "$DEPLOY_TARGET" "$remote_archive" "$release_id" <<'REMOTE_DEPLOY'
 set -Eeu
+copy_release_files() {
+  local release_source="$1" release_target="$2" file relative release_temp
+  mkdir -p "$release_target"
+  release_temp="$(mktemp -d "${release_target}.pending-XXXXXX")"
+  while IFS= read -r -d '' file; do
+    relative="${file#"$release_source/"}"
+    case "$relative" in .env|.env.*|storage/*|cache/*|.git/*|node_modules/*) continue ;; esac
+    mkdir -p "$(dirname "$release_target/$relative")"
+    cp -p "$file" "$release_temp/file"
+    mv -f "$release_temp/file" "$release_target/$relative"
+  done < <(find "$release_source" \( -name .git -o -name node_modules -o -name storage -o -name cache \) -type d -prune -o -type f -print0)
+  # Remove retired published files only after replacements are available.
+  while IFS= read -r -d '' file; do
+    relative="${file#"$release_target/"}"
+    case "$relative" in .env|.env.*|.release|storage/*|cache/*|.git/*|node_modules/*) continue ;; esac
+    if [[ ! -f "$release_source/$relative" ]]; then rm -f "$file"; fi
+  done < <(find "$release_target" \( -name .git -o -name node_modules -o -name storage -o -name cache \) -type d -prune -o -type f -print0)
+  rmdir "$release_temp"
+}
+
 target="$1"
 archive="$2"
 release="$3"
@@ -84,8 +104,7 @@ if command -v rsync >/dev/null 2>&1; then
   rsync -a --delete --exclude='.env' --exclude='.env.production' --exclude='.env.staging' --exclude='storage/' --exclude='cache/' --exclude='.git/' --exclude='node_modules/' "$stage/" "$target/"
 else
   cp -a "$target/." "$backup/"
-  find "$target" -mindepth 1 -maxdepth 1 ! -name '.env' ! -name '.env.production' ! -name '.env.staging' ! -name 'storage' ! -name 'cache' ! -name '.git' ! -name 'node_modules' -exec rm -rf {} +
-  cp -a "$stage/." "$target/"
+  copy_release_files "$stage" "$target"
 fi
 echo "$release" > "$target/.release"
 REMOTE_DEPLOY
@@ -94,14 +113,33 @@ if ! node scripts/live-smoke.mjs "$DEPLOY_URL"; then
   echo "Post-deploy smoke test failed; rolling back $environment." >&2
   ssh "${ssh_options[@]}" "$ssh_target" bash -s -- "$DEPLOY_TARGET" <<'REMOTE_ROLLBACK'
 set -Eeu
+copy_release_files() {
+  local release_source="$1" release_target="$2" file relative release_temp
+  mkdir -p "$release_target"
+  release_temp="$(mktemp -d "${release_target}.pending-XXXXXX")"
+  while IFS= read -r -d '' file; do
+    relative="${file#"$release_source/"}"
+    case "$relative" in .env|.env.*|storage/*|cache/*|.git/*|node_modules/*) continue ;; esac
+    mkdir -p "$(dirname "$release_target/$relative")"
+    cp -p "$file" "$release_temp/file"
+    mv -f "$release_temp/file" "$release_target/$relative"
+  done < <(find "$release_source" \( -name .git -o -name node_modules -o -name storage -o -name cache \) -type d -prune -o -type f -print0)
+  # Remove retired published files only after replacements are available.
+  while IFS= read -r -d '' file; do
+    relative="${file#"$release_target/"}"
+    case "$relative" in .env|.env.*|.release|storage/*|cache/*|.git/*|node_modules/*) continue ;; esac
+    if [[ ! -f "$release_source/$relative" ]]; then rm -f "$file"; fi
+  done < <(find "$release_target" \( -name .git -o -name node_modules -o -name storage -o -name cache \) -type d -prune -o -type f -print0)
+  rmdir "$release_temp"
+}
+
 target="$1"
 backup="${target}.rollback"
 [[ -d "$backup" ]] || { echo "Rollback backup is missing." >&2; exit 1; }
 if command -v rsync >/dev/null 2>&1; then
   rsync -a --delete --exclude='.env' --exclude='.env.production' --exclude='.env.staging' --exclude='storage/' --exclude='cache/' --exclude='.git/' --exclude='node_modules/' "$backup/" "$target/"
 else
-  find "$target" -mindepth 1 -maxdepth 1 ! -name '.env' ! -name '.env.production' ! -name '.env.staging' ! -name 'storage' ! -name 'cache' ! -name '.git' ! -name 'node_modules' -exec rm -rf {} +
-  cp -a "$backup/." "$target/"
+  copy_release_files "$backup" "$target"
 fi
 REMOTE_ROLLBACK
   exit 1

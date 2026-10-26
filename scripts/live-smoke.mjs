@@ -35,7 +35,7 @@ const checks = [
   { path: '/assets/team/chandresh-pandey.jpg', type: 'asset' },
   { path: '/assets/team/tejas-mane.jpg', type: 'asset' },
   { path: '/assets/logo.png', type: 'asset' },
-  { path: '/api/healthcare/doctors.php', type: 'json', array: 'doctors' },
+  { path: '/api/healthcare/doctors.php', type: 'json', array: 'doctors', allowUnpublished: true },
   { path: '/api/healthcare/tests.php', type: 'json', array: 'tests' },
   { path: '/api/crowdfunding.php', type: 'json', array: 'campaigns' },
   { path: '/api/news.php', type: 'json', array: 'articles' },
@@ -58,7 +58,7 @@ for (const check of checks) {
     if (ok && check.type === 'text') ok = body.includes(check.contains);
     if (ok && check.type === 'json') {
       const data = JSON.parse(body);
-      ok = data.status !== 'error' && Array.isArray(data[check.array]) && data[check.array].length > 0;
+      ok = data.status !== 'error' && Array.isArray(data[check.array]) && (data[check.array].length > 0 || (check.allowUnpublished && data.published === false));
       detail += `, ${check.array}=${data[check.array]?.length ?? 0}`;
     }
 
