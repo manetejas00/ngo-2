@@ -401,7 +401,7 @@ class AvinyaPdfService {
       </div>
 
       <div style="background: #EFF6FF; border: 1.5px dashed #93C5FD; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;">
-        <div style="font-weight: 800; color: #1E40AF; font-size: 12.5px; margin-bottom: 4px;">📞 AvinyaCareFoundation Free Patient Navigation & Subsidized Screening Helpline:</div>
+        <div style="font-weight: 800; color: #1E40AF; font-size: 12.5px; margin-bottom: 4px;">📞 AvinyaCareFoundation Support & Screening Enquiries:</div>
         <div style="font-size: 11.5px; color: #1E3A8A; line-height: 1.5;">
           Need clinical consultation or subsidized diagnostic tests? Contact our Virar-Mumbai care desk at <strong>${this.brand.phone}</strong> or email <strong>${this.brand.email}</strong>.
         </div>
@@ -604,7 +604,7 @@ class AvinyaPdfService {
         <div>
           <span style="font-size: 10px; font-weight: 800; color: #087F73; text-transform: uppercase; background: #E6F4F1; padding: 2px 8px; border-radius: 4px;">Diagnostic Request Summary</span>
           <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 4px 0 2px 0;">DIAGNOSTIC TEST REQUISITION</h1>
-          <div style="font-size: 11px; color: #64748B;">Subsidized Screening & Clinical Pathology Order</div>
+          <div style="font-size: 11px; color: #64748B;">Screening and laboratory request summary</div>
         </div>
         <div style="text-align: right;">
           <div style="font-size: 11px; font-weight: 700; color: #087F73;">ORDER REF</div>
@@ -619,7 +619,7 @@ class AvinyaPdfService {
             <div style="font-size: 15px; font-weight: 800; color: #0f172a; margin-top: 2px;">${testName}</div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 11px; color: #64748B;">Subsidized Rate</div>
+            <div style="font-size: 11px; color: #64748B;">Listed price; confirm charges</div>
             <div style="font-size: 16px; font-weight: 800; color: #166534;">₹${price}</div>
           </div>
         </div>

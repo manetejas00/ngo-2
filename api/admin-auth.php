@@ -7,6 +7,7 @@
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=UTF-8');
+header('Cache-Control: no-store, private');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 
@@ -250,7 +251,7 @@ if ($action === 'change_password' || $action === 'force_change_password') {
         }
 
         $newHash = password_hash($newPass, PASSWORD_DEFAULT);
-        $upd = $pdo->prepare("UPDATE `users` SET `password_hash` = :h, `must_change_password` = 0, `password_changed_at` = NOW() WHERE `user_id` = :uid");
+        $upd = $pdo->prepare("UPDATE `users` SET `password_hash` = :h, `session_token` = NULL, `session_expires` = NULL, `must_change_password` = 0, `password_changed_at` = NOW() WHERE `user_id` = :uid");
         $upd->execute([':h' => $newHash, ':uid' => $userId]);
     }
 
@@ -341,7 +342,7 @@ if ($action === 'reset_password') {
         }
 
         $newHash = password_hash($newPass, PASSWORD_DEFAULT);
-        $updUser = $pdo->prepare("UPDATE `users` SET `password_hash` = :h, `must_change_password` = 0, `password_changed_at` = NOW() WHERE `email` = :e");
+        $updUser = $pdo->prepare("UPDATE `users` SET `password_hash` = :h, `session_token` = NULL, `session_expires` = NULL, `must_change_password` = 0, `password_changed_at` = NOW() WHERE `email` = :e");
         $updUser->execute([':h' => $newHash, ':e' => $rst['email']]);
 
         $updReset = $pdo->prepare("UPDATE `password_resets` SET `used` = 1 WHERE `id` = :id");
@@ -402,6 +403,11 @@ if ($action === 'verify') {
 
 // Action: Logout
 if ($action === 'logout') {
+    $logoutToken = (string) ($_SESSION['admin_token'] ?? getBearerToken());
+    if ($pdo !== null && $logoutToken !== '') {
+        $revoke = $pdo->prepare('UPDATE users SET session_token = NULL, session_expires = NULL WHERE session_token = :token');
+        $revoke->execute([':token' => $logoutToken]);
+    }
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
         $params = session_get_cookie_params();

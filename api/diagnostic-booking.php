@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=UTF-8');
+header('Cache-Control: no-store, private');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
@@ -196,7 +197,7 @@ try {
         }
     }
     if (!$test) throw new InvalidArgumentException('Selected diagnostic test package not found.');
-    $booking = ['id' => 'AVC-TST-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4))), 'testId' => $data['testId'], 'testName' => $test['name'], 'price' => $test['price'], 'collectionMethod' => $data['collectionMethod'] ?? 'home_collection', 'homeAddress' => trim((string) ($data['homeAddress'] ?? '')), 'pincode' => trim((string) ($data['pincode'] ?? '')), 'city' => trim((string) ($data['city'] ?? 'Mumbai')), 'date' => $data['date'], 'timeSlot' => $data['timeSlot'], 'patientName' => trim($data['patientName']), 'patientEmail' => strtolower(trim($data['patientEmail'])), 'patientPhone' => trim($data['patientPhone']), 'patientAge' => (int) ($data['patientAge'] ?? 0), 'patientGender' => $data['patientGender'] ?? 'Unspecified', 'status' => 'pending', 'createdAt' => date(DATE_ATOM)];
+    $booking = ['id' => 'AVC-TST-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4))), 'testId' => $data['testId'], 'testName' => $test['name'], 'price' => $test['price'], 'collectionMethod' => $data['collectionMethod'] ?? 'home_collection', 'homeAddress' => trim((string) ($data['homeAddress'] ?? '')), 'pincode' => trim((string) ($data['pincode'] ?? '')), 'city' => trim((string) ($data['city'] ?? '')), 'date' => $data['date'], 'timeSlot' => $data['timeSlot'], 'patientName' => trim($data['patientName']), 'patientEmail' => strtolower(trim($data['patientEmail'])), 'patientPhone' => trim($data['patientPhone']), 'patientAge' => (int) ($data['patientAge'] ?? 0), 'patientGender' => $data['patientGender'] ?? 'Unspecified', 'status' => 'pending', 'createdAt' => date(DATE_ATOM)];
     $emailSent = false;
     
     try {

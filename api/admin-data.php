@@ -7,6 +7,7 @@
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=UTF-8');
+header('Cache-Control: no-store, private');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 

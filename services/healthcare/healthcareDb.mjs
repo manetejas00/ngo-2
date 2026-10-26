@@ -601,7 +601,7 @@ export async function createTestBooking(bookingData) {
     centreId,
     homeAddress,
     pincode,
-    city = 'Mumbai',
+    city = '',
     date,
     timeSlot,
     patientName,

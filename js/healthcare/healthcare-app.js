@@ -60,7 +60,7 @@ class HealthcarePlatform {
       centreId: 'diag-centre-mumbai',
       homeAddress: '',
       pincode: '',
-      city: 'Mumbai',
+      city: '',
       selectedDate: this.getInitialBookingDate(),
       selectedTimeSlot: '08:30 AM - 09:30 AM',
       patient: {
@@ -1109,7 +1109,7 @@ class HealthcarePlatform {
           <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
             <div class="hc-input-group">
               <label class="hc-input-label">Complete Home Address *</label>
-              <input type="text" id="hc-test-address" class="hc-search-input" ${this.testBookingState.collectionMethod === 'home_collection' ? 'required' : ''} placeholder="Flat No, Wing, Building, Area">
+              <input type="text" id="hc-test-address" class="hc-search-input" ${this.testBookingState.collectionMethod === 'home_collection' ? 'required' : ''} placeholder="Flat No, Building, Area, City">
             </div>
             <div class="hc-input-group">
               <label class="hc-input-label">Pincode *</label>
@@ -1199,7 +1199,7 @@ class HealthcarePlatform {
       collectionMethod: this.testBookingState.collectionMethod,
       homeAddress: document.getElementById('hc-test-address')?.value || '',
       pincode: document.getElementById('hc-test-pincode')?.value || '',
-      city: 'Mumbai',
+      city: '',
       date: document.getElementById('hc-test-date').value,
       timeSlot: document.getElementById('hc-test-slot').value,
       patientName: document.getElementById('hc-test-pat-name').value.trim(),

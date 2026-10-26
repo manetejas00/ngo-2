@@ -2114,7 +2114,7 @@ const server = createServer(async (req, res) => {
   // 10. Diagnostic Tests Catalog: GET /api/healthcare/tests
   if (['/api/healthcare/tests', '/api/healthcare/tests.php', '/api/healthcare/tests.json'].includes(urlPath) && req.method === 'GET') {
     try {
-      const tests = await getDiagnosticTests(queryParams);
+      const tests = (await getDiagnosticTests(queryParams)).map(({b2bPrice, margin, ...test}) => ({...test, reportTurnaround: 'Confirm with laboratory', originalPrice: 0, avinyaSubsidy: 'Listed price; confirm charges'}));
       return sendJson(200, { status: 'ok', tests, count: tests.length });
     } catch (err) {
       return sendJson(500, { status: 'error', message: err.message });

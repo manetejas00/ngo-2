@@ -90,10 +90,10 @@ $paymentStatus = strtoupper((string)($data['payment_status'] ?? 'PENDING'));
 $isConfirmedPayment = in_array($paymentStatus, ['SUCCESS', 'CONFIRMED', 'PAID'], true);
 
 if ($formType === 'donation') {
-    $userSubject = $isConfirmedPayment ? "Thank You for Your Generous Support of ₹{$formattedAmount} — AvinyaCareFoundation" : "Donation Payment Verification Pending — AvinyaCareFoundation";
+    $userSubject = $isConfirmedPayment ? "Thank You for Your Generous Support of ₹{$formattedAmount} — AvinyaCareFoundation" : "Contribution Interest Received — AvinyaCareFoundation";
     $greeting = "Dear {$name},";
     $bodyText = $isConfirmedPayment ? "Dhanyawad for your generous contribution of <strong>₹{$formattedAmount}</strong> ({$frequency}) towards AvinyaCareFoundation. Your compassionate gift directly funds our life-saving mobile cancer screening camps, diagnostic navigation, and vital clinical nutrition for patients across underserved communities in India." : "We have recorded your donation pledge of <strong>₹{$formattedAmount}</strong>. It will not be counted or receipted until the payment provider verifies the transaction.";
-    $adminSubject = "[AvinyaCareFoundation] New Donation Interest — {$name} (₹{$formattedAmount})";
+    $adminSubject = "Website contribution enquiry — {$submissionId}";
 } elseif ($formType === 'volunteer') {
     $userSubject = "Thank You for Wanting to Volunteer with AvinyaCareFoundation — AvinyaCareFoundation";
     $greeting = "Dear {$name},";
