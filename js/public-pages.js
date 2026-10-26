@@ -15,7 +15,7 @@ async function openSharedDonationForm(amount = 1000, category = null) {
       const fallback = window.AvinyaModals;
       await new Promise((resolve,reject) => {
         const script = document.createElement('script');
-        script.src='/js/modals.js?v=4.2.4'; script.onload=resolve; script.onerror=reject;
+        script.src='/js/modals.js?v=4.4.3-audit'; script.onload=resolve; script.onerror=reject;
         document.body.append(script);
       });
       // Keep information-page support/volunteer routes while reusing donation controls.

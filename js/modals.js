@@ -75,6 +75,22 @@ class ModalManager {
       const heading = modal.querySelector('h2, h3');
       if (heading) { heading.id ||= `${modalId}-heading`; modal.setAttribute('aria-labelledby', heading.id); }
       modal.querySelectorAll('.modal-close-btn').forEach(button => button.setAttribute('aria-label', 'Close dialog'));
+      modal.querySelectorAll('input,select,textarea').forEach(field => {
+        if (!field.labels?.length && !field.hasAttribute('aria-label')) {
+          field.setAttribute('aria-label', field.getAttribute('placeholder') || field.name || 'Form field');
+        }
+      });
+      modal.querySelectorAll('form').forEach(form => {
+        if (!form.querySelector('[data-form-privacy]')) {
+          const notice = document.createElement('p');
+          notice.dataset.formPrivacy = '';
+          notice.style.cssText = 'font-size:13px;line-height:1.6;color:#525252;margin:12px 0';
+          notice.append('We use these details to respond to your request. Share only necessary information. ');
+          const privacy = document.createElement('a'); privacy.href = '/privacy'; privacy.textContent = 'Read the privacy notice';
+          notice.append(privacy);
+          form.prepend(notice);
+        }
+      });
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
       this.activeModal = modal;

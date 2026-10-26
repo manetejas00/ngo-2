@@ -278,10 +278,17 @@ $adminHtmlContent = '<!DOCTYPE html>
 </body>
 </html>';
 
+// Refuse requests when durable storage is unavailable.
+if (getDatabaseConnection() === null) {
+    http_response_code(503);
+    echo json_encode(['status' => 'error', 'message' => 'Requests cannot be saved right now. Please try again later or call the foundation.']);
+    exit;
+}
+
 // 1. Dispatch User Confirmation HTML Email via Authenticated SSL SMTP
 $userSentResult = $email === '' ? true : sendPHPSMTP($email, $userSubject, $userHtmlContent);
-$userEmailSent = ($userSentResult === true || $userSentResult === 1);
-$userEmailError = !$userEmailSent ? "User confirmation email delivery failed via Hostinger SSL SMTP." : null;
+$userEmailSent = $email !== '' && ($userSentResult === true || $userSentResult === 1);
+$userEmailError = ($email !== '' && !$userEmailSent) ? "User confirmation email delivery failed via Hostinger SSL SMTP." : null;
 
 // 2. Dispatch Admin Alert HTML Email via Authenticated SSL SMTP
 $isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
@@ -300,7 +307,7 @@ if (filter_var($adminRecordTo, FILTER_VALIDATE_EMAIL) && strcasecmp($adminRecord
 }
 
 // 3. If any email delivery failed, automatically dispatch error diagnostic alert to admin
-if (!$userEmailSent) {
+if ($email !== '' && !$userEmailSent) {
     $errorAlertSubject = "[AvinyaCareFoundation ALERT] Email Delivery Failed — " . strtoupper($formType) . " (ID: {$submissionId})";
     $errorAlertHtml = '<!DOCTYPE html>
     <html lang="en">
@@ -342,8 +349,9 @@ if (!$userEmailSent) {
     @sendPHPSMTP($adminTo, $errorAlertSubject, $errorAlertHtml, $email);
 }
 
-$deliveryStatus = ($userEmailSent && $adminEmailSent) ? 'SENT' : (($userEmailSent || $adminEmailSent) ? 'PARTIAL' : 'FAILED');
-$successMessage = ($userEmailSent && $adminEmailSent) ? "All emails dispatched successfully via Hostinger SSL SMTP (Port 465)." : (($userEmailSent || $adminEmailSent) ? "Partial email delivery completed. Error alert sent to admin." : "Email delivery failed. Error alert sent to admin.");
+$userDeliveryComplete = $email === '' || $userEmailSent;
+$deliveryStatus = ($userDeliveryComplete && $adminEmailSent) ? 'SENT' : (($userEmailSent || $adminEmailSent) ? 'PARTIAL' : 'FAILED');
+$successMessage = ($userDeliveryComplete && $adminEmailSent) ? "All emails dispatched successfully via Hostinger SSL SMTP (Port 465)." : (($userEmailSent || $adminEmailSent) ? "Partial email delivery completed. Error alert sent to admin." : "Email delivery failed. Error alert sent to admin.");
 $errorMessage = (!$userEmailSent && !$adminEmailSent) ? "Email dispatch failed on both recipient channels." : ($userEmailError ?: $adminEmailError);
 
 // Save form submission and audit email logs to Hostinger MySQL Database
@@ -401,7 +409,7 @@ try {
             ':role' => 'user',
             ':to' => $email,
             ':subj' => $userSubject,
-            ':status' => $userEmailSent ? 'SENT' : 'FAILED',
+            ':status' => $email === '' ? 'SKIPPED' : ($userEmailSent ? 'SENT' : 'FAILED'),
             ':err' => $userEmailError
         ]);
 
@@ -416,7 +424,10 @@ try {
         ]);
     }
 } catch (Throwable $dbErr) {
-    error_log('Database Insert Warning (form_submissions): ' . $dbErr->getMessage());
+    error_log('Form persistence or delivery audit failed.');
+    http_response_code(503);
+    echo json_encode(['status' => 'error', 'message' => 'We could not confirm that your request was saved. An email may already have been sent. Please contact the foundation before submitting again.']);
+    exit;
 }
 
 logActivity(
@@ -474,6 +485,7 @@ echo json_encode([
         'status' => $deliveryStatus,
         'deliveryMethod' => 'HOSTINGER_SSL_SMTP_465',
         'userEmailSent' => $userEmailSent,
+        'userEmailStatus' => $email === '' ? 'SKIPPED' : ($userEmailSent ? 'SENT' : 'FAILED'),
         'adminEmailSent' => $adminEmailSent,
         'adminRecordEmailSent' => $adminRecordEmailSent,
         'userEmailRecipient' => $email,
@@ -489,6 +501,6 @@ echo json_encode([
         'body' => $bodyText,
         'closing' => "With deepest gratitude and care,\nAvinyaCareFoundation Team"
     ],
-    'message' => "Thank you, {$name}. Your {$formType} submission has been received and confirmed via email."
+    'message' => "Thank you, {$name}. Your request has been received. " . ($email === '' ? 'No email was requested; please save your reference.' : ($userEmailSent ? 'A confirmation email has been sent.' : 'The email could not be sent; please save your reference.'))
 ]);
 ?>

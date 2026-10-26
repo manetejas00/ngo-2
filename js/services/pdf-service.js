@@ -337,7 +337,7 @@ class AvinyaPdfService {
         <div>
           <span style="font-size: 10px; font-weight: 800; color: #087F73; text-transform: uppercase; letter-spacing: 1px; background: #E6F4F1; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 4px;">Public Health Initiative • Free Community Resource</span>
           <h1 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 2px 0;">${topic}</h1>
-          <div style="font-size: 11px; color: #64748B;">Aligned with Tata Memorial Centre & ICMR Early Detection Protocols • Issued: ${dateStr}</div>
+          <div style="font-size: 11px; color: #64748B;">Discuss screening with your clinician; this guide does not establish a clinical protocol • Issued: ${dateStr}</div>
         </div>
         <div style="text-align: right;">
           <div style="font-size: 10px; font-weight: 700; color: #475569;">DOC REF: ACF-GUIDE-2026</div>
@@ -646,7 +646,7 @@ class AvinyaPdfService {
       <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 11px; color: #92400E; line-height: 1.5;">
         <strong>🧪 Fasting & Patient Preparation Protocol:</strong><br>
         • For Blood Glucose / Lipid / Comprehensive Profiles: 10–12 hours overnight fasting is advised (water allowed).<br>
-        • Reports will be delivered to your registered email within 24–48 hours of sample collection.<br>
+        • Ask the assigned laboratory to confirm report timing and delivery arrangements.<br>
         • Trained phlebotomist will carry standardized vacuum collection tubes & ID credentials.
       </div>
 
