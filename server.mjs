@@ -775,6 +775,28 @@ const server = createServer(async (req, res) => {
     }
   }
 
+  if (urlPath === '/response' || urlPath === '/response.html') {
+    res.writeHead(301, {Location: '/'}); res.end(); return;
+  }
+
+  if (req.method === 'GET' && urlPath === '/api/healthcare/doctors') {
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify({status: 'ok', published: false, doctors: [], data: []})); return;
+  }
+
+  // Public donor identities, enquiry text and unverified totals are not published.
+  if (req.method === 'GET' && ['/api/donations', '/api/donations/recent', '/api/donations/stats'].includes(urlPath)) {
+    const body = urlPath.endsWith('/stats')
+      ? {status: 'ok', published: false, stats: {total: null}}
+      : {status: 'ok', published: false, count: 0, donations: []};
+    res.writeHead(200, {'Content-Type': 'application/json', 'Cache-Control': 'no-store'});
+    res.end(JSON.stringify(body)); return;
+  }
+  if (urlPath === '/api/news/generate') {
+    res.writeHead(410, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify({status: 'error', message: 'Generated news is not published.'})); return;
+  }
+
   // API Endpoint: /api/donations/recent & /api/donations (Serves real donations sorted latest first, without timestamps)
   if ((urlPath === '/api/donations/recent' || urlPath === '/api/donations') && req.method === 'GET') {
     try {

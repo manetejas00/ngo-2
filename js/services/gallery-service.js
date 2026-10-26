@@ -4,6 +4,11 @@
 
   function prepareItems(items) {
     items.forEach(item => {
+      item.short_description = 'Archive media — event details and publication permissions require foundation confirmation.';
+      item.description = item.short_description;
+      item.event_date = null;
+      item.location = 'Event details unverified';
+      delete item.created_by; delete item.updated_by; delete item.photographer;
       ['title', 'short_description', 'description', 'alt_text', 'photographer'].forEach(field => {
         if (typeof item[field] === 'string') {
           item[field] = item[field].replace(/\bAvinya\s*Care(?:\s*(?:Foundation|Founation|Foundatation))?\b(?![.@/_-])/gi, 'AvinyaCareFoundation');

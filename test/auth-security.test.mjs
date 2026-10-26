@@ -16,3 +16,11 @@ test('analytics never forwards caller-supplied fields',()=>{
  assert.doesNotMatch(src,/event: function \(name, params\)/);
  assert.match(src,/includes\(name\)/);
 });
+
+test('confirmation dispatch is single and failed requests cannot fabricate bookings',()=>{
+ const form=readFileSync(new URL('../api/submit-form.php',import.meta.url),'utf8');
+ assert.equal((form.match(/sendPHPSMTP\(\$email,/g)||[]).length,1);
+ const ui=readFileSync(new URL('../js/healthcare/healthcare-app.js',import.meta.url),'utf8');
+ assert.doesNotMatch(ui,/using client fallback|Math\.random\(\) \* 900000/);
+ assert.match(ui,/escapeHtml\(value\)/);
+});

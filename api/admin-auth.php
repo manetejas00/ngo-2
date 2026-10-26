@@ -18,6 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 ini_set('session.use_strict_mode', '1');
 session_set_cookie_params(['lifetime' => 1800, 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'httponly' => true, 'samesite' => 'Strict', 'path' => '/']);
 session_start();
+if (!empty($_SESSION['admin_token']) && !str_starts_with((string) $_SESSION['admin_token'], 'AVG2-SESS-')) {
+    $_SESSION = [];
+    session_regenerate_id(true);
+}
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/rate_limiter.php';
 enforcePhpRateLimit(20, 300);

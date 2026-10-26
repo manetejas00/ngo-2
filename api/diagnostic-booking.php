@@ -136,7 +136,7 @@ function sendDiagnosticEmail(array $booking, bool $sendAdminRecord = true): bool
         smtpCommand($socket, 'DATA', [354]);
         $boundary = '=_AvinyaDiagnostic_' . bin2hex(random_bytes(8));
         $subjectPrefix = !empty($booking['_adminRecord']) ? '[Admin Record] ' : '';
-        $headers = ['From: AvinyaCareFoundation <' . $from . '>', 'To: <' . $booking['patientEmail'] . '>', 'Subject: =?UTF-8?B?' . base64_encode($subjectPrefix . 'Diagnostic Test Booking Confirmation – AvinyaCareFoundation [' . $booking['id'] . ']') . '?=', 'MIME-Version: 1.0', 'Content-Type: multipart/related; boundary="' . $boundary . '"', 'X-Mailer: AvinyaCareFoundation-Diagnostic/1.0'];
+        $headers = ['From: AvinyaCareFoundation <' . $from . '>', 'To: <' . $booking['patientEmail'] . '>', 'Subject: =?UTF-8?B?' . base64_encode($subjectPrefix . 'Diagnostic Request Received – AvinyaCareFoundation [' . $booking['id'] . ']') . '?=', 'Reply-To: <info@avinyacarefoundation.org>', 'MIME-Version: 1.0', 'Content-Type: multipart/related; boundary="' . $boundary . '"', 'X-Mailer: AvinyaCareFoundation-Diagnostic/1.0'];
         $parts = ['--' . $boundary, 'Content-Type: text/html; charset=UTF-8', 'Content-Transfer-Encoding: 8bit', '', diagnosticTemplate($booking)];
         $logoPath = dirname(__DIR__) . '/assets/logo.png';
         if (is_readable($logoPath)) {

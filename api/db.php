@@ -138,11 +138,6 @@ function getDatabaseConnection(): ?PDO {
                         PDO::ATTR_TIMEOUT => 2
                     ]);
 
-                    try {
-                        autoMigrateDatabaseTables($conn);
-                    } catch (Throwable $migrationErr) {
-                        error_log('AvinyaCareFoundation Auto-Migration Notice: ' . $migrationErr->getMessage());
-                    }
                     $pdo = $conn;
                     return $pdo;
                 } catch (Throwable $e) {

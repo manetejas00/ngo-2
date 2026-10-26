@@ -19,6 +19,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/cache-manager.php';
 
+ob_start(function ($body) {
+    $payload = json_decode($body, true);
+    if (!is_array($payload)) return $body;
+    foreach (['data', 'galleries'] as $key) {
+        if (!isset($payload[$key]) || !is_array($payload[$key])) continue;
+        foreach ($payload[$key] as &$item) {
+            unset($item['created_by'], $item['updated_by'], $item['photographer']);
+            $item['short_description'] = 'Archive media — event details and publication permissions require foundation confirmation.';
+            $item['description'] = $item['short_description'] . ' No participant count, treatment outcome or partner accreditation is verified here.';
+            $item['event_date'] = null;
+            $item['location'] = 'Event details unverified';
+        }
+        unset($item);
+    }
+    return json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+});
+
 $pdo = getDatabaseConnection();
 $category = strtolower(trim((string) ($_GET['category'] ?? '')));
 

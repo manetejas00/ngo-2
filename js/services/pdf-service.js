@@ -19,11 +19,11 @@ class AvinyaPdfService {
       phone: '+91 744 744 1116',
       email: 'info@avinyacarefoundation.org',
       website: 'www.avinyacarefoundation.org',
-      pan: 'AABTA9988C',
-      reg12a: 'AAATA9988CE20214',
-      urn80g: 'AABTA9988CF20221',
-      csr: 'CSR00049281',
-      ngoId: 'MH/2023/0349811'
+      pan: 'Confirm current documents with the foundation',
+      reg12a: 'Confirm current documents with the foundation',
+      urn80g: 'Confirm current documents with the foundation',
+      csr: 'Confirm current documents with the foundation',
+      ngoId: 'Confirm current documents with the foundation'
     };
     this.initStyle();
   }
@@ -503,7 +503,7 @@ class AvinyaPdfService {
       </div>
       ${this.getDocumentFooterHtml('Donation receipt')}`;
 
-    this.showPreviewModal(sheetHtml, `AvinyaCareFoundation_80G_Receipt_${receiptNo}.pdf`);
+    this.showPreviewModal(sheetHtml, `AvinyaCareFoundation_Contribution_Record_${receiptNo}.pdf`);
   }
 
   // -------------------------------------------------------------
@@ -602,7 +602,7 @@ class AvinyaPdfService {
       ${this.getLetterheadDataHtml()}
       <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #087F73; padding-bottom: 10px; margin-bottom: 14px;">
         <div>
-          <span style="font-size: 10px; font-weight: 800; color: #087F73; text-transform: uppercase; background: #E6F4F1; padding: 2px 8px; border-radius: 4px;">Diagnostic Investigation Pass</span>
+          <span style="font-size: 10px; font-weight: 800; color: #087F73; text-transform: uppercase; background: #E6F4F1; padding: 2px 8px; border-radius: 4px;">Diagnostic Request Summary</span>
           <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 4px 0 2px 0;">DIAGNOSTIC TEST REQUISITION</h1>
           <div style="font-size: 11px; color: #64748B;">Subsidized Screening & Clinical Pathology Order</div>
         </div>
@@ -615,7 +615,7 @@ class AvinyaPdfService {
       <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <div style="font-size: 11px; font-weight: 700; color: #087F73; text-transform: uppercase;">Ordered Diagnostic Package</div>
+            <div style="font-size: 11px; font-weight: 700; color: #087F73; text-transform: uppercase;">Requested Diagnostic Package</div>
             <div style="font-size: 15px; font-weight: 800; color: #0f172a; margin-top: 2px;">${testName}</div>
           </div>
           <div style="text-align: right;">
@@ -651,12 +651,12 @@ class AvinyaPdfService {
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E2E8F0; padding-top: 8px; font-size: 10px; color: #64748B;">
-        <div>AvinyaCareFoundation Diagnostic Network • NABL Accredited Partner Labs</div>
+        <div>Request only. Provider, accreditation, slot and charges require confirmation.</div>
         <div>Order Ref: ${orderId}</div>
       </div>
     `;
 
-    this.showPreviewModal(sheetHtml, `AvinyaCareFoundation_Diagnostic_Order_${orderId}.pdf`);
+    this.showPreviewModal(sheetHtml, `AvinyaCareFoundation_Diagnostic_Request_${orderId}.pdf`);
   }
 
   // -------------------------------------------------------------

@@ -44,6 +44,7 @@
     if (refreshPromise) return refreshPromise;
     refreshPromise = window.AvinyaDonationService.load()
       .then(({ stats, donations }) => {
+        if (stats.total === null) return stats;
         applyStats(stats);
         applyRecent(donations);
         window.dispatchEvent(new CustomEvent('avinya:donation_stats_updated', { detail: stats }));

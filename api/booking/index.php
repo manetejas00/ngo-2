@@ -716,6 +716,7 @@ try {
         respondJson(200, ['success' => true, 'status' => 'ok', 'doctorId' => $doctorId, 'date' => $date, 'slots' => $slots]);
     }
     if ($method === 'POST' && $action === 'create') {
+        respondJson(503, ['success' => false, 'status' => 'error', 'message' => 'Online clinician booking is unavailable while provider details are confirmed. Please contact 744 744 1116.']);
         $booking = createBooking(requestBody());
         error_log('[Booking API] Booking ' . $booking['id'] . ' created');
         $event = ['status' => 'failed', 'error' => 'Notification result could not be recorded.'];

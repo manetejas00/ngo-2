@@ -34,6 +34,8 @@ Options -Indexes
   RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+  RewriteRule ^response(?:\.html)?/?$ / [R=301,L]
+
   # Retired page opens the shared donation guide modal on home.
   RewriteRule ^donation-guide(?:\.html)?/?$ /#donation-guide [R=302,L,NE]
 
@@ -55,6 +57,8 @@ Options -Indexes
 
   # Public diagnostic IDs go to a dedicated renderer; internal test files stay blocked.
   RewriteRule ^test/(test-[a-z0-9-]+)/?$ api/test-detail.php?test_id=$1 [END]
+
+  RewriteRule ^(?:data/.*\.json|api/healthcare/.*\.json)$ - [F,L,NC]
 
   # Never serve repository, test, runtime, or credential material over HTTP.
   RewriteRule ^(?:test|tests|scripts|storage|cache|docs|\.agents|\.git)(?:/|$) - [F,L,NC]

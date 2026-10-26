@@ -221,8 +221,7 @@ $userHtmlContent = '<!DOCTYPE html>
 </body>
 </html>';
 
-// 1. Dispatch User Confirmation HTML Email via Authenticated SSL SMTP
-$userSent = sendPHPSMTP($email, $userSubject, $userHtmlContent);
+// Dispatch once, alongside the admin notification below.
 
 // Build Admin Operational Alert HTML Template
 $adminHtmlContent = '<!DOCTYPE html>

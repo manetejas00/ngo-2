@@ -40,7 +40,8 @@ test('public gallery and donation statistics endpoints have their expected respo
   assert.equal(statsResponse.status, 200);
   const stats = await statsResponse.json();
   assert.equal(stats.status, 'ok');
-  assert.equal(typeof stats.stats.total, 'number');
+  assert.equal(stats.published, false);
+  assert.equal(stats.stats.total, null);
 });
 
 test('audit information pages and every diagnostic detail remain public while internal tests stay private', async () => {

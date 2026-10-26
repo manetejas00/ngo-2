@@ -5,6 +5,26 @@
  */
 
 class HealthcarePlatform {
+  escapeHtml(value) {
+    const node = document.createElement('span');
+    node.textContent = String(value ?? '');
+    return node.innerHTML;
+  }
+
+  showDiagnosticError(content, message) {
+    let alert = content.querySelector('[data-diagnostic-error]');
+    if (!alert) {
+      alert = document.createElement('p');
+      alert.dataset.diagnosticError = '';
+      alert.setAttribute('role', 'alert');
+      alert.tabIndex = -1;
+      alert.style.cssText = 'padding:14px;background:#fff1ed;color:#9b2915;border-radius:8px;line-height:1.5';
+      content.querySelector('form')?.prepend(alert);
+    }
+    alert.textContent = message;
+    alert.focus();
+  }
+
   constructor() {
     this.currentView = 'home'; // 'home' | 'doctors-tests'
     this.currentRole = 'patient'; // 'patient' | 'doctor' | 'admin'
@@ -928,48 +948,13 @@ class HealthcarePlatform {
         }
       }
     } catch (err) {
-      console.warn('[Healthcare Platform] Remote API fetch failed, using client fallback:', err.message);
+      console.warn('[Healthcare Platform] Appointment request failed.');
     }
 
     if (!appointment) {
-      const doc = this.bookingState.doctor || (this.doctorsCache && this.doctorsCache[0]);
-      if (!doc) {
-        if (errBox) {
-          errBox.style.display = 'block';
-          errBox.textContent = 'Unable to complete appointment. No doctor profiles found in catalog.';
-        }
-        if (btnConfirm) {
-          btnConfirm.removeAttribute('disabled');
-          btnConfirm.innerHTML = '<span>Confirm Consultation Booking →</span>';
-        }
-        return;
-      }
-      appointment = {
-        id: `APT-${Math.floor(100000 + Math.random() * 900000)}`,
-        doctorId: doc.id,
-        doctorName: doc.name,
-        specialityName: doc.specialityName,
-        date: this.bookingState.selectedDate,
-        time: this.bookingState.selectedSlot,
-        consultationType: this.bookingState.consultationType,
-        patientName: this.bookingState.patient.name,
-        patientPhone: this.bookingState.patient.phone,
-        patientEmail: this.bookingState.patient.email,
-        patientAge: this.bookingState.patient.age,
-        patientGender: this.bookingState.patient.gender,
-        reason: this.bookingState.patient.reason,
-        notes: this.bookingState.patient.notes,
-        status: 'confirmed',
-        createdAt: new Date().toISOString(),
-        emailStatus: 'Dispatched to ' + this.bookingState.patient.email,
-        whatsapp: { status: 'sent', confirmationSent: true }
-      };
-
-      try {
-        const stored = JSON.parse(localStorage.getItem('avinya_appointments') || '[]');
-        stored.unshift(appointment);
-        localStorage.setItem('avinya_appointments', JSON.stringify(stored));
-      } catch (e) {}
+      if (errBox) { errBox.style.display = 'block'; errBox.textContent = 'Your appointment could not be saved. Please contact the foundation; no confirmation has been issued.'; }
+      if (btnConfirm) { btnConfirm.disabled = false; btnConfirm.textContent = 'Try again'; }
+      return;
     }
 
     this.bookingState.confirmedAppointment = appointment;
@@ -1094,7 +1079,7 @@ class HealthcarePlatform {
       <div style="background: var(--hc-primary-light); padding: 1.25rem; border-radius: var(--hc-radius-md); margin-bottom: 1.5rem;">
         <div style="font-size: 0.75rem; font-weight: 700; color: var(--hc-primary); text-transform: uppercase;">Selected Diagnostic Package</div>
         <h3 style="margin: 0.25rem 0 0.25rem 0; font-size: 1.25rem; font-weight: 800;">${test.name}</h3>
-        <div style="font-size: 0.9rem; font-weight: 700; color: var(--hc-text-main);">Package Price: ₹${test.price} (Subsidized)</div>
+        <div style="font-size: 0.9rem; font-weight: 700; color: var(--hc-text-main);">Package Price: ₹${test.price} (listed price; confirm charges)</div>
       </div>
 
       <p class="hc-booking-notice">This is a request. The team must confirm the slot, collection availability, final price and any extra charges. Follow preparation instructions from your laboratory or clinician; do not stop medicines without advice. Tests can give false positive or false negative results and require medical interpretation.</p>
@@ -1107,14 +1092,14 @@ class HealthcarePlatform {
               <input type="radio" name="test-method" value="home_collection" ${this.testBookingState.collectionMethod === 'home_collection' ? 'checked' : ''} onchange="window.HealthcareApp.toggleCollectionMethod('home_collection')">
               <div>
                 <strong>🏠 Home Sample</strong>
-                <div style="font-size: 0.72rem; color: var(--hc-text-muted);">Trained phlebotomist visit</div>
+                <div style="font-size: 0.72rem; color: var(--hc-text-muted);">Collection subject to confirmation</div>
               </div>
             </label>
             <label style="border: 1.5px solid var(--hc-border); padding: 0.85rem; border-radius: var(--hc-radius-sm); display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
               <input type="radio" name="test-method" value="centre_visit" ${this.testBookingState.collectionMethod === 'centre_visit' ? 'checked' : ''} onchange="window.HealthcareApp.toggleCollectionMethod('centre_visit')">
               <div>
                 <strong>🔬 Visit Centre</strong>
-                <div style="font-size: 0.72rem; color: var(--hc-text-muted);">Partner accredited lab</div>
+                <div style="font-size: 0.72rem; color: var(--hc-text-muted);">Confirm laboratory details</div>
               </div>
             </label>
           </div>
@@ -1204,6 +1189,10 @@ class HealthcarePlatform {
   async submitTestBooking(e) {
     e.preventDefault();
     const content = document.getElementById('hc-test-modal-content');
+    if (this.testSubmitting) return;
+    this.testSubmitting = true;
+    const submitButton = e.target.querySelector('[type=submit]');
+    if (submitButton) { submitButton.disabled = true; submitButton.textContent = 'Saving request…'; }
 
     const payload = {
       testId: this.testBookingState.test.id,
@@ -1231,48 +1220,27 @@ class HealthcarePlatform {
       if (res.ok && data.status === 'ok') {
         const booking = data.booking;
         content.innerHTML = `
-          <div style="text-align: center; padding: 1.5rem 0;">
-            <div style="width: 64px; height: 64px; background: var(--hc-success-bg); color: var(--hc-success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.25rem auto;">
-              ✓
+          <section role="status" style="padding:24px;text-align:center">
+            <h3>Test request received</h3>
+            <p>The team must confirm the provider, slot and final charges before you attend.</p>
+            <p>Reference: <strong>${this.escapeHtml(booking.id)}</strong></p>
+            <p>${this.escapeHtml(booking.testName)}<br>${this.escapeHtml(booking.date)} · ${this.escapeHtml(booking.timeSlot)}</p>
+            <p>${data.emailSent ? 'Your confirmation email has been sent.' : 'Your request is saved, but the email could not be sent. Please save this reference.'}</p>
+            <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap">
+              <button type="button" class="hc-btn-primary" data-request-slip>Download request summary</button>
+              <button type="button" class="hc-btn-secondary" data-request-close>Close</button>
             </div>
-            <h3 style="font-size: 1.5rem; font-weight: 800; margin: 0 0 0.5rem 0;">Test Request Received</h3>
-            <p style="color: var(--hc-text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
-              Request reference: <strong style="font-family: monospace; color: var(--hc-primary); font-size: 1.1rem;">${booking.id}</strong>
-            </p>
-            <div style="background: var(--hc-surface-alt); padding: 1.25rem; border-radius: var(--hc-radius-md); text-align: left; font-size: 0.9rem; margin-bottom: 1.5rem;">
-              <div><strong>Package:</strong> ${booking.testName}</div>
-              <div><strong>Date & Slot:</strong> ${booking.date} (${booking.timeSlot})</div>
-              <div><strong>Collection:</strong> ${booking.collectionMethod === 'home_collection' ? 'Home Sample Collection' : 'Centre Visit'}</div>
-            </div>
-            <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
-              <button class="hc-btn-primary" style="background: #087F73;" onclick="window.AvinyaPdf.generateDiagnosticBookingPDF({
-                id: '${booking.id}',
-                testName: '${(booking.testName || '').replace(/'/g, "\\'")}',
-                price: ${booking.price || 0},
-                date: '${booking.date}',
-                timeSlot: '${booking.timeSlot}',
-                collectionMethod: '${booking.collectionMethod}',
-                patientName: '${(payload.patientName || '').replace(/'/g, "\\'")}',
-                patientAge: '${payload.patientAge || ''}',
-                patientGender: '${payload.patientGender || ''}',
-                patientPhone: '${payload.patientPhone || ''}',
-                homeAddress: '${(payload.homeAddress || '').replace(/'/g, "\\'")}',
-                pincode: '${payload.pincode || ''}'
-              })">
-                <span>📄 Download Lab Order Slip (PDF)</span>
-              </button>
-              <button class="hc-btn-primary" onclick="window.HealthcareApp.closeModals(); window.HealthcareApp.openHealthcarePlatform('dashboard');">
-                <span>View in Dashboard →</span>
-              </button>
-            </div>
-          </div>
-        `;
-        this.loadDashboardData();
+          </section>`;
+        content.querySelector('[data-request-slip]').addEventListener('click', () => window.AvinyaPdf?.generateDiagnosticBookingPDF({...payload, ...booking}));
+        content.querySelector('[data-request-close]').addEventListener('click', () => this.closeModals());
       } else {
-        alert(data.message || 'Failed to schedule test');
+        this.showDiagnosticError(content, data.message || 'Your request could not be saved. Your entries have been kept. Please try again.');
       }
     } catch (err) {
-      alert('Error scheduling test: ' + err.message);
+      this.showDiagnosticError(content, 'The request could not be completed. Your entries have been kept. Check your connection and try again.');
+    } finally {
+      this.testSubmitting = false;
+      if (submitButton?.isConnected) { submitButton.disabled = false; submitButton.textContent = 'Request Test Booking →'; }
     }
   }
 
