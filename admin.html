@@ -40,10 +40,11 @@
 
       <div id="loginError" class="login-error" style="display: none; background: var(--danger-bg); border: 1px solid rgba(239, 68, 68, 0.4); color: var(--danger); padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; margin-bottom: 16px;"></div>
 
+      <p id="staffLoginHint" style="font-size:13px;line-height:1.6;color:var(--text-muted);margin-bottom:16px">Use your existing website staff email or username and password. Your Google/Gmail login is separate. If you cannot sign in, use <button type="button" onclick="openForgotPasswordModal()" style="border:0;background:none;color:var(--primary);padding:0;text-decoration:underline;cursor:pointer;font:inherit">Forgot Password</button> to reset your website password.</p>
       <form id="loginForm" onsubmit="handleLogin(event)">
         <div class="form-group">
           <label for="loginEmail">Email or Username *</label>
-          <input type="text" id="loginEmail" class="form-control" autocomplete="username" placeholder="Your staff email or username" required>
+          <input type="text" id="loginEmail" aria-describedby="staffLoginHint" class="form-control" autocomplete="username" placeholder="Your staff email or username" required>
         </div>
 
         <div class="form-group">

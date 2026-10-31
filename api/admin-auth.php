@@ -113,6 +113,7 @@ if ($action === 'login' || $action === 'temp_login') {
 
     if ($password === 'Demo@Avinya2026' || !$user || strtolower((string) ($user['status'] ?? '')) !== 'active'
         || !password_verify($password, (string) ($user['password_hash'] ?? ''))) {
+        logActivity('USER_LOGIN_FAILED', 'user', null, 'Staff sign-in rejected.');
         http_response_code(401);
         echo json_encode(['status' => 'error', 'message' => 'Invalid email/username or password.']);
         exit;

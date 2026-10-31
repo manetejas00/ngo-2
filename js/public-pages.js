@@ -15,7 +15,7 @@ async function openSharedDonationForm(amount = 1000, category = null) {
       const fallback = window.AvinyaModals;
       await new Promise((resolve,reject) => {
         const script = document.createElement('script');
-        script.src='/js/modals.js?v=4.4.5-upi'; script.onload=resolve; script.onerror=reject;
+        script.src='/js/modals.js?v=4.4.6-volunteer-tabs'; script.onload=resolve; script.onerror=reject;
         document.body.append(script);
       });
       // Keep information-page support/volunteer routes while reusing donation controls.
@@ -32,7 +32,7 @@ async function openSharedDonationForm(amount = 1000, category = null) {
 window.AvinyaModals ||= {
   openSupportModal: () => location.assign('/assistance'),
   openDonateModal: (amount, category) => openSharedDonationForm(amount, category),
-  openVolunteerModal: () => location.assign('https://docs.google.com/forms/d/e/1FAIpQLSeiRxf0Cv3OktSKILJScVgsNHpTVAEj0M-9rOD-7vMeECXZUA/viewform'),
+  openVolunteerModal: () => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeiRxf0Cv3OktSKILJScVgsNHpTVAEj0M-9rOD-7vMeECXZUA/viewform', '_blank', 'noopener,noreferrer'),
   openCSRModal: () => location.assign('/get-involved#partnerships'),
   openCsrModal: () => location.assign('/get-involved#partnerships'),
   closeAll: () => {}
