@@ -112,23 +112,28 @@
   font-family: 'Outfit', 'Inter', sans-serif;
   font-size: clamp(2.2rem, 4.5vw, 3.6rem);
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.2;
   color: #FFFFFF !important;
-  max-width: 880px;
+  max-width: 920px;
   margin: 0 auto 20px;
   letter-spacing: -0.02em;
-  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.75), 0 1px 4px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.95);
   position: relative;
   z-index: 1;
 }
 
 .camp-hero-title em {
+  display: block;
   font-style: normal;
-  color: #F58220;
-  background: linear-gradient(135deg, #FFB26B 0%, #F58220 50%, #EA580C 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 14px rgba(245, 130, 32, 0.55));
+  color: #FF851A !important;
+  -webkit-text-fill-color: #FF851A !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  filter: none !important;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.95), 0 1px 4px rgba(0, 0, 0, 0.95);
+  margin-top: 6px;
+  letter-spacing: -0.01em;
 }
 
 .camp-hero-subtitle {
@@ -992,6 +997,10 @@
     font-size: clamp(1.5rem, 6.8vw, 1.95rem) !important;
     line-height: 1.22 !important;
     margin-bottom: 12px !important;
+  }
+
+  .camp-hero-title em {
+    margin-top: 4px;
   }
 
   .camp-hero-subtitle {
