@@ -73,6 +73,13 @@ if ($formType === 'donation') {
         echo json_encode(['status' => 'error', 'message' => 'Donation amount must be between ₹100 and ₹1,00,00,000.']);
         exit(0);
     }
+    $claim = (string)($data['payment_claim'] ?? 'interest');
+    $ref = trim((string)($data['transaction_id'] ?? ''));
+    if (!in_array($claim, ['interest', 'paid'], true) || (($claim === 'paid' || $ref !== '') && (!preg_match('/^[0-9]{12}$/', $ref) || preg_match('/^([0-9])\1{11}$/', $ref)))) {
+        http_response_code(422);
+        echo json_encode(['status' => 'error', 'message' => 'Enter a valid 12-digit UPI reference from your bank transaction.', 'errors' => ['transaction_id' => ['Enter a valid 12-digit UPI reference.']]]);
+        exit(0);
+    }
     // Payment success is set exclusively by an authenticated gateway webhook/verification route.
     $data['payment_status'] = 'PENDING';
 }

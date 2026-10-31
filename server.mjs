@@ -670,6 +670,9 @@ const server = createServer(async (req, res) => {
         const amountText = String(payload.amount ?? '').trim();
         donationAmount = Number(amountText);
         if (!/^\d+(?:\.\d{1,2})?$/.test(amountText) || !Number.isFinite(donationAmount) || donationAmount < 100 || donationAmount > 10000000) addError('amount', 'Donation amount must be between ₹100 and ₹1,00,00,000.');
+        const claim = payload.payment_claim ?? 'interest';
+        const ref = String(payload.transaction_id ?? '').trim();
+        if (!['interest', 'paid'].includes(claim) || ((claim === 'paid' || ref) && (!/^\d{12}$/.test(ref) || /^(\d)\1{11}$/.test(ref)))) addError('transaction_id', 'Enter a valid 12-digit UPI reference from your bank transaction.');
         // A browser request is never payment proof. Gateway/webhook verification owns success.
       }
       if (Object.keys(errors).length) {

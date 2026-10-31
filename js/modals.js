@@ -302,7 +302,7 @@ class ModalManager {
             <h2 style="font-size: 1.8rem; font-weight: 800; margin: 1rem 0 0.5rem; color: #111827; font-family: var(--font-primary, 'Manrope', sans-serif); letter-spacing: -0.02em;">${this.escapeHtml(title || 'Thank You!')}</h2>
             <p style="color: #4B5563; font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.6;">
               ${userEmail.greeting ? `<strong style="color:#111827;">${this.escapeHtml(userEmail.greeting)}</strong><br>` : ''}
-              ${formType === 'donation' ? 'Your donation interest has been recorded. Payment has not been taken by this form.' : 'Your request has been received.'}
+              ${formType === 'donation' ? 'Your contribution details have been recorded. Any UPI payment is pending bank verification.' : 'Your request has been received.'}
             </p>
 
             <p role="status" style="color:#374151">Reference: ${this.escapeHtml(resData.submissionId || '')}. ${isUserSent && payload.email ? 'A confirmation email has been sent.' : 'Your request was received. Please save this reference and contact us if you need help.'} ${formType === 'donation' && !isConfirmedDonation ? 'Payment has not been confirmed. This is an acknowledgement of your interest, not a donation receipt. No recurring payment has been set up.' : ''}</p>
@@ -434,6 +434,8 @@ class ModalManager {
       interest: category,
       frequency: this.isMonthly ? 'monthly' : 'one-time',
       payment_status: 'PENDING',
+      payment_claim: form.querySelector('[name="payment_claim"]')?.value || 'interest',
+      transaction_id: form.querySelector('[name="transaction_id"]')?.value.trim() || '',
       is_anonymous: Boolean(form.querySelector('#donor-anonymous')?.checked)
     };
     const errors = this.validatePayload('donation', payload);
@@ -507,6 +509,11 @@ class ModalManager {
     if (formType === 'donation' && (!Number.isFinite(Number(payload.amount)) || Number(payload.amount) < 100 || Number(payload.amount) > 10000000)) errors.amount = 'Donation amount must be between ₹100 and ₹1,00,00,000.';
     if (formType === 'partnership' && !String(payload.organization || '').trim()) errors.organization = 'Please enter your organization name.';
     if (['contact', 'support', 'feedback', 'coming_soon_feedback'].includes(formType) && !String(payload.message || '').trim()) errors.message = 'Please enter a message.';
+    if (formType === 'donation') {
+      if (!/^\d+(?:\.\d{1,2})?$/.test(String(payload.amount))) errors.amount = 'Enter a valid rupee amount with at most two decimal places.';
+      if (!['interest', 'paid'].includes(payload.payment_claim || 'interest')) errors.payment_claim = 'Choose a valid payment option.';
+      if ((payload.payment_claim === 'paid' || payload.transaction_id) && (!/^\d{12}$/.test(payload.transaction_id || '') || /^(\d)\1{11}$/.test(payload.transaction_id || ''))) errors.transaction_id = 'Enter the valid 12-digit UPI reference from your bank transaction.';
+    }
     return errors;
   }
 
@@ -516,7 +523,7 @@ class ModalManager {
     const messages = Object.values(errors);
     if (!messages.length) return true;
     for (const [field, message] of Object.entries(errors)) {
-      const input = field === 'amount' ? form.querySelector('#custom-amount-input') : Array.from(form.querySelectorAll('input, textarea, select')).find(el => (field === 'email' && (el.type === 'email' || /email/i.test(el.placeholder))) || (field === 'phone' && (el.type === 'tel' || /phone/i.test(el.placeholder))) || (field === 'name' && /name/i.test(el.placeholder)) || (field === 'organization' && /org|company/i.test(el.placeholder)) || (field === 'message' && el.tagName === 'TEXTAREA'));
+      const input = field === 'transaction_id' ? form.querySelector('[name="transaction_id"]') : field === 'payment_claim' ? form.querySelector('[name="payment_claim"]') : field === 'amount' ? form.querySelector('#custom-amount-input') : Array.from(form.querySelectorAll('input, textarea, select')).find(el => (field === 'email' && (el.type === 'email' || /email/i.test(el.placeholder))) || (field === 'phone' && (el.type === 'tel' || /phone/i.test(el.placeholder))) || (field === 'name' && /name/i.test(el.placeholder)) || (field === 'organization' && /org|company/i.test(el.placeholder)) || (field === 'message' && el.tagName === 'TEXTAREA'));
       if (input) {
         input.setAttribute('aria-invalid', 'true');
         const node = document.createElement('div');
@@ -640,3 +647,9 @@ window.AvinyaStories = {
     }
   }
 };
+
+// Shared foundation payment details, also used by dynamically loaded donation forms.
+if (!document.getElementById('avinya-upi-script')) {
+  const script = document.createElement('script'); script.id = 'avinya-upi-script';
+  script.src = '/js/upi-payment.js?v=1'; document.head.append(script);
+}

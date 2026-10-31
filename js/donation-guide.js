@@ -33,3 +33,9 @@
   window.addEventListener('hashchange',openFromHash);
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',openFromHash);else openFromHash();
 })();
+
+// Shared foundation payment details, also used by dynamically loaded donation forms.
+if (!document.getElementById('avinya-upi-script')) {
+  const script = document.createElement('script'); script.id = 'avinya-upi-script';
+  script.src = '/js/upi-payment.js?v=1'; document.head.append(script);
+}
