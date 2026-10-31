@@ -136,6 +136,60 @@ if ($action === 'test_email_dispatch') {
     exit(0);
 }
 
+// Action: Send Camp Participant Email
+if ($action === 'send_camp_mail') {
+    if (!in_array(strtolower((string)$userRole), ['admin','manager','superadmin'], true)) {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Administrator permissions required.']);
+        exit(0);
+    }
+    $recipientEmail = strtolower(trim((string)($data['email'] ?? '')));
+    $recipientName = trim((string)($data['name'] ?? 'Participant'));
+    $regId = trim((string)($data['id'] ?? 'CAMP-REG'));
+    $customSubject = trim((string)($data['subject'] ?? ''));
+    $customMessage = trim((string)($data['message'] ?? ''));
+
+    if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(422);
+        echo json_encode(['status' => 'error', 'message' => 'Please enter a valid recipient email address.']);
+        exit(0);
+    }
+
+    require_once __DIR__ . '/smtp-mailer.php';
+    $templateFile = __DIR__ . '/templates/camp-confirmation.html';
+    $subject = $customSubject ?: 'Your Mega Health & Screening Camp Registration — AvinyaCareFoundation';
+
+    if (is_file($templateFile)) {
+        $html = file_get_contents($templateFile);
+        $html = strtr($html, [
+            '__CAMP_NAME__' => htmlspecialchars($recipientName, ENT_QUOTES, 'UTF-8'),
+            '__CAMP_REFERENCE__' => htmlspecialchars($regId, ENT_QUOTES, 'UTF-8')
+        ]);
+        if ($customMessage !== '') {
+            $extraNote = '<div style="margin-top:16px;padding:12px 16px;background:#F0FDFA;border-left:4px solid #087F73;border-radius:6px;font-size:14px;color:#0F766E;"><strong>Note from Organizer:</strong><br>' . nl2br(htmlspecialchars($customMessage, ENT_QUOTES, 'UTF-8')) . '</div>';
+            $html = str_replace('</div>', $extraNote . '</div>', $html);
+        }
+    } else {
+        $html = '<p>Hello ' . htmlspecialchars($recipientName, ENT_QUOTES, 'UTF-8') . ',</p><p>' . nl2br(htmlspecialchars($customMessage, ENT_QUOTES, 'UTF-8')) . '</p>';
+    }
+
+    $sent = sendPHPSMTP($recipientEmail, $subject, $html);
+    logActivity('CAMP_EMAIL_SENT', 'admin', $_SESSION['admin_email'] ?? 'admin', "Sent camp email to {$recipientEmail} for {$regId}", ['id' => $regId, 'email' => $recipientEmail, 'sent' => $sent]);
+
+    try {
+        $logStmt = $pdo->prepare("INSERT INTO `email_logs` (`recipient`, `subject`, `status`, `type`, `created_at`) VALUES (?, ?, ?, 'camp_notification', NOW())");
+        $logStmt->execute([$recipientEmail, $subject, $sent ? 'DELIVERED' : 'FAILED']);
+    } catch (Throwable $e) {}
+
+    if ($sent) {
+        echo json_encode(['status' => 'ok', 'message' => "Confirmation email successfully sent to {$recipientEmail}."]);
+    } else {
+        http_response_code(502);
+        echo json_encode(['status' => 'error', 'message' => "Failed to deliver email to {$recipientEmail}. Please check SMTP configuration."]);
+    }
+    exit(0);
+}
+
 // Action: Update Status for Doctor or Diagnostic Booking
 if ($action === 'update_status') {
     $type = strtolower(trim((string) ($data['type'] ?? '')));
