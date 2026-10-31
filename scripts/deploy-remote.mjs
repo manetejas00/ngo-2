@@ -18,7 +18,7 @@ console.log('---------------------------------------------');
 // 1. Run local preflight verification
 console.log('1️⃣ Running local preflight verification...');
 try {
-  execSync(`"${process.execPath}" scripts/preflight.mjs', { stdio: 'inherit' });
+  execSync(`"${process.execPath}" scripts/preflight.mjs, { stdio: 'inherit' });
 } catch (e) {
   console.error('❌ Preflight failed. Aborting deployment.');
   process.exit(1);
