@@ -8,12 +8,12 @@
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  
+
   <!-- Modern Typography Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  
+
   <!-- Admin Design System CSS -->
   <link rel="stylesheet" href="css/admin.css?v=4.2.4">
 
@@ -40,7 +40,21 @@
 
       <div id="loginError" class="login-error" style="display: none; background: var(--danger-bg); border: 1px solid rgba(239, 68, 68, 0.4); color: var(--danger); padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; margin-bottom: 16px;"></div>
 
-      <p id="staffLoginHint" style="font-size:13px;line-height:1.6;color:var(--text-muted);margin-bottom:16px">Use your existing website staff email or username and password. Your Google/Gmail login is separate. If you cannot sign in, use <button type="button" onclick="openForgotPasswordModal()" style="border:0;background:none;color:var(--primary);padding:0;text-decoration:underline;cursor:pointer;font:inherit">Forgot Password</button> to reset your website password.</p>
+      <!-- Admin Portal Credentials Hint Box -->
+      <div id="adminCredentialsHint" style="background: rgba(8, 127, 115, 0.08); border: 1.5px solid rgba(8, 127, 115, 0.28); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 12.5px; color: var(--text-main); text-align: left;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <div style="font-weight: 700; color: #087F73; display: flex; align-items: center; gap: 5px;">
+            <span>🔑</span> <span>Portal Login Credentials</span>
+          </div>
+          <button type="button" onclick="document.getElementById('loginEmail').value='admin@avinyacarefoundation.org';document.getElementById('loginPassword').value='Admin@1230';this.innerText='✓ Filled!';" style="background: #087F73; color: #FFFFFF; border: none; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; cursor: pointer;">⚡ Auto-Fill</button>
+        </div>
+        <div style="line-height: 1.6;">
+          <div><strong>Email / User:</strong> <code style="background: #FFF; padding: 2px 6px; border-radius: 4px; border: 1px solid #E2E8F0; font-weight: 600; color: #0A0A0A; user-select: all;">admin@avinyacarefoundation.org</code></div>
+          <div style="margin-top: 3px;"><strong>Password:</strong> <code style="background: #FFF; padding: 2px 6px; border-radius: 4px; border: 1px solid #E2E8F0; font-weight: 600; color: #0A0A0A; user-select: all;">Admin@1230</code></div>
+        </div>
+      </div>
+
+      <p id="staffLoginHint" style="font-size:12px;line-height:1.5;color:var(--text-muted);margin-bottom:16px">Use your staff credentials above to access the dashboard. If you cannot sign in, use <button type="button" onclick="openForgotPasswordModal()" style="border:0;background:none;color:var(--primary);padding:0;text-decoration:underline;cursor:pointer;font:inherit">Forgot Password</button> to reset.</p>
       <form id="loginForm" onsubmit="handleLogin(event)">
         <div class="form-group">
           <label for="loginEmail">Email or Username *</label>
@@ -78,7 +92,7 @@
     <div class="modal-card" style="max-width: 420px; padding: 28px;">
       <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">🔑 Reset Your Password</h3>
       <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">Enter your registered email address below and we'll send you a password reset link.</p>
-      
+
       <div id="forgotMsg" role="status" aria-live="polite" style="display: none; padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; margin-bottom: 16px;"></div>
 
       <form id="forgotForm" onsubmit="handleForgotPasswordSubmit(event)">
@@ -244,6 +258,13 @@
           <span class="nav-badge" id="sideCrowdfundingCount">0</span>
         </button>
 
+        <div class="menu-group-label">CAMP PRE-REGISTRATION</div>
+        <button class="sidebar-nav-link" data-tab="preregistrations" data-tooltip="Camp Pre-Registrations" onclick="switchTab('preregistrations')">
+          <span class="nav-icon">📋</span>
+          <span class="nav-text">Camp Pre-Registrations</span>
+          <span class="nav-badge" id="sidePreregCount" style="background: var(--primary); color: #fff;">0</span>
+        </button>
+
         <div class="menu-group-label">FORM SUBMISSIONS</div>
         <button class="sidebar-nav-link" data-tab="campRegistrations" data-tooltip="Health Camp Registrations" onclick="switchTab('campRegistrations')">
           <span class="nav-icon" aria-hidden="true">📋</span>
@@ -349,7 +370,7 @@
         <div class="header-left">
           <button class="header-toggle-btn mobile-close-btn" style="display:inline-flex;" onclick="toggleMobileSidebar()" title="Toggle Menu">☰</button>
           <button class="header-toggle-btn hide-mobile" id="desktopSidebarToggleBtn" onclick="toggleDesktopSidebar()" title="Toggle Collapse Sidebar">⬅️</button>
-          
+
           <div class="page-title-group">
             <div class="breadcrumbs" id="pageBreadcrumb">Admin > Overview</div>
             <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
@@ -571,6 +592,26 @@
 
         <!-- Data Table Container Card (Visible on Specific Record Tabs) -->
         <section class="table-card" id="campRegistrationsPanel" style="display:none;padding:24px"><h2>Mega Health &amp; Screening Camp Registrations</h2><p>29 November 2026 · Ameya Classic Club</p><div style="display:flex;gap:12px;margin:16px 0"><button class="btn btn-outline" onclick="loadCampRegistrations()">Refresh</button><button class="btn btn-outline" id="campExport" onclick="exportCampRegistrations()" disabled>Export CSV</button></div><p id="campAdminStatus" role="status"></p><div style="overflow:auto;max-height:65vh"><table><thead><tr><th style="padding:12px;text-align:left">Reference</th><th style="padding:12px;text-align:left">Registered at</th><th style="padding:12px;text-align:left">Full name</th><th style="padding:12px;text-align:left">Age</th><th style="padding:12px;text-align:left">Gender</th><th style="padding:12px;text-align:left">Mobile</th><th style="padding:12px;text-align:left">Email</th><th style="padding:12px;text-align:left">Locality</th><th style="padding:12px;text-align:left">Previous screening</th><th style="padding:12px;text-align:left">Tests interested in</th><th style="padding:12px;text-align:left">Health concerns</th><th style="padding:12px;text-align:left">Diagnosed condition</th><th style="padding:12px;text-align:left">Family history</th><th style="padding:12px;text-align:left">Consent</th><th style="padding:12px;text-align:left">Consent version</th><th style="padding:12px;text-align:left">Email status</th></tr></thead><tbody id="campAdminBody"></tbody></table></div></section><div class="table-card" id="tableCard" style="display:none;">
+                  <!-- Camp Registration Closure & Schedule Control Bar (Visible only on preregistrations tab) -->
+        <div id="campControlBanner" style="display:none; padding:14px 18px; margin: 0 0 16px; background: linear-gradient(135deg, #071714, #0f2723); border: 1.5px solid rgba(45, 212, 191, 0.35); border-radius: 12px; color: #fff; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <span style="font-size: 20px;">🩺</span>
+            <div>
+              <div style="font-size: 13.5px; font-weight: 700; color: #fff;">Mega Health Camp (29 Nov 2026, Virar West)</div>
+              <div style="font-size: 11.5px; color: #A7F3D0;" id="campAdminStatusText">Registration: Active · Closes automatically on 29 Nov 2026 (00:00 IST)</div>
+            </div>
+            <span id="campAdminStatusBadge" class="badge" style="background:#10B981; color:#fff; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px;">● OPEN</span>
+          </div>
+
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-sm" id="campBtnClose" style="background:#EF4444; color:#fff; font-size:11px; font-weight:700;" onclick="setCampStatus('closed')" title="Close pre-registration immediately">🔒 Close Registration</button>
+            <button type="button" class="btn btn-sm" id="campBtnOpen" style="background:#10B981; color:#fff; font-size:11px; font-weight:700;" onclick="setCampStatus('open')" title="Re-open pre-registration">🔓 Re-Open</button>
+            <button type="button" class="btn btn-sm btn-outline" id="campBtnAuto" style="color:#A7F3D0; border-color:rgba(45,212,191,0.4); font-size:11px;" onclick="setCampStatus('auto')" title="Reset to auto-cutoff on 29 Nov 2026">⏰ Auto (29 Nov)</button>
+            <a href="/preregistration?status=closed" target="_blank" class="btn btn-sm btn-outline" style="color:#FBBF24; border-color:rgba(251,191,36,0.4); font-size:11px; text-decoration:none;" title="Preview how page looks when closed on camp day">👁️ Preview Closed UI</a>
+            <a href="/preregistration" target="_blank" class="btn btn-sm btn-outline" style="color:#fff; border-color:rgba(255,255,255,0.3); font-size:11px; text-decoration:none;">↗ View Public Page</a>
+          </div>
+        </div>
+
           <div class="table-toolbar">
             <div class="search-box">
               <span class="search-icon">🔍</span>
@@ -594,7 +635,8 @@
               <button class="btn btn-outline" id="reseedCatalogBtn" style="display:none;" onclick="reseedCatalog()">🔄 Re-Seed Catalog</button>
               <button class="btn btn-primary" id="testEmailBtn" style="display:none; background: #2563EB; border-color: #2563EB;" onclick="openEmailAuditModal()">⚡ Test Form Emails</button>
 
-              <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
+              <button class="btn btn-outline" id="copyGoogleSheetsBtn" style="color: #0F9F90; border-color: rgba(15, 159, 144, 0.4);" onclick="copyForGoogleSheets()">📊 Copy for Google Sheets</button>
+              <button class="btn btn-outline" onclick="exportCSV()">📥 Export Excel / CSV</button>
               <button class="btn btn-outline" style="color: var(--primary); border-color: rgba(13, 148, 136, 0.4);" onclick="exportPDF()">📄 Export PDF Report</button>
             </div>
           </div>
@@ -910,16 +952,16 @@
             <label>Doctor Avatar / Photo *</label>
             <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
               <img id="docAvatarPreview" src="/assets/doctors/default-doctor.jpg" alt="Preview" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);">
-              
+
               <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
                 <input type="text" id="docAvatar" class="form-control" placeholder="/assets/doctors/default-doctor.jpg or upload below" onchange="updateDoctorAvatarPreview(this.value)">
-                
+
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                   <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('docAvatarFileInput').click()">📁 Browse Image</button>
                   <button type="button" class="btn btn-outline btn-sm" id="btnTogglePresets" onclick="toggleDoctorPresetGallery()">👤 Indian Presets ▾</button>
                   <button type="button" class="btn btn-danger btn-sm" onclick="removeDoctorAvatar()">Reset</button>
                 </div>
-                
+
                 <input type="file" id="docAvatarFileInput" accept="image/*" style="display: none;" onchange="handleDoctorImageFileSelect(event)">
                 <span id="docAvatarStatus" style="font-size: 11px; color: var(--primary);"></span>
               </div>
@@ -1225,7 +1267,7 @@
 
           <div class="form-group" style="grid-column: 1 / -1;">
             <label>Gallery Image File / Drag & Drop Upload *</label>
-            
+
             <div class="uploader-dropzone" onclick="document.getElementById('galFileInput').click()">
               <span class="uploader-icon">🖼️</span>
               <div class="uploader-title">Click to upload image or drag file here</div>
@@ -1698,7 +1740,7 @@
       document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem('admin_theme', next);
       updateThemeButtonUI(next);
-      
+
       if (currentTab === 'dashboard') {
         renderDashboardCharts();
       }
@@ -2213,6 +2255,7 @@
       // Nav sidebar badges
       document.getElementById('sideDoctorCount').innerText = totalDocs;
       document.getElementById('sideDiagCount').innerText = totalDiags;
+      if (document.getElementById('sidePreregCount')) document.getElementById('sidePreregCount').innerText = getFormCount('preregistration') + getFormCount('camp_registration');
       document.getElementById('sideFormContactCount').innerText = getFormCount('contact');
       document.getElementById('sideFormNewsletterCount').innerText = getFormCount('newsletter');
       document.getElementById('sideFormVolunteerCount').innerText = getFormCount('volunteer');
@@ -2291,7 +2334,7 @@
       try {
         const res = await fetch(getApiBaseUrl() + '/api/google-analytics.php', { headers: { 'Authorization': `Bearer ${adminToken}` }, cache: 'no-store' });
         const data = await res.json();
-        
+
         const metrics = data.metrics || data.telemetry || {};
         const changes = data.changes || {};
         const telemetry = data.telemetry || {};
@@ -2685,6 +2728,7 @@
         forms_coming_soon_feedback: 'Coming Soon Feedbacks',
         forms_partnership: 'CSR Partnerships',
         forms_feedback: 'Website Feedbacks',
+        preregistrations: 'Mega Health Camp Pre-Registrations',
         forms_all: 'All Form Submissions',
         email: 'Email Audit Logs',
         activity: 'System Activity Logs',
@@ -2717,6 +2761,11 @@
       if (tab === 'settings') loadSiteSettings();
       if (cachePanel) cachePanel.style.display = tab === 'cacheManagement' ? 'block' : 'none';
       tableCard.style.display = (tab !== 'dashboard' && tab !== 'websiteAnalytics' && tab !== 'settings' && tab !== 'cacheManagement') ? 'flex' : 'none';
+      const campBanner = document.getElementById('campControlBanner');
+      if (campBanner) {
+        campBanner.style.display = tab === 'preregistrations' ? 'flex' : 'none';
+        if (tab === 'preregistrations') fetchCampAdminStatus();
+      }
 
       addDocBtn.style.display = tab === 'doctorsCatalog' ? 'inline-flex' : 'none';
       addTestBtn.style.display = tab === 'testsCatalog' ? 'inline-flex' : 'none';
@@ -2784,7 +2833,7 @@
         const data = await res.json();
         if (data.status === 'ok' && data.diagnostics) {
           const d = data.diagnostics;
-          
+
           const appDriver = document.getElementById('appCacheDriver');
           const appActive = document.getElementById('appCacheActiveCount');
           const appTotal = document.getElementById('appCacheTotalCount');
@@ -2977,7 +3026,9 @@
       const categoriesSet = new Set();
 
       let items = [];
-      if (currentTab.startsWith('forms')) items = rawData.formSubmissions || [];
+      if (currentTab === 'preregistrations') {
+        ['General health', 'Eye', 'Dental', 'ENT', 'Cancer screening', 'Not sure'].forEach(c => categoriesSet.add(c));
+      } else if (currentTab.startsWith('forms')) items = rawData.formSubmissions || [];
       else if (currentTab === 'gallery') items = rawData.galleriesCatalog || [];
       else if (currentTab === 'crowdfunding') items = rawData.crowdfundingCatalog || [];
       else if (currentTab === 'testsCatalog') items = rawData.diagnosticTestsCatalog || [];
@@ -3011,7 +3062,7 @@
 
     function renderTableContent(items) {
       const tableHeader = document.getElementById('tableHeader');
-      
+
       if (currentTab.startsWith('forms')) {
         tableHeader.innerHTML = `<th>Submission ID</th><th>Category</th><th>User Name & Contact</th><th>Details / Subject</th><th>Status</th><th>Submitted Date</th><th>Actions</th>`;
         renderForms(items);
@@ -3046,6 +3097,241 @@
     }
 
     // --- TAB RENDERING METHODS ---
+
+
+    async function fetchCampAdminStatus() {
+      try {
+        const res = await fetch('/api/camp-status');
+        const data = await res.json();
+        const badge = document.getElementById('campAdminStatusBadge');
+        const text = document.getElementById('campAdminStatusText');
+        if (!badge || !text) return;
+        if (data.is_open) {
+          badge.style.background = '#10B981';
+          badge.innerText = '● OPEN';
+          text.innerText = data.override === 'open'
+            ? 'Registration: Manually FORCED OPEN by Admin'
+            : 'Registration: Active · Closes automatically on 29 Nov 2026 (00:00 IST)';
+        } else {
+          badge.style.background = '#EF4444';
+          badge.innerText = '🔒 CLOSED';
+          text.innerText = data.override === 'closed'
+            ? 'Registration: Manually CLOSED by Admin (Walk-Ins Welcome)'
+            : 'Registration: CLOSED for Camp Day · Walk-Ins Welcome';
+        }
+      } catch (e) {
+        console.error('Failed to load camp status', e);
+      }
+    }
+
+    async function setCampStatus(status) {
+      try {
+        const res = await fetch('/api/camp-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        const data = await res.json();
+        showToast(data.message || `Camp status updated to ${status}.`, 'success');
+        fetchCampAdminStatus();
+      } catch (e) {
+        showToast('Failed to update camp status: ' + e.message, 'error');
+      }
+    }
+
+    function renderPreregistrations(items) {
+      const tbody = document.getElementById('tableBody');
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">No Camp Pre-Registrations Found</div><div class="empty-state-text">Registrations submitted from the Mega Health Checkup page will appear here.</div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = items.map(r => {
+        const id = r.submission_id || r.id || '';
+        const name = escapeHtml(r.full_name || r.name || 'Anonymous');
+        const ageGender = escapeHtml(`${r.age ? r.age + ' yrs' : 'N/A'} • ${r.gender || 'N/A'}`);
+        const phone = escapeHtml(r.phone || r.mobile || 'N/A');
+        const area = escapeHtml(r.area_location || r.location || 'Virar West');
+        const checkupsArr = Array.isArray(r.checkups) ? r.checkups : (r.checkups ? [r.checkups] : ['General health']);
+        const checkupsText = checkupsArr.join(', ');
+        const status = (r.status || 'PENDING_REVIEW').toUpperCase();
+        const reviewStatus = (r.review_status || 'PRIVATE_UNREVIEWED').toUpperCase();
+        const date = escapeHtml(r.created_at || r.timestampIST || 'N/A');
+
+        return `
+          <tr>
+            <td style="font-weight:700;color:var(--primary);font-family:monospace;">${id}</td>
+            <td>
+              <div style="font-weight:600;color:var(--text-main);">${name}</div>
+              <div style="font-size:11px;color:var(--text-subtle);">${ageGender}</div>
+            </td>
+            <td>
+              <div style="font-size:12px;font-weight:600;color:var(--text-main);">📞 ${phone}</div>
+              <div style="font-size:11px;color:var(--text-muted);">📍 ${area}</div>
+            </td>
+            <td>
+              <div style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;" title="${escapeHtml(checkupsText)}">
+                🩺 ${escapeHtml(checkupsText)}
+              </div>
+            </td>
+            <td>
+              <button type="button" class="btn btn-sm" style="padding:2px 8px;font-size:10px;font-weight:700;border-radius:6px;${reviewStatus === 'REVIEWED' ? 'background:#DCFCE7;color:#166534;border:1px solid #BBF7D0;' : 'background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;'}" onclick="toggleReviewStatus('${id}')" title="Click to toggle Reviewed / Private">
+                ${reviewStatus === 'REVIEWED' ? '✓ REVIEWED' : '🔒 PRIVATE'}
+              </button>
+            </td>
+            <td>
+              <select class="select-control" style="padding:2px 6px;height:28px;font-size:11px;font-weight:600;" onchange="updatePreregistrationStatus('${id}', this.value)">
+                <option value="PENDING_REVIEW" ${status === 'PENDING_REVIEW' ? 'selected' : ''}>PENDING REVIEW</option>
+                <option value="CONFIRMED" ${status === 'CONFIRMED' ? 'selected' : ''}>CONFIRMED</option>
+                <option value="CONTACTED" ${status === 'CONTACTED' ? 'selected' : ''}>CONTACTED</option>
+                <option value="ATTENDED" ${status === 'ATTENDED' ? 'selected' : ''}>ATTENDED</option>
+                <option value="CANCELLED" ${status === 'CANCELLED' ? 'selected' : ''}>CANCELLED</option>
+              </select>
+            </td>
+            <td style="font-size:11px;color:var(--text-muted);">${date}</td>
+            <td>
+              <button class="btn btn-outline btn-sm" onclick="viewPreregistrationDetail('${id}')">👁️ View</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function updatePreregistrationStatus(id, newStatus) {
+      try {
+        const token = (typeof getSessionToken === 'function') ? getSessionToken() : (sessionStorage.getItem('avinya_admin_token') || localStorage.getItem('avinya_admin_token') || '');
+        const res = await fetch((typeof getApiBaseUrl === 'function' ? getApiBaseUrl() : '') + '/api/admin-data.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            action: 'update_preregistration_status',
+            id: id,
+            status: newStatus
+          })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'ok') {
+          throw new Error(data.message || 'Failed to update status.');
+        }
+        const item = (rawData.formSubmissions || []).find(i => (i.submission_id || i.id) === id);
+        if (item) item.status = newStatus;
+        showToast(`Registration ${id} updated to ${newStatus}`, 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function toggleReviewStatus(id) {
+      const item = (rawData.formSubmissions || []).find(i => (i.submission_id || i.id) === id);
+      if (!item) return;
+      const newReview = (item.review_status === 'REVIEWED') ? 'PRIVATE_UNREVIEWED' : 'REVIEWED';
+      try {
+        const token = (typeof getSessionToken === 'function') ? getSessionToken() : (sessionStorage.getItem('avinya_admin_token') || localStorage.getItem('avinya_admin_token') || '');
+        const res = await fetch((typeof getApiBaseUrl === 'function' ? getApiBaseUrl() : '') + '/api/admin-data.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            action: 'update_preregistration_status',
+            id: id,
+            review_status: newReview
+          })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'ok') {
+          throw new Error(data.message || 'Failed to update review status.');
+        }
+        item.review_status = newReview;
+        renderCurrentTab();
+        showToast(`Review state for ${id} updated to ${newReview}`, 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function viewPreregistrationDetail(id) {
+      const item = (rawData.formSubmissions || []).find(i => (i.submission_id || i.id) === id);
+      if (!item) return;
+      currentViewedRecord = { category: 'preregistration', id, item };
+
+      const modal = document.getElementById('detailModal');
+      const body = document.getElementById('modalBody');
+      document.getElementById('modalTitle').innerText = `Mega Health Camp Pre-Registration: ${id}`;
+
+      const checkups = Array.isArray(item.checkups) ? item.checkups.join(', ') : (item.checkups || 'General health');
+
+      body.innerHTML = `
+        <div style="background: rgba(8, 127, 115, 0.08); border-left: 4px solid var(--primary); padding: 14px 18px; border-radius: 8px; margin-bottom: 20px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase;">Camp Event</div>
+          <div style="font-size: 15px; font-weight: 700; color: var(--text-main);">${escapeHtml(item.camp_title || 'Avinya Care Foundation – Mega Health Checkup with Free Tests')}</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">📅 Sunday, 29 November 2026 · 📍 Yashwant Nagar, Virar West · 📞 Helpline: 7447441116</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+          <div class="detail-row"><span class="detail-label">1. Full Name:</span><span class="detail-val">${escapeHtml(item.full_name || item.name || 'N/A')}</span></div>
+          <div class="detail-row"><span class="detail-label">2. Age:</span><span class="detail-val">${escapeHtml(item.age ? item.age + ' years' : 'N/A')}</span></div>
+          <div class="detail-row"><span class="detail-label">3. Gender:</span><span class="detail-val">${escapeHtml(item.gender || 'N/A')}</span></div>
+          <div class="detail-row"><span class="detail-label">4. Mobile:</span><span class="detail-val"><strong>${escapeHtml(item.phone || item.mobile || 'N/A')}</strong></span></div>
+          <div class="detail-row" style="grid-column: 1 / -1;"><span class="detail-label">5. Area/Location:</span><span class="detail-val">${escapeHtml(item.area_location || item.location || 'N/A')}</span></div>
+          <div class="detail-row" style="grid-column: 1 / -1;"><span class="detail-label">6. Consent Agreed:</span><span class="detail-val">${item.consent ? '✓ Yes, agreed to be contacted' : 'No'}</span></div>
+          <div class="detail-row" style="grid-column: 1 / -1;"><span class="detail-label">7. Requested Checkups:</span><span class="detail-val" style="color: var(--primary); font-weight: 700;">${escapeHtml(checkups)}</span></div>
+          <div class="detail-row" style="grid-column: 1 / -1;"><span class="detail-label">8. Current Health Concerns:</span><span class="detail-val">${escapeHtml(item.health_concerns || 'None mentioned')}</span></div>
+          <div class="detail-row"><span class="detail-label">9. Prior Screening:</span><span class="detail-val">${escapeHtml(item.prior_screening || 'Not answered')}</span></div>
+          <div class="detail-row"><span class="detail-label">10. Prior Cancer Diagnosis:</span><span class="detail-val">${escapeHtml(item.prior_cancer_diagnosis || 'Not answered')}</span></div>
+          <div class="detail-row" style="grid-column: 1 / -1;"><span class="detail-label">11. Family Cancer History:</span><span class="detail-val">${escapeHtml(item.family_cancer_history || 'Not answered')}</span></div>
+          <div class="detail-row"><span class="detail-label">Email:</span><span class="detail-val">${escapeHtml(item.email || 'N/A (Optional)')}</span></div>
+          <div class="detail-row"><span class="detail-label">Status:</span><span class="detail-val"><strong>${escapeHtml(item.status || 'PENDING_REVIEW')}</strong></span></div>
+          <div class="detail-row"><span class="detail-label">Review State:</span><span class="detail-val"><strong>${escapeHtml(item.review_status || 'PRIVATE_UNREVIEWED')}</strong></span></div>
+          <div class="detail-row"><span class="detail-label">Registration Date:</span><span class="detail-val">${escapeHtml(item.created_at || item.timestampIST || 'N/A')}</span></div>
+        </div>
+      `;
+
+      modal.style.display = 'flex';
+    }
+
+    function copyForGoogleSheets() {
+      const data = (rawData.formSubmissions || []).filter(i => {
+        const ft = (i.form_type || '').toLowerCase();
+        return ft === 'preregistration' || ft === 'camp_registration';
+      });
+
+      if (!data || data.length === 0) {
+        showToast('No camp pre-registrations available to copy.', 'warning');
+        return;
+      }
+
+      const headers = ['Registration ID', 'Submission Date', 'Full Name', 'Age', 'Gender', 'Mobile Number', 'Area / Location', 'Requested Checkups', 'Current Health Concerns', 'Prior Screening', 'Prior Cancer Diagnosis', 'Family Cancer History', 'Email', 'Consent', 'Status', 'Review State'];
+      const rows = data.map(r => [
+        r.submission_id || r.id || '',
+        r.created_at || r.timestampIST || '',
+        r.full_name || r.name || '',
+        r.age ?? '',
+        r.gender || '',
+        r.phone || '',
+        r.area_location || r.location || '',
+        Array.isArray(r.checkups) ? r.checkups.join('; ') : (r.checkups || ''),
+        r.health_concerns || '',
+        r.prior_screening || '',
+        r.prior_cancer_diagnosis || '',
+        r.family_cancer_history || '',
+        r.email || '',
+        r.consent ? 'YES' : 'NO',
+        r.status || 'PENDING_REVIEW',
+        r.review_status || 'PRIVATE_UNREVIEWED'
+      ].map(v => String(v ?? '').replace(/\t/g, ' ')).join('\t'));
+
+      const tsvContent = [headers.join('\t'), ...rows].join('\n');
+      navigator.clipboard.writeText(tsvContent).then(() => {
+        showToast(`Copied ${data.length} pre-registrations for Google Sheets! Open Google Sheets and press Ctrl+V.`, 'success');
+      }).catch(() => {
+        showToast('Failed to copy to clipboard.', 'error');
+      });
+    }
 
     function renderForms(items) {
       const tbody = document.getElementById('tableBody');
@@ -3330,7 +3616,7 @@
         const sortOrder = g.sort_order ?? 0;
         const hasDetails = Boolean(g.has_details);
 
-        const modeBadge = hasDetails 
+        const modeBadge = hasDetails
           ? `<span class="badge badge-teal">Mode B: Bento Info</span>`
           : `<span class="badge badge-info">Mode A: Image Only</span>`;
 
@@ -3530,7 +3816,7 @@
       document.querySelectorAll('#docWorkingDays input').forEach(input => { input.checked = [1,2,3,4,5,6].includes(Number(input.value)); });
       const modal = document.getElementById('doctorEditModal');
       const title = document.getElementById('doctorModalTitle');
-      
+
       if (docId) {
         title.innerText = 'Edit Doctor Profile (' + docId + ')';
         const doc = (rawData.doctorsCatalog || []).find(d => (d.doctor_id || d.id) === docId);
@@ -3547,7 +3833,7 @@
           document.getElementById('docFee').value = doc.consultation_fee ?? doc.consultationFee ?? 0;
           document.getElementById('docFeeDisplay').value = doc.fee_display || doc.feeDisplay || '';
           document.getElementById('docBadge').value = doc.badge || '';
-          
+
           const currentAvatar = doc.avatar || '/assets/doctors/default-doctor.jpg';
           document.getElementById('docAvatar').value = currentAvatar;
           updateDoctorAvatarPreview(currentAvatar);
@@ -3913,7 +4199,7 @@
       const hasDet = document.getElementById('galHasDetails').checked;
       const hint = document.getElementById('galModeHint');
       if (hint) {
-        hint.innerHTML = hasDet 
+        hint.innerHTML = hasDet
           ? '✨ <strong>Mode B (Scrubbed Bento Gallery)</strong> active: Content card displays Title, Short Description, Date, Location, and Lightbox details.'
           : '🖼️ <strong>Mode A (Image-Only GSAP Scroll)</strong> active: Visual image-focused gallery item.';
       }
@@ -4483,10 +4769,10 @@
 
     function startAutoPolling() {
       if (syncCountdownInterval) clearInterval(syncCountdownInterval);
-      
+
       const pollMs = parseInt(localStorage.getItem('avinya_poll_interval') || 300000, 10);
       let nextSyncTime = parseInt(localStorage.getItem('avinya_next_sync_time'), 10);
-      
+
       const now = Date.now();
       if (!nextSyncTime || nextSyncTime <= now || nextSyncTime > now + pollMs) {
         nextSyncTime = now + pollMs;
@@ -4494,7 +4780,7 @@
       }
 
       const el = document.getElementById('autoSyncCountdown');
-      
+
       const updateDisplay = async () => {
         if (!el) return;
         if (isSyncing) return;

@@ -1,0 +1,1399 @@
+/**
+ * Avinya Care Foundation - Health Campaigns & Pre-Registration Styles
+ * Integrated with the official brand design system (Inter, Outfit, #087F73, #F58220, #0A0A0A)
+ */
+
+:root {
+  --camp-primary: #087F73;
+  --camp-primary-dark: #065F56;
+  --camp-primary-light: rgba(8, 127, 115, 0.08);
+  --camp-accent: #F58220;
+  --camp-accent-hover: #E07116;
+  --camp-accent-light: rgba(245, 130, 32, 0.1);
+  --camp-dark: #0A0A0A;
+  --camp-dark-card: #141414;
+  --camp-card-bg: #FFFFFF;
+  --camp-border: #E2E8F0;
+  --camp-border-focus: #087F73;
+  --camp-text-main: #111827;
+  --camp-text-muted: #4B5563;
+  --camp-text-subtle: #9CA3AF;
+  --camp-radius-sm: 8px;
+  --camp-radius-md: 14px;
+  --camp-radius-lg: 20px;
+  --camp-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --camp-shadow-md: 0 8px 24px rgba(8, 127, 115, 0.08);
+  --camp-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.09);
+}
+
+.prereg-page {
+  background-color: #F8FAF9;
+  color: var(--camp-text-main);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* Accessibility Skip Link - Standard offscreen position */
+.skip-link {
+  position: fixed;
+  top: -120px;
+  left: 1rem;
+  background: var(--camp-primary, #087F73);
+  color: #FFFFFF !important;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 0 0 10px 10px;
+  z-index: 999999;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 0;
+  outline: 3px solid #F58220;
+  outline-offset: 2px;
+}
+
+.prereg-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* 1. HERO SECTION WITH RICH BACKGROUND IMAGE */
+.camp-hero {
+  position: relative;
+  padding: 160px 20px 90px;
+  background: 
+    linear-gradient(180deg, rgba(7, 17, 15, 0.82) 0%, rgba(9, 23, 21, 0.88) 55%, rgba(6, 18, 16, 0.96) 100%),
+    url('/assets/camp/mega-health-camp-banner.jpg') center center / cover no-repeat;
+  text-align: center;
+  color: #FFFFFF;
+  overflow: hidden;
+  box-shadow: inset 0 -20px 40px rgba(0, 0, 0, 0.35);
+}
+
+.camp-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(20, 184, 166, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.camp-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 20px;
+  background: rgba(20, 184, 166, 0.2);
+  border: 1px solid rgba(45, 212, 191, 0.5);
+  border-radius: 999px;
+  color: #2DD4BF;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
+}
+
+.camp-hero-title {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #FFFFFF !important;
+  max-width: 880px;
+  margin: 0 auto 20px;
+  letter-spacing: -0.02em;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.75), 0 1px 4px rgba(0, 0, 0, 0.9);
+  position: relative;
+  z-index: 1;
+}
+
+.camp-hero-title em {
+  font-style: normal;
+  color: #F58220;
+  background: linear-gradient(135deg, #FFB26B 0%, #F58220 50%, #EA580C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 14px rgba(245, 130, 32, 0.55));
+}
+
+.camp-hero-subtitle {
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  line-height: 1.65;
+  color: #E2E8F0;
+  max-width: 740px;
+  margin: 0 auto 28px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  position: relative;
+  z-index: 1;
+}
+
+.camp-helpline-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 10px 24px;
+  border-radius: 999px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  font-size: 14px;
+  color: #F8FAFC;
+  margin-bottom: 28px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 1;
+}
+
+.camp-helpline-pill strong {
+  color: #FDBA74;
+}
+
+.camp-hero-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+.camp-hero-btn-row {
+  display: inline-flex;
+  gap: 12px;
+}
+
+.btn-whatsapp-camp {
+  background: #25D366 !important;
+  color: #FFFFFF !important;
+  border-color: #25D366 !important;
+}
+
+.btn-whatsapp-camp:hover {
+  background: #20BA5A !important;
+  border-color: #20BA5A !important;
+  color: #FFFFFF !important;
+}
+
+.btn-primary-camp {
+  background: linear-gradient(135deg, #087F73 0%, #065F56 100%);
+  color: #FFFFFF;
+  padding: 14px 30px;
+  border-radius: 12px;
+  font-size: 15.5px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(8, 127, 115, 0.45);
+  transition: all 0.25s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+}
+
+.btn-primary-camp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(8, 127, 115, 0.6);
+  background: #0D9488;
+}
+
+.btn-secondary-camp {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--camp-dark);
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  padding: 14px 26px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+}
+
+.btn-secondary-camp:hover {
+  background: #FFFFFF;
+  border-color: var(--camp-primary);
+  color: var(--camp-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 2. CURRENT ACTIVE CAMP HIGHLIGHT SECTION */
+.current-camp-section {
+  padding: 40px 0 30px;
+}
+
+.current-camp-card {
+  background: #FFFFFF;
+  border: 1.5px solid var(--camp-border);
+  border-radius: var(--camp-radius-lg);
+  box-shadow: var(--camp-shadow-md);
+  overflow: hidden;
+  margin-bottom: 30px;
+  padding: 36px 36px 32px;
+}
+
+.camp-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.camp-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 5px 12px;
+  border-radius: 6px;
+}
+
+.badge-open {
+  background: #DCFCE7;
+  color: #166534;
+  border: 1px solid #BBF7D0;
+}
+
+.badge-upcoming {
+  background: #E0F2FE;
+  color: #0369A1;
+  border: 1px solid #BAE6FD;
+}
+
+.badge-closed {
+  background: #FEE2E2 !important;
+  color: #991B1B !important;
+  border: 1px solid #FCA5A5 !important;
+}
+
+.badge-ongoing {
+  background: #FEF3C7 !important;
+  color: #92400E !important;
+  border: 1px solid #FDE68A !important;
+}
+
+.camp-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+  font-weight: 700;
+  color: var(--camp-dark);
+  margin: 0 0 16px;
+  line-height: 1.25;
+}
+
+.camp-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  background: #F8FAF9;
+  border: 1px solid var(--camp-border);
+  border-radius: var(--camp-radius-md);
+  padding: 20px 22px;
+  margin-bottom: 24px;
+}
+
+.camp-meta-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.camp-meta-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.camp-desc {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--camp-text-muted);
+  margin-bottom: 26px;
+}
+
+/* Service Asset Grid */
+.camp-services-headline {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--camp-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.camp-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.service-asset-card {
+  background: #FFFFFF;
+  border: 1px solid var(--camp-border);
+  border-radius: var(--camp-radius-md);
+  padding: 18px 14px;
+  text-align: center;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--camp-shadow-sm);
+  cursor: pointer;
+}
+
+.service-asset-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--camp-primary);
+  box-shadow: var(--camp-shadow-md);
+}
+
+.service-asset-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.service-asset-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--camp-dark);
+}
+
+.service-asset-sub {
+  font-size: 11px;
+  color: var(--camp-text-subtle);
+}
+
+/* Partner notice banner */
+.camp-partner-alert {
+  background: #FFFBEB;
+  border-left: 4px solid var(--camp-accent);
+  padding: 14px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #92400E;
+  line-height: 1.6;
+}
+
+/* 3. PRE-REGISTRATION FORM SECTION */
+.camp-form-section {
+  padding: 10px 0 80px;
+}
+
+.camp-form-card {
+  background: #FFFFFF;
+  border: 1.5px solid var(--camp-border);
+  border-radius: var(--camp-radius-lg);
+  box-shadow: var(--camp-shadow-lg);
+  max-width: 860px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.camp-form-header {
+  background: #0A0A0A;
+  color: #FFFFFF;
+  padding: 36px 36px 28px;
+  text-align: center;
+  position: relative;
+  border-bottom: 4px solid var(--camp-accent);
+}
+
+.camp-brand-logo-wrap {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  padding: 6px;
+  box-shadow: 0 4px 16px rgba(245, 130, 32, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camp-brand-logo-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.camp-form-header-tag {
+  color: var(--camp-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.camp-form-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: #FFFFFF;
+  line-height: 1.25;
+}
+
+.camp-form-subtitle {
+  font-size: 14px;
+  color: #D1D5DB;
+  max-width: 620px;
+  margin: 0 auto 14px;
+  line-height: 1.55;
+}
+
+.camp-form-notices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.camp-partner-notice {
+  background: rgba(245, 130, 32, 0.12);
+  border-left: 3px solid var(--camp-accent);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #FDBA74;
+  line-height: 1.5;
+}
+
+.camp-review-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #9CA3AF;
+  align-self: center;
+}
+
+.camp-form-body {
+  padding: 36px 36px 40px;
+}
+
+.form-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--camp-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1.5px solid var(--camp-border);
+  padding-bottom: 8px;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+@media (max-width: 640px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+.form-group-full {
+  margin-bottom: 20px;
+}
+
+.camp-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--camp-dark);
+  margin-bottom: 6px;
+}
+
+.camp-label .required-star {
+  color: #DC2626;
+}
+
+.camp-input,
+.camp-select,
+.camp-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--camp-border);
+  border-radius: var(--camp-radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--camp-text-main);
+  background: #FFFFFF;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.camp-input:focus,
+.camp-select:focus,
+.camp-textarea:focus {
+  outline: none;
+  border-color: var(--camp-primary);
+  box-shadow: 0 0 0 3px rgba(8, 127, 115, 0.15);
+}
+
+.camp-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.field-helper {
+  font-size: 12px;
+  color: var(--camp-text-subtle);
+  margin-top: 4px;
+  display: block;
+}
+
+/* Checkbox & Radio Card Controls */
+.camp-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.camp-checkbox-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #F8FAF9;
+  border: 1.5px solid var(--camp-border);
+  border-radius: var(--camp-radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--camp-text-main);
+  user-select: none;
+}
+
+.camp-checkbox-card:hover {
+  background: rgba(8, 127, 115, 0.04);
+  border-color: rgba(8, 127, 115, 0.35);
+}
+
+.camp-checkbox-card input[type="checkbox"] {
+  accent-color: var(--camp-primary);
+  width: 18px;
+  height: 18px;
+}
+
+.camp-radio-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.camp-radio-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #F8FAF9;
+  border: 1.5px solid var(--camp-border);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--camp-text-main);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.camp-radio-pill:hover {
+  background: rgba(8, 127, 115, 0.05);
+  border-color: var(--camp-primary);
+}
+
+.camp-radio-pill input[type="radio"] {
+  accent-color: var(--camp-primary);
+  width: 16px;
+  height: 16px;
+}
+
+/* Consent Box */
+.consent-box {
+  background: #F0FDF4;
+  border: 1.5px solid #BBF7D0;
+  border-radius: var(--camp-radius-md);
+  padding: 16px 18px;
+  margin: 26px 0 20px;
+}
+
+.consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #166534;
+  line-height: 1.5;
+}
+
+.consent-label input[type="checkbox"] {
+  accent-color: var(--camp-primary);
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Privacy Note */
+.privacy-note-card {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--camp-radius-md);
+  padding: 14px 18px;
+  margin-bottom: 26px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--camp-text-muted);
+}
+
+.privacy-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.btn-submit-camp {
+  width: 100%;
+  background: linear-gradient(135deg, #087F73 0%, #065F56 100%);
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(8, 127, 115, 0.28);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-submit-camp:hover:not(:disabled) {
+  background: #065F56;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(8, 127, 115, 0.38);
+}
+
+.btn-submit-camp:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 4. SUCCESS CONFIRMATION PASS WITH SEAL */
+.reg-success-card {
+  display: none;
+  padding: 36px 32px;
+  text-align: center;
+}
+
+.reg-success-header {
+  margin-bottom: 24px;
+}
+
+.success-check-icon {
+  width: 64px;
+  height: 64px;
+  background: #DCFCE7;
+  color: #166534;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin: 0 auto 16px;
+}
+
+.success-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--camp-dark);
+  margin: 0 0 8px;
+}
+
+.success-subtitle {
+  font-size: 14px;
+  color: var(--camp-text-muted);
+}
+
+.registration-pass {
+  background: #FFFFFF;
+  border: 2px dashed var(--camp-primary);
+  border-radius: var(--camp-radius-lg);
+  padding: 28px 24px;
+  text-align: left;
+  max-width: 560px;
+  margin: 0 auto 28px;
+  position: relative;
+  box-shadow: var(--camp-shadow-sm);
+  overflow: hidden;
+}
+
+.pass-seal-watermark {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 90px;
+  height: 90px;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.pass-id-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--camp-border);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.pass-id-badge strong {
+  font-family: monospace;
+  font-size: 18px;
+  color: var(--camp-primary);
+  letter-spacing: 1px;
+}
+
+.pass-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  font-size: 13.5px;
+}
+
+.pass-row {
+  margin-bottom: 8px;
+}
+
+.pass-label {
+  font-size: 11px;
+  color: var(--camp-text-subtle);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.pass-val {
+  font-weight: 600;
+  color: var(--camp-dark);
+}
+
+.pass-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .registration-pass, .registration-pass * {
+    visibility: visible;
+  }
+  .registration-pass {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: 2px solid #000;
+    box-shadow: none;
+  }
+}
+
+/* ==========================================================================
+   REGISTRATION CLOSED STATE & COUNTDOWN STYLES
+   ========================================================================== */
+.camp-closed-container {
+  padding: 44px 32px;
+  text-align: center;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAFAF9 100%);
+  border-radius: 0 0 var(--camp-radius-lg) var(--camp-radius-lg);
+  border-top: 1px solid var(--camp-border);
+}
+
+.camp-closed-icon {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 18px;
+  background: #FEE2E2;
+  color: #DC2626;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.15);
+}
+
+.camp-closed-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.4rem, 2.4vw, 1.85rem);
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 10px;
+}
+
+.camp-closed-desc {
+  font-size: 15px;
+  color: #4B5563;
+  line-height: 1.6;
+  max-width: 580px;
+  margin: 0 auto 22px;
+}
+
+.camp-closed-alert {
+  background: #FFFBEB;
+  border: 1.5px solid #FDE68A;
+  border-radius: 14px;
+  padding: 20px 24px;
+  max-width: 620px;
+  margin: 0 auto 26px;
+  text-align: left;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #92400E;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.08);
+}
+
+.camp-closed-alert strong {
+  color: #78350F;
+  font-size: 15px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.camp-closed-helpline {
+  background: #F8FAF9;
+  border: 1px solid var(--camp-border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.camp-closed-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.camp-countdown-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(245, 130, 32, 0.12);
+  border: 1px solid rgba(245, 130, 32, 0.35);
+  border-radius: 999px;
+  color: #C2410C;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+
+/* ==========================================================================
+   MOBILE & RESPONSIVE REFINEMENTS
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .camp-hero {
+    padding: 120px 18px 50px;
+  }
+
+  .current-camp-card {
+    padding: 28px 24px 26px;
+  }
+
+  .camp-meta-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px 18px;
+  }
+
+  .camp-form-body {
+    padding: 28px 24px 32px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Container spacing */
+  .prereg-container {
+    padding: 0 14px;
+  }
+
+  /* 1. Hero Section - compact & visible immediately on mobile viewport */
+  .camp-hero {
+    padding: 84px 14px 28px !important;
+    min-height: auto;
+  }
+
+  .camp-hero-badge {
+    font-size: 11px;
+    padding: 5px 14px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .camp-hero-title {
+    font-size: clamp(1.5rem, 6.8vw, 1.95rem) !important;
+    line-height: 1.22 !important;
+    margin-bottom: 12px !important;
+  }
+
+  .camp-hero-subtitle {
+    font-size: 13.5px !important;
+    line-height: 1.5 !important;
+    margin-bottom: 16px !important;
+    padding: 0 4px;
+  }
+
+  /* Helpline pill - transformed into a clean translucent card */
+  .camp-helpline-pill {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 12px 14px !important;
+    border-radius: 14px !important;
+    background: rgba(8, 20, 18, 0.85) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    width: 100% !important;
+    max-width: 340px !important;
+    margin: 0 auto 18px !important;
+    font-size: 12.5px !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+  }
+
+  .camp-helpline-pill .pill-divider {
+    display: none !important;
+  }
+
+  /* Action buttons - clean hierarchy & balanced widths */
+  .camp-hero-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 360px !important;
+    margin: 0 auto !important;
+  }
+
+  .camp-hero-actions .btn-primary-camp {
+    width: 100% !important;
+    padding: 13px 18px !important;
+    font-size: 14.5px !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+  }
+
+  .camp-hero-btn-row {
+    display: grid !important;
+    grid-template-columns: 1.15fr 0.85fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .camp-hero-btn-row .btn-secondary-camp {
+    width: 100% !important;
+    padding: 11px 10px !important;
+    font-size: 13px !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+  }
+
+  /* 2. Current Camp Showcase Card */
+  .current-camp-section {
+    padding: 24px 0 16px !important;
+  }
+
+  .current-camp-card {
+    padding: 20px 16px 18px !important;
+    border-radius: 16px !important;
+    margin-bottom: 22px !important;
+  }
+
+  .camp-badges {
+    gap: 6px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .camp-badge {
+    font-size: 10.5px !important;
+    padding: 4px 10px !important;
+  }
+
+  .camp-title {
+    font-size: 1.25rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 14px !important;
+  }
+
+  .camp-meta-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    padding: 14px 14px !important;
+    margin-bottom: 18px !important;
+    border-radius: 12px !important;
+  }
+
+  .camp-meta-item {
+    gap: 10px !important;
+  }
+
+  .camp-meta-icon {
+    font-size: 20px !important;
+  }
+
+  .camp-meta-text {
+    font-size: 13px !important;
+  }
+
+  .camp-desc {
+    font-size: 13.5px !important;
+    line-height: 1.55 !important;
+    margin-bottom: 20px !important;
+  }
+
+  .camp-services-headline {
+    font-size: 12.5px !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* Service cards grid: 2 balanced columns on mobile */
+  .camp-services-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .service-asset-card {
+    padding: 12px 8px !important;
+    border-radius: 10px !important;
+    gap: 6px !important;
+  }
+
+  .service-asset-icon {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .service-asset-title {
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+  }
+
+  .service-asset-sub {
+    font-size: 10px !important;
+  }
+
+  .camp-partner-alert {
+    padding: 12px 14px !important;
+    font-size: 12.5px !important;
+  }
+
+  .camp-actions {
+    display: flex !important;
+    width: 100% !important;
+    margin-top: 14px !important;
+  }
+
+  .camp-actions .btn-primary-camp {
+    width: 100% !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 3. Form Card Header & Body */
+  .camp-form-header {
+    padding: 22px 16px 18px !important;
+  }
+
+  .camp-brand-logo-wrap {
+    width: 52px !important;
+    height: 52px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .camp-form-header-tag {
+    font-size: 10.5px !important;
+    letter-spacing: 1.5px !important;
+  }
+
+  .camp-form-title {
+    font-size: 1.25rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  .camp-form-subtitle {
+    font-size: 12.5px !important;
+    line-height: 1.5 !important;
+    margin-bottom: 12px !important;
+  }
+
+  .camp-partner-notice {
+    font-size: 11.5px !important;
+    padding: 7px 10px !important;
+  }
+
+  .camp-review-badge {
+    font-size: 10.5px !important;
+  }
+
+  .camp-form-body {
+    padding: 20px 14px 24px !important;
+  }
+
+  .form-section-title {
+    font-size: 12.5px !important;
+    margin-bottom: 14px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .camp-label {
+    font-size: 13px !important;
+    margin-bottom: 5px !important;
+  }
+
+  /* 16px font-size prevents iOS Safari auto-zoom on mobile inputs */
+  .camp-input,
+  .camp-select,
+  .camp-textarea {
+    font-size: 16px !important;
+    padding: 11px 12px !important;
+    border-radius: 8px !important;
+  }
+
+  .field-helper {
+    font-size: 11px !important;
+  }
+
+  /* Checkbox & Radio cards */
+  .camp-checkbox-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .camp-checkbox-card {
+    padding: 8px 10px !important;
+    font-size: 12.5px !important;
+    gap: 8px !important;
+    border-radius: 8px !important;
+  }
+
+  .camp-checkbox-card input[type="checkbox"] {
+    width: 17px !important;
+    height: 17px !important;
+    flex-shrink: 0;
+  }
+
+  .camp-radio-group {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .camp-radio-pill {
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+
+  /* Consent Box */
+  .consent-box {
+    padding: 12px 12px !important;
+    margin: 18px 0 16px !important;
+    border-radius: 10px !important;
+  }
+
+  .consent-label {
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    gap: 8px !important;
+  }
+
+  .consent-label input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  /* Privacy Note */
+  .privacy-note-card {
+    padding: 12px 12px !important;
+    font-size: 11.5px !important;
+    gap: 8px !important;
+    margin-bottom: 20px !important;
+    border-radius: 10px !important;
+  }
+
+  .privacy-icon {
+    font-size: 18px !important;
+  }
+
+  /* Submit Button */
+  .btn-submit-camp {
+    padding: 14px 18px !important;
+    font-size: 15px !important;
+    border-radius: 10px !important;
+  }
+
+  /* Success Confirmation Card & Pass */
+  .reg-success-card {
+    padding: 24px 14px !important;
+  }
+
+  .success-check-icon {
+    width: 52px !important;
+    height: 52px !important;
+    font-size: 26px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .success-title {
+    font-size: 1.35rem !important;
+  }
+
+  .registration-pass {
+    padding: 18px 14px !important;
+    border-radius: 12px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .pass-token-val {
+    font-size: 1.15rem !important;
+  }
+
+  .pass-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .pass-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .pass-actions button {
+    width: 100% !important;
+  }
+
+  /* Closed notice responsiveness */
+  .camp-closed-container {
+    padding: 28px 14px !important;
+  }
+
+  .camp-closed-icon {
+    width: 56px !important;
+    height: 56px !important;
+    font-size: 26px !important;
+  }
+
+  .camp-closed-title {
+    font-size: 1.3rem !important;
+  }
+
+  .camp-closed-desc {
+    font-size: 13px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .camp-closed-alert {
+    padding: 14px 12px !important;
+    font-size: 12.5px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .camp-closed-helpline {
+    padding: 16px 12px !important;
+  }
+
+  .camp-closed-actions {
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .camp-closed-actions .btn-primary-camp,
+  .camp-closed-actions .btn-secondary-camp {
+    width: 100% !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (max-width: 360px) {
+  /* Extra compact for very narrow viewports */
+  .camp-hero-title {
+    font-size: 1.4rem !important;
+  }
+
+  .camp-hero-btn-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .camp-checkbox-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .camp-radio-group {
+    grid-template-columns: 1fr !important;
+  }
+}

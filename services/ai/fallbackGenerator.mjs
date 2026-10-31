@@ -7,13 +7,13 @@
 /**
  * Generates structured fallback email content based on form type and submitted fields.
  * @param {Object} formData - Cleaned form input fields
- * @param {string} formType - Form type (donation, volunteer, contact, support, partnership, newsletter, feedback)
+ * @param {string} formType - Form type (donation, volunteer, contact, support, partnership, newsletter, feedback, preregistration)
  * @param {string} submissionId - Unique submission ID
  * @param {string} timestampIST - Formatted IST timestamp
  * @returns {Object} Structured user and admin email content
  */
 export function generateFallbackEmails(formData, formType, submissionId, timestampIST) {
-  const name = formData.name || formData.firstName || 'Valued Supporter';
+  const name = formData.name || formData.full_name || formData.firstName || 'Valued Participant';
   const email = formData.email || '';
   const phone = formData.phone || formData.mobile || '';
   const interest = formData.interest || formData.category || formData.subject || 'Cancer Care & Awareness';
@@ -22,6 +22,32 @@ export function generateFallbackEmails(formData, formType, submissionId, timesta
 
   // Form type specific fallback content
   switch (formType.toLowerCase()) {
+    case 'preregistration':
+    case 'camp_registration': {
+      const checkupsArr = Array.isArray(formData.checkups) ? formData.checkups : (formData.checkups ? [formData.checkups] : []);
+      const checkupsText = checkupsArr.length > 0 ? checkupsArr.join(', ') : 'General Health, Eye, Dental & Screening';
+      const ageGender = [formData.age ? `${formData.age} yrs` : '', formData.gender || ''].filter(Boolean).join(', ');
+      const campName = formData.camp_title || 'Avinya Care Foundation – Mega Health Checkup with Free Tests';
+      const campDate = 'Sunday, 29 November 2026';
+      const campVenue = 'Yashwant Nagar, Virar West';
+      const helpline = '+91 74474 41116';
+
+      return {
+        user: {
+          subject: `Camp Registration Confirmed: ${campName}`,
+          greeting: `Dear ${name},`,
+          body: `Thank you for registering for the upcoming free health camp.\n\nCamp Details:\n• Event: ${campName}\n• Date: ${campDate}\n• Location: ${campVenue}\n• Registration Pass ID: ${submissionId}\n• Registrant: ${name}${ageGender ? ` (${ageGender})` : ''}\n• Area/Location: ${formData.area_location || 'Virar West'}\n• Selected Checkups: ${checkupsText}\n\nImportant Medical Note: Available checkups and tests depend on medical eligibility and partner availability. Additional tests are subject to partner confirmation.\n\nPlease show your Registration Pass ID (${submissionId}) upon arrival at the camp registration desk. For any assistance or questions, please call our helpline at ${helpline}.`,
+          closing: "With warm regards and wishing you the best of health,\nAvinya Care Foundation Team"
+        },
+        admin: {
+          subject: `New Camp Pre-Registration — ${name} (${formData.area_location || 'Virar West'})`,
+          summary: `A new registration has been received for the Mega Health Checkup Camp.\n\n• Registration ID: ${submissionId}\n• Full Name: ${name}\n• Age & Gender: ${ageGender || 'Not specified'}\n• Mobile Number: ${phone || 'Not specified'}\n• Area/Location: ${formData.area_location || 'Not specified'}\n• Requested Checkups: ${checkupsText}\n• Current Health Concerns: ${formData.health_concerns || 'None mentioned'}\n• Prior Screening Undergone: ${formData.prior_screening || 'Not answered'}\n• Prior Cancer Diagnosis: ${formData.prior_cancer_diagnosis || 'Not answered'}\n• Family History of Cancer: ${formData.family_cancer_history || 'Not answered'}\n• Consent Agreed: Yes (agreed to be contacted for camp arrangements)`,
+          recommendedAction: "Review medical eligibility, verify diagnostic partner quota for requested checkups, and update camp slot schedule in the dashboard.",
+          closing: "Avinya Care Foundation Operations Coordination"
+        }
+      };
+    }
+
     case 'donation': {
       const amount = formData.amount ? `₹${new Intl.NumberFormat('en-IN').format(formData.amount)}` : 'your monetary gift';
       const frequency = formData.frequency || (formData.isMonthly ? 'monthly' : 'one-time');

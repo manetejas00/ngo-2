@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <circle cx="60" cy="60" r="54" stroke="#087F73" stroke-width="2.5" stroke-dasharray="4 3"/>
+  <circle cx="60" cy="60" r="48" stroke="#087F73" stroke-width="1.5"/>
+  <path id="curve" d="M 22 60 A 38 38 0 1 1 98 60" fill="none"/>
+  <text font-family="'Outfit', sans-serif" font-size="7.5" font-weight="700" fill="#087F73" letter-spacing="1.5">
+    <textPath href="#curve" startOffset="50%" text-anchor="middle">
+      AVINYA CARE FOUNDATION
+    </textPath>
+  </text>
+  <path id="curveBottom" d="M 98 60 A 38 38 0 0 1 22 60" fill="none"/>
+  <text font-family="'Outfit', sans-serif" font-size="7" font-weight="700" fill="#F58220" letter-spacing="1.2">
+    <textPath href="#curveBottom" startOffset="50%" text-anchor="middle">
+      ★ VERIFIED ENTRY PASS ★
+    </textPath>
+  </text>
+  <!-- Center Emblem -->
+  <circle cx="60" cy="60" r="18" fill="#F0FDF4"/>
+  <path d="M60 48L63.5 55L71 56L65.5 61.5L67 69L60 65.5L53 69L54.5 61.5L49 56L56.5 55Z" fill="#087F73"/>
+  <text x="60" y="78" font-family="'Inter', sans-serif" font-size="6" font-weight="800" fill="#087F73" text-anchor="middle">2026</text>
+</svg>

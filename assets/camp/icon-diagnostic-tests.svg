@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#F3E8FF"/>
+  <!-- Flask -->
+  <path d="M22 12V18L15 31C13.8954 32.9134 15.2758 35.3113 17.5 35.3113H30.5C32.7242 35.3113 34.1046 32.9134 33 31L26 18V12" stroke="#7E22CE" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M20 12H28" stroke="#7E22CE" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M18 28H30" stroke="#087F73" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="21" cy="24" r="1.5" fill="#F58220"/>
+  <circle cx="27" cy="23" r="2" fill="#F58220"/>
+</svg>

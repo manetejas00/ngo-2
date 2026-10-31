@@ -6,25 +6,38 @@ import { getSubmissionCategory } from '../donations/donationStats.mjs';
 
 function normalizeSubmissions(list) {
     return list.map(item => ({
+      ...item,
       id: item.submissionId || item.id || item.submission_id || ('SUB-' + Date.now()),
       submission_id: item.submissionId || item.id || item.submission_id || ('SUB-' + Date.now()),
       form_type: (item.formType || item.form_type || 'contact').toLowerCase(),
-      name: item.name || 'Anonymous',
+      name: item.name || item.full_name || 'Anonymous',
+      full_name: item.full_name || item.name || 'Anonymous',
       email: item.email || '',
-      phone: item.phone || '',
+      phone: item.phone || item.mobile || '',
       organization: item.organization || '',
       message: item.message || '',
       amount: item.amount || null,
       payment_status: item.paymentStatus || item.payment_status || 'PENDING',
       transaction_id: item.transactionId || item.transaction_id || '',
-      category: getSubmissionCategory(item),
-      interest: getSubmissionCategory(item),
+      category: item.category || getSubmissionCategory(item) || item.interest || '',
+      interest: item.interest || getSubmissionCategory(item) || '',
       is_anonymous: Boolean(item.isAnonymous || item.is_anonymous),
       delivery_status: item.deliveryStatus || item.delivery_status || 'SENT',
-      created_at: item.timestampIST || item.created_at || new Date().toISOString()
+      created_at: item.timestampIST || item.created_at || new Date().toISOString(),
+      age: item.age !== undefined && item.age !== null ? item.age : null,
+      gender: item.gender || '',
+      area_location: item.area_location || item.location || item.area || '',
+      checkups: Array.isArray(item.checkups) ? item.checkups : (item.checkups ? [item.checkups] : []),
+      health_concerns: item.health_concerns || '',
+      prior_screening: item.prior_screening || '',
+      prior_cancer_diagnosis: item.prior_cancer_diagnosis || '',
+      family_cancer_history: item.family_cancer_history || '',
+      consent: item.consent !== undefined ? Boolean(item.consent) : true,
+      camp_title: item.camp_title || 'Avinya Care Foundation – Mega Health Checkup with Free Tests',
+      status: item.status || 'PENDING_REVIEW',
+      review_status: item.review_status || 'PRIVATE_UNREVIEWED'
     }));
 }
-
 
 /** Serialize mutations so concurrent requests cannot overwrite one another. */
 export function createSubmissionStore(file, { timestamp } = {}) {
@@ -79,6 +92,23 @@ export function createSubmissionStore(file, { timestamp } = {}) {
         record.payment_status = status;
         record.paymentVerifiedBy = String(verifiedBy || 'admin').slice(0, 120);
         record.paymentVerifiedAt = timestamp();
+        await writeRecords(records);
+        return record;
+      });
+    },
+    updatePreregistrationStatus(submissionId, newStatus, newReviewStatus) {
+      return mutate(async () => {
+        const id = String(submissionId || '').trim();
+        if (!id) throw new Error('Registration ID required.');
+        const records = await readRecords();
+        const record = records.find(item => String(item.submissionId || item.id || item.submission_id || '').trim() === id);
+        if (!record) throw new Error('Registration record was not found.');
+        if (newStatus) {
+          record.status = String(newStatus).toUpperCase().trim();
+        }
+        if (newReviewStatus) {
+          record.review_status = String(newReviewStatus).toUpperCase().trim();
+        }
         await writeRecords(records);
         return record;
       });

@@ -4,7 +4,7 @@
  * Serves static assets, health news API (/api/news), Gemini AI topic generator (/api/news/generate), persistent 1-hour cache, and cron refresh (/api/news/refresh).
  */
 
-import { createServer } from 'node:http';
+import http, { createServer } from 'node:http';
 import { sendCampConfirmation } from './services/registrations/camp-email.mjs';
 import { createCampRegistrationStore, campRegistrationHandler, validateRegistration } from './services/registrations/camp-registration.mjs';
 import { randomBytes } from 'node:crypto';
@@ -105,7 +105,7 @@ async function initPersistentCache() {
     if (parsed && Array.isArray(parsed.articles) && parsed.timestamp) {
       newsCache = parsed;
       console.log(`[Cache Loaded] Restored ${newsCache.articles.length} news articles from persistent storage.`);
-      
+
       // If cache is older than 24 hours, automatically trigger daily global news refresh
       if ((Date.now() - newsCache.timestamp) >= CACHE_TTL_MS) {
         console.log('[News Auto-Sync] Cache is older than interval. Refreshing global healthcare news...');
@@ -167,18 +167,18 @@ const STRICT_NON_HEALTH_KEYWORDS = [
 function isHealthcareOnlyNews(article) {
   if (!article || !article.title) return false;
   const text = `${article.title || ''} ${article.description || ''}`.toLowerCase();
-  
+
   // 1. Reject explicitly unrelated non-health topics with word boundary matching
   for (const keyword of STRICT_NON_HEALTH_KEYWORDS) {
     const wordRegex = new RegExp(`\\b${keyword.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i');
     if (wordRegex.test(text)) return false;
   }
-  
+
   // 2. MUST contain at least one healthcare / medical / oncology keyword
   for (const keyword of HEALTHCARE_KEYWORDS) {
     if (text.includes(keyword)) return true;
   }
-  
+
   return false;
 }
 
@@ -207,10 +207,10 @@ try {
 }
 
 function generateGeminiNewsTopicFromPool(index = null, now = Date.now()) {
-  const item = index !== null && AI_NEWS_TOPICS_POOL[index] 
-    ? AI_NEWS_TOPICS_POOL[index] 
+  const item = index !== null && AI_NEWS_TOPICS_POOL[index]
+    ? AI_NEWS_TOPICS_POOL[index]
     : AI_NEWS_TOPICS_POOL[Math.floor(Math.random() * AI_NEWS_TOPICS_POOL.length)];
-    
+
   return {
     id: `gemini-ai-topic-${now}-${Math.random().toString(36).substring(2, 6)}`,
     title: item.title,
@@ -230,7 +230,7 @@ function generateMultipleGeminiNewsTopics(count = 5, userTopicHint = "") {
   const numToGen = Math.max(3, Math.min(10, count || 5));
   const shuffled = [...AI_NEWS_TOPICS_POOL].sort(() => 0.5 - Math.random());
   const selected = shuffled.slice(0, numToGen);
-  
+
   return selected.map((item, idx) => ({
     id: `gemini-ai-topic-${now}-${idx + 1}-${Math.random().toString(36).substring(2, 6)}`,
     title: item.title,
@@ -249,7 +249,7 @@ function generateMultipleGeminiNewsTopics(count = 5, userTopicHint = "") {
 async function generateGeminiNewsTopic(userTopicHint = "") {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   const now = Date.now();
-  
+
   if (apiKey) {
     try {
       const promptText = `You are a senior medical communicator for AvinyaCareFoundation (a cancer awareness NGO).
@@ -510,6 +510,30 @@ const submissionStore = createSubmissionStore(join(CACHE_DIR, 'submissions.json'
 const saveSubmission = submissionStore.save;
 const getFormSubmissions = submissionStore.list;
 const updateDonationPaymentStatus = submissionStore.updateDonationPaymentStatus;
+const updatePreregistrationStatus = submissionStore.updatePreregistrationStatus;
+
+async function syncToGoogleSheets(record) {
+  const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+  if (!webhookUrl || !webhookUrl.startsWith('http')) return;
+  try {
+    const url = new URL(webhookUrl);
+    const postData = JSON.stringify(record);
+    const client = url.protocol === 'https:' ? https : http;
+    const sReq = client.request(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      },
+      timeout: 6000
+    });
+    sReq.on('error', (e) => console.warn('[Google Sheets Sync Error]', e.message));
+    sReq.write(postData);
+    sReq.end();
+  } catch (err) {
+    console.warn('[Google Sheets Webhook Warning]', err.message);
+  }
+}
 
 function getFormattedISTTimestamp() {
   const now = new Date();
@@ -642,22 +666,51 @@ const server = createServer(async (req, res) => {
         return;
       }
 
-      const allowedFormTypes = new Set(['donation', 'volunteer', 'support', 'contact', 'partnership', 'newsletter', 'feedback', 'guide', 'coming_soon_feedback']);
+      const allowedFormTypes = new Set(['donation', 'volunteer', 'support', 'contact', 'partnership', 'newsletter', 'feedback', 'guide', 'coming_soon_feedback', 'preregistration', 'camp_registration']);
       const formType = String(payload.form_type || payload.formType || 'contact').trim().toLowerCase();
       const text = (value, max = 500) => String(value ?? '').trim().replace(/\s+/g, ' ').slice(0, max);
       const errors = {};
       const addError = (field, message) => { errors[field] = [message]; };
       const email = text(payload.email, 254).toLowerCase();
-      const name = text(payload.name || payload.fullName || `${payload.firstName || ''} ${payload.lastName || ''}`, 120);
+      const name = text(payload.name || payload.full_name || payload.fullName || (payload.firstName ? `${payload.firstName || ''} ${payload.lastName || ''}` : ''), 120);
       const phoneRaw = text(payload.phone || payload.mobile, 20);
       const indianPhone = /^(?:\+91)?[6-9]\d{9}$/;
       const normalizedPhone = phoneRaw.replace(/[\s()-]/g, '');
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,63}$/;
 
       if (!allowedFormTypes.has(formType)) addError('form_type', 'Unsupported form type.');
-      if (!emailPattern.test(email) && !(formType === 'support' && !email)) addError('email', 'Enter a valid email address.');
-      if (['donation', 'volunteer', 'support', 'contact', 'partnership', 'coming_soon_feedback'].includes(formType) && !name) addError('name', 'Enter your name.');
-      if (['donation', 'volunteer', 'support', 'coming_soon_feedback'].includes(formType) && !indianPhone.test(normalizedPhone)) addError('phone', 'Enter a valid Indian mobile number.');
+      if (email && !emailPattern.test(email)) addError('email', 'Enter a valid email address.');
+      if (!email && !['support', 'preregistration', 'camp_registration'].includes(formType)) addError('email', 'Enter a valid email address.');
+      if (['donation', 'volunteer', 'support', 'contact', 'partnership', 'coming_soon_feedback', 'preregistration', 'camp_registration'].includes(formType) && !name) addError('name', 'Enter your name.');
+      if (['donation', 'volunteer', 'support', 'coming_soon_feedback', 'preregistration', 'camp_registration'].includes(formType) && !indianPhone.test(normalizedPhone)) addError('phone', 'Enter a valid Indian mobile number.');
+
+      if (formType === 'preregistration' || formType === 'camp_registration') {
+        const campCutoff = new Date('2026-11-29T00:00:00+05:30');
+        const now = new Date();
+        const settings = await getSiteSettings();
+        const override = settings.camp_registration_status;
+        const isForceClosed = override === 'closed';
+        const isForceOpen = override === 'open';
+        const isClosed = isForceClosed || (!isForceOpen && now >= campCutoff);
+
+        if (isClosed) {
+          res.writeHead(403, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+          res.end(JSON.stringify({
+            status: 'closed',
+            message: 'Online pre-registration for the Mega Health Camp on 29 November 2026 has closed. Walk-ins are accepted directly on-site at Yashwant Nagar, Virar West from 9:00 AM to 4:00 PM. Helpline: 7447441116.'
+          }));
+          return;
+        }
+
+        const ageNum = parseInt(payload.age, 10);
+        if (!payload.age || isNaN(ageNum) || ageNum < 1 || ageNum > 120) addError('age', 'Please enter a valid age between 1 and 120.');
+        if (!payload.gender) addError('gender', 'Please select your gender.');
+        const loc = text(payload.area_location || payload.location || payload.area, 200);
+        if (!loc) addError('area_location', 'Please enter your area/location.');
+        if (payload.consent !== true && payload.consent !== 'true' && payload.consent !== 'on') {
+          addError('consent', 'Please agree to be contacted by Avinya Care Foundation regarding camp arrangements.');
+        }
+      }
 
       const organization = text(payload.organization || payload.company, 160);
       const message = text(payload.message || payload.feedback, 3000);
@@ -681,34 +734,67 @@ const server = createServer(async (req, res) => {
         return;
       }
 
-      const submissionId = `SUB-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+      const submissionId = (formType === 'preregistration' || formType === 'camp_registration') ? `CAMP-2026-${Math.random().toString(36).substring(2, 7).toUpperCase()}` : `SUB-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
       const timestampIST = getFormattedISTTimestamp();
 
       const formData = {
         ...payload,
         name,
+        full_name: name,
         email,
         form_type: formType
       };
 
       // Save submission record
       await saveSubmission({
+        ...payload,
         submissionId,
         formType,
         name,
+        full_name: name,
         email,
         phone: normalizedPhone,
         organization,
-        interest: payload.interest || payload.category || payload.subject || '',
+        interest: payload.interest || payload.category || payload.subject || (formType === 'preregistration' ? 'Mega Health Camp 29 Nov 2026' : ''),
         message,
         amount: donationAmount,
         paymentStatus,
         transactionId: payload.transaction_id || '',
-        category: payload.category || payload.interest || '',
+        category: payload.category || payload.interest || (formType === 'preregistration' ? 'Health Camp' : ''),
         isAnonymous: Boolean(payload.is_anonymous),
         isSensitive: payload.is_sensitive || false,
-        timestampIST
+        timestampIST,
+        age: payload.age ? parseInt(payload.age, 10) : null,
+        gender: text(payload.gender, 50),
+        area_location: text(payload.area_location || payload.location || payload.area, 200),
+        checkups: Array.isArray(payload.checkups) ? payload.checkups : (payload.checkups ? [payload.checkups] : []),
+        health_concerns: text(payload.health_concerns, 2000),
+        prior_screening: text(payload.prior_screening, 50),
+        prior_cancer_diagnosis: text(payload.prior_cancer_diagnosis, 50),
+        family_cancer_history: text(payload.family_cancer_history, 50),
+        consent: Boolean(payload.consent),
+        camp_title: text(payload.camp_title || 'Avinya Care Foundation – Mega Health Checkup with Free Tests', 200),
+        status: 'PENDING_REVIEW',
+        review_status: payload.review_status || 'PRIVATE_UNREVIEWED'
       });
+
+      if (formType === 'preregistration' || formType === 'camp_registration') {
+        syncToGoogleSheets({
+          submissionId,
+          timestampIST,
+          name,
+          age: payload.age,
+          gender: payload.gender,
+          phone: normalizedPhone,
+          area_location: payload.area_location || payload.location || payload.area,
+          checkups: Array.isArray(payload.checkups) ? payload.checkups.join(', ') : (payload.checkups || ''),
+          health_concerns: payload.health_concerns || '',
+          prior_screening: payload.prior_screening || '',
+          prior_cancer_diagnosis: payload.prior_cancer_diagnosis || '',
+          family_cancer_history: payload.family_cancer_history || '',
+          email: email || 'N/A'
+        });
+      }
 
       // AI Email Generation (Server-Side)
       const generatedEmails = await generateFormEmails(formData, formType, submissionId, timestampIST);
@@ -798,6 +884,124 @@ const server = createServer(async (req, res) => {
   if (urlPath === '/api/news/generate') {
     res.writeHead(410, {'Content-Type': 'application/json'});
     res.end(JSON.stringify({status: 'error', message: 'Generated news is not published.'})); return;
+  }
+
+  // API Endpoint: /api/camp-status (Check & manage camp registration auto-closure)
+  if (urlPath === '/api/camp-status' && req.method === 'GET') {
+    try {
+      const campCutoff = new Date('2026-11-29T00:00:00+05:30');
+      const campEnd = new Date('2026-11-29T16:00:00+05:30');
+      const now = new Date();
+      const settings = await getSiteSettings();
+      const override = settings.camp_registration_status; // 'open' | 'closed' | undefined
+      const isForceClosed = override === 'closed';
+      const isForceOpen = override === 'open';
+      const isAutoClosed = now >= campCutoff;
+      const isOpen = isForceOpen || (!isForceClosed && !isAutoClosed);
+
+      let state = 'upcoming_open';
+      if (!isOpen) {
+        state = now > campEnd ? 'concluded' : 'ongoing_closed';
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({
+        status: 'ok',
+        camp_title: 'Avinya Care Foundation – Mega Health Checkup with Free Tests',
+        camp_date: '2026-11-29',
+        camp_date_formatted: 'Sunday, 29 November 2026',
+        camp_time: '9:00 AM – 4:00 PM IST',
+        venue: 'Yashwant Nagar, Virar West',
+        helpline: '+91 74474 41116',
+        cutoff_ist: campCutoff.toISOString(),
+        current_time_ist: getFormattedISTTimestamp(),
+        is_open: isOpen,
+        state,
+        override: override || 'auto',
+        walkins_allowed: true,
+        message: isOpen
+          ? 'Pre-registration is active and open.'
+          : 'Pre-registration has closed for this camp. Walk-ins are accepted directly on-site at Yashwant Nagar, Virar West.'
+      }));
+      return;
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'error', message: e.message }));
+      return;
+    }
+  }
+
+  if (urlPath === '/api/camp-status' && req.method === 'POST') {
+    try {
+      const body = await parseJsonBody(req);
+      const settings = await getSiteSettings();
+      const newStatus = body.status; // 'auto', 'open', 'closed'
+      if (['auto', 'open', 'closed'].includes(newStatus)) {
+        settings.camp_registration_status = newStatus === 'auto' ? '' : newStatus;
+        await saveSiteSettings(settings);
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({ status: 'ok', message: `Camp registration status set to ${newStatus}.`, camp_registration_status: settings.camp_registration_status || 'auto' }));
+      return;
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'error', message: e.message }));
+      return;
+    }
+  }
+
+  // API Endpoint: /api/preregistrations (List & CSV Export)
+  if (urlPath === '/api/preregistrations' && req.method === 'GET') {
+    try {
+      const submissions = await getFormSubmissions();
+      const campRegs = submissions.filter(s => (s.form_type || '').toLowerCase() === 'preregistration' || (s.form_type || '').toLowerCase() === 'camp_registration');
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({ status: 'ok', total: campRegs.length, registrations: campRegs }));
+      return;
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'error', message: e.message }));
+      return;
+    }
+  }
+
+  if (urlPath === '/api/preregistrations/export' && req.method === 'GET') {
+    try {
+      const submissions = await getFormSubmissions();
+      const campRegs = submissions.filter(s => (s.form_type || '').toLowerCase() === 'preregistration' || (s.form_type || '').toLowerCase() === 'camp_registration');
+      const headers = ['Registration ID', 'Submission Date', 'Full Name', 'Age', 'Gender', 'Mobile Number', 'Area / Location', 'Requested Checkups', 'Current Health Concerns', 'Prior Screening', 'Prior Cancer Diagnosis', 'Family Cancer History', 'Email', 'Consent', 'Status', 'Review State'];
+      const rows = campRegs.map(r => [
+        r.submissionId || r.id,
+        r.created_at || r.timestampIST,
+        r.full_name || r.name,
+        r.age ?? '',
+        r.gender || '',
+        r.phone || '',
+        r.area_location || '',
+        Array.isArray(r.checkups) ? r.checkups.join('; ') : (r.checkups || ''),
+        r.health_concerns || '',
+        r.prior_screening || '',
+        r.prior_cancer_diagnosis || '',
+        r.family_cancer_history || '',
+        r.email || '',
+        r.consent ? 'YES' : 'NO',
+        r.status || 'PENDING_REVIEW',
+        r.review_status || 'PRIVATE_UNREVIEWED'
+      ].map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','));
+
+      const csvData = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+      res.writeHead(200, {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="Avinya_Mega_Health_Camp_Registrations_${new Date().toISOString().slice(0, 10)}.csv"`,
+        'Access-Control-Allow-Origin': '*'
+      });
+      res.end(csvData);
+      return;
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'error', message: e.message }));
+      return;
+    }
   }
 
   // API Endpoint: /api/donations/recent & /api/donations (Serves real donations sorted latest first, without timestamps)
@@ -969,7 +1173,7 @@ const server = createServer(async (req, res) => {
   // -------------------------------------------------------------
   // HEALTHCARE REST APIS: /api/healthcare/*
   // -------------------------------------------------------------
-  
+
   const searchParams = new URLSearchParams(req.url.split('?')[1] || '');
   const queryParams = Object.fromEntries(searchParams.entries());
 
@@ -1367,7 +1571,7 @@ const server = createServer(async (req, res) => {
     const submissions = await getFormSubmissions();
     const appointments = await getAppointments();
     const testBookings = await getTestBookings();
-    
+
     const formsCount = (submissions || []).length;
     const doctorsCount = (appointments || []).length;
     const diagCount = (testBookings || []).length;
@@ -2050,7 +2254,7 @@ const server = createServer(async (req, res) => {
     try {
       const body = await parseJsonBody(req);
       const appointment = await createAppointment(body);
-      
+
       // Asynchronously trigger patient, doctor, and admin notifications
       dispatchAppointmentCreatedEmails(appointment).catch(e => console.warn('[Email Warning]', e.message));
 
@@ -2100,7 +2304,7 @@ const server = createServer(async (req, res) => {
       const newTime = body.time || body.newTime || null;
 
       const updatedApt = await updateAppointmentStatus(aptId, newStatus, actor, notes, newDate, newTime);
-      
+
       // Dispatch status email
       dispatchAppointmentStatusEmail(updatedApt, newStatus, notes).catch(e => console.warn('[Email Warning]', e.message));
 
@@ -2209,7 +2413,7 @@ const server = createServer(async (req, res) => {
 
   // --- SEO ROUTES (robots.txt, sitemap.xml, dynamic doctor/test pages) ---
   const BASE_URL = process.env.APP_URL || process.env.BASE_URL || 'https://www.avinyacarefoundation.org';
-  
+
   if (urlPath === '/robots.txt') {
     const robotsTxt = `User-agent: *
 Allow: /
@@ -2225,12 +2429,12 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
     try {
       const tests = await getDiagnosticTests();
       let urls = '';
-      
+
       const staticPages = ['', '/about', '/assistance', '/get-involved', '/transparency', '/privacy', '/terms', '/events', '/gallery', '/diagnostic-tests', '/crowdfunding'];
       for (const page of staticPages) {
         urls += `  <url>\n    <loc>${BASE_URL}${page}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${page === '' ? '1.0' : '0.8'}</priority>\n  </url>\n`;
       }
-      
+
       for (const t of tests) {
         urls += `  <url>\n    <loc>${BASE_URL}/test/${t.id}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
       }
@@ -2285,7 +2489,16 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
         html = html.replace(/<script type="application\/ld\+json">.*?<\/script>/s, '');
         html = html.replace('<!-- Canonical URL -->', seoTags);
         html = html.replace('</body>', `<script>window.INITIAL_MODAL_ID='${doc.id}'; window.INITIAL_MODAL_TYPE='doctor';</script></body>`);
-        
+
+        if (html.includes('<!-- REUSABLE_NAVBAR -->')) {
+          const navbar = await readFile(join(__dirname, 'components', 'navbar.html'), 'utf-8');
+          html = html.replace('<!-- REUSABLE_NAVBAR -->', navbar);
+        }
+        if (html.includes('<!-- REUSABLE_FOOTER -->')) {
+          const footer = await readFile(join(__dirname, 'components', 'footer.html'), 'utf-8');
+          html = html.replace('<!-- REUSABLE_FOOTER -->', footer);
+        }
+
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
         return res.end(html);
       }
@@ -2300,7 +2513,15 @@ Sitemap: ${BASE_URL}/sitemap.xml`;
       const tests = await getDiagnosticTests();
       const test = tests.find(t => t.id === testId);
       if (test) {
-        const html = diagnosticDetailPage(test, BASE_URL);
+        let html = diagnosticDetailPage(test, BASE_URL);
+        if (html.includes('<!-- REUSABLE_NAVBAR -->')) {
+          const navbar = await readFile(join(__dirname, 'components', 'navbar.html'), 'utf-8');
+          html = html.replace('<!-- REUSABLE_NAVBAR -->', navbar);
+        }
+        if (html.includes('<!-- REUSABLE_FOOTER -->')) {
+          const footer = await readFile(join(__dirname, 'components', 'footer.html'), 'utf-8');
+          html = html.replace('<!-- REUSABLE_FOOTER -->', footer);
+        }
 
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
         return res.end(html);

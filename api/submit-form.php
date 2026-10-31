@@ -55,13 +55,13 @@ $submissionId = 'SUB-' . time() . '-' . strtoupper(substr(md5(uniqid()), 0, 5));
 date_default_timezone_set('Asia/Kolkata');
 $timestampIST = date('d F Y, g:i A \I\S\T');
 
-$allowedFormTypes = ['donation', 'volunteer', 'support', 'contact', 'partnership', 'newsletter', 'feedback', 'guide', 'coming_soon_feedback'];
+$allowedFormTypes = ['donation', 'volunteer', 'support', 'contact', 'partnership', 'newsletter', 'feedback', 'guide', 'coming_soon_feedback', 'preregistration', 'camp_registration'];
 $errors = [];
 if (!in_array($formType, $allowedFormTypes, true)) $errors['form_type'] = ['Unsupported form type.'];
-if ((!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) && !($formType === 'support' && $email === '')) $errors['email'] = ['Please provide a valid email address.'];
-if (in_array($formType, ['donation', 'volunteer', 'support', 'contact', 'partnership', 'coming_soon_feedback'], true) && $name === '') $errors['name'] = ['Please enter your name.'];
+if ((!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) && !($formType === 'support' && $email === '') && !($formType === 'preregistration' && $email === '') && !($formType === 'camp_registration' && $email === '')) $errors['email'] = ['Please provide a valid email address.'];
+if (in_array($formType, ['donation', 'volunteer', 'support', 'contact', 'partnership', 'coming_soon_feedback', 'preregistration', 'camp_registration'], true) && $name === '') $errors['name'] = ['Please enter your name.'];
 $normalizedPhone = preg_replace('/[\s()\-]/', '', $phone);
-if (in_array($formType, ['donation', 'volunteer', 'support', 'coming_soon_feedback'], true) && !preg_match('/^(?:\+91)?[6-9]\d{9}$/', $normalizedPhone)) $errors['phone'] = ['Enter a valid Indian mobile number.'];
+if (in_array($formType, ['donation', 'volunteer', 'support', 'coming_soon_feedback', 'preregistration', 'camp_registration'], true) && !preg_match('/^(?:\+91)?[6-9]\d{9}$/', $normalizedPhone)) $errors['phone'] = ['Enter a valid Indian mobile number.'];
 if ($formType === 'partnership' && $organization === '') $errors['organization'] = ['Organization name is required.'];
 if (in_array($formType, ['feedback', 'contact', 'support', 'coming_soon_feedback'], true) && $message === '') $errors['message'] = ['Please enter a message.'];
 if ($errors) { http_response_code(422); echo json_encode(['status' => 'error', 'message' => reset($errors)[0], 'errors' => $errors]); exit(0); }

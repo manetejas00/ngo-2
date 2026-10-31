@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#FFF1F2"/>
+  <!-- Awareness Ribbon -->
+  <path d="M20 18C20 15 22 13 24 13C26 13 28 15 28 18C28 22 20 28 17 35M28 18C28 22 36 28 31 35" stroke="#E11D48" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Early Detection Cross -->
+  <path d="M24 28V36M20 32H28" stroke="#087F73" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="24" cy="18" r="2" fill="#F58220"/>
+</svg>
