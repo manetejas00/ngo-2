@@ -258,11 +258,17 @@
           <span class="nav-badge" id="sideCrowdfundingCount">0</span>
         </button>
 
-        <div class="menu-group-label">CAMP PRE-REGISTRATION</div>
+        <div class="menu-group-label">GOOGLE FORMS</div>
         <button class="sidebar-nav-link" data-tab="preregistrations" data-tooltip="Camp Pre-Registrations" onclick="switchTab('preregistrations')">
           <span class="nav-icon">📋</span>
-          <span class="nav-text">Pre-Registrations</span>
+          <span class="nav-text">Camp Pre-Registrations</span>
           <span class="nav-badge" id="sidePreregCount" style="background: var(--primary); color: #fff;">0</span>
+        </button>
+
+        <button class="sidebar-nav-link" data-tab="forms_volunteer" data-tooltip="Volunteer Applications" onclick="switchTab('forms_volunteer')">
+          <span class="nav-icon">🙋‍♂️</span>
+          <span class="nav-text">Volunteer Applications</span>
+          <span class="nav-badge" id="sideFormVolunteerCount">0</span>
         </button>
 
         <div class="menu-group-label">FORM SUBMISSIONS</div>
@@ -279,11 +285,6 @@
           <span class="nav-icon">📰</span>
           <span class="nav-text">Newsletter Subscribers</span>
           <span class="nav-badge" id="sideFormNewsletterCount">0</span>
-        </button>
-        <button class="sidebar-nav-link" data-tab="forms_volunteer" data-tooltip="Volunteer Applications" onclick="switchTab('forms_volunteer')">
-          <span class="nav-icon">🙋‍♂️</span>
-          <span class="nav-text">Volunteer Applications</span>
-          <span class="nav-badge" id="sideFormVolunteerCount">0</span>
         </button>
         <button class="sidebar-nav-link" data-tab="forms_support" data-tooltip="Patient Support Inquiries" onclick="switchTab('forms_support')">
           <span class="nav-icon">🩺</span>
@@ -2893,7 +2894,8 @@
         crowdfunding: 'Healthcare > Crowdfunding Campaigns',
         forms_contact: 'Forms > Contact Us',
         forms_newsletter: 'Forms > Newsletter',
-        forms_volunteer: 'Forms > Volunteer',
+        forms_volunteer: 'Google Forms > Volunteer Applications',
+        preregistrations: 'Google Forms > Camp Pre-Registrations',
         forms_support: 'Forms > Patient Support',
         forms_donation: 'Forms > Donations & 80G',
         forms_coming_soon_feedback: 'Forms > Coming Soon',
