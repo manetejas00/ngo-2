@@ -4,6 +4,7 @@
  * Serves static assets, health news API (/api/news), Gemini AI topic generator (/api/news/generate), persistent 1-hour cache, and cron refresh (/api/news/refresh).
  */
 
+import { googleFormHandler } from './services/registrations/google-form-sync.mjs';
 import http, { createServer } from 'node:http';
 import { sendCampConfirmation } from './services/registrations/camp-email.mjs';
 import { createCampRegistrationStore, campRegistrationHandler, validateRegistration } from './services/registrations/camp-registration.mjs';
@@ -631,6 +632,8 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (['/api/google-form-sync', '/api/google-form-sync.php'].includes(urlPath)) return await googleFormHandler(submissionStore, { token: process.env.GOOGLE_FORM_SYNC_SECRET, formId: process.env.GOOGLE_PREREGISTRATION_FORM_ID, sendConfirmation: sendCampConfirmation })(req, res);
+
   if (urlPath === '/api/camp-registration') return await registerForCamp(req, res);
 
   // API Endpoint: /api/submit-form (Processes all form submissions with server-side AI email generation)
@@ -813,6 +816,8 @@ const server = createServer(async (req, res) => {
         timestampIST
       });
 
+      if (['preregistration','camp_registration'].includes(formType)) await submissionStore.setEmailStatus(submissionId, !email ? 'SKIPPED' : dispatchResult.userEmail?.sent ? 'SENT' : 'FAILED');
+
       res.writeHead(200, {
         'Content-Type': 'application/json; charset=utf-8',
         'Access-Control-Allow-Origin': '*'
@@ -948,6 +953,12 @@ const server = createServer(async (req, res) => {
       res.end(JSON.stringify({ status: 'error', message: e.message }));
       return;
     }
+  }
+
+  if (['/api/preregistrations','/api/preregistrations/export'].includes(urlPath)) {
+    const user = getSessionUser(String(req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim());
+    if (!user || !['admin','manager'].includes(user.role)) return sendJson(401, {status:'error',message:'Administrator session required.'});
+    res.setHeader('Cache-Control', 'no-store');
   }
 
   // API Endpoint: /api/preregistrations (List & CSV Export)
@@ -1668,6 +1679,21 @@ const server = createServer(async (req, res) => {
       }
 
       const action = (payload.action || 'all').toLowerCase().trim();
+
+      if (action === 'send_camp_mail') {
+        if (req.method !== 'POST') return sendJson(405, {status:'error',message:'Use POST.'});
+        if (!['admin','manager'].includes(sessionUser.role)) return sendJson(403, {status:'error',message:'Administrator permissions required.'});
+        const record = (await getFormSubmissions()).find(r => r.submission_id === payload.id && ['preregistration','camp_registration'].includes(r.form_type));
+        if (!record) return sendJson(404, {status:'error',message:'Registration not found.'});
+        const email = String(payload.email || record.email).trim().toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,63}$/.test(email)) return sendJson(422, {status:'error',message:'Enter a valid email address.'});
+        const message = { subject: String(payload.subject || 'Mega Health Camp Registration').slice(0,200).replace(/[\r\n]/g,' '), greeting: `Hello ${record.name},`, body: String(payload.message || `Your registration is saved. Reference: ${record.submission_id}. Camp: 29 November 2026, Yashwant Nagar, Virar West. Helpline: 7447441116.`).slice(0,5000), closing: 'With care, Avinya Care Foundation' };
+        const rendered = renderUserEmail(message, record, 'preregistration');
+        const result = await sendFormEmails(rendered, rendered, {submissionId:record.submission_id,formType:'preregistration',userEmail:email,skipAdmin:true});
+        const status = result.userEmail?.sent ? 'SENT' : 'FAILED';
+        await submissionStore.setEmailStatus(record.submission_id, status);
+        return sendJson(status === 'SENT' ? 200 : 502, {status:status === 'SENT' ? 'ok' : 'error',emailStatus:status,message:status === 'SENT' ? 'Email accepted by the mail server.' : 'Email failed. Registration remains saved; you can retry.'});
+      }
 
       if (action === 'camp_registrations') {
         res.setHeader('Cache-Control', 'no-store');

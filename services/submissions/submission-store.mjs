@@ -22,7 +22,7 @@ function normalizeSubmissions(list) {
       category: item.category || getSubmissionCategory(item) || item.interest || '',
       interest: item.interest || getSubmissionCategory(item) || '',
       is_anonymous: Boolean(item.isAnonymous || item.is_anonymous),
-      delivery_status: item.deliveryStatus || item.delivery_status || 'SENT',
+      delivery_status: item.deliveryStatus || item.delivery_status || 'UNKNOWN',
       created_at: item.timestampIST || item.created_at || new Date().toISOString(),
       age: item.age !== undefined && item.age !== null ? item.age : null,
       gender: item.gender || '',
@@ -71,6 +71,27 @@ export function createSubmissionStore(file, { timestamp } = {}) {
         const records = await readRecords();
         const category = getSubmissionCategory(record);
         records.unshift({ ...record, category, interest: category || record.interest || '' });
+        await writeRecords(records);
+      });
+    },
+    saveGoogleResponse(record) {
+      return mutate(async () => {
+        const records = await readRecords();
+        const existing = records.find(row => row.submissionId === record.submissionId);
+        if (existing) return { record: existing, duplicate: true };
+        records.unshift(record);
+        await writeRecords(records);
+        return { record, duplicate: false };
+      });
+    },
+    setEmailStatus(id, status) {
+      return mutate(async () => {
+        const records = await readRecords();
+        const record = records.find(row => (row.submissionId || row.submission_id || row.id) === id);
+        if (!record) throw new Error('Registration not found.');
+        record.deliveryStatus = status;
+        record.delivery_status = status;
+        record.user_email_sent = status === 'SENT';
         await writeRecords(records);
       });
     },

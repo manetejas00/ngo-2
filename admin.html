@@ -261,7 +261,7 @@
         <div class="menu-group-label">CAMP PRE-REGISTRATION</div>
         <button class="sidebar-nav-link" data-tab="preregistrations" data-tooltip="Camp Pre-Registrations" onclick="switchTab('preregistrations')">
           <span class="nav-icon">📋</span>
-          <span class="nav-text">Camp Pre-Registrations</span>
+          <span class="nav-text">Pre-Registrations</span>
           <span class="nav-badge" id="sidePreregCount" style="background: var(--primary); color: #fff;">0</span>
         </button>
 
@@ -598,18 +598,16 @@
             <span style="font-size: 20px;">🩺</span>
             <div>
               <div style="font-size: 13.5px; font-weight: 700; color: #fff;">Mega Health Camp (29 Nov 2026, Virar West)</div>
-              <div style="font-size: 11.5px; color: #A7F3D0;" id="campAdminStatusText">Registration: Active · Closes automatically on 29 Nov 2026 (00:00 IST)</div>
+              <div style="font-size: 11.5px; color: #A7F3D0;" id="campGoogleSyncDescription">Google Form responses sync automatically · Manage availability in Google Forms</div>
             </div>
-            <span id="campAdminStatusBadge" class="badge" style="background:#10B981; color:#fff; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px;">● OPEN</span>
+            <span id="campGoogleSyncBadge" class="badge" style="background:#10B981; color:#fff; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px;">GOOGLE FORM</span>
           </div>
 
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <button type="button" class="btn btn-sm" id="campBtnClose" style="background:#EF4444; color:#fff; font-size:11px; font-weight:700;" onclick="setCampStatus('closed')" title="Close pre-registration immediately">🔒 Close Registration</button>
-            <button type="button" class="btn btn-sm" id="campBtnOpen" style="background:#10B981; color:#fff; font-size:11px; font-weight:700;" onclick="setCampStatus('open')" title="Re-open pre-registration">🔓 Re-Open</button>
-            <button type="button" class="btn btn-sm btn-outline" id="campBtnAuto" style="color:#A7F3D0; border-color:rgba(45,212,191,0.4); font-size:11px;" onclick="setCampStatus('auto')" title="Reset to auto-cutoff on 29 Nov 2026">⏰ Auto (29 Nov)</button>
             <button type="button" class="btn btn-sm" id="campBtnSendMail" style="background:#0284C7; color:#fff; font-size:11px; font-weight:700;" onclick="openSendMailModal()" title="Compose and Send Email to Participant">✉️ Send Camp Mail</button>
-            <a href="/preregistration?status=closed" target="_blank" class="btn btn-sm btn-outline" style="color:#FBBF24; border-color:rgba(251,191,36,0.4); font-size:11px; text-decoration:none;" title="Preview how page looks when closed on camp day">👁️ Preview Closed UI</a>
-            <a href="/preregistration" target="_blank" class="btn btn-sm btn-outline" style="color:#fff; border-color:rgba(255,255,255,0.3); font-size:11px; text-decoration:none;">↗ View Public Page</a>
+            <button type="button" class="btn btn-sm btn-outline" onclick="fetchAdminData()">Refresh</button>
+            <a href="https://docs.google.com/forms/d/1V7U85Zg_iw9to6ZM6uciaUrvI7Oy6AByKgeezMbS-DU/edit" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline">Manage Google Form</a>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSeTJhxRvhfLdXYVn42D4ZjvZKa-eezs3awprflhlwQ76TboYg/viewform" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="color:#fff; border-color:rgba(255,255,255,0.3); font-size:11px; text-decoration:none;">↗ Open Google Form</a>
           </div>
         </div>
 
@@ -635,6 +633,7 @@
               <button class="btn btn-teal" id="addCampaignBtn" style="display:none;" onclick="openCampaignModal()">🎗️ Add Campaign</button>
               <button class="btn btn-outline" id="reseedCatalogBtn" style="display:none;" onclick="reseedCatalog()">🔄 Re-Seed Catalog</button>
               <button class="btn btn-primary" id="testEmailBtn" style="display:none; background: #2563EB; border-color: #2563EB;" onclick="openEmailAuditModal()">⚡ Test Form Emails</button>
+              <button class="btn btn-sm" id="volunteerSendMailBtn" style="display:none; background:#0284C7; color:#fff; font-size:12px; font-weight:700;" onclick="openVolunteerMailModal()" title="Send email to volunteer when auto-email failed">✉️ Send Volunteer Mail</button>
 
               <button class="btn btn-outline" id="copyGoogleSheetsBtn" style="color: #0F9F90; border-color: rgba(15, 159, 144, 0.4);" onclick="copyForGoogleSheets()">📊 Copy for Google Sheets</button>
               <button class="btn btn-outline" onclick="exportCSV()">📥 Export Excel / CSV</button>
@@ -1566,6 +1565,47 @@
           <div class="modal-footer" style="padding:0;border:none;display:flex;justify-content:flex-end;gap:8px;">
             <button type="button" class="btn btn-outline" onclick="closeCampMailModal()">Cancel</button>
             <button type="submit" class="btn btn-primary" id="campMailSubmitBtn" style="background:#0284C7;border-color:#0284C7;color:#fff;">
+              <span>✉️ Send Email</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Volunteer Send Mail Modal (manual fallback when auto-email did not send) -->
+  <div id="volunteerMailModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 class="modal-title">✉️ Send Volunteer Email</h3>
+        <button class="modal-close-btn" onclick="closeVolunteerMailModal()" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="volunteerMailForm" onsubmit="submitVolunteerMail(event)">
+          <input type="hidden" id="volunteerMailRegId" value="">
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Volunteer Name *</label>
+            <input type="text" class="form-control" id="volunteerMailName" required placeholder="Volunteer Full Name" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-main);">
+          </div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Recipient Email *</label>
+            <input type="email" class="form-control" id="volunteerMailEmail" required placeholder="volunteer@example.com" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-main);">
+            <small style="color:var(--text-muted);font-size:11px;display:block;margin-top:4px;">Use this when the automatic confirmation email did not reach the volunteer.</small>
+          </div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Email Subject</label>
+            <input type="text" class="form-control" id="volunteerMailSubject" required style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-main);" value="Volunteer Application Received — Avinya Care Foundation">
+          </div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Additional Note (Optional)</label>
+            <textarea class="form-control" id="volunteerMailMessage" rows="4" placeholder="Add a personal note, next steps, or interview details..." style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-main);font-family:inherit;font-size:13px;"></textarea>
+          </div>
+          <div style="background:rgba(8,127,115,0.08);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--text-muted);line-height:1.5;">
+            ℹ️ <strong>Auto-included:</strong> Application reference ID, foundation contact number, and thank-you message.
+          </div>
+          <div class="modal-footer" style="padding:0;border:none;display:flex;justify-content:flex-end;gap:8px;">
+            <button type="button" class="btn btn-outline" onclick="closeVolunteerMailModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="volunteerMailSubmitBtn" style="background:#0284C7;border-color:#0284C7;color:#fff;">
               <span>✉️ Send Email</span>
             </button>
           </div>
@@ -2820,6 +2860,8 @@
       reseedBtn.style.display = ['doctorsCatalog', 'testsCatalog', 'usersCatalog', 'crowdfunding'].includes(tab) ? 'inline-flex' : 'none';
       const testEmailBtn = document.getElementById('testEmailBtn');
       if (testEmailBtn) testEmailBtn.style.display = tab === 'email' ? 'inline-flex' : 'none';
+      const volunteerSendMailBtn = document.getElementById('volunteerSendMailBtn');
+      if (volunteerSendMailBtn) volunteerSendMailBtn.style.display = tab === 'forms_volunteer' ? 'inline-flex' : 'none';
 
       if (tab === 'dashboard') {
         renderDashboardCharts();
@@ -3022,7 +3064,7 @@
 
       // Filter by category dropdown
       if (typeVal !== 'all') {
-        items = items.filter(item => (item.category || item.form_type || '').toLowerCase() === typeVal.toLowerCase());
+        items = items.filter(item => currentTab === 'preregistrations' ? (Array.isArray(item.checkups) ? item.checkups : [item.checkups || '']).some(value => String(value).toLowerCase() === typeVal.toLowerCase()) : (item.category || item.form_type || '').toLowerCase() === typeVal.toLowerCase());
       }
 
       // Filter by date range
@@ -3199,15 +3241,49 @@
       }
     }
 
+
+    let visibleCampRegistrations = [];
+    function campEmailStatus(record) {
+      const status = String(record.delivery_status || '').toUpperCase();
+      if (['SENT', 'FAILED', 'PENDING', 'SKIPPED'].includes(status)) return status;
+      if (!record.email) return 'SKIPPED';
+      return Number(record.user_email_sent) === 1 ? 'SENT' : record.user_email_sent !== undefined ? 'FAILED' : 'UNKNOWN';
+    }
+    function campExportTable() {
+      const headers = ['Registration ID', 'Registered At', 'Full Name', 'Age', 'Gender', 'Mobile', 'Email', 'Area / Location', 'Requested Checkups', 'Health Concerns', 'Prior Screening', 'Prior Cancer Diagnosis', 'Family Cancer History', 'Consent', 'Consent Version', 'Status', 'Review State', 'Source', 'Email Status'];
+      const rows = visibleCampRegistrations.map(r => [r.submission_id || r.id, r.created_at || r.timestampIST || '', r.full_name || r.name || '', r.age ?? '', r.gender || '', r.phone || r.mobile || '', r.email || '', r.area_location || r.location || '', Array.isArray(r.checkups) ? r.checkups.join('; ') : (r.checkups || ''), r.health_concerns || '', r.prior_screening || '', r.prior_cancer_diagnosis || '', r.family_cancer_history || '', r.consent === true || r.consent === 1 || r.consent === '1' ? 'YES' : 'NO', r.consentVersion || r.consent_version || '', r.status || 'PENDING_REVIEW', r.review_status || 'PRIVATE_UNREVIEWED', r.source === 'google_forms' ? 'Google Form' : 'Website', campEmailStatus(r)]);
+      return { headers, rows };
+    }
+    function campSpreadsheetValue(value) {
+      const text = String(value ?? '');
+      return /^[\s]*[=+@-]/.test(text) ? "'" + text : text;
+    }
+    function exportCampCSV() {
+      const { headers, rows } = campExportTable();
+      if (!rows.length) return showToast('No registrations match the current filters.', 'warning');
+      const csv = [headers, ...rows].map(row => row.map(value => '"' + campSpreadsheetValue(value).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+      const url = URL.createObjectURL(new Blob(['\ufeff', csv], { type: 'text/csv;charset=utf-8' }));
+      const link = document.createElement('a'); link.href = url; link.download = 'Mega_Health_Camp_Pre_Registrations.csv';
+      document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast(`Exported ${rows.length} registrations with all answers.`, 'success');
+    }
+    function exportCampPDF() {
+      const { headers, rows } = campExportTable();
+      if (!rows.length) return showToast('No registrations match the current filters.', 'warning');
+      const html = rows.map((row, index) => `<section style="${index ? 'break-before:page;' : ''}padding:20px;color:#0f172a!important;background:#fff;"><h2 style="color:#0f172a!important;">Mega Health Camp Pre-Registration</h2><p style="color:#334155!important;">Confidential · Record ${index + 1} of ${rows.length}</p><table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px;color:#0f172a!important;">${headers.map((header, column) => `<tr style="break-inside:avoid;"><th style="width:32%;padding:7px;color:#0f172a!important;text-align:left;border-bottom:1px solid #ddd;">${escapeHtml(header)}</th><td style="padding:7px;color:#0f172a!important;border-bottom:1px solid #ddd;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;">${column === 0 ? escapeHtml(String(row[column] ?? '')).replace(/(.{24})/g, '$1<br>') : escapeHtml(String(row[column] ?? ''))}</td></tr>`).join('')}</table></section>`).join('');
+      window.AvinyaPdf.showPreviewModal(html, 'Mega_Health_Camp_Pre_Registrations.pdf');
+    }
+
     function renderPreregistrations(items) {
+      visibleCampRegistrations = items || [];
       const tbody = document.getElementById('tableBody');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">No Camp Pre-Registrations Found</div><div class="empty-state-text">Registrations submitted from the Mega Health Checkup page will appear here.</div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">No Camp Pre-Registrations Found</div><div class="empty-state-text">Google Form responses and existing website registrations appear here. Use Refresh to load the latest responses.</div></td></tr>`;
         return;
       }
 
       tbody.innerHTML = items.map(r => {
-        const id = r.submission_id || r.id || '';
+        const id = escapeHtml(r.submission_id || r.id || '');
         const name = escapeHtml(r.full_name || r.name || 'Anonymous');
         const ageGender = escapeHtml(`${r.age ? r.age + ' yrs' : 'N/A'} • ${r.gender || 'N/A'}`);
         const phone = escapeHtml(r.phone || r.mobile || 'N/A');
@@ -3252,7 +3328,8 @@
             <td>
               <div style="display:flex;gap:6px;align-items:center;">
                 <button class="btn btn-outline btn-sm" onclick="viewPreregistrationDetail('${id}')" title="View Full Details">👁️ View</button>
-                <button class="btn btn-outline btn-sm" style="color:#0284C7;border-color:rgba(2,132,199,0.4);" onclick="openSendMailModal('${id}')" title="Send Email Notification">✉️ Send Mail</button>
+                <span style="font-size:11px;">Email: ${escapeHtml(campEmailStatus(r))} · ${r.source === 'google_forms' ? 'Google Form' : 'Website'}</span>
+                <button class="btn btn-outline btn-sm" style="color:#0284C7;border-color:rgba(2,132,199,0.4);" onclick="openSendMailModal('${id}')" title="Send or retry confirmation email">✉️ ${campEmailStatus(r) === 'FAILED' ? 'Retry Email' : 'Send Mail'}</button>
               </div>
             </td>
           </tr>
@@ -3361,42 +3438,10 @@
     }
 
     function copyForGoogleSheets() {
-      const data = (rawData.formSubmissions || []).filter(i => {
-        const ft = (i.form_type || '').toLowerCase();
-        return ft === 'preregistration' || ft === 'camp_registration';
-      });
-
-      if (!data || data.length === 0) {
-        showToast('No camp pre-registrations available to copy.', 'warning');
-        return;
-      }
-
-      const headers = ['Registration ID', 'Submission Date', 'Full Name', 'Age', 'Gender', 'Mobile Number', 'Area / Location', 'Requested Checkups', 'Current Health Concerns', 'Prior Screening', 'Prior Cancer Diagnosis', 'Family Cancer History', 'Email', 'Consent', 'Status', 'Review State'];
-      const rows = data.map(r => [
-        r.submission_id || r.id || '',
-        r.created_at || r.timestampIST || '',
-        r.full_name || r.name || '',
-        r.age ?? '',
-        r.gender || '',
-        r.phone || '',
-        r.area_location || r.location || '',
-        Array.isArray(r.checkups) ? r.checkups.join('; ') : (r.checkups || ''),
-        r.health_concerns || '',
-        r.prior_screening || '',
-        r.prior_cancer_diagnosis || '',
-        r.family_cancer_history || '',
-        r.email || '',
-        r.consent ? 'YES' : 'NO',
-        r.status || 'PENDING_REVIEW',
-        r.review_status || 'PRIVATE_UNREVIEWED'
-      ].map(v => String(v ?? '').replace(/\t/g, ' ')).join('\t'));
-
-      const tsvContent = [headers.join('\t'), ...rows].join('\n');
-      navigator.clipboard.writeText(tsvContent).then(() => {
-        showToast(`Copied ${data.length} pre-registrations for Google Sheets! Open Google Sheets and press Ctrl+V.`, 'success');
-      }).catch(() => {
-        showToast('Failed to copy to clipboard.', 'error');
-      });
+      const { headers, rows } = campExportTable();
+      if (!rows.length) return showToast('No registrations match the current filters.', 'warning');
+      const text = [headers, ...rows].map(row => row.map(value => campSpreadsheetValue(value).replace(/[\t\r\n]+/g, ' ')).join('\t')).join('\n');
+      navigator.clipboard.writeText(text).then(() => showToast(`Copied ${rows.length} registrations with all answers.`, 'success')).catch(() => showToast('Could not copy. Use Export Excel / CSV instead.', 'error'));
     }
 
     function renderForms(items) {
@@ -3427,7 +3472,10 @@
             <td><span class="badge ${status === 'FAILED' ? 'badge-danger' : 'badge-success'}">${status}</span></td>
             <td style="font-size:12px;color:var(--text-muted);">${date}</td>
             <td>
-              <button class="btn btn-outline btn-sm" onclick="viewDetail('form', '${id}')">👁️ View</button>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <button class="btn btn-outline btn-sm" onclick="viewDetail('form', '${id}')">👁️ View</button>
+                ${(f.email || '') !== '' ? `<button class="btn btn-outline btn-sm" style="color:#0284C7;border-color:rgba(2,132,199,0.4);" onclick="${f.form_type === 'volunteer' ? `openVolunteerMailModal('${id}')` : `openSendMailModal('${id}')`}" title="Send Email (fallback if auto-email failed)">✉️ Send Mail</button>` : ''}
+              </div>
             </td>
           </tr>
         `;
@@ -4754,6 +4802,68 @@ For inquiries, please call our camp helpline at +91 74474 41116.`;
       if (modal) modal.style.display = 'none';
     }
 
+    // ── Volunteer Mail Modal ──────────────────────────────────
+    function openVolunteerMailModal(id) {
+      const modal = document.getElementById('volunteerMailModal');
+      if (!modal) return;
+
+      if (id) {
+        const raw = (rawData.formSubmissions || []).find(i => (i.submission_id || i.id) === id);
+        let p = {};
+        if (raw && raw.raw_payload) {
+          try { p = typeof raw.raw_payload === 'string' ? JSON.parse(raw.raw_payload) : raw.raw_payload; } catch (e) {}
+        }
+        const item = { ...(raw || {}), ...p };
+        document.getElementById('volunteerMailRegId').value  = id;
+        document.getElementById('volunteerMailName').value   = item.name || item.full_name || '';
+        document.getElementById('volunteerMailEmail').value  = item.email || '';
+        document.getElementById('volunteerMailSubject').value = `Volunteer Application Received (${id}) — Avinya Care Foundation`;
+        document.getElementById('volunteerMailMessage').value = '';
+      } else {
+        document.getElementById('volunteerMailRegId').value  = '';
+        document.getElementById('volunteerMailName').value   = '';
+        document.getElementById('volunteerMailEmail').value  = '';
+        document.getElementById('volunteerMailSubject').value = 'Volunteer Application Received — Avinya Care Foundation';
+        document.getElementById('volunteerMailMessage').value = '';
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeVolunteerMailModal() {
+      const modal = document.getElementById('volunteerMailModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function submitVolunteerMail(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('volunteerMailSubmitBtn');
+      const id      = document.getElementById('volunteerMailRegId').value;
+      const name    = document.getElementById('volunteerMailName').value;
+      const email   = document.getElementById('volunteerMailEmail').value;
+      const subject = document.getElementById('volunteerMailSubject').value;
+      const message = document.getElementById('volunteerMailMessage').value;
+
+      if (!email) { showToast('Please enter recipient email address.', 'warning'); return; }
+
+      try {
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<span>⏳ Sending...</span>'; }
+        const token = (typeof getSessionToken === 'function') ? getSessionToken() : (sessionStorage.getItem('avinya_admin_token') || localStorage.getItem('avinya_admin_token') || '');
+        const res = await fetch((typeof getApiBaseUrl === 'function' ? getApiBaseUrl() : '') + '/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ action: 'send_volunteer_mail', id: id || 'VOL', name, email, subject, message })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'ok') throw new Error(data.message || 'Failed to send email.');
+        showToast(data.message || `Email sent to ${email}`, 'success');
+        closeVolunteerMailModal();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<span>✉️ Send Email</span>'; }
+      }
+    }
+
     async function submitCampMail(e) {
       e.preventDefault();
       const submitBtn = document.getElementById('campMailSubmitBtn');
@@ -4790,6 +4900,9 @@ For inquiries, please call our camp helpline at +91 74474 41116.`;
           })
         });
         const data = await res.json();
+        const item = (rawData.formSubmissions || []).find(r => (r.submission_id || r.id) === id);
+        if (item) item.delivery_status = data.emailStatus || (res.ok ? 'SENT' : 'FAILED');
+        renderCurrentTab();
         if (!res.ok || data.status !== 'ok') {
           throw new Error(data.message || 'Failed to send camp email.');
         }
@@ -4806,6 +4919,7 @@ For inquiries, please call our camp helpline at +91 74474 41116.`;
     }
 
     function exportPDF() {
+      if (currentTab === 'preregistrations') return exportCampPDF();
       let data = [];
       const title = `AvinyaCareFoundation - ${currentTab.toUpperCase()} Official Report`;
 
@@ -4837,6 +4951,7 @@ For inquiries, please call our camp helpline at +91 74474 41116.`;
     }
 
     function exportCSV() {
+      if (currentTab === 'preregistrations') return exportCampCSV();
       let data = [];
       let filename = `AvinyaCareFoundation_${currentTab}_export.csv`;
 
@@ -5063,5 +5178,77 @@ For inquiries, please call our camp helpline at +91 74474 41116.`;
       }
     }
   </script>
-<script src="/js/camp-admin.js?v=3"></script></body>
+<script src="/js/camp-admin.js?v=3"></script>
+
+  <!-- Register Google Form Modal -->
+  <div id="registerFormModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card" style="max-width:500px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🔗 Link Google Form to DB</h3>
+        <button class="modal-close-btn" onclick="closeRegisterFormModal()" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
+          After running <code>createPreregForm()</code> in Google Apps Script, paste the Form ID here to activate DB sync — no redeployment needed.
+        </p>
+        <form id="registerFormForm" onsubmit="submitRegisterForm(event)">
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Google Form ID *</label>
+            <input type="text" id="regFormId" class="form-control" required placeholder="e.g. 1FAIpQLSe..." style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-main);font-family:monospace;">
+            <small style="color:var(--text-muted);font-size:11px;margin-top:4px;display:block;">Found in the Apps Script log after running createPreregForm().</small>
+          </div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Form Type *</label>
+            <select id="regFormType" class="select-control" style="width:100%;padding:8px 12px;border-radius:8px;">
+              <option value="preregistration">preregistration — Mega Health Camp</option>
+              <option value="volunteer">volunteer — Volunteer Applications</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label" style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Label (Optional)</label>
+            <input type="text" id="regFormLabel" class="form-control" placeholder="e.g. Mega Health Camp Nov 2026" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-main);">
+          </div>
+          <div class="modal-footer" style="padding:0;border:none;display:flex;justify-content:flex-end;gap:8px;">
+            <button type="button" class="btn btn-outline" onclick="closeRegisterFormModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="regFormSubmitBtn" style="background:#0F9F90;border-color:#0F9F90;">
+              <span>🔗 Register Form</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openRegisterFormModal()  { document.getElementById('registerFormModal').style.display = 'flex'; }
+    function closeRegisterFormModal() { document.getElementById('registerFormModal').style.display = 'none'; }
+
+    async function submitRegisterForm(e) {
+      e.preventDefault();
+      const btn     = document.getElementById('regFormSubmitBtn');
+      const formId  = document.getElementById('regFormId').value.trim();
+      const formType= document.getElementById('regFormType').value;
+      const label   = document.getElementById('regFormLabel').value.trim();
+
+      try {
+        btn.disabled = true; btn.innerHTML = '<span>⏳ Registering...</span>';
+        const token = (typeof getSessionToken === 'function') ? getSessionToken() : (sessionStorage.getItem('avinya_admin_token') || localStorage.getItem('avinya_admin_token') || '');
+        const res = await fetch((typeof getApiBaseUrl === 'function' ? getApiBaseUrl() : '') + '/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ action: 'register_google_form', form_id: formId, form_type: formType, label })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'ok') throw new Error(data.message || 'Registration failed.');
+        showToast('✅ ' + data.message, 'success');
+        closeRegisterFormModal();
+        document.getElementById('regFormId').value = '';
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false; btn.innerHTML = '<span>🔗 Register Form</span>';
+      }
+    }
+  </script>
+</body>
 </html>

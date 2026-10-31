@@ -167,18 +167,19 @@ if ($action === 'send_camp_mail') {
         ]);
         if ($customMessage !== '') {
             $extraNote = '<div style="margin-top:16px;padding:12px 16px;background:#F0FDFA;border-left:4px solid #087F73;border-radius:6px;font-size:14px;color:#0F766E;"><strong>Note from Organizer:</strong><br>' . nl2br(htmlspecialchars($customMessage, ENT_QUOTES, 'UTF-8')) . '</div>';
-            $html = str_replace('</div>', $extraNote . '</div>', $html);
+            $html = preg_replace('/<\/body>/i', $extraNote . '</body>', $html, 1);
         }
     } else {
         $html = '<p>Hello ' . htmlspecialchars($recipientName, ENT_QUOTES, 'UTF-8') . ',</p><p>' . nl2br(htmlspecialchars($customMessage, ENT_QUOTES, 'UTF-8')) . '</p>';
     }
 
     $sent = sendPHPSMTP($recipientEmail, $subject, $html);
+    $pdo->prepare("UPDATE form_submissions SET delivery_status=?, user_email_sent=? WHERE submission_id=? AND form_type IN ('preregistration','camp_registration')")->execute([$sent ? 'SENT' : 'FAILED', $sent ? 1 : 0, $regId]);
     logActivity('CAMP_EMAIL_SENT', 'admin', $_SESSION['admin_email'] ?? 'admin', "Sent camp email to {$recipientEmail} for {$regId}", ['id' => $regId, 'email' => $recipientEmail, 'sent' => $sent]);
 
     try {
-        $logStmt = $pdo->prepare("INSERT INTO `email_logs` (`recipient`, `subject`, `status`, `type`, `created_at`) VALUES (?, ?, ?, 'camp_notification', NOW())");
-        $logStmt->execute([$recipientEmail, $subject, $sent ? 'DELIVERED' : 'FAILED']);
+        $logStmt = $pdo->prepare("INSERT INTO email_logs (reference_id, form_or_booking_type, recipient_role, recipient_email, subject, smtp_status, delivery_method, error_message) VALUES (?, 'preregistration', 'user', ?, ?, ?, 'HOSTINGER_SSL_SMTP_465', ?)");
+        $logStmt->execute([$regId, $recipientEmail, $subject, $sent ? 'SENT' : 'FAILED', $sent ? null : 'SMTP dispatch failed']);
     } catch (Throwable $e) {}
 
     if ($sent) {
@@ -186,6 +187,105 @@ if ($action === 'send_camp_mail') {
     } else {
         http_response_code(502);
         echo json_encode(['status' => 'error', 'message' => "Failed to deliver email to {$recipientEmail}. Please check SMTP configuration."]);
+    }
+    exit(0);
+}
+
+// Action: Send Volunteer Application Email (manual fallback when auto-email failed)
+if ($action === 'send_volunteer_mail') {
+    if (!in_array(strtolower((string)$userRole), ['admin', 'manager', 'superadmin'], true)) {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Administrator permissions required.']);
+        exit(0);
+    }
+    $recipientEmail = strtolower(trim((string)($data['email'] ?? '')));
+    $recipientName  = trim((string)($data['name'] ?? 'Volunteer'));
+    $regId          = trim((string)($data['id'] ?? 'VOL'));
+    $customSubject  = trim((string)($data['subject'] ?? ''));
+    $customMessage  = trim((string)($data['message'] ?? ''));
+
+    if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(422);
+        echo json_encode(['status' => 'error', 'message' => 'Please enter a valid recipient email address.']);
+        exit(0);
+    }
+
+    require_once __DIR__ . '/smtp-mailer.php';
+    $subject = $customSubject ?: 'Volunteer Application Received — Avinya Care Foundation';
+
+    $html = "<div style='font-family:sans-serif;max-width:600px;margin:0 auto;'>"
+          . "<p>Dear " . htmlspecialchars($recipientName, ENT_QUOTES, 'UTF-8') . ",</p>"
+          . "<p>Thank you for applying to volunteer with <strong>Avinya Care Foundation</strong>.</p>"
+          . "<p><strong>Application Reference:</strong> " . htmlspecialchars($regId, ENT_QUOTES, 'UTF-8') . "</p>"
+          . "<p>Our team will review your application and reach out to you shortly.</p>";
+
+    if ($customMessage !== '') {
+        $html .= '<div style="margin-top:16px;padding:12px 16px;background:#F0FDFA;border-left:4px solid #087F73;border-radius:6px;font-size:14px;color:#0F766E;">'
+               . '<strong>Note from Team:</strong><br>'
+               . nl2br(htmlspecialchars($customMessage, ENT_QUOTES, 'UTF-8'))
+               . '</div>';
+    }
+
+    $html .= "<p style='margin-top:20px;'>For any questions, please call: <strong>+91 74474 41116</strong></p>"
+           . "<p style='color:#64748B;font-size:12px;'>Avinya Care Foundation · avinyacarefoundation.org</p>"
+           . "</div>";
+
+    $sent = sendPHPSMTP($recipientEmail, $subject, $html);
+    logActivity('VOLUNTEER_EMAIL_SENT', 'admin', $_SESSION['admin_email'] ?? 'admin', "Sent volunteer email to {$recipientEmail} for {$regId}", ['id' => $regId, 'email' => $recipientEmail, 'sent' => $sent]);
+
+    try {
+        $logStmt = $pdo->prepare("INSERT INTO email_logs (recipient, subject, status, type, created_at) VALUES (?, ?, ?, 'volunteer_notification', NOW())");
+        $logStmt->execute([$recipientEmail, $subject, $sent ? 'DELIVERED' : 'FAILED']);
+    } catch (Throwable $e) {}
+
+    if ($sent) {
+        echo json_encode(['status' => 'ok', 'message' => "Email successfully sent to {$recipientEmail}."]);
+    } else {
+        http_response_code(502);
+        echo json_encode(['status' => 'error', 'message' => "Failed to deliver email to {$recipientEmail}. Please check SMTP configuration."]);
+    }
+    exit(0);
+}
+
+// Action: Register a Google Form ID → DB (so sync endpoint accepts it without redeploying)
+if ($action === 'register_google_form') {
+    if (!in_array(strtolower((string)$userRole), ['admin', 'superadmin'], true)) {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Admin permissions required.']);
+        exit(0);
+    }
+    $newFormId  = trim((string)($data['form_id']   ?? ''));
+    $newType    = trim((string)($data['form_type']  ?? ''));
+    $newLabel   = trim((string)($data['label']      ?? ''));
+    $validTypes = ['preregistration', 'volunteer', 'contact', 'donation'];
+
+    if (strlen($newFormId) < 10 || strlen($newFormId) > 256) {
+        http_response_code(422);
+        echo json_encode(['status' => 'error', 'message' => 'Invalid form_id length.']);
+        exit(0);
+    }
+    if (!in_array($newType, $validTypes, true)) {
+        http_response_code(422);
+        echo json_encode(['status' => 'error', 'message' => 'form_type must be one of: ' . implode(', ', $validTypes)]);
+        exit(0);
+    }
+
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS google_form_config (
+            form_id    VARCHAR(256) PRIMARY KEY,
+            form_type  VARCHAR(64)  NOT NULL,
+            label      VARCHAR(255) DEFAULT '',
+            created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+        )");
+        $stmt = $pdo->prepare("INSERT INTO google_form_config (form_id, form_type, label) VALUES (?, ?, ?)
+                                ON DUPLICATE KEY UPDATE form_type = VALUES(form_type), label = VALUES(label)");
+        $stmt->execute([$newFormId, $newType, $newLabel]);
+        logActivity('GOOGLE_FORM_REGISTERED', 'admin', $_SESSION['admin_email'] ?? 'admin',
+            "Registered Google Form {$newFormId} as type {$newType}", ['form_id' => $newFormId, 'type' => $newType]);
+        echo json_encode(['status' => 'ok', 'message' => "Form registered: {$newFormId} → {$newType}"]);
+    } catch (Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'message' => 'DB error: ' . $e->getMessage()]);
     }
     exit(0);
 }
@@ -1035,6 +1135,15 @@ if ($pdo !== null) {
         error_log('Admin Data Fetch Warning: ' . $e->getMessage());
     }
 }
+
+// Expand pre-registration answers while retaining authoritative database fields.
+foreach ($formSubmissions as &$registration) {
+    if (in_array($registration['form_type'] ?? '', ['preregistration','camp_registration'], true)) {
+        $answers = json_decode($registration['raw_payload'] ?? '{}', true);
+        if (is_array($answers)) $registration = array_merge($answers, $registration);
+    }
+}
+unset($registration);
 
 // Calculate Analytics Summaries
 $totalDonationsAmount = 0.0;
