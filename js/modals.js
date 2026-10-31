@@ -355,7 +355,7 @@ class ModalManager {
 
   // --- VOLUNTEER MODAL ---
   openVolunteerModal() {
-    this.openModal('volunteer-modal');
+    window.location.assign('https://docs.google.com/forms/d/e/1FAIpQLSeiRxf0Cv3OktSKILJScVgsNHpTVAEj0M-9rOD-7vMeECXZUA/viewform');
   }
 
   // --- PATIENT & CAREGIVER SUPPORT MODAL ---
