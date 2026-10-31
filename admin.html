@@ -2785,6 +2785,7 @@
 
     // --- TAB SWITCHING ---
     function switchTab(tab) {
+      if (tab !== currentTab) resetAdvFilters(false);
       document.getElementById('campRegistrationsPanel').style.display = tab === 'campRegistrations' ? 'block' : 'none';
       currentTab = tab;
       window.location.hash = tab;
@@ -3013,13 +3014,14 @@
       filterTable();
     }
 
-    function resetAdvFilters() {
+    function resetAdvFilters(render = true) {
       document.getElementById('startDateFilter').value = '';
       document.getElementById('endDateFilter').value = '';
       document.getElementById('deliveryFilter').value = 'ALL';
       document.getElementById('sortFilter').value = 'NEWEST';
       document.getElementById('searchInput').value = '';
-      filterTable();
+      document.getElementById('typeFilter').value = 'all';
+      if (render) filterTable();
     }
 
     function filterTable() {
@@ -3449,7 +3451,7 @@
     function renderForms(items) {
       const tbody = document.getElementById('tableBody');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><div class="empty-state-icon">📥</div><div class="empty-state-title">No Form Submissions Found</div><div class="empty-state-text">No inquiry or form data matches your criteria.</div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><div class="empty-state-icon">📥</div><div class="empty-state-title">No Form Submissions Found</div><div class="empty-state-text">No inquiry or form data matches your criteria.</div><button type="button" class="btn btn-outline" onclick="resetAdvFilters()">Clear search and filters</button></td></tr>`;
         return;
       }
 
