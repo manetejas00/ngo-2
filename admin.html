@@ -4859,9 +4859,18 @@ For inquiries, please call our camp helpline at +91 74474 41116.`;
           body: JSON.stringify({ action: 'send_volunteer_mail', id: id || 'VOL', name, email, subject, message })
         });
         const data = await res.json();
+        if (data.emailStatus === 'SENT' || data.emailStatus === 'FAILED') {
+          const item = (rawData.formSubmissions || []).find(r => (r.submission_id || r.id) === id);
+          if (item) {
+            item.delivery_status = data.emailStatus;
+            item.user_email_sent = data.emailStatus === 'SENT' ? 1 : 0;
+          }
+          renderCurrentTab();
+        }
         if (!res.ok || data.status !== 'ok') throw new Error(data.message || 'Failed to send email.');
         showToast(data.message || `Email sent to ${email}`, 'success');
         closeVolunteerMailModal();
+        await fetchAdminData();
       } catch (err) {
         showToast(err.message, 'error');
       } finally {

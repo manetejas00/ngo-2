@@ -231,18 +231,20 @@ if ($action === 'send_volunteer_mail') {
            . "</div>";
 
     $sent = sendPHPSMTP($recipientEmail, $subject, $html);
+    $emailStatus = $sent ? 'SENT' : 'FAILED';
+    $pdo->prepare("UPDATE form_submissions SET delivery_status=?, user_email_sent=? WHERE submission_id=? AND form_type='volunteer'")->execute([$emailStatus, $sent ? 1 : 0, $regId]);
     logActivity('VOLUNTEER_EMAIL_SENT', 'admin', $_SESSION['admin_email'] ?? 'admin', "Sent volunteer email to {$recipientEmail} for {$regId}", ['id' => $regId, 'email' => $recipientEmail, 'sent' => $sent]);
 
     try {
-        $logStmt = $pdo->prepare("INSERT INTO email_logs (recipient, subject, status, type, created_at) VALUES (?, ?, ?, 'volunteer_notification', NOW())");
-        $logStmt->execute([$recipientEmail, $subject, $sent ? 'DELIVERED' : 'FAILED']);
+        $logStmt = $pdo->prepare("INSERT INTO email_logs (reference_id, form_or_booking_type, recipient_role, recipient_email, subject, smtp_status, delivery_method, error_message) VALUES (?, 'volunteer', 'user', ?, ?, ?, 'HOSTINGER_SSL_SMTP_465', ?)");
+        $logStmt->execute([$regId, $recipientEmail, $subject, $emailStatus, $sent ? null : 'SMTP dispatch failed']);
     } catch (Throwable $e) {}
 
     if ($sent) {
-        echo json_encode(['status' => 'ok', 'message' => "Email successfully sent to {$recipientEmail}."]);
+        echo json_encode(['status' => 'ok', 'emailStatus' => $emailStatus, 'message' => "Email successfully sent to {$recipientEmail}."]);
     } else {
         http_response_code(502);
-        echo json_encode(['status' => 'error', 'message' => "Failed to deliver email to {$recipientEmail}. Please check SMTP configuration."]);
+        echo json_encode(['status' => 'error', 'emailStatus' => $emailStatus, 'message' => "Failed to deliver email to {$recipientEmail}. Please check SMTP configuration."]);
     }
     exit(0);
 }
