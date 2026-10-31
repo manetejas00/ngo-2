@@ -47,6 +47,9 @@ try {
     // 2b. Explicitly re-seed crowdfunding campaigns from data/seed_crowdfunding.json
     $seededCampaignsCount = seedCrowdfundingFromJSON($pdo, true);
 
+    // 2c. Seed default admin users for portal authentication
+    $seededUsersCount = seedDefaultUsers($pdo, true);
+
     // Explicitly purge old placeholder tests (test-1 through test-8)
     $pdo->exec("DELETE FROM `diagnostic_tests` WHERE `test_id` IN ('test-1', 'test-2', 'test-3', 'test-4', 'test-5', 'test-6', 'test-7', 'test-8')");
 
@@ -84,6 +87,7 @@ try {
         'campaignsSeeded' => $seededCampaignsCount,
         'testsCount' => $activeTestsCount,
         'testsSeeded' => $seededTestsCount,
+        'usersSeeded' => $seededUsersCount,
         'galleries' => $galleries,
         'campaigns' => $campaigns,
         'timestamp' => date(DATE_ATOM)

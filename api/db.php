@@ -848,7 +848,39 @@ function seedDiagnosticProviders(PDO $pdo, bool $force = false): int {
     return $seeded;
 }
 
-// Account provisioning is an explicit staff operation, never a database-read side effect.
 function seedDefaultUsers(PDO $pdo, bool $force = false): int {
-    return 0;
+    $seeded = 0;
+    try {
+        $count = (int) $pdo->query("SELECT COUNT(*) FROM `users` WHERE `role` = 'admin'")->fetchColumn();
+        if ($count === 0 || $force) {
+            $bootstrapEmail = getDbEnv('BOOTSTRAP_ADMIN_EMAIL', 'admin@avinyacarefoundation.org');
+            $bootstrapPassword = getDbEnv('BOOTSTRAP_ADMIN_PASSWORD', 'Admin@1230');
+            $defaultPassHash = password_hash($bootstrapPassword, PASSWORD_DEFAULT);
+
+            $stmt = $pdo->prepare("INSERT INTO `users`
+                (`user_id`, `name`, `email`, `password_hash`, `role`, `status`, `must_change_password`, `created_at`, `updated_at`)
+                VALUES (:u_id, :name, :email, :pass_hash, 'admin', 'active', 0, NOW(), NOW())
+                ON DUPLICATE KEY UPDATE
+                `name` = VALUES(`name`), `password_hash` = VALUES(`password_hash`), `status` = 'active', `must_change_password` = 0");
+
+            $stmt->execute([
+                ':u_id' => 'usr-admin-01',
+                ':name' => 'Super Admin',
+                ':email' => strtolower($bootstrapEmail),
+                ':pass_hash' => $defaultPassHash
+            ]);
+            $seeded++;
+
+            $stmt->execute([
+                ':u_id' => 'usr-admin-02',
+                ':name' => 'Admin User',
+                ':email' => 'admin@gmail.com',
+                ':pass_hash' => $defaultPassHash
+            ]);
+            $seeded++;
+        }
+    } catch (Throwable $e) {
+        error_log('Error seeding default users: ' . $e->getMessage());
+    }
+    return $seeded;
 }
