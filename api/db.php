@@ -861,7 +861,7 @@ function seedDefaultUsers(PDO $pdo, bool $force = false): int {
                 (`user_id`, `name`, `email`, `password_hash`, `role`, `status`, `must_change_password`, `created_at`, `updated_at`)
                 VALUES (:u_id, :name, :email, :pass_hash, 'admin', 'active', 0, NOW(), NOW())
                 ON DUPLICATE KEY UPDATE
-                `name` = VALUES(`name`), `password_hash` = VALUES(`password_hash`), `status` = 'active', `must_change_password` = 0");
+                `name` = VALUES(`name`), `email` = VALUES(`email`), `password_hash` = VALUES(`password_hash`), `status` = 'active', `must_change_password` = 0");
 
             $stmt->execute([
                 ':u_id' => 'usr-admin-01',
