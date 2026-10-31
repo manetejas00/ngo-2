@@ -3458,7 +3458,9 @@
         const name = escapeHtml(f.full_name || f.name || 'Anonymous');
         const contact = escapeHtml(f.email || f.phone || 'N/A');
         const type = escapeHtml(f.form_type || 'General');
-        const details = escapeHtml(f.subject || f.message || f.donation_amount ? `Donation Amount: ₹${f.donation_amount}` : 'Inquiry details recorded');
+        const hasAmount = f.donation_amount !== null && f.donation_amount !== undefined && String(f.donation_amount).trim() !== '' && Number.isFinite(Number(f.donation_amount));
+        const details = escapeHtml(f.subject || f.message || (hasAmount ? `Donation Amount: ₹${Number(f.donation_amount).toLocaleString('en-IN')}` : 'Inquiry details recorded'));
+        const hasEmail = String(f.email || '').trim() !== '';
         const status = escapeHtml(f.delivery_status || f.status || 'SENT');
         const date = escapeHtml(f.created_at || 'N/A');
 
@@ -3476,7 +3478,7 @@
             <td>
               <div style="display:flex;gap:6px;align-items:center;">
                 <button class="btn btn-outline btn-sm" onclick="viewDetail('form', '${id}')">👁️ View</button>
-                ${(f.email || '') !== '' ? `<button class="btn btn-outline btn-sm" style="color:#0284C7;border-color:rgba(2,132,199,0.4);" onclick="${f.form_type === 'volunteer' ? `openVolunteerMailModal('${id}')` : `openSendMailModal('${id}')`}" title="Send Email (fallback if auto-email failed)">✉️ Send Mail</button>` : ''}
+                ${hasEmail ? `<button class="btn btn-outline btn-sm" style="color:#0284C7;border-color:rgba(2,132,199,0.4);" onclick="${f.form_type === 'volunteer' ? `openVolunteerMailModal('${id}')` : `openSendMailModal('${id}')`}" title="Send Email (fallback if auto-email failed)">✉️ Send Mail</button>` : `<span title="No email address provided for this submission"><button type="button" class="btn btn-outline btn-sm" disabled aria-label="Send Mail unavailable: no email address">✉️ Send Mail</button><small style="display:block;color:var(--text-muted);">No email provided</small></span>`}
               </div>
             </td>
           </tr>
