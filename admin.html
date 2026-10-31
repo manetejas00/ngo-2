@@ -2342,10 +2342,10 @@
       document.getElementById('sideFormContactCount').innerText = getFormCount('contact');
       document.getElementById('sideFormNewsletterCount').innerText = getFormCount('newsletter');
       document.getElementById('sideFormVolunteerCount').innerText = getFormCount('volunteer');
-      document.getElementById('sideFormSupportCount').innerText = getFormCount('patient_support');
+      document.getElementById('sideFormSupportCount').innerText = getFormCount('support') + getFormCount('patient_support');
       document.getElementById('sideFormDonationCount').innerText = getFormCount('donation');
       document.getElementById('sideFormComingSoonFeedbackCount').innerText = getFormCount('coming_soon_feedback');
-      document.getElementById('sideFormPartnershipCount').innerText = getFormCount('csr_partnership');
+      document.getElementById('sideFormPartnershipCount').innerText = getFormCount('partnership') + getFormCount('csr_partnership');
       document.getElementById('sideFormFeedbackCount').innerText = getFormCount('feedback');
       document.getElementById('sideFormsCount').innerText = totalForms;
       document.getElementById('sideEmailCount').innerText = (rawData.emailLogs || []).length;
@@ -3035,7 +3035,8 @@
         items = rawData.formSubmissions || [];
         if (currentTab !== 'forms_all') {
           const target = currentTab.replace('forms_', '');
-          items = items.filter(i => (i.form_type || 'contact').toLowerCase() === target);
+          const types = target === 'support' ? ['support', 'patient_support'] : target === 'partnership' ? ['partnership', 'csr_partnership'] : [target];
+          items = items.filter(i => types.includes((i.form_type || 'contact').toLowerCase()));
         }
       } else if (currentTab === 'doctor') items = rawData.doctorBookings || [];
       else if (currentTab === 'diagnostic') items = rawData.diagnosticBookings || [];
