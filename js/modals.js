@@ -155,15 +155,10 @@ class ModalManager {
   }
 
   // --- DONATION CONTROLS ---
-  setDonationType(type) {
-    // This form records an intention; it cannot create a recurring payment mandate.
-    this.isMonthly = (type === 'monthly');
+  setDonationType() {
+    this.isMonthly = false;
     const oneTimeBtn = document.getElementById('toggle-one-time');
-    const monthlyBtn = document.getElementById('toggle-monthly');
-    if (oneTimeBtn && monthlyBtn) {
-      oneTimeBtn.classList.toggle('active', !this.isMonthly);
-      monthlyBtn.classList.toggle('active', this.isMonthly);
-    }
+    if (oneTimeBtn) oneTimeBtn.classList.add('active');
     this.updateImpactStatement();
   }
 
@@ -432,7 +427,7 @@ class ModalManager {
       amount,
       category,
       interest: category,
-      frequency: this.isMonthly ? 'monthly' : 'one-time',
+      frequency: 'one-time',
       payment_status: 'PENDING',
       payment_claim: form.querySelector('[name="payment_claim"]')?.value || 'interest',
       transaction_id: form.querySelector('[name="transaction_id"]')?.value.trim() || '',
