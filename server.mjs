@@ -562,6 +562,11 @@ const server = createServer(async (req, res) => {
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
   let urlPath = req.url.split('?')[0];
+  if (/^\/(?:health-camp|preregistration)(?:\.html)?\/?$/i.test(urlPath)) {
+    res.writeHead(302, { Location: 'https://docs.google.com/forms/d/e/1FAIpQLSeTJhxRvhfLdXYVn42D4ZjvZKa-eezs3awprflhlwQ76TboYg/viewform', 'Cache-Control': 'no-store' });
+    res.end();
+    return;
+  }
   if (/^\/donation-guide(?:\.html)?\/?$/.test(urlPath)) {
     res.writeHead(302, { Location: '/#donation-guide', 'Cache-Control': 'no-store' });
     res.end();

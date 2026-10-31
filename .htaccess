@@ -40,6 +40,9 @@ Options -Indexes
 
   RewriteRule ^response(?:\.html)?/?$ / [R=301,L]
 
+  # Retired camp pages now use the Google registration form.
+  RewriteRule ^(?:health-camp|preregistration)(?:\.html)?/?$ https://docs.google.com/forms/d/e/1FAIpQLSeTJhxRvhfLdXYVn42D4ZjvZKa-eezs3awprflhlwQ76TboYg/viewform [R=302,L,NE,QSD,NC]
+
   # Retired page opens the shared donation guide modal on home.
   RewriteRule ^donation-guide(?:\.html)?/?$ /#donation-guide [R=302,L,NE]
 

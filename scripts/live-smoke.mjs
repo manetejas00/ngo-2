@@ -18,7 +18,7 @@ const checks = [
   { path: '/admin.html', type: 'text', contains: 'Admin Dashboard' },
   { path: '/about', type: 'text', contains: 'team-profile-trigger' },
   { path: '/assistance', type: 'text', contains: 'assistance-hero' },
-  { path: '/health-camp', type: 'text', contains: 'camp-opening' },
+  { path: '/health-camp', type: 'redirect', location: 'https://docs.google.com/forms/d/e/1FAIpQLSeTJhxRvhfLdXYVn42D4ZjvZKa-eezs3awprflhlwQ76TboYg/viewform' },
   { path: '/get-involved', type: 'text', contains: 'volunteer' },
   { path: '/gallery', type: 'text', contains: 'Gallery' },
   { path: '/events', type: 'text', contains: 'Community events' },
@@ -27,7 +27,7 @@ const checks = [
   { path: '/css/donation-guide.css', type: 'text', contains: '.donation-guide-dialog' },
   { path: '/privacy', type: 'text', contains: 'Privacy' },
   { path: '/terms', type: 'text', contains: 'terms' },
-  { path: '/components/navbar', type: 'text', contains: '/health-camp' },
+  { path: '/components/navbar', type: 'text', contains: 'https://docs.google.com/forms/d/e/1FAIpQLSeTJhxRvhfLdXYVn42D4ZjvZKa-eezs3awprflhlwQ76TboYg/viewform' },
   { path: '/components/footer', type: 'text', contains: 'site-footer-grid' },
   { path: '/css/section-themes.css', type: 'text', contains: '.camp-opening' },
   { path: '/css/footer.css', type: 'text', contains: '.site-footer-grid' },
@@ -85,6 +85,7 @@ for (const check of checks) {
   const url = `${base}${check.path}${check.path.includes('?') ? '&' : '?'}smoke=${Date.now()}`;
   try {
     const response = await fetch(url, {
+      redirect: check.type === 'redirect' ? 'manual' : 'follow',
       headers: { 'cache-control': 'no-cache', 'user-agent': 'Avinya-Deploy-Smoke/1.0' },
       signal: AbortSignal.timeout(20_000),
     });
@@ -92,6 +93,7 @@ for (const check of checks) {
     let ok = response.ok && body.length > 0;
     let detail = `${response.status}, ${body.length} bytes`;
 
+    if (check.type === 'redirect') ok = response.status === 302 && response.headers.get('location') === check.location;
     if (ok && check.type === 'text') ok = body.includes(check.contains);
     if (ok && check.type === 'json') {
       const data = JSON.parse(body);
