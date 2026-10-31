@@ -18,7 +18,7 @@ console.log('---------------------------------------------');
 // 1. Run local preflight verification
 console.log('1️⃣ Running local preflight verification...');
 try {
-  execSync('node scripts/preflight.mjs', { stdio: 'inherit' });
+  execSync(`"${process.execPath}" scripts/preflight.mjs', { stdio: 'inherit' });
 } catch (e) {
   console.error('❌ Preflight failed. Aborting deployment.');
   process.exit(1);
@@ -112,7 +112,7 @@ conn.on('ready', () => {
       console.log('5️⃣ Running live smoke checks against production...');
 
       try {
-        execSync(`node --dns-result-order=ipv4first scripts/live-smoke.mjs ${LIVE_URL}`, { stdio: 'inherit' });
+        execSync(`"${process.execPath}" --dns-result-order=ipv4first scripts/live-smoke.mjs ${LIVE_URL}`, { stdio: 'inherit' });
         console.log('\n🎉 ALL CHECKS PASSED: Website is live and fully verified!');
       } catch (smokeErr) {
         console.error('❌ Post-deployment smoke check failed.');
