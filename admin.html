@@ -272,10 +272,6 @@
         </button>
 
         <div class="menu-group-label">FORM SUBMISSIONS</div>
-        <button class="sidebar-nav-link" data-tab="campRegistrations" data-tooltip="Health Camp Registrations" onclick="switchTab('campRegistrations')">
-          <span class="nav-icon" aria-hidden="true">📋</span>
-          <span class="nav-text">Health Camp Registrations</span>
-        </button>
         <button class="sidebar-nav-link" data-tab="forms_contact" data-tooltip="Contact Us Inquiries" onclick="switchTab('forms_contact')">
           <span class="nav-icon">📞</span>
           <span class="nav-text">Contact Us Inquiries</span>
@@ -1739,7 +1735,8 @@
     };
 
     function getInitialTab() {
-      const hash = window.location.hash.replace('#', '').trim();
+      const requestedTab = window.location.hash.replace('#', '').trim();
+      const hash = requestedTab === 'campRegistrations' ? 'preregistrations' : requestedTab;
       const validTabs = [
         'dashboard', 'doctor', 'diagnostic', 'doctorsCatalog', 'testsCatalog', 'gallery', 'crowdfunding',
         'forms_contact', 'forms_newsletter', 'forms_volunteer', 'forms_support',
@@ -2785,6 +2782,7 @@
 
     // --- TAB SWITCHING ---
     function switchTab(tab) {
+      if (tab === 'campRegistrations') tab = 'preregistrations';
       if (tab !== currentTab) resetAdvFilters(false);
       document.getElementById('campRegistrationsPanel').style.display = tab === 'campRegistrations' ? 'block' : 'none';
       currentTab = tab;
