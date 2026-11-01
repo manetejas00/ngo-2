@@ -3458,6 +3458,9 @@
         const id = f.submission_id || f.id || '';
         const name = escapeHtml(f.full_name || f.name || 'Anonymous');
         const contact = escapeHtml(f.email || f.phone || 'N/A');
+        let formPayload = {};
+        try { formPayload = typeof f.raw_payload === 'string' ? JSON.parse(f.raw_payload) : (f.raw_payload || {}); } catch (_) {}
+        const phoneNeedsReview = Array.isArray(formPayload.validation_warnings) && formPayload.validation_warnings.includes('phone');
         const type = escapeHtml(f.form_type || 'General');
         const hasAmount = f.donation_amount !== null && f.donation_amount !== undefined && String(f.donation_amount).trim() !== '' && Number.isFinite(Number(f.donation_amount));
         const details = escapeHtml(f.subject || f.message || (hasAmount ? `Donation Amount: ₹${Number(f.donation_amount).toLocaleString('en-IN')}` : 'Inquiry details recorded'));
@@ -3472,6 +3475,7 @@
             <td>
               <div style="font-weight:600;color:var(--text-main);">${name}</div>
               <div style="font-size:11px;color:var(--text-subtle);">${contact}</div>
+              ${phoneNeedsReview ? '<small style="color:var(--text-muted);">⚠️ Phone needs review</small>' : ''}
             </td>
             <td><div style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${details}</div></td>
             <td><span class="badge ${status === 'FAILED' ? 'badge-danger' : 'badge-success'}">${status}</span></td>

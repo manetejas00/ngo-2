@@ -12,7 +12,9 @@ $raw = file_get_contents('php://input', false, null, 0, 65537);
 if ($raw === false || strlen($raw) > 65536) syncReply(413, ['status'=>'error']);
 $timestamp = $_SERVER['HTTP_X_AVINYA_TIMESTAMP'] ?? '';
 $signature = $_SERVER['HTTP_X_AVINYA_SIGNATURE'] ?? '';
-if (!ctype_digit($timestamp) || abs(time() - (int)$timestamp) > 300 || !hash_equals(hash_hmac('sha256', $timestamp.'.'.$raw, $secret), $signature)) syncReply(401, ['status'=>'unauthorized']);
+if (!ctype_digit($timestamp)) syncReply(401, ['status'=>'invalid_timestamp']);
+if (abs(time() - (int)$timestamp) > 300) syncReply(401, ['status'=>'expired_timestamp']);
+if (!hash_equals(hash_hmac('sha256', $timestamp.'.'.$raw, $secret), $signature)) syncReply(401, ['status'=>'invalid_signature']);
 $data = json_decode($raw, true);
 $allowedForms = ['1UVgzhzhWTUvwals3B997bIdFKocLsxWUiveiP93APjU', '1FAIpQLSeiRxf0Cv3OktSKILJScVgsNHpTVAEj0M-9rOD-7vMeECXZUA'];
 if (!is_array($data) || !in_array($data['form_id'] ?? '', $allowedForms, true)) syncReply(422, ['status'=>'invalid_form']);
@@ -21,7 +23,13 @@ $answers = $data['answers'] ?? [];
 if ($responseId === '' || strlen($responseId) > 256 || !is_array($answers)) syncReply(422, ['status'=>'invalid_response']);
 $find = function(string $prefix) use ($answers): string { foreach ($answers as $title=>$value) { if (str_starts_with(strtolower((string)$title), strtolower($prefix))) return is_array($value) ? implode('; ', $value) : trim((string)$value); } return ''; };
 $name = $find('Full name'); $phone = $find('Mobile / WhatsApp'); $age = $find('Age');
-if ($name === '' || strlen($name) > 160 || !preg_match('/^(?:\+91)?[6-9][0-9]{9}$/', preg_replace('/[\s()\-]/', '', $phone)) || !ctype_digit($age) || (int)$age < 18 || (int)$age > 120 || $find('Declaration and Consent') === '') syncReply(422, ['status'=>'invalid_fields']);
+$invalidFields = [];
+if ($name === '' || strlen($name) > 160) $invalidFields[] = 'name';
+$phoneValid = preg_match('/^(?:\+91)?[6-9][0-9]{9}$/', preg_replace('/[\s()\-]/', '', $phone)) === 1;
+if ($phone === '' || strlen($phone) > 40) $invalidFields[] = 'phone';
+if (!ctype_digit($age) || (int)$age < 18 || (int)$age > 120) $invalidFields[] = 'age';
+if ($find('Declaration and Consent') === '') $invalidFields[] = 'consent';
+if ($invalidFields) syncReply(422, ['status'=>'invalid_fields','fields'=>$invalidFields]);
 $reference = $find('Payment reference');
 if ($reference !== '' && $reference !== 'WAIVER' && (!preg_match('/^[0-9]{12}$/', $reference) || preg_match('/^([0-9])\1{11}$/', $reference))) syncReply(422, ['status'=>'invalid_reference']);
 $pdo = getDatabaseConnection();
@@ -37,8 +45,8 @@ try {
     // Optional health information is retained only when its explicit sharing consent was given.
     $permissions = $find('Optional Permissions');
     if (!str_contains($permissions, 'I consent to sharing my blood group')) foreach (array_keys($answers) as $title) { if (str_starts_with($title, 'Blood Group') || str_starts_with($title, 'Any health condition')) unset($answers[$title]); }
-    $payload = ['source'=>'google_forms','form_id'=>$data['form_id'],'response_id'=>$responseId,'submitted_at'=>$data['submitted_at'] ?? '', 'answers'=>$answers];
-    $stmt = $pdo->prepare("INSERT INTO form_submissions (submission_id, form_type, name, email, phone, amount, frequency, transaction_id, category, interest, message, payment_status, raw_payload) VALUES (?, 'volunteer', ?, '', ?, ?, 'one-time', ?, 'Volunteer registration', ?, ?, 'PENDING', ?)");
+    $payload = ['source'=>'google_forms','form_id'=>$data['form_id'],'response_id'=>$responseId,'submitted_at'=>$data['submitted_at'] ?? '', 'answers'=>$answers,'validation_warnings'=>$phoneValid?[]:['phone'],'review_status'=>'PRIVATE_UNREVIEWED'];
+    $stmt = $pdo->prepare("INSERT INTO form_submissions (submission_id, form_type, name, email, phone, amount, frequency, transaction_id, category, interest, message, payment_status, delivery_status, user_email_sent, raw_payload) VALUES (?, 'volunteer', ?, '', ?, ?, 'one-time', ?, 'Volunteer registration', ?, ?, 'PENDING', 'SKIPPED', 0, ?)");
     $stmt->execute([$id,$name,$phone,$reference==='WAIVER'?0:99,$reference==='WAIVER'?'':$reference,$find('Interested in Volunteering'),json_encode($answers,JSON_UNESCAPED_UNICODE),json_encode($payload,JSON_UNESCAPED_UNICODE)]);
     $pdo->commit();
     syncReply(200, ['status'=>'ok','submission_id'=>$id]);
