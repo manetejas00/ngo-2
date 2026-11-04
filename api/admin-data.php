@@ -71,6 +71,45 @@ function validMoney($value, string $label): float {
     return round((float) $value, 2);
 }
 
+// Delete only explicitly supported records; table and column names never come from input.
+if ($action === 'delete_record') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405); echo json_encode(['status' => 'error', 'message' => 'Use POST.']); exit;
+    }
+    if (!in_array(strtolower((string)$userRole), ['admin', 'manager', 'superadmin'], true)) {
+        http_response_code(403); echo json_encode(['status' => 'error', 'message' => 'Administrator permissions required.']); exit;
+    }
+    $resources = [
+        'form' => ['form_submissions', 'submission_id'],
+        'doctor' => ['doctor_bookings', 'booking_id'],
+        'diagnostic' => ['diagnostic_bookings', 'booking_id'],
+        'email' => ['email_logs', 'id'],
+        'activity' => ['activity_logs', 'log_id']
+    ];
+    $type = (string)($data['type'] ?? '');
+    $id = trim((string)($data['id'] ?? ''));
+    if (!isset($resources[$type]) || !preg_match('/^[A-Za-z0-9][A-Za-z0-9_-]{0,199}$/', $id)) {
+        http_response_code(422); echo json_encode(['status' => 'error', 'message' => 'Invalid record type or ID.']); exit;
+    }
+    if ($pdo === null) {
+        http_response_code(503); echo json_encode(['status' => 'error', 'message' => 'Database unavailable.']); exit;
+    }
+    try {
+        [$table, $column] = $resources[$type];
+        $stmt = $pdo->prepare("DELETE FROM `{$table}` WHERE `{$column}` = :id");
+        $stmt->execute([':id' => $id]);
+        if ($stmt->rowCount() === 0) {
+            http_response_code(404); echo json_encode(['status' => 'error', 'message' => 'Record not found. Refresh the list.']); exit;
+        }
+        logActivity('ADMIN_RECORD_DELETED', 'admin', $_SESSION['admin_email'] ?? 'admin', "Deleted {$type} record {$id}", ['type' => $type, 'id' => $id]);
+        echo json_encode(['status' => 'ok', 'message' => 'Record deleted successfully.']);
+    } catch (Throwable $error) {
+        error_log('Admin record deletion failed: ' . $error->getMessage());
+        http_response_code(500); echo json_encode(['status' => 'error', 'message' => 'Unable to delete record. Please try again.']);
+    }
+    exit;
+}
+
 if (in_array($action, ['camp_update','camp_delete','camp_send_email'],true)) { require __DIR__.'/camp-admin.php'; exit; }
 
 if ($action === 'camp_registrations') {

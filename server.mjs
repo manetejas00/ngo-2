@@ -27,6 +27,9 @@ import { renderUserEmail, renderAdminEmail } from './services/email/emailTemplat
 import { sendFormEmails } from './services/email/emailService.mjs';
 import { startMailHogServer } from './services/email/mailhogServer.mjs';
 import {
+  deleteAdminRecord,
+  getCrowdfundingCampaigns,
+  deleteCrowdfundingCampaign,
   getSpecialities,
   getHospitals,
   getDoctors,
@@ -1518,8 +1521,7 @@ const server = createServer(async (req, res) => {
     try {
       const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
       const category = (parsedUrl.searchParams.get('category') || '').toLowerCase().trim();
-      const seedFile = join(__dirname, 'data', 'seed_crowdfunding.json');
-      const raw = JSON.parse(await readFile(seedFile, 'utf-8'));
+      const raw = await getCrowdfundingCampaigns();
       let items = raw.filter(item => item.is_published !== false);
       if (category && category !== 'all') {
         items = items.filter(item => (item.category || '').toLowerCase() === category);
@@ -1684,6 +1686,28 @@ const server = createServer(async (req, res) => {
       }
 
       const action = (payload.action || 'all').toLowerCase().trim();
+
+      if (action === 'delete_crowdfunding_campaign') {
+        if (req.method !== 'POST') return sendJson(405, { status: 'error', message: 'Use POST.' });
+        if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', message: 'Administrator permissions required.' });
+        const id = String(payload.id || '').trim();
+        if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,199}$/.test(id)) return sendJson(422, { status: 'error', message: 'Invalid campaign ID.' });
+        if (!await deleteCrowdfundingCampaign(id)) return sendJson(404, { status: 'error', message: 'Campaign not found.' });
+        return sendJson(200, { status: 'ok', message: 'Campaign deleted successfully.' });
+      }
+
+      if (action === 'delete_record') {
+        if (req.method !== 'POST') return sendJson(405, { status: 'error', message: 'Use POST.' });
+        if (!['admin', 'manager'].includes(sessionUser.role)) return sendJson(403, { status: 'error', message: 'Administrator permissions required.' });
+        const type = String(payload.type || '');
+        const id = String(payload.id || '').trim();
+        if (!['form', 'doctor', 'diagnostic', 'email', 'activity'].includes(type) || !/^[A-Za-z0-9][A-Za-z0-9_-]{0,199}$/.test(id)) {
+          return sendJson(422, { status: 'error', message: 'Invalid record type or ID.' });
+        }
+        const removed = type === 'form' ? await submissionStore.remove(id) : await deleteAdminRecord(type, id);
+        if (!removed) return sendJson(404, { status: 'error', message: 'Record not found. Refresh the list.' });
+        return sendJson(200, { status: 'ok', message: 'Record deleted successfully.' });
+      }
 
       if (action === 'send_camp_mail') {
         if (req.method !== 'POST') return sendJson(405, {status:'error',message:'Use POST.'});
@@ -2010,6 +2034,7 @@ const server = createServer(async (req, res) => {
         });
 
         const galleries = await getGalleries();
+        const crowdfunding = ['admin', 'manager'].includes(sessionUser.role) ? await getCrowdfundingCampaigns() : [];
 
         return sendJson(200, {
           status: 'ok',
@@ -2048,7 +2073,8 @@ const server = createServer(async (req, res) => {
             doctorsCatalog: filteredDoctors,
             diagnosticTestsCatalog: filteredTests,
             usersCatalog: filteredUsers,
-            galleriesCatalog: galleries
+            galleriesCatalog: galleries,
+            crowdfundingCatalog: crowdfunding
           }
         });
       }

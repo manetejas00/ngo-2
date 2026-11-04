@@ -74,6 +74,16 @@ export function createSubmissionStore(file, { timestamp } = {}) {
         await writeRecords(records);
       });
     },
+    remove(id) {
+      return mutate(async () => {
+        const records = await readRecords();
+        const index = records.findIndex(row => (row.submissionId || row.id || row.submission_id) === id);
+        if (index < 0) return false;
+        records.splice(index, 1);
+        await writeRecords(records);
+        return true;
+      });
+    },
     saveGoogleResponse(record) {
       return mutate(async () => {
         const records = await readRecords();

@@ -1274,3 +1274,35 @@ export async function reorderGalleries(orderMap = []) {
   await persistDb();
   return true;
 }
+
+/** Delete an admin-managed booking or audit record by its displayed identifier. */
+export async function deleteAdminRecord(type, id) {
+  const collections = { doctor: 'appointments', diagnostic: 'testBookings', email: 'notificationLogs', activity: 'activityLogs' };
+  const collection = collections[type];
+  if (!collection) throw new Error('Unsupported record type.');
+  const db = await getDb();
+  const records = db[collection] || [];
+  const index = records.findIndex(row => String(row.booking_id || row.log_id || row.id) === id);
+  if (index < 0) return false;
+  records.splice(index, 1);
+  await persistDb();
+  return true;
+}
+
+export async function getCrowdfundingCampaigns() {
+  const db = await getDb();
+  if (!Array.isArray(db.crowdfundingCampaigns)) {
+    db.crowdfundingCampaigns = JSON.parse(await readFile(join(__dirname, '../../data/seed_crowdfunding.json'), 'utf8'));
+    await persistDb();
+  }
+  return db.crowdfundingCampaigns.filter(row => !row.deleted_at);
+}
+
+export async function deleteCrowdfundingCampaign(id) {
+  const campaigns = await getCrowdfundingCampaigns();
+  const campaign = campaigns.find(row => String(row.campaign_id || row.id) === id);
+  if (!campaign) return false;
+  campaign.deleted_at = new Date().toISOString();
+  await persistDb();
+  return true;
+}

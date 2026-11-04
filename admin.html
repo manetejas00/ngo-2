@@ -3181,7 +3181,7 @@
         tableHeader.innerHTML = `<th>Log ID</th><th>Type</th><th>Recipient</th><th>Subject</th><th>Status</th><th>Sent Time</th><th>Actions</th>`;
         renderEmailLogs(items);
       } else if (currentTab === 'activity') {
-        tableHeader.innerHTML = `<th>Log ID</th><th>User</th><th>Action</th><th>Details</th><th>IP Address</th><th>Timestamp</th>`;
+        tableHeader.innerHTML = `<th>Log ID</th><th>User</th><th>Action</th><th>Details</th><th>IP Address</th><th>Timestamp</th><th>Actions</th>`;
         renderActivityLogs(items);
       } else if (currentTab === 'doctorsCatalog') {
         tableHeader.innerHTML = `<th>Photo</th><th>Doctor Name</th><th>Speciality</th><th>Hospital / Location</th><th>Fee</th><th>Actions</th>`;
@@ -3330,7 +3330,7 @@
             <td style="font-size:11px;color:var(--text-muted);">${date}</td>
             <td>
               <div style="display:flex;gap:6px;align-items:center;">
-                <button class="btn btn-outline btn-sm" onclick="viewPreregistrationDetail('${id}')" title="View Full Details">👁️ View</button>
+                ${deleteRecordButton('form', r.submission_id || r.id)} <button class="btn btn-outline btn-sm" onclick="viewPreregistrationDetail('${id}')" title="View Full Details">👁️ View</button>
                 <span style="font-size:11px;">Email: ${escapeHtml(campEmailStatus(r))} · ${r.source === 'google_forms' ? 'Google Form' : 'Website'}</span>
                 <button class="btn btn-outline btn-sm" style="color:#0284C7;border-color:rgba(2,132,199,0.4);" onclick="openSendMailModal('${id}')" title="Send or retry confirmation email">✉️ ${campEmailStatus(r) === 'FAILED' ? 'Retry Email' : 'Send Mail'}</button>
               </div>
@@ -3447,6 +3447,35 @@
       navigator.clipboard.writeText(text).then(() => showToast(`Copied ${rows.length} registrations with all answers.`, 'success')).catch(() => showToast('Could not copy. Use Export Excel / CSV instead.', 'error'));
     }
 
+    function deleteRecordButton(type, id) {
+      const role = String(currentUser?.role || '').toLowerCase();
+      if (!['admin', 'manager', 'superadmin'].includes(role) || !id) return '';
+      return `<button type="button" class="btn btn-danger btn-sm" data-delete-type="${escapeHtml(type)}" data-delete-id="${escapeHtml(String(id))}">🗑️ Delete</button>`;
+    }
+
+    document.addEventListener('click', async event => {
+      const button = event.target.closest('[data-delete-type]');
+      if (!button || button.disabled) return;
+      const { deleteType: type, deleteId: id } = button.dataset;
+      if (!confirm(`Delete record '${id}'? This cannot be undone.`)) return;
+      button.disabled = true;
+      try {
+        const response = await fetch(getApiBaseUrl() + '/api/admin-data.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ action: 'delete_record', type, id })
+        });
+        const result = await response.json();
+        if (!response.ok || result.status !== 'ok') throw new Error(result.message || 'Unable to delete record.');
+        showToast(result.message || 'Record deleted.', 'success');
+        if (!await fetchAdminData()) showToast('Record deleted. Refresh to load the latest data.', 'error');
+      } catch (error) {
+        showToast(error.message || 'Unable to delete record.', 'error');
+      } finally {
+        button.disabled = false;
+      }
+    });
+
     function renderForms(items) {
       const tbody = document.getElementById('tableBody');
       if (!items || items.length === 0) {
@@ -3482,7 +3511,7 @@
             <td style="font-size:12px;color:var(--text-muted);">${date}</td>
             <td>
               <div style="display:flex;gap:6px;align-items:center;">
-                <button class="btn btn-outline btn-sm" onclick="viewDetail('form', '${id}')">👁️ View</button>
+                ${deleteRecordButton('form', id)} <button class="btn btn-outline btn-sm" onclick="viewDetail('form', '${id}')">👁️ View</button>
                 ${hasEmail ? `<button class="btn btn-outline btn-sm" style="color:#0284C7;border-color:rgba(2,132,199,0.4);" onclick="${f.form_type === 'volunteer' ? `openVolunteerMailModal('${id}')` : `openSendMailModal('${id}')`}" title="Send Email (fallback if auto-email failed)">✉️ Send Mail</button>` : `<span title="No email address provided for this submission"><button type="button" class="btn btn-outline btn-sm" disabled aria-label="Send Mail unavailable: no email address">✉️ Send Mail</button><small style="display:block;color:var(--text-muted);">No email provided</small></span>`}
               </div>
             </td>
@@ -3522,7 +3551,7 @@
               </select>
             </td>
             <td>
-              <button class="btn btn-outline btn-sm" onclick="viewDetail('doctor', '${id}')">👁️ View Pass</button>
+              ${deleteRecordButton('doctor', id)} <button class="btn btn-outline btn-sm" onclick="viewDetail('doctor', '${id}')">👁️ View Pass</button>
             </td>
           </tr>
         `;
@@ -3561,7 +3590,7 @@
               </select>
             </td>
             <td>
-              <button class="btn btn-outline btn-sm" onclick="viewDetail('diagnostic', '${id}')">👁️ View Order</button>
+              ${deleteRecordButton('diagnostic', id)} <button class="btn btn-outline btn-sm" onclick="viewDetail('diagnostic', '${id}')">👁️ View Order</button>
             </td>
           </tr>
         `;
@@ -3583,7 +3612,7 @@
           <td><div style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(l.subject || 'N/A')}</div></td>
           <td><span class="badge ${l.delivery_status === 'sent' ? 'badge-success' : 'badge-danger'}">${escapeHtml(l.delivery_status || 'UNKNOWN')}</span></td>
           <td style="font-size:12px;color:var(--text-muted);">${escapeHtml(l.created_at || 'N/A')}</td>
-          <td><button class="btn btn-outline btn-sm" onclick="viewDetail('email', '${l.log_id || l.id}')">👁️ Log</button></td>
+          <td>${deleteRecordButton('email', l.log_id || l.id)} <button class="btn btn-outline btn-sm" onclick="viewDetail('email', '${l.log_id || l.id}')">👁️ Log</button></td>
         </tr>
       `).join('');
     }
@@ -3591,7 +3620,7 @@
     function renderActivityLogs(items) {
       const tbody = document.getElementById('tableBody');
       if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="empty-state-icon">📜</div><div class="empty-state-title">No Activity Audit Logs</div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><div class="empty-state-icon">📜</div><div class="empty-state-title">No Activity Audit Logs</div></td></tr>`;
         return;
       }
 
@@ -3603,6 +3632,7 @@
           <td><div style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(l.details || 'No details')}</div></td>
           <td style="font-size:12px;color:var(--text-subtle);">${escapeHtml(l.ip_address || '127.0.0.1')}</td>
           <td style="font-size:12px;color:var(--text-muted);">${escapeHtml(l.created_at || 'N/A')}</td>
+          <td>${deleteRecordButton('activity', l.log_id || l.id)}</td>
         </tr>
       `).join('');
     }

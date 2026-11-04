@@ -27,3 +27,16 @@ test('a malformed data file is reported and never overwritten', async (t) => {
   await assert.rejects(store.list());
   assert.equal(await readFile(file, 'utf8'), '{broken');
 });
+
+test('deletion persists across reloads and concurrent writes preserve other records', async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), 'submissions-delete-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const file = join(dir, 'records.json');
+  const store = createSubmissionStore(file);
+  await writeFile(file, JSON.stringify([{ submissionId: 'a' }, { submission_id: 'b' }, { id: 'c' }]));
+  await Promise.all([store.remove('a'), store.save({ submissionId: 'd' })]);
+  assert.equal(await store.remove('missing'), false);
+  assert.equal(await store.remove('b'), true);
+  assert.equal(await store.remove('c'), true);
+  assert.deepEqual((await createSubmissionStore(file).list()).map(row => row.id), ['d']);
+});
