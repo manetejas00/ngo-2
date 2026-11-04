@@ -1206,6 +1206,18 @@ body.sidebar-collapsed .admin-user-card {
 }
 
 /* Table Wrapper */
+.registration-id {
+  display: block;
+  width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
 .table-wrapper {
   overflow-x: auto;
   width: 100%;
