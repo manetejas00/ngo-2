@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
+import { execFileSync, spawnSync } from 'node:child_process';
 
 const server = await readFile(new URL('../server.mjs', import.meta.url), 'utf8');
 const deletion = server.slice(server.indexOf("      if (action === 'delete_record')"), server.indexOf("      if (action === 'send_camp_mail')"));
@@ -60,6 +61,34 @@ test('delete buttons respect role and safely encode record identifiers', () => {
   assert.match(context.deleteRecordButton('form', 'a"b'), /a&quot;b/);
   context.currentUser.role = 'doctor';
   assert.equal(context.deleteRecordButton('form', '1'), '');
+});
+
+test('PHP restores account identity before rendering Delete after a page reload', async t => {
+  const phpBinary = [process.env.PHP_BINARY, 'php', '/opt/homebrew/bin/php', '/usr/local/bin/php'].filter(Boolean)
+    .find(binary => spawnSync(binary, ['--version'], { stdio: 'ignore' }).status === 0);
+  if (!phpBinary) return t.skip('PHP is unavailable');
+  const php = await readFile(new URL('../api/admin-data.php', import.meta.url), 'utf8');
+  const identity = php.slice(php.indexOf("    'currentUser' =>"), php.indexOf("    'analytics' =>", php.indexOf("    'currentUser' =>")));
+  assert.ok(identity.includes("$authenticatedUser['role']"));
+  const fetchUI = html.slice(html.indexOf('    async function fetchAdminData('), html.indexOf('    function updateStats('));
+  for (const role of ['admin', 'manager', 'doctor', 'diagnostic_provider']) {
+    const response = JSON.parse(execFileSync(phpBinary, ['-r', `
+      $authenticatedUser = ['user_id' => 'test-user', 'name' => 'Test', 'email' => 'test@example.org', 'role' => '${role}', 'status' => 'active'];
+      echo json_encode(['status' => 'ok', ${identity} 'data' => []]);
+    `], { encoding: 'utf8' }));
+    const { context } = deleteUI();
+    context.currentUser = null;
+    let renderedButton;
+    Object.assign(context, {
+      fetch: async () => ({ status: 200, json: async () => response }),
+      syncCurrentUserChrome() {}, applyRolePermissions() {}, updateStats() {}, loadGoogleAnalytics() {},
+      renderCurrentTab() { renderedButton = context.deleteRecordButton('form', 'SUB-1'); }
+    });
+    vm.runInNewContext(fetchUI, context);
+    assert.equal(await context.fetchAdminData(), true);
+    assert.equal(context.currentUser.role, role);
+    assert.equal(renderedButton.includes('data-delete-type'), ['admin', 'manager'].includes(role));
+  }
 });
 
 test('delete confirmation cancels without a request; success refreshes; failure allows retry', async () => {

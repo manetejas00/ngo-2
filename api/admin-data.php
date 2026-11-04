@@ -46,10 +46,12 @@ $userProvId = $_SESSION['user_prov_id'] ?? null;
 $action = strtolower(trim((string) ($data['action'] ?? $_GET['action'] ?? 'all')));
 
 $pdo = getDatabaseConnection();
+$authenticatedUser = null;
 if ($pdo !== null && !empty($_SESSION['user_id'])) {
-    $accountCheck = $pdo->prepare('SELECT status FROM users WHERE user_id = :uid LIMIT 1');
+    $accountCheck = $pdo->prepare('SELECT user_id, name, email, phone, avatar, role, status, doctor_id, provider_id, must_change_password FROM users WHERE user_id = :uid LIMIT 1');
     $accountCheck->execute([':uid' => (string) $_SESSION['user_id']]);
-    if (strtolower((string) $accountCheck->fetchColumn()) !== 'active') {
+    $authenticatedUser = $accountCheck->fetch(PDO::FETCH_ASSOC);
+    if (!$authenticatedUser || strtolower((string) $authenticatedUser['status']) !== 'active') {
         $_SESSION = [];
         session_destroy();
         http_response_code(401);
@@ -1215,6 +1217,18 @@ foreach ($diagnosticBookings as $db) {
 echo json_encode([
     'status' => 'ok',
     'timestamp' => date(DATE_ATOM),
+    'currentUser' => $authenticatedUser ? [
+        'userId' => $authenticatedUser['user_id'],
+        'name' => $authenticatedUser['name'],
+        'email' => $authenticatedUser['email'],
+        'phone' => $authenticatedUser['phone'] ?? '',
+        'avatar' => $authenticatedUser['avatar'] ?? '',
+        'role' => strtolower((string) $authenticatedUser['role']),
+        'status' => $authenticatedUser['status'],
+        'doctorId' => $authenticatedUser['doctor_id'] ?? null,
+        'providerId' => $authenticatedUser['provider_id'] ?? null,
+        'must_change_password' => (bool) ($authenticatedUser['must_change_password'] ?? false)
+    ] : null,
     'analytics' => [
         'totalFormSubmissions' => count($formSubmissions),
         'totalSubmissions' => count($formSubmissions),
