@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 
   <!-- Admin Design System CSS -->
-  <link rel="stylesheet" href="css/admin.css?v=4.2.5">
+  <link rel="stylesheet" href="css/admin.css?v=4.2.6">
 
   <!-- External Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -3167,6 +3167,7 @@
 
     function renderTableContent(items) {
       const tableHeader = document.getElementById('tableHeader');
+      document.getElementById('dataTable').classList.toggle('form-records-table', currentTab.startsWith('forms') || currentTab === 'preregistrations');
 
       if (currentTab.startsWith('forms')) {
         tableHeader.innerHTML = `<th>Submission ID</th><th>Category</th><th>User Name & Contact</th><th>Details / Subject</th><th>Status</th><th>Submitted Date</th><th>Actions</th>`;
@@ -3506,7 +3507,7 @@
 
         return `
           <tr>
-            <td style="font-weight:700;color:var(--primary);">${id}</td>
+            <td><span class="registration-id" title="${escapeHtml(String(id))}">${escapeHtml(String(id))}</span></td>
             <td><span class="badge badge-info">${type}</span></td>
             <td>
               <div style="font-weight:600;color:var(--text-main);">${name}</div>

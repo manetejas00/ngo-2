@@ -1257,6 +1257,33 @@ tbody tr:hover {
   background: var(--admin-card-hover);
 }
 
+/* Keep form actions visible when the record table scrolls horizontally. */
+.form-records-table :is(th, td):last-child:not([colspan]) {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  background: var(--admin-card);
+  box-shadow: -1px 0 var(--admin-border);
+}
+
+.form-records-table th:last-child {
+  background: var(--admin-bg);
+  z-index: 2;
+}
+
+.form-records-table tr:hover td:last-child {
+  background: var(--admin-card-hover);
+}
+
+.form-records-table td:last-child > div {
+  flex-wrap: wrap;
+  width: 210px;
+}
+
+.form-records-table [data-delete-type] {
+  flex-shrink: 0;
+}
+
 /* Badges */
 .badge {
   display: inline-flex;
