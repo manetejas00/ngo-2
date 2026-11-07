@@ -114,7 +114,7 @@ function diagnosticTemplate(array $booking): string {
 }
 
 function sendDiagnosticEmail(array $booking, bool $sendAdminRecord = true): bool {
-    $isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
+    $isStaging = (preg_match('/test[0-9]*\.avinyacarefoundation\.org/i', $_SERVER['HTTP_HOST'] ?? '') === 1);
     $defaultUser = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
     $defaultAdminRecord = $isStaging ? 'manetejas00@gmail.com' : 'health@avinyacarefoundation.org';
 

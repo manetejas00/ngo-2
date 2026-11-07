@@ -9,12 +9,16 @@ case "$environment" in
     default_target="domains/test.avinyacarefoundation.org/public_html"
     default_url="https://test.avinyacarefoundation.org"
     ;;
+  test2)
+    default_target="domains/test2.avinyacarefoundation.org/public_html"
+    default_url="https://test2.avinyacarefoundation.org"
+    ;;
   production)
     default_target="domains/avinyacarefoundation.org/public_html"
     default_url="https://avinyacarefoundation.org"
     ;;
   *)
-    echo "Usage: $0 staging|production" >&2
+    echo "Usage: $0 staging|test2|production" >&2
     exit 2
     ;;
 esac
@@ -29,7 +33,7 @@ repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 
 expected_branch="staging"
-[[ "$environment" == "production" ]] && expected_branch="main"
+[[ "$environment" == "production" || "$environment" == "test2" ]] && expected_branch="main"
 current_branch="${GITHUB_REF_NAME:-$(git branch --show-current)}"
 if [[ "$current_branch" != "$expected_branch" ]]; then
   echo "Refusing $environment deploy from '$current_branch'; expected '$expected_branch'." >&2

@@ -4,7 +4,7 @@ declare(strict_types=1);
 function loadBookingEmailEnv(string $root): void {
     $hostHeader = $_SERVER['HTTP_HOST'] ?? '';
     $path = $root . '/.env';
-    if (str_contains($hostHeader, 'test.avinyacarefoundation.org') && is_file($root . '/.env.staging')) {
+    if (preg_match('/test[0-9]*\.avinyacarefoundation\.org/i', $hostHeader) && is_file($root . '/.env.staging')) {
         $path = $root . '/.env.staging';
     } elseif (is_file($root . '/.env.production')) {
         $path = $root . '/.env.production';
@@ -42,7 +42,7 @@ final class AppointmentEmailService {
         $to = trim((string) ($booking['patientEmail'] ?? ''));
         if (!filter_var($to, FILTER_VALIDATE_EMAIL)) return $this->event('failed', $attemptedAt, 'Invalid patient email address.');
         
-        $isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
+        $isStaging = (preg_match('/test[0-9]*\.avinyacarefoundation\.org/i', $_SERVER['HTTP_HOST'] ?? '') === 1);
         $defaultUser = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
         $defaultAdminRecord = $isStaging ? 'manetejas00@gmail.com' : 'health@avinyacarefoundation.org';
 

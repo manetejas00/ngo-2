@@ -3,7 +3,7 @@ function sendPHPSMTP($to, $subject, $htmlBody, $replyTo = '') {
     foreach ([$to, $replyTo] as $address) {
         if ($address !== '' && (!filter_var($address, FILTER_VALIDATE_EMAIL) || preg_match('/[\r\n]/', $address))) return false;
     }
-    $isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
+    $isStaging = (preg_match('/test[0-9]*\.avinyacarefoundation\.org/i', $_SERVER['HTTP_HOST'] ?? '') === 1);
     $defaultUser = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
 
     $host = 'ssl://' . preg_replace('#^ssl://#', '', getDbEnv('SMTP_HOST', 'smtp.hostinger.com'));

@@ -15,14 +15,14 @@ if (!function_exists('loadEnvDatabaseVars')) {
         $hostHeader = $_SERVER['HTTP_HOST'] ?? '';
 
         $filesToLoad = [];
-        if (str_contains($hostHeader, 'test.avinyacarefoundation.org')) {
+        if (preg_match('/test[0-9]*\.avinyacarefoundation\.org/i', $hostHeader)) {
             if (is_file($root . '/.env.staging')) $filesToLoad[] = $root . '/.env.staging';
         } else {
             if (is_file($root . '/.env.production')) $filesToLoad[] = $root . '/.env.production';
         }
         if (is_file($root . '/.env')) $filesToLoad[] = $root . '/.env';
         // Keep live mail credentials outside the deploy checkout so releases cannot replace them.
-        $mailEnvironment = str_contains($hostHeader, 'test.avinyacarefoundation.org') ? 'staging' : 'production';
+        $mailEnvironment = preg_match('/test[0-9]*\.avinyacarefoundation\.org/i', $hostHeader) ? 'staging' : 'production';
         $privateMailFile = dirname($root) . '/.avinya-mail-' . $mailEnvironment . '.env';
         if (is_file($privateMailFile)) $filesToLoad[] = $privateMailFile;
 

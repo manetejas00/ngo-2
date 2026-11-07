@@ -21,7 +21,7 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/smtp-mailer.php';
 require_once __DIR__ . '/activity-logger.php';
 
-$isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
+$isStaging = (preg_match('/test[0-9]*\.avinyacarefoundation\.org/i', $_SERVER['HTTP_HOST'] ?? '') === 1);
 $defaultAdmin = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
 
 $brandName = 'AvinyaCareFoundation';
@@ -298,7 +298,7 @@ $userEmailSent = $email !== '' && ($userSentResult === true || $userSentResult =
 $userEmailError = ($email !== '' && !$userEmailSent) ? "User confirmation email delivery failed via Hostinger SSL SMTP." : null;
 
 // 2. Dispatch Admin Alert HTML Email via Authenticated SSL SMTP
-$isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
+$isStaging = (preg_match('/test[0-9]*\.avinyacarefoundation\.org/i', $_SERVER['HTTP_HOST'] ?? '') === 1);
 $defaultAdmin = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
 $defaultAdminRecord = $isStaging ? 'manetejas00@gmail.com' : 'health@avinyacarefoundation.org';
 

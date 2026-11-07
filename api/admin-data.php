@@ -131,7 +131,7 @@ if ($action === 'test_email_dispatch') {
         exit(0);
     }
 
-    $isStaging = str_contains($_SERVER['HTTP_HOST'] ?? '', 'test.avinyacarefoundation.org');
+    $isStaging = (preg_match('/test[0-9]*\.avinyacarefoundation\.org/i', $_SERVER['HTTP_HOST'] ?? '') === 1);
     $defaultAdmin = $isStaging ? 'info@test.avinyacarefoundation.org' : 'info@avinyacarefoundation.org';
     $adminTo = getDbEnv('ADMIN_EMAIL', $defaultAdmin);
 

@@ -9,10 +9,20 @@ const HOST = process.env.HOSTINGER_SSH_HOST || '82.112.239.95';
 const PORT = parseInt(process.env.HOSTINGER_SSH_PORT || '65002', 10);
 const USER = process.env.HOSTINGER_SSH_USER || 'u382139760';
 const PASS = process.env.HOSTINGER_SSH_PASS || process.env.DB_PASS || '@qLVTyL|J5';
-const TARGET_DIR = 'domains/avinyacarefoundation.org/public_html';
-const LIVE_URL = 'https://avinyacarefoundation.org';
 
-console.log('🚀 AvinyaCareFoundation Production Deployment');
+const targetArg = (process.argv[2] || process.env.TARGET_ENV || 'production').toLowerCase();
+let TARGET_DIR = 'domains/avinyacarefoundation.org/public_html';
+let LIVE_URL = 'https://avinyacarefoundation.org';
+
+if (targetArg === 'test2') {
+  TARGET_DIR = 'domains/test2.avinyacarefoundation.org/public_html';
+  LIVE_URL = 'https://test2.avinyacarefoundation.org';
+} else if (targetArg === 'staging' || targetArg === 'test') {
+  TARGET_DIR = 'domains/test.avinyacarefoundation.org/public_html';
+  LIVE_URL = 'https://test.avinyacarefoundation.org';
+}
+
+console.log(`🚀 AvinyaCareFoundation Deployment [Target: ${targetArg} -> ${LIVE_URL}]`);
 console.log('---------------------------------------------');
 
 // 1. Run local preflight verification
